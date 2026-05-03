@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="kk">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#1b5e45" />
+    <meta name="description" content="Gardina — перде салондары мен ательелерге арналған жүйе: клиенттер, өлшем, ұсыныс, өндіріс және төлем бір жерде." />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Gardina" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+
+    <title>Gardina — перде бизнесі үшін жүйе</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Icons: Hugeicons (via @hugeicons/react package) -->
+
+    <!-- Tailwind CDN (temporary for development) -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+    <script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "primary": "#1b5e45",
+              "primary-light": "#2d6a4f",
+              "primary-dark": "#0f2919",
+              "primary-content": "#ffffff",
+              "accent": "#74c69d",
+              "background-light": "#f1f6f3",
+              "background-dark": "#0c1814",
+              "surface-light": "#ffffff",
+              "surface-dark": "#152922",
+              "text-main": "#101916",
+              "text-main-light": "#101916",
+              "text-main-dark": "#e8f0ec",
+              "text-secondary": "#4d5c54",
+              "text-secondary-light": "#4d5c54",
+              "text-secondary-dark": "#9cb0a4",
+              "border-light": "#d5e3dc",
+              "border-dark": "#2a3d34",
+            },
+            fontFamily: {
+              "display": ["Inter", "sans-serif"]
+            },
+            borderRadius: {
+              "DEFAULT": "0.5rem",
+              "lg": "0.75rem",
+              "xl": "1rem",
+              "2xl": "1.5rem",
+              "full": "9999px"
+            },
+            boxShadow: {
+              "card": "0 4px 12px -2px rgba(27, 94, 69, 0.1), 0 2px 6px -1px rgba(0, 0, 0, 0.04)",
+              "lg": "0 10px 25px -5px rgba(27, 94, 69, 0.14), 0 8px 10px -6px rgba(0, 0, 0, 0.04)",
+            },
+          },
+        },
+      }
+    </script>
+
+    <style>
+      /* PWA Safe Areas Support */
+      :root {
+        --safe-area-top: env(safe-area-inset-top, 0px);
+        --safe-area-bottom: env(safe-area-inset-bottom, 0px);
+        --safe-area-left: env(safe-area-inset-left, 0px);
+        --safe-area-right: env(safe-area-inset-right, 0px);
+      }
+
+      body {
+        margin: 0;
+        padding: 0;
+        overflow-x: hidden;
+      }
+
+      /* PWA Mode - Add padding for notch/home indicator */
+      @media (display-mode: standalone) {
+        #root {
+          padding-top: env(safe-area-inset-top);
+        }
+
+        /* Sticky headers in PWA mode should account for notch */
+        .sticky {
+          top: env(safe-area-inset-top) !important;
+        }
+      }
+
+      .material-symbols-outlined {
+        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      }
+
+      .material-symbols-outlined.filled {
+        font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      }
+
+      .no-scrollbar::-webkit-scrollbar {
+        display: none;
+      }
+
+      .no-scrollbar {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+      }
+
+      /* Safe area utilities */
+      .pb-safe {
+        padding-bottom: max(20px, env(safe-area-inset-bottom));
+      }
+
+      .pt-safe {
+        padding-top: max(20px, env(safe-area-inset-top));
+      }
+
+      .px-safe {
+        padding-left: max(16px, env(safe-area-inset-left));
+        padding-right: max(16px, env(safe-area-inset-right));
+      }
+
+      /* PWA install prompt positioning */
+      @media (display-mode: standalone) {
+        .pwa-install-prompt {
+          bottom: calc(96px + env(safe-area-inset-bottom)) !important;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>

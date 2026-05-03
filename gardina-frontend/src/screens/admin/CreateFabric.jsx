@@ -1,0 +1,552 @@
+import React, { useState, useEffect, useRef } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import catalogAPI, { uploadAPI } from '../../services/api';
+import Icon from '../../components/common/Icon';
+
+const CreateFabric = () => {
+    const navigate = useNavigate();
+    const { id } = useParams();
+    const isEditMode = Boolean(id);
+
+    const [loading, setLoading] = useState(false);
+    const [fetching, setFetching] = useState(isEditMode);
+    const [uploading, setUploading] = useState(false);
+
+    const [formData, setFormData] = useState({
+        code: '',
+        name: '',
+        type: 'curtain',
+        unit: 'm',
+        pricePerMeter: '',
+        costPrice: '',
+        widthCm: '280',
+        imageUrl: '',
+        isAvailable: true,
+    });
+
+    const [colors, setColors] = useState([]);
+    const [newColorName, setNewColorName] = useState('');
+
+    const [notification, setNotification] = useState(null);
+    const [errors, setErrors] = useState({});
+    const fileInputRef = useRef(null);
+
+    // Auto-hide notification
+    useEffect(() => {
+        if (notification) {
+            const timer = setTimeout(() => setNotification(null), 3000);
+            return () => clearTimeout(timer);
+        }
+    }, [notification]);
+
+    // Load fabric data if in edit mode
+    useEffect(() => {
+        if (isEditMode) {
+            loadFabricData();
+        }
+    }, [id]);
+
+    const loadFabricData = async () => {
+        setFetching(true);
+        try {
+            const res = await catalogAPI.getFabricById(id);
+            const data = res.data.data;
+
+            // Load basic fabric data
+            setFormData({
+                code: data.code,
+                name: data.name,
+                type: data.type,
+                unit: data.unit || 'm',
+                pricePerMeter: data.pricePerMeter,
+                costPrice: data.costPrice,
+                widthCm: data.widthCm || '0',
+                imageUrl: data.imageUrl || '',
+                isAvailable: data.isAvailable
+            });
+
+            // Load color variants
+            const colorsRes = await catalogAPI.getProductColors(id);
+            if (colorsRes.data.data && colorsRes.data.data.length > 0) {
+                // Just use color names/codes as simple strings
+                setColors(colorsRes.data.data.map(c => c.color_name || c.color_code));
+            }
+        } catch (error) {
+            setNotification({ type: 'error', message: 'Тауар мәліметін жүктеу мүмкін болмады' });
+            setTimeout(() => navigate('/admin/catalog'), 2000);
+        } finally {
+            setFetching(false);
+        }
+    };
+
+    const handleChange = (e) => {
+        const { name, value, type, checked } = e.target;
+        setFormData(prev => ({
+            ...prev,
+            [name]: type === 'checkbox' ? checked : value
+        }));
+        if (errors[name]) {
+            setErrors(prev => ({ ...prev, [name]: null }));
+        }
+    };
+
+    const addColor = () => {
+        if (!newColorName.trim()) {
+            setNotification({ type: 'error', message: 'Түс атауын немесе кодын жазыңыз' });
+            return;
+        }
+        setColors([...colors, newColorName.trim()]);
+        setNewColorName('');
+    };
+
+    const removeColor = (index) => {
+        setColors(colors.filter((_, i) => i !== index));
+    };
+
+    const handleColorKeyPress = (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            addColor();
+        }
+    };
+
+    const handleFileSelect = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        if (!file.type.startsWith('image/')) {
+            setNotification({ type: 'error', message: 'Тек сурет файлдарын жүктеуге болады' });
+            return;
+        }
+        if (file.size > 10 * 1024 * 1024) {
+            setNotification({ type: 'error', message: 'Файл өлшемі 10МБ-тан аспауы керек' });
+            return;
+        }
+
+        setUploading(true);
+        try {
+            const res = await uploadAPI.uploadPhoto(file, { folder: 'products' });
+            if (res.data?.success) {
+                setFormData(prev => ({ ...prev, imageUrl: res.data.data.url }));
+                setNotification({ type: 'success', message: 'Сурет сәтті жүктелді' });
+            }
+        } catch (error) {
+            setNotification({ type: 'error', message: 'Суретті жүктеу сәтсіз аяқталды' });
+        } finally {
+            setUploading(false);
+        }
+    };
+
+    const validate = () => {
+        const newErrors = {};
+        if (!formData.name.trim()) newErrors.name = 'Атауын жазу керек';
+        if (!formData.costPrice || parseFloat(formData.costPrice) <= 0) newErrors.costPrice = 'Закуп бағасы дұрыс емес';
+        if (!formData.pricePerMeter || parseFloat(formData.pricePerMeter) <= 0) newErrors.pricePerMeter = 'Сату бағасы дұрыс емес';
+
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
+    };
+
+    const calculateMargin = () => {
+        const cost = parseFloat(formData.costPrice) || 0;
+        const sell = parseFloat(formData.pricePerMeter) || 0;
+        if (cost === 0) return 0;
+        return Math.round(((sell - cost) / cost) * 100);
+    };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        if (!validate()) {
+            setNotification({ type: 'error', message: 'Қызылмен белгіленген қателерді түзетіңіз' });
+            return;
+        }
+
+        setLoading(true);
+        setErrors({});
+
+        // Prepare colors as simple array of strings
+        const validColors = colors.filter(c => c.trim());
+
+        const payload = {
+            ...formData,
+            code: formData.code.trim() || undefined, // Don't send empty code
+            pricePerMeter: parseFloat(formData.pricePerMeter),
+            costPrice: parseFloat(formData.costPrice),
+            widthCm: parseInt(formData.widthCm) || 0,
+            unit: formData.unit,
+            colors: validColors.length > 0 ? validColors.map(c => ({
+                colorName: c,
+                colorCode: c
+            })) : undefined
+        };
+
+        try {
+            if (isEditMode) {
+                await catalogAPI.updateFabric(id, payload);
+                setNotification({ type: 'success', message: 'Тауар өзгертілді!' });
+            } else {
+                await catalogAPI.createFabric(payload);
+                setNotification({ type: 'success', message: 'Тауар каталогқа сәтті қосылды!' });
+            }
+
+            setTimeout(() => {
+                navigate('/admin/catalog');
+            }, 1000);
+
+        } catch (err) {
+            const errorMsg = err.response?.data?.error || 'Серверде қате орын алды';
+            if (errorMsg.includes('already exists')) {
+                setErrors({ code: 'Бұл артикул (код) базада бар!' });
+                setNotification({ type: 'error', message: 'Артикул қайталанып тұр' });
+            } else {
+                setNotification({ type: 'error', message: 'Сақтау кезінде қате шықты: ' + errorMsg });
+            }
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const margin = calculateMargin();
+    const getUnitLabel = () => {
+        switch (formData.unit) {
+            case 'pcs': return 'тг/дн';
+            case 'set': return 'тг/жнқ';
+            case 'roll': return 'тг/орам';
+            case 'pack': return 'тг/қап';
+            case 'box': return 'тг/қорап';
+            case 'pair': return 'тг/жұп';
+            default: return 'тг/м';
+        }
+    };
+
+    if (fetching) {
+        return (
+            <div className="min-h-screen bg-background-light flex items-center justify-center">
+                <div className="size-10 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+            </div>
+        );
+    }
+
+    return (
+        <div className="bg-background-light min-h-screen pb-24 relative">
+            {notification && (
+                <div className={`fixed top-4 left-1/2 -translate-x-1/2 z-50 px-6 py-3 rounded-xl shadow-xl flex items-center gap-3 animate-in fade-in slide-in-from-top-4 duration-300 ${notification.type === 'success' ? 'bg-green-600 text-white' : 'bg-red-500 text-white'}`}>
+                    <Icon name={notification.type === 'success' ? 'check_circle' : 'error'} />
+                    <span className="font-medium">{notification.message}</span>
+                </div>
+            )}
+
+            <header className="sticky top-0 z-30 bg-white/80 backdrop-blur-md border-b border-gray-100 px-4 py-4">
+                <div className="flex items-center justify-between">
+                    <button
+                        onClick={() => navigate('/admin/catalog')}
+                        className="size-10 flex items-center justify-center rounded-full bg-gray-50 hover:bg-gray-100 transition-colors"
+                    >
+                        <Icon name="arrow_back" className="text-gray-600" />
+                    </button>
+                    <h1 className="text-xl font-bold text-gray-900">
+                        {isEditMode ? 'Тауарды өзгерту' : 'Жаңа тауар'}
+                    </h1>
+                    <div className="size-10"></div>
+                </div>
+            </header>
+
+            <main className="p-4">
+                <form onSubmit={handleSubmit} className="space-y-6 max-w-2xl mx-auto">
+                    {/* Main Info */}
+                    <div className="bg-white p-5 rounded-2xl shadow-sm space-y-4">
+                        <h2 className="font-bold text-lg text-gray-900 border-b border-gray-100 pb-2 mb-4">
+                            Негізгі ақпарат
+                        </h2>
+
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Тауар атауы <span className="text-red-500">*</span>
+                            </label>
+                            <input
+                                type="text"
+                                name="name"
+                                required
+                                value={formData.name}
+                                onChange={handleChange}
+                                className={`w-full px-4 py-3 rounded-xl border ${errors.name ? 'border-red-500 bg-red-50 text-gray-900' : 'border-gray-200 text-gray-900'} focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all`}
+                                placeholder="Мысалы: Blackout Royal Blue"
+                            />
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-4">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Артикул
+                                </label>
+                                <input
+                                    type="text"
+                                    name="code"
+                                    value={formData.code}
+                                    onChange={handleChange}
+                                    className={`w-full px-4 py-3 rounded-xl border ${errors.code ? 'border-red-500 bg-red-50 text-gray-900' : 'border-gray-200 text-gray-900'} focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all font-mono uppercase`}
+                                    placeholder="ITEM-001"
+                                />
+                                {errors.code && <p className="text-red-500 text-xs mt-1 font-medium">{errors.code}</p>}
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Өлшем бірлігі
+                                </label>
+                                <select
+                                    name="unit"
+                                    value={formData.unit}
+                                    onChange={handleChange}
+                                    className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all bg-white text-gray-900 font-bold"
+                                >
+                                    <option value="m">Метр</option>
+                                    <option value="pcs">Дана</option>
+                                    <option value="set">Жинақ</option>
+                                    <option value="roll">Орам</option>
+                                    <option value="pack">Қаптама</option>
+                                    <option value="box">Қорап</option>
+                                    <option value="pair">Жұп</option>
+                                </select>
+                            </div>
+                        </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Категория
+                                </label>
+                                <select
+                                    name="type"
+                                    value={formData.type}
+                                    onChange={handleChange}
+                                    className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all bg-white text-gray-900 font-bold"
+                                >
+                                    <option value="curtain">Перде</option>
+                                    <option value="tulle">Тюль</option>
+                                    <option value="cornice">Карниз</option>
+                                    <option value="jalousie">Жалюзи</option>
+                                    <option value="accessory">Аксессуар (Таспа)</option>
+                                    <option value="ready_made">Дайын өнім</option>
+                                </select>
+                        </div>
+
+                        {/* Dimension Field - Only for Curtain/Tulle */}
+                        {['curtain', 'tulle'].includes(formData.type) && (
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Рулон Биіктігі (см)
+                                </label>
+                                <input
+                                    type="number"
+                                    name="widthCm"
+                                    value={formData.widthCm}
+                                    onChange={handleChange}
+                                    className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all text-gray-900"
+                                    placeholder="280"
+                                />
+                                <p className="text-[10px] text-gray-400 mt-1">
+                                    * Стандарт: 280-320 см
+                                </p>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Color Variants - Simple */}
+                    <div className="bg-white p-5 rounded-2xl shadow-sm space-y-4">
+                        <h2 className="font-bold text-lg text-gray-900 border-b border-gray-100 pb-2 mb-4">
+                            Түстер (қосымша)
+                            </h2>
+
+                        <div className="flex gap-2">
+                            <input
+                                type="text"
+                                value={newColorName}
+                                onChange={(e) => setNewColorName(e.target.value)}
+                                onKeyPress={handleColorKeyPress}
+                                className="flex-1 px-4 py-3 rounded-xl border border-gray-200 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all text-gray-900"
+                                placeholder="Мысалы: Қызыл немесе RED-001"
+                            />
+                            <button
+                                type="button"
+                                onClick={addColor}
+                                className="px-6 py-3 rounded-xl bg-primary text-white hover:brightness-110 transition-all flex items-center gap-2 font-semibold"
+                            >
+                                <Icon name="add" />
+                                Қосу
+                            </button>
+                        </div>
+
+                        {colors.length > 0 && (
+                            <div className="flex flex-wrap gap-2 mt-4">
+                        {colors.map((color, index) => (
+                                    <div
+                                        key={index}
+                                        className="flex items-center gap-2 px-3 py-2 bg-gray-100 rounded-lg group hover:bg-gray-200 transition-colors"
+                                    >
+                                        <span className="text-sm text-gray-700 font-medium">{color}</span>
+                                        <button
+                                            type="button"
+                                            onClick={() => removeColor(index)}
+                                            className="text-red-500 hover:text-red-700 transition-colors"
+                                        >
+                                            <Icon name="close" size={16} />
+                                        </button>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+
+                        {colors.length === 0 && (
+                            <p className="text-sm text-gray-400 text-center py-4">
+                                Түстер қосылмаған
+                            </p>
+                        )}
+                    </div>
+
+                    {/* Pricing */}
+                    <div className="bg-white p-5 rounded-2xl shadow-sm space-y-4">
+                        <h2 className="font-bold text-lg text-gray-900 border-b border-gray-100 pb-2 mb-4 flex items-center gap-2">
+                            Құны және Бағасы
+                        </h2>
+
+                        <div className="bg-primary/10/50 rounded-xl p-3 mb-4 flex items-center gap-3 border border-primary/15">
+                            <Icon name="info" className="text-primary" />
+                            <p className="text-xs text-primary">
+                                Бағаны <b>{formData.unit === 'm' ? '1 метр' : '1 дана'}</b> үшін көрсетіңіз.
+                            </p>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-4">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Сатып алу бағасы <span className="text-red-500">*</span>
+                                </label>
+                                <div className="relative">
+                                    <input
+                                        type="number"
+                                        name="costPrice"
+                                        required
+                                        min="0"
+                                        value={formData.costPrice}
+                                        onChange={handleChange}
+                                        className={`w-full pl-4 pr-8 py-3 rounded-xl border ${errors.costPrice ? 'border-red-500 bg-red-50 text-gray-900' : 'border-gray-200 text-gray-900'} focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all`}
+                                        placeholder="0"
+                                    />
+                                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 font-bold">₸</span>
+                                </div>
+                                {errors.costPrice && <p className="text-red-500 text-xs mt-1 font-medium">{errors.costPrice}</p>}
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Сату бағасы ({getUnitLabel()}) <span className="text-red-500">*</span>
+                                </label>
+                                <div className="relative">
+                                    <input
+                                        type="number"
+                                        name="pricePerMeter"
+                                        required
+                                        min="0"
+                                        value={formData.pricePerMeter}
+                                        onChange={handleChange}
+                                        className={`w-full pl-4 pr-8 py-3 rounded-xl border ${errors.pricePerMeter ? 'border-red-500 bg-red-50 text-gray-900' : 'border-gray-200 text-gray-900'} focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all`}
+                                        placeholder="0"
+                                    />
+                                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 font-bold">₸</span>
+                                </div>
+                                {errors.pricePerMeter && <p className="text-red-500 text-xs mt-1 font-medium">{errors.pricePerMeter}</p>}
+                            </div>
+                        </div>
+
+                        {/* Margin Preview */}
+                        <div className="bg-primary/10 rounded-xl p-4 flex justify-between items-center">
+                            <span className="text-sm font-bold text-primary">Маржа</span>
+                            <div className="text-right">
+                                <span className={`text-xl font-black ${margin > 0 ? 'text-green-600' : 'text-gray-500'}`}>
+                                    {margin}%
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Main Product Image */}
+                    <div className="bg-white p-5 rounded-2xl shadow-sm space-y-4">
+                        <h2 className="font-bold text-lg text-gray-900 border-b border-gray-100 pb-2 mb-4">
+                            Негізгі сурет
+                        </h2>
+
+                        <input
+                            type="file"
+                            ref={fileInputRef}
+                            hidden
+                            accept="image/*"
+                            onChange={handleFileSelect}
+                        />
+
+                        {formData.imageUrl ? (
+                            <div className="relative rounded-2xl overflow-hidden aspect-video border border-gray-100 group">
+                                <img
+                                    src={formData.imageUrl}
+                                    alt="Preview"
+                                    className="w-full h-full object-cover"
+                                />
+                                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3">
+                                    <button
+                                        type="button"
+                                        onClick={() => window.open(formData.imageUrl, '_blank')}
+                                        className="p-2 bg-white/20 hover:bg-white/40 rounded-full text-white backdrop-blur-sm transition-colors"
+                                    >
+                                        <Icon name="visibility" />
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => fileInputRef.current?.click()}
+                                        className="p-2 bg-white/20 hover:bg-white/40 rounded-full text-white backdrop-blur-sm transition-colors"
+                                    >
+                                        <Icon name="edit" />
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => setFormData(prev => ({ ...prev, imageUrl: '' }))}
+                                        className="p-2 bg-red-500/80 hover:bg-red-600/80 rounded-full text-white backdrop-blur-sm transition-colors"
+                                    >
+                                        <Icon name="delete" />
+                                    </button>
+                                </div>
+                            </div>
+                        ) : (
+                            <button
+                                type="button"
+                                onClick={() => fileInputRef.current?.click()}
+                                disabled={uploading}
+                                className="w-full aspect-video rounded-2xl border-2 border-dashed border-gray-300 hover:border-primary hover:bg-primary/5 transition-all flex flex-col items-center justify-center gap-2 group"
+                            >
+                                {uploading ? (
+                                    <div className="size-8 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+                                ) : (
+                                    <>
+                                        <div className="size-12 rounded-full bg-gray-100 group-hover:bg-primary/10 flex items-center justify-center transition-colors">
+                                            <Icon name="add_photo_alternate" size={24} className="text-gray-400" />
+                                        </div>
+                                        <p className="text-gray-500 font-medium group-hover:text-primary transition-colors">Сурет жүктеу</p>
+                                        <p className="text-xs text-gray-400">PNG, JPG (max 10MB)</p>
+                                    </>
+                                )}
+                            </button>
+                        )}
+                    </div>
+
+                    <button
+                        type="submit"
+                        disabled={loading || uploading}
+                        className="w-full bg-primary text-white font-bold py-4 rounded-xl shadow-lg hover:brightness-110 active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                        {loading ? 'Сақталуда...' : isEditMode ? 'Өзгерістерді сақтау' : 'Тауарды сақтау'}
+                    </button>
+
+                    <div className="h-10"></div>
+                </form>
+            </main>
+        </div>
+    );
+};
+
+export default CreateFabric;

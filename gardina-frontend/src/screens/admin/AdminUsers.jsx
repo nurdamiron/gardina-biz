@@ -1,0 +1,354 @@
+import React, { useState, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
+import api from '../../services/api';
+import BottomNav from '../../components/navigation/BottomNav';
+import Icon from '../../components/common/Icon';
+
+const ROLES = [
+  { value: 'designer', label: 'Дизайнер', color: 'bg-primary/10 text-primary' },
+  { value: 'manager', label: 'Менеджер', color: 'bg-primary/15 text-primary-dark' },
+  { value: 'admin', label: 'Әкімші', color: 'bg-primary/10 text-primary-dark' },
+];
+
+const roleConfig = (role) => ROLES.find(r => r.value === role) || { label: role, color: 'bg-gray-100 text-gray-600' };
+
+const EMPTY_FORM = { name: '', phone: '', password: '', role: 'designer' };
+
+const AdminUsers = () => {
+  const navigate = useNavigate();
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState('');
+  const [filterRole, setFilterRole] = useState('');
+  const [toast, setToast] = useState(null);
+
+  // Modals
+  const [modal, setModal] = useState(null); // 'create' | 'edit' | 'password' | 'delete'
+  const [selected, setSelected] = useState(null);
+  const [form, setForm] = useState(EMPTY_FORM);
+  const [pwForm, setPwForm] = useState({ newPassword: '', confirm: '' });
+  const [saving, setSaving] = useState(false);
+  const [formError, setFormError] = useState(null);
+
+  const showToast = (text, ok = true) => {
+    setToast({ text, ok });
+    setTimeout(() => setToast(null), 3000);
+  };
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    try {
+      const res = await api.get('/users');
+      setUsers(res.data.data || []);
+    } catch { /* ignore */ }
+    setLoading(false);
+  }, []);
+
+  useEffect(() => { load(); }, [load]);
+
+  const filtered = users.filter(u => {
+    const q = search.toLowerCase();
+    const matchSearch = !q || u.name?.toLowerCase().includes(q) || u.phone?.toLowerCase().includes(q);
+    const matchRole = !filterRole || u.role === filterRole;
+    return matchSearch && matchRole;
+  });
+
+  const openCreate = () => { setForm(EMPTY_FORM); setFormError(null); setModal('create'); };
+  const openEdit = (u) => { setSelected(u); setForm({ name: u.name, phone: u.phone, role: u.role, isActive: u.is_active }); setFormError(null); setModal('edit'); };
+  const openPassword = (u) => { setSelected(u); setPwForm({ newPassword: '', confirm: '' }); setFormError(null); setModal('password'); };
+  const openDelete = (u) => { setSelected(u); setModal('delete'); };
+  const closeModal = () => { setModal(null); setSelected(null); setSaving(false); setFormError(null); };
+
+  const handleCreate = async () => {
+    setFormError(null);
+    if (!form.name.trim() || !form.phone.trim() || !form.password) { setFormError('Барлық өрістерді толтырыңыз'); return; }
+    if (form.password.length < 6) { setFormError('Пароль кемінде 6 таңба'); return; }
+    setSaving(true);
+    try {
+      await api.post('/users/admin/create', form);
+      showToast('Пайдаланушы сәтті жасалды');
+      closeModal();
+      load();
+    } catch (e) {
+      setFormError(e.response?.data?.error || 'Қате орын алды');
+    }
+    setSaving(false);
+  };
+
+  const handleEdit = async () => {
+    setFormError(null);
+    if (!form.name.trim()) { setFormError('Аты міндетті'); return; }
+    setSaving(true);
+    try {
+      await api.put(`/users/admin/${selected.id}`, form);
+      showToast('Өзгерістер сақталды');
+      closeModal();
+      load();
+    } catch (e) {
+      setFormError(e.response?.data?.error || 'Қате орын алды');
+    }
+    setSaving(false);
+  };
+
+  const handleResetPassword = async () => {
+    setFormError(null);
+    if (!pwForm.newPassword || pwForm.newPassword.length < 6) { setFormError('Пароль кемінде 6 таңба'); return; }
+    if (pwForm.newPassword !== pwForm.confirm) { setFormError('Парольдер сәйкес келмейді'); return; }
+    setSaving(true);
+    try {
+      await api.post(`/users/admin/${selected.id}/reset-password`, { newPassword: pwForm.newPassword });
+      showToast('Пароль өзгертілді');
+      closeModal();
+    } catch (e) {
+      setFormError(e.response?.data?.error || 'Қате орын алды');
+    }
+    setSaving(false);
+  };
+
+  const handleToggleActive = async (u) => {
+    try {
+      await api.put(`/users/admin/${u.id}`, { isActive: !u.is_active });
+      showToast(u.is_active ? 'Деактивацияланды' : 'Активацияланды');
+      load();
+    } catch { showToast('Қате орын алды', false); }
+  };
+
+  const handleDelete = async () => {
+    setSaving(true);
+    try {
+      await api.delete(`/users/admin/${selected.id}`);
+      showToast('Пайдаланушы деактивацияланды');
+      closeModal();
+      load();
+    } catch (e) {
+      showToast(e.response?.data?.error || 'Қате орын алды', false);
+      closeModal();
+    }
+  };
+
+  const counts = ROLES.map(r => ({ ...r, count: users.filter(u => u.role === r.value).length }));
+
+  return (
+    <div className="bg-background-light min-h-screen pb-28">
+      {/* Header */}
+      <header className="sticky top-0 z-30 bg-white/80 backdrop-blur-md border-b border-gray-100">
+        <div className="flex items-center gap-3 px-4 py-4">
+          <button onClick={() => navigate(-1)} className="p-2 -ml-2 rounded-full hover:bg-gray-100">
+            <Icon name="arrow_back" size={22} />
+          </button>
+          <h1 className="text-xl font-bold flex-1">Қызметкерлер</h1>
+          <button onClick={openCreate} className="flex items-center gap-1.5 bg-primary text-white px-3 py-2 rounded-xl text-sm font-bold hover:brightness-110 transition-all">
+            <Icon name="add" size={18} />
+            Жасау
+          </button>
+        </div>
+
+        {/* Search + filter */}
+        <div className="px-4 pb-3 space-y-2">
+          <div className="relative">
+            <Icon name="search" size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+            <input
+              type="text"
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              placeholder="Аты немесе логин бойынша іздеу..."
+              className="w-full pl-9 pr-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none"
+            />
+          </div>
+          <div className="flex gap-2 overflow-x-auto pb-0.5">
+            <FilterChip active={!filterRole} onClick={() => setFilterRole('')} label={`Барлығы (${users.length})`} />
+            {counts.map(r => <FilterChip key={r.value} active={filterRole === r.value} onClick={() => setFilterRole(r.value)} label={`${r.label} (${r.count})`} />)}
+          </div>
+        </div>
+      </header>
+
+      {/* Toast */}
+      {toast && (
+        <div className={`fixed top-4 left-1/2 -translate-x-1/2 z-50 px-5 py-3 rounded-xl shadow-lg text-white text-sm font-medium ${toast.ok ? 'bg-green-600' : 'bg-red-500'}`}>
+          {toast.text}
+        </div>
+      )}
+
+      <main className="p-4 space-y-3">
+        {loading && (
+          <div className="flex justify-center py-12">
+            <div className="size-10 border-4 border-primary/30 border-t-primary rounded-full animate-spin" />
+          </div>
+        )}
+
+        {!loading && filtered.length === 0 && (
+          <div className="text-center py-12 text-gray-400">
+            <Icon name="person_search" size={40} className="mx-auto mb-3 opacity-40" />
+            <p>Пайдаланушылар табылмады</p>
+          </div>
+        )}
+
+        {filtered.map(u => {
+          const rc = roleConfig(u.role);
+          return (
+            <div key={u.id} className={`bg-white rounded-2xl shadow-sm border p-4 transition-all ${!u.is_active ? 'opacity-50 border-gray-100' : 'border-gray-100'}`}>
+              <div className="flex items-start gap-3">
+                {/* Avatar */}
+                <div className={`size-12 rounded-full flex items-center justify-center flex-shrink-0 ${u.is_active ? 'bg-primary/10' : 'bg-gray-100'}`}>
+                  <span className={`text-lg font-bold ${u.is_active ? 'text-primary' : 'text-gray-400'}`}>
+                    {u.name?.[0]?.toUpperCase() || '?'}
+                  </span>
+                </div>
+
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <p className="font-bold text-gray-900">{u.name}</p>
+                    <span className={`text-xs px-2 py-0.5 rounded-full font-semibold ${rc.color}`}>{rc.label}</span>
+                    {!u.is_active && <span className="text-xs px-2 py-0.5 rounded-full bg-red-100 text-red-600 font-semibold">Деактив</span>}
+                  </div>
+                  <p className="text-sm text-gray-500 mt-0.5">{u.phone || u.email || '—'}</p>
+                  <p className="text-xs text-gray-400 mt-0.5">
+                    {u.created_at ? new Date(u.created_at).toLocaleDateString('ru-RU') : ''}
+                  </p>
+                </div>
+
+                {/* Actions menu */}
+                <div className="flex flex-col gap-1">
+                  <button onClick={() => openEdit(u)} className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-500">
+                    <Icon name="edit" size={16} />
+                  </button>
+                  <button onClick={() => openPassword(u)} className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-500">
+                    <Icon name="lock" size={16} />
+                  </button>
+                  <button onClick={() => handleToggleActive(u)} className={`p-1.5 rounded-lg ${u.is_active ? 'hover:bg-amber-50 text-amber-500' : 'hover:bg-green-50 text-green-500'}`}>
+                    <Icon name={u.is_active ? 'block' : 'check_circle'} size={16} />
+                  </button>
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </main>
+
+      <BottomNav />
+
+      {/* CREATE Modal */}
+      {modal === 'create' && (
+        <ModalBase title="Жаңа қызметкер" onClose={closeModal}>
+          <UserForm form={form} setForm={setForm} showPassword error={formError} />
+          <ModalFooter onClose={closeModal} onSave={handleCreate} saving={saving} saveLabel="Жасау" />
+        </ModalBase>
+      )}
+
+      {/* EDIT Modal */}
+      {modal === 'edit' && selected && (
+        <ModalBase title={`Өзгерту: ${selected.name}`} onClose={closeModal}>
+          <UserForm form={form} setForm={setForm} error={formError} />
+          {/* Active toggle */}
+          <div className="flex items-center justify-between py-3 border-t border-gray-100">
+            <div>
+              <p className="font-medium text-sm">Белсенді</p>
+              <p className="text-xs text-gray-400">Жүйеге кіру мүмкіндігі</p>
+            </div>
+            <button
+              onClick={() => setForm(f => ({ ...f, isActive: !f.isActive }))}
+              className={`relative w-12 h-6 rounded-full transition-colors ${form.isActive !== false ? 'bg-green-500' : 'bg-gray-300'}`}
+            >
+              <span className={`absolute top-0.5 left-0.5 size-5 bg-white rounded-full shadow transition-transform ${form.isActive !== false ? 'translate-x-6' : 'translate-x-0'}`} />
+            </button>
+          </div>
+          <ModalFooter onClose={closeModal} onSave={handleEdit} saving={saving} saveLabel="Сақтау" />
+        </ModalBase>
+      )}
+
+      {/* RESET PASSWORD Modal */}
+      {modal === 'password' && selected && (
+        <ModalBase title={`Пароль: ${selected.name}`} onClose={closeModal}>
+          {formError && <p className="text-sm text-red-600 bg-red-50 p-3 rounded-xl mb-4">{formError}</p>}
+          {[{ label: 'Жаңа пароль', key: 'newPassword' }, { label: 'Растау', key: 'confirm' }].map(f => (
+            <div key={f.key} className="mb-3">
+              <label className="text-sm font-semibold text-gray-700 block mb-1">{f.label}</label>
+              <input type="password" value={pwForm[f.key]} onChange={e => setPwForm(p => ({ ...p, [f.key]: e.target.value }))}
+                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:border-primary outline-none" />
+            </div>
+          ))}
+          <ModalFooter onClose={closeModal} onSave={handleResetPassword} saving={saving} saveLabel="Өзгерту" />
+        </ModalBase>
+      )}
+
+      {/* DELETE/DEACTIVATE Confirm */}
+      {modal === 'delete' && selected && (
+        <ModalBase title="Деактивациялау" onClose={closeModal}>
+          <div className="text-center py-2">
+            <div className="size-14 rounded-full bg-red-100 flex items-center justify-center mx-auto mb-4">
+              <Icon name="person_off" size={24} className="text-red-500" />
+            </div>
+            <p className="text-gray-600 text-sm">
+              <span className="font-bold">{selected.name}</span> пайдаланушысын деактивациялау. Жүйеге кіре алмайды.
+            </p>
+          </div>
+          <ModalFooter onClose={closeModal} onSave={handleDelete} saving={saving} saveLabel="Деактивациялау" danger />
+        </ModalBase>
+      )}
+    </div>
+  );
+};
+
+// ─── Shared sub-components ────────────────────────────────────────────────────
+
+const FilterChip = ({ active, onClick, label }) => (
+  <button onClick={onClick} className={`px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-colors ${active ? 'bg-primary text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}>
+    {label}
+  </button>
+);
+
+const ModalBase = ({ title, onClose, children }) => (
+  <div className="fixed inset-0 bg-black/50 z-50 flex items-end sm:items-center justify-center p-4" onClick={onClose}>
+    <div className="bg-white rounded-2xl p-6 w-full max-w-sm shadow-2xl max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+      <h3 className="text-lg font-bold mb-5">{title}</h3>
+      {children}
+    </div>
+  </div>
+);
+
+const UserForm = ({ form, setForm, showPassword = false, error }) => {
+  const f = (key, val) => setForm(p => ({ ...p, [key]: val }));
+  return (
+    <>
+      {error && <p className="text-sm text-red-600 bg-red-50 p-3 rounded-xl mb-4">{error}</p>}
+      {[
+        { label: 'Аты-жөні *', key: 'name', type: 'text', placeholder: 'Толық аты' },
+        { label: 'Логин / Телефон *', key: 'phone', type: 'text', placeholder: 'akbota немесе +77001234567' },
+        ...(showPassword ? [{ label: 'Пароль *', key: 'password', type: 'password', placeholder: 'Кемінде 6 таңба' }] : []),
+      ].map(field => (
+        <div key={field.key} className="mb-3">
+          <label className="text-sm font-semibold text-gray-700 block mb-1">{field.label}</label>
+          <input
+            type={field.type}
+            value={form[field.key] || ''}
+            onChange={e => f(field.key, e.target.value)}
+            placeholder={field.placeholder}
+            className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none"
+          />
+        </div>
+      ))}
+      <div className="mb-4">
+        <label className="text-sm font-semibold text-gray-700 block mb-1">Рөл</label>
+        <div className="grid grid-cols-3 gap-2">
+          {ROLES.map(r => (
+            <button key={r.value} onClick={() => f('role', r.value)}
+              className={`py-2 rounded-xl text-sm font-semibold border-2 transition-all ${form.role === r.value ? 'border-primary bg-primary/5 text-primary' : 'border-gray-100 text-gray-600 hover:border-gray-200'}`}>
+              {r.label}
+            </button>
+          ))}
+        </div>
+      </div>
+    </>
+  );
+};
+
+const ModalFooter = ({ onClose, onSave, saving, saveLabel, danger = false }) => (
+  <div className="flex gap-3 mt-2">
+    <button onClick={onClose} className="flex-1 py-3 bg-gray-100 text-gray-700 font-bold rounded-xl hover:bg-gray-200">Болдырмау</button>
+    <button onClick={onSave} disabled={saving} className={`flex-1 py-3 text-white font-bold rounded-xl disabled:opacity-50 ${danger ? 'bg-red-500 hover:bg-red-600' : 'bg-primary hover:brightness-110'}`}>
+      {saving ? 'Жүктелуде...' : saveLabel}
+    </button>
+  </div>
+);
+
+export default AdminUsers;
