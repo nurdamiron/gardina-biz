@@ -59,7 +59,10 @@ export default defineConfig({
           },
         ],
       },
-      devOptions: { enabled: true },
+      // PWA SW disabled in dev — when on, the service worker would serve
+      // stale chunks from previous Vite sessions and you get "lost styles"
+      // after editing without a hard refresh.
+      devOptions: { enabled: false },
     }),
   ],
 
