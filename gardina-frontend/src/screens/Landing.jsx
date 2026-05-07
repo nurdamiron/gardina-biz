@@ -121,7 +121,7 @@ function Hero() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 grid lg:grid-cols-2 gap-12 items-center">
         <motion.div initial="hidden" animate="visible" variants={stagger} className="text-center lg:text-left">
           <motion.div variants={fadeUp} className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-bold mb-6">
-            <Icon name="cloud" size={16} />
+            <Icon name="install_mobile" size={16} />
             Кез келген жерден ашылады · командаға ыңғайлы
           </motion.div>
           <motion.h1 variants={fadeUp} className="text-4xl sm:text-5xl lg:text-6xl font-black text-text-main leading-[1.05] tracking-tight">
@@ -139,7 +139,7 @@ function Hero() {
               to="/register"
               className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-primary text-white font-bold text-base hover:brightness-110 active:scale-[0.99] shadow-xl shadow-primary/25 transition-all"
             >
-              <Icon name="rocket_launch" size={20} />
+              <Icon name="arrow_forward" size={20} />
               7 күн тегін бастау
             </Link>
             <a
@@ -439,7 +439,7 @@ function PhoneDemo() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
         <SectionHeading
           badge="Қалай жұмыс істейді"
-          badgeIcon="smartphone"
+          badgeIcon="install_mobile"
           title="Телефондағыдай көріңіз"
           subtitle="Клиенттен төлемге дейінгі процесс бір экранда қалай жүретінін төмендегі демодан көріңіз."
         />
@@ -532,8 +532,8 @@ function Features() {
   const items = [
     { icon: 'groups', title: 'Клиенттер бір тізімде', body: 'Кім қоңырау шалды, қай тапсырыс қай кезеңде — бәрі бір жерде.' },
     { icon: 'straighten', title: 'Өлшем мен фото', body: 'Әр терезе, өлшем, түсірілген фото бір тапсырысқа бекітіледі.' },
-    { icon: 'receipt', title: 'Ұсыныс және келісім', body: 'Клиентке КП жібересіз, оның жауабын бірден көресіз.' },
-    { icon: 'precision', title: 'Өндіріс пен тігу', body: 'Тапсырыс цехқа өтті ме, тігу бітті ме — әр кезең бірден көрінеді.' },
+    { icon: 'receipt_long', title: 'Ұсыныс және келісім', body: 'Клиентке КП жібересіз, оның жауабын бірден көресіз.' },
+    { icon: 'precision_manufacturing', title: 'Өндіріс пен тігу', body: 'Тапсырыс цехқа өтті ме, тігу бітті ме — әр кезең бірден көрінеді.' },
     { icon: 'payments', title: 'Төлемдер анық', body: 'Алдын ала төлем, қалғаны, төленбеген сома — көрініп тұрады.' },
     { icon: 'badge', title: 'Қызметкерлерге ыңғайлы', body: 'Дизайнер, менеджер, өндіріс — әркім өз жұмысына керек бөлікті көреді.' },
   ];
@@ -579,7 +579,7 @@ function Features() {
 function Modules() {
   const items = [
     { icon: 'person_search', title: 'Клиенттер мен тапсырыстар', body: 'Жаңа өтініштен бастап дайын орнатуға дейінгі жол нақты көрінеді.' },
-    { icon: 'camera', title: 'Өлшем және суреттер', body: 'Бөлме, терезе, фото және ескертпелер тапсырыспен бірге сақталады.' },
+    { icon: 'photo_camera', title: 'Өлшем және суреттер', body: 'Бөлме, терезе, фото және ескертпелер тапсырыспен бірге сақталады.' },
     { icon: 'inventory', title: 'Маталар мен есеп', body: 'Қай мата таңдалды, қанша қажет, қанша қалды — анық көрінеді.' },
     { icon: 'notifications', title: 'Хабарламалар', body: 'Маңызды жаңалықты өткізіп алмайсыз: тапсырыс, төлем, мерзім.' },
     { icon: 'analytics', title: 'Нәтиже мен шолу', body: 'Не сатылды, қай тапсырыс кідіріп тұр, қай жерде назар керек.' },
@@ -718,7 +718,7 @@ function Testimonials() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
         <SectionHeading
           badge="Команда айтады"
-          badgeIcon="quote"
+          badgeIcon="star"
           title="Бірінші клиенттеріміздің сөздері"
           subtitle="Бұл — early-access кезеңіндегі Gardina пайдаланушыларының пікірлері."
         />
@@ -811,7 +811,7 @@ function Pricing() {
       <div className="max-w-6xl mx-auto px-4 sm:px-6">
         <SectionHeading
           badge="Тарифтер"
-          badgeIcon="sell"
+          badgeIcon="store"
           title="Өзіңізге ыңғайлы тарифті таңдаңыз"
           subtitle="Үш деңгей: Start, Pro, Network. Pro тарифінде 7 күн тегін сынап көріңіз."
         />
@@ -1031,7 +1031,7 @@ function Process() {
       <div className="max-w-6xl mx-auto px-4 sm:px-6">
         <SectionHeading
           badge="Қалай бастайсыз"
-          badgeIcon="rocket_launch"
+          badgeIcon="arrow_forward"
           title="Төрт қарапайым қадам"
           subtitle="Сізге түсінікті, қарапайым жолмен бастаймыз."
         />
@@ -1101,7 +1101,7 @@ function CTA() {
                 to="/register"
                 className="inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl bg-white text-primary font-bold hover:bg-accent transition-all"
               >
-                <Icon name="rocket_launch" size={20} />
+                <Icon name="arrow_forward" size={20} />
                 Тегін бастау
               </Link>
               <a
