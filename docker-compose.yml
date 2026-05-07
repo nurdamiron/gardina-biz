@@ -27,13 +27,34 @@ services:
   # ============================================
   # CERTBOT - SSL Certificate Management
   # ============================================
+  # certbot's --deploy-hook only runs inside the certbot container,
+  # which has no docker socket access, so it writes a timestamp to a
+  # shared volume. The nginx-reloader sidecar watches that volume and
+  # runs `nginx -s reload` whenever it changes. Without this, nginx
+  # serves the old cert until the next manual restart and clients see
+  # NET::ERR_CERT_DATE_INVALID after expiry.
   certbot:
     image: certbot/certbot
     container_name: gardina-certbot
     volumes:
       - ./certbot/conf:/etc/letsencrypt
       - ./certbot/www:/var/www/certbot
-    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
+      - certbot-reload:/var/lib/letsencrypt-reload
+    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew --deploy-hook \"date -u +%FT%TZ > /var/lib/letsencrypt-reload/trigger\"; sleep 12h & wait $${!}; done;'"
+    networks:
+      - gardina-network
+
+  nginx-reloader:
+    image: docker:cli
+    container_name: gardina-nginx-reloader
+    restart: always
+    depends_on:
+      - certbot
+      - nginx
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - certbot-reload:/var/lib/letsencrypt-reload
+    entrypoint: "/bin/sh -c 'touch /var/lib/letsencrypt-reload/trigger; last=$$(stat -c %Y /var/lib/letsencrypt-reload/trigger 2>/dev/null || echo 0); while sleep 60; do current=$$(stat -c %Y /var/lib/letsencrypt-reload/trigger 2>/dev/null || echo 0); if [ \"$$current\" != \"$$last\" ]; then echo \"[nginx-reloader] cert renewed, reloading nginx\"; docker exec gardina-nginx nginx -s reload || true; last=$$current; fi; done'"
     networks:
       - gardina-network
 
@@ -87,3 +108,6 @@ services:
 networks:
   gardina-network:
     driver: bridge
+
+volumes:
+  certbot-reload:

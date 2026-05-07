@@ -22,51 +22,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
     <!-- Icons: Hugeicons (via @hugeicons/react package) -->
-
-    <!-- Tailwind CDN (temporary for development) -->
-    <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
-    <script>
-      tailwind.config = {
-        darkMode: "class",
-        theme: {
-          extend: {
-            colors: {
-              "primary": "#1b5e45",
-              "primary-light": "#2d6a4f",
-              "primary-dark": "#0f2919",
-              "primary-content": "#ffffff",
-              "accent": "#74c69d",
-              "background-light": "#f1f6f3",
-              "background-dark": "#0c1814",
-              "surface-light": "#ffffff",
-              "surface-dark": "#152922",
-              "text-main": "#101916",
-              "text-main-light": "#101916",
-              "text-main-dark": "#e8f0ec",
-              "text-secondary": "#4d5c54",
-              "text-secondary-light": "#4d5c54",
-              "text-secondary-dark": "#9cb0a4",
-              "border-light": "#d5e3dc",
-              "border-dark": "#2a3d34",
-            },
-            fontFamily: {
-              "display": ["Inter", "sans-serif"]
-            },
-            borderRadius: {
-              "DEFAULT": "0.5rem",
-              "lg": "0.75rem",
-              "xl": "1rem",
-              "2xl": "1.5rem",
-              "full": "9999px"
-            },
-            boxShadow: {
-              "card": "0 4px 12px -2px rgba(27, 94, 69, 0.1), 0 2px 6px -1px rgba(0, 0, 0, 0.04)",
-              "lg": "0 10px 25px -5px rgba(27, 94, 69, 0.14), 0 8px 10px -6px rgba(0, 0, 0, 0.04)",
-            },
-          },
-        },
-      }
-    </script>
+    <!-- Tailwind is built locally via @tailwindcss/vite plugin (see src/index.css). -->
 
     <style>
       /* PWA Safe Areas Support */

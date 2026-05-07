@@ -3,6 +3,7 @@ import { Navigate, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { billingAPI } from '../services/api';
 import Icon from '../components/common/Icon';
+import LanguageSwitcher from '../components/common/LanguageSwitcher';
 
 const PRICES = {
   monthly: {
@@ -77,10 +78,10 @@ const PlanOnboarding = () => {
     setError(null);
     setSaving('start');
     try {
+      // Server decides subscription_status — Start is free → 'active'
       await billingAPI.selectPlan({
         planCode: 'start',
         billingCycle: cycle,
-        subscriptionStatus: 'active',
       });
       await afterSuccess();
     } catch (err) {
@@ -107,10 +108,10 @@ const PlanOnboarding = () => {
     setError(null);
     setSaving('pro-paid');
     try {
+      // Paid plans become 'pending_payment' on the server until PSP webhook arrives.
       await billingAPI.selectPlan({
         planCode: 'pro',
         billingCycle: cycle,
-        subscriptionStatus: 'active',
       });
       await afterSuccess();
     } catch (err) {
@@ -127,7 +128,6 @@ const PlanOnboarding = () => {
       await billingAPI.selectPlan({
         planCode: 'network',
         billingCycle: cycle,
-        subscriptionStatus: 'active',
       });
       await afterSuccess();
     } catch (err) {
@@ -144,7 +144,6 @@ const PlanOnboarding = () => {
       await billingAPI.selectPlan({
         planCode: 'start',
         billingCycle: 'monthly',
-        subscriptionStatus: 'active',
       });
       await afterSuccess();
     } catch (err) {
@@ -159,6 +158,9 @@ const PlanOnboarding = () => {
       <div className="max-w-5xl mx-auto">
         <div className="text-center mb-8">
           <img src="/images/logo-header.png" alt="Gardina" className="w-32 h-auto mx-auto mb-4 drop-shadow-sm" />
+          <div className="flex justify-center mb-2">
+            <LanguageSwitcher compact />
+          </div>
           <h1 className="text-2xl sm:text-3xl font-bold text-text-main tracking-tight">Тарифті таңдаңыз</h1>
           <p className="text-text-secondary text-sm sm:text-base mt-2 max-w-xl mx-auto leading-relaxed">
             Тіркелу аяқталды. Салоныңызға сәйкес тарифті таңдаңыз — таңдау жүйеде сақталады, кейін әкімші
