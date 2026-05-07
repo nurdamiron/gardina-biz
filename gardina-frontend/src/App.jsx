@@ -1,20 +1,23 @@
 import React, { useState, lazy, Suspense } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { AppProvider } from './contexts/AppContext';
 import { UIProvider } from './contexts/UIContext';
 import Icon from './components/common/Icon';
+import LanguageSwitcher from './components/common/LanguageSwitcher';
 
 // ─── Eagerly loaded (needed on first render) ──────────────────────────────────
 import Login from './screens/Login';
 import Register from './screens/Register';
 import PlanOnboarding from './screens/PlanOnboarding';
-import Landing from './screens/Landing';
 import PWAInstallPrompt from './components/common/PWAInstallPrompt';
 import PushPermissionPrompt from './components/common/PushPermissionPrompt';
 
-// ─── Lazy loaded by role group ────────────────────────────────────────────────
-// Designer
+// Landing is lazy-loaded — authenticated users never see it, and even for
+// guests the framer-motion bundle is only loaded when they hit "/".
+const Landing = lazy(() => import('./screens/Landing'));
+
+
 const DesignerDashboard    = lazy(() => import('./screens/DesignerDashboard'));
 const MeasurementsList     = lazy(() => import('./screens/MeasurementsList'));
 const MeasurementDetails   = lazy(() => import('./screens/MeasurementDetails'));
@@ -89,7 +92,6 @@ const ProtectedRoute = ({ children, allowedRoles = [] }) => {
   return children;
 };
 
-// ─── Home: landing for guests, dashboard redirect if logged in ────────────────
 const HomeRoute = () => {
   const { isAuthenticated, loading } = useAuth();
   if (loading) return <PageLoader />;
@@ -97,7 +99,6 @@ const HomeRoute = () => {
   return <Landing />;
 };
 
-// ─── Role redirect ────────────────────────────────────────────────────────────
 const RoleDashboard = () => {
   const { user, logout } = useAuth();
   switch (user?.role) {
@@ -106,13 +107,11 @@ const RoleDashboard = () => {
     case 'admin':     return <Navigate to="/admin/dashboard" replace />;
     case 'sales':     return <Navigate to="/sales/clients" replace />;
     default:
-      // Unknown/unsupported role — log out and redirect to login
       logout();
       return <Navigate to="/login" replace />;
   }
 };
 
-// ─── Routes ───────────────────────────────────────────────────────────────────
 const AppRoutes = () => {
   const [currentMeasurement, setCurrentMeasurement] = useState(null);
 
@@ -199,6 +198,7 @@ function App() {
         <AppProvider>
           <UIProvider>
             <div className="min-h-screen bg-background-light">
+              <GlobalLanguageSwitcher />
               <AppRoutes />
               <PWAInstallPrompt />
               <PushPromptWrapper />
@@ -214,6 +214,22 @@ const PushPromptWrapper = () => {
   const { isAuthenticated } = useAuth();
   if (!isAuthenticated) return null;
   return <PushPermissionPrompt />;
+};
+
+const GlobalLanguageSwitcher = () => {
+  const location = useLocation();
+  const { isAuthenticated } = useAuth();
+
+  // Auth pages already have their own switcher.
+  if (location.pathname === '/login' || location.pathname === '/register') return null;
+  // Landing for guests keeps its own static experience.
+  if (!isAuthenticated) return null;
+
+  return (
+    <div className="fixed top-3 right-3 z-[1200]">
+      <LanguageSwitcher compact />
+    </div>
+  );
 };
 
 export default App;

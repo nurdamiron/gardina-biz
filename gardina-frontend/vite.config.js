@@ -77,6 +77,8 @@ export default defineConfig({
           'store': ['@reduxjs/toolkit', 'react-redux'],
           // Forms
           'forms': ['react-hook-form'],
+          // Landing animations — only loaded when visiting "/"
+          'motion': ['framer-motion'],
           // HTTP
           'http': ['axios'],
           // Icons — split from app code so they can be cached separately
