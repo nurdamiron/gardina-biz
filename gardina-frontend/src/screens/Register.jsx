@@ -2,6 +2,8 @@ import React, { useState, useCallback } from 'react';
 import { Link, Navigate, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import Icon from '../components/common/Icon';
+import { useI18n } from '../contexts/I18nContext';
+import LanguageSwitcher from '../components/common/LanguageSwitcher';
 
 const MODES = {
   salon: 'salon',
@@ -23,6 +25,7 @@ function slugFromName(name) {
 
 const Register = () => {
   const navigate = useNavigate();
+  const { t } = useI18n();
   const { register, registerSalon, error: authError, clearError, isAuthenticated, loading: authLoading } =
     useAuth();
 
@@ -38,6 +41,7 @@ const Register = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [localError, setLocalError] = useState(null);
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
 
   const onOrgNameChange = useCallback(
     (value) => {
@@ -74,6 +78,7 @@ const Register = () => {
     if (!phone.trim()) return 'Телефон немесе логин қажет';
     if (!password || password.length < 6) return 'Құпия сөз кемінде 6 таңба';
     if (password !== confirmPassword) return 'Құпия сөздер сәйкес емес';
+    if (!acceptedTerms) return 'Шарттарды және құпиялылық саясатын қабылдау қажет';
     return null;
   };
 
@@ -137,7 +142,10 @@ const Register = () => {
       <div className="w-full max-w-md">
         <div className="text-center mb-6">
           <img src="/images/logo-header.png" alt="Gardina" className="w-40 h-auto mx-auto mb-3 drop-shadow-sm" />
-          <h1 className="text-2xl font-bold text-text-main tracking-tight">Тіркелу</h1>
+          <div className="flex justify-center mb-2">
+            <LanguageSwitcher compact />
+          </div>
+          <h1 className="text-2xl font-bold text-text-main tracking-tight">{t('auth.registerTitle')}</h1>
           <p className="text-sm text-text-secondary mt-1.5 font-medium">
             Жаңа салон ашыңыз немесе командаға қосылыңыз
           </p>
@@ -374,15 +382,30 @@ const Register = () => {
                 </div>
               </div>
 
+              <label className="flex items-start gap-2 cursor-pointer select-none">
+                <input
+                  type="checkbox"
+                  checked={acceptedTerms}
+                  onChange={(e) => setAcceptedTerms(e.target.checked)}
+                  className="mt-0.5 size-4 rounded border-gray-300 text-primary focus:ring-primary"
+                />
+                <span className="text-xs text-text-secondary leading-relaxed">
+                  <a href="/terms.html" target="_blank" rel="noreferrer" className="text-primary font-bold hover:underline">Қызмет көрсету шартын</a>
+                  {' '}және{' '}
+                  <a href="/privacy.html" target="_blank" rel="noreferrer" className="text-primary font-bold hover:underline">Дербес деректерді өңдеу саясатын</a>
+                  {' '}оқыдым және қабылдаймын
+                </span>
+              </label>
+
               <button
                 type="submit"
-                disabled={loading}
+                disabled={loading || !acceptedTerms}
                 className="w-full mt-2 bg-primary hover:brightness-110 active:scale-[0.99] text-white font-bold text-base py-3.5 rounded-xl shadow-lg shadow-primary/25 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
               >
                 {loading ? (
                   <>
                     <div className="size-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    Тіркелуде…
+                    {t('common.loading')}
                   </>
                 ) : (
                   <>
@@ -394,9 +417,9 @@ const Register = () => {
             </form>
 
             <p className="text-center text-sm text-text-secondary mt-6">
-              Аккаунтыңыз бар ма?{' '}
+              {t('auth.hasAccount')}{' '}
               <Link to="/login" className="font-bold text-primary hover:underline">
-                Кіру
+                {t('auth.login')}
               </Link>
             </p>
           </div>

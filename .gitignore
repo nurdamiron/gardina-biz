@@ -26,3 +26,16 @@ certbot/
 # Logs
 *.log
 npm-debug.log*
+
+# Test artifacts
+playwright-report/
+test-results/
+.tmp_i18n_strings.txt
+
+# Frontend dev artifacts
+dev-dist/
+.vercel/
+
+# Stray binaries / one-off files in repo root
+/Лого.png
+/*.png
