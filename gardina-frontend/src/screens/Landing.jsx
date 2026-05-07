@@ -287,7 +287,7 @@ function StatsBand() {
             key={s.label}
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: '-50px' }}
+            viewport={{ once: true, amount: 0.05 }}
             transition={{ duration: 0.4, delay: i * 0.08 }}
             className="text-center"
           >
@@ -308,7 +308,7 @@ function SectionHeading({ badge, badgeIcon, title, subtitle }) {
     <motion.div
       initial="hidden"
       whileInView="visible"
-      viewport={{ once: true, margin: '-80px' }}
+      viewport={{ once: true, amount: 0.05 }}
       variants={stagger}
       className="text-center max-w-2xl mx-auto mb-12 sm:mb-16"
     >
@@ -364,7 +364,7 @@ function Problems() {
         <motion.div
           initial="hidden"
           whileInView="visible"
-          viewport={{ once: true, margin: '-100px' }}
+          viewport={{ once: true, amount: 0.05 }}
           variants={stagger}
           className="grid md:grid-cols-3 gap-6"
         >
@@ -449,7 +449,7 @@ function PhoneDemo() {
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             whileInView={{ opacity: 1, scale: 1 }}
-            viewport={{ once: true, margin: '-100px' }}
+            viewport={{ once: true, amount: 0.05 }}
             transition={{ duration: 0.6 }}
             className="relative mx-auto"
           >
@@ -503,7 +503,7 @@ function PhoneDemo() {
                 onClick={() => setActive(i)}
                 initial={{ opacity: 0, x: 30 }}
                 whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
+                viewport={{ once: true, amount: 0.05 }}
                 transition={{ duration: 0.4, delay: 0.1 + i * 0.1 }}
                 className={`w-full text-left p-5 rounded-2xl border transition-all ${
                   active === i ? 'bg-primary text-white border-primary shadow-xl shadow-primary/25' : 'bg-white border-border-light/80 hover:border-primary/30'
@@ -551,7 +551,7 @@ function Features() {
         <motion.div
           initial="hidden"
           whileInView="visible"
-          viewport={{ once: true, margin: '-100px' }}
+          viewport={{ once: true, amount: 0.05 }}
           variants={stagger}
           className="grid md:grid-cols-2 lg:grid-cols-3 gap-5"
         >
@@ -598,7 +598,7 @@ function Modules() {
         <motion.div
           initial="hidden"
           whileInView="visible"
-          viewport={{ once: true, margin: '-100px' }}
+          viewport={{ once: true, amount: 0.05 }}
           variants={stagger}
           className="grid md:grid-cols-2 lg:grid-cols-3 gap-4"
         >
@@ -656,7 +656,7 @@ function Comparison() {
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: '-100px' }}
+          viewport={{ once: true, amount: 0.05 }}
           transition={{ duration: 0.5 }}
           className="rounded-3xl bg-white border border-border-light/70 overflow-hidden shadow-card"
         >
@@ -678,7 +678,7 @@ function Comparison() {
                     key={r.feature}
                     initial={{ opacity: 0, x: -20 }}
                     whileInView={{ opacity: 1, x: 0 }}
-                    viewport={{ once: true }}
+                    viewport={{ once: true, amount: 0.05 }}
                     transition={{ duration: 0.3, delay: i * 0.05 }}
                     className="border-b border-border-light/40 last:border-0"
                   >
@@ -819,7 +819,7 @@ function Pricing() {
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
+          viewport={{ once: true, amount: 0.05 }}
           className="flex justify-center mb-10"
         >
           <div className="relative inline-flex items-center bg-gray-100 p-1 rounded-2xl">
@@ -855,7 +855,7 @@ function Pricing() {
         <motion.div
           initial="hidden"
           whileInView="visible"
-          viewport={{ once: true, margin: '-100px' }}
+          viewport={{ once: true, amount: 0.05 }}
           variants={stagger}
           className="grid md:grid-cols-3 gap-6"
         >
@@ -973,7 +973,7 @@ function FAQ() {
         <motion.div
           initial="hidden"
           whileInView="visible"
-          viewport={{ once: true, margin: '-50px' }}
+          viewport={{ once: true, amount: 0.05 }}
           variants={stagger}
           className="space-y-3"
         >
@@ -1039,7 +1039,7 @@ function Process() {
         <motion.ol
           initial="hidden"
           whileInView="visible"
-          viewport={{ once: true, margin: '-100px' }}
+          viewport={{ once: true, amount: 0.05 }}
           variants={stagger}
           className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5"
         >
@@ -1073,7 +1073,7 @@ function CTA() {
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: '-100px' }}
+          viewport={{ once: true, amount: 0.05 }}
           transition={{ duration: 0.5 }}
           className="relative rounded-3xl bg-gradient-to-br from-primary-dark via-primary to-primary-light p-10 sm:p-14 text-center overflow-hidden"
         >

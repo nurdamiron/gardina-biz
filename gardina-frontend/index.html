@@ -92,6 +92,25 @@
   </head>
   <body>
     <div id="root"></div>
+    <script>
+      // In dev, kill any leftover service worker from previous sessions.
+      // vite-plugin-pwa used to register one (devOptions.enabled = true)
+      // and the old SW keeps serving stale chunks until manually unregistered.
+      // This auto-cleans it on the next dev visit.
+      if (location.hostname === 'localhost' && 'serviceWorker' in navigator) {
+        navigator.serviceWorker.getRegistrations().then((regs) => {
+          if (regs.length === 0) return;
+          Promise.all(regs.map((r) => r.unregister())).then(() => {
+            if ('caches' in window) caches.keys().then((keys) => keys.forEach((k) => caches.delete(k)));
+            // First load after a stale SW: hard-reload once so we get fresh assets
+            if (!sessionStorage.getItem('__sw_killed')) {
+              sessionStorage.setItem('__sw_killed', '1');
+              location.reload();
+            }
+          });
+        });
+      }
+    </script>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>
