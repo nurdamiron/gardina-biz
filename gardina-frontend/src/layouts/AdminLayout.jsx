@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { NavLink, useNavigate, Outlet } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import Icon from '../components/common/Icon';
+import { useI18n } from '../contexts/I18nContext';
+import LanguageSwitcher from '../components/common/LanguageSwitcher';
 
 /**
  * Admin Layout with sidebar
@@ -11,15 +13,16 @@ const AdminLayout = () => {
     const navigate = useNavigate();
     const { user, logout } = useAuth();
     const [sidebarOpen, setSidebarOpen] = useState(true);
+    const { t } = useI18n();
 
     const menuItems = [
-        { path: '/admin/dashboard', icon: 'dashboard', label: 'Дашборд' },
-        { path: '/admin/catalog', icon: 'inventory_2', label: 'Каталог' },
-        { path: '/admin/orders', icon: 'shopping_cart', label: 'Заказы' },
-        { path: '/admin/users', icon: 'group', label: 'Пользователи' },
-        { path: '/admin/clients', icon: 'people', label: 'Клиенты' },
-        { path: '/admin/reports', icon: 'bar_chart', label: 'Отчёты' },
-        { path: '/admin/settings', icon: 'settings', label: 'Настройки' },
+        { path: '/admin/dashboard', icon: 'dashboard', label: t('adminLayout.dashboard') },
+        { path: '/admin/catalog', icon: 'inventory_2', label: t('adminLayout.catalog') },
+        { path: '/admin/orders', icon: 'shopping_cart', label: t('adminLayout.orders') },
+        { path: '/admin/users', icon: 'group', label: t('adminLayout.users') },
+        { path: '/admin/clients', icon: 'people', label: t('adminLayout.clients') },
+        { path: '/admin/reports', icon: 'bar_chart', label: t('adminLayout.reports') },
+        { path: '/admin/settings', icon: 'settings', label: t('adminLayout.settings') },
     ];
 
     const handleLogout = async () => {
@@ -40,7 +43,7 @@ const AdminLayout = () => {
                         {sidebarOpen && (
                             <div>
                                 <h1 className="font-bold text-lg">Gardina Admin</h1>
-                                <p className="text-xs text-slate-400">Панель управления</p>
+                                <p className="text-xs text-slate-400">{t('adminLayout.subtitle')}</p>
                             </div>
                         )}
                     </div>
@@ -73,6 +76,9 @@ const AdminLayout = () => {
 
                 {/* User */}
                 <div className="p-4 border-t border-slate-700">
+                    <div className="mb-3 flex justify-center">
+                        <LanguageSwitcher compact />
+                    </div>
                     <div className="flex items-center gap-3">
                         <div className="size-10 bg-primary/20 rounded-full flex items-center justify-center">
                             <Icon name="person" className="text-primary" />
@@ -80,13 +86,13 @@ const AdminLayout = () => {
                         {sidebarOpen && (
                             <div className="flex-1 min-w-0">
                                 <p className="font-medium text-sm truncate">{user?.name}</p>
-                                <p className="text-xs text-slate-400">Админ</p>
+                                <p className="text-xs text-slate-400">{t('adminLayout.admin')}</p>
                             </div>
                         )}
                         <button
                             onClick={handleLogout}
                             className="p-2 hover:bg-slate-700 rounded-lg"
-                            title="Шығу"
+                            title={t('common.logout')}
                         >
                             <Icon name="logout" className="text-red-400" />
                         </button>

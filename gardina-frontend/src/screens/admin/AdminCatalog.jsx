@@ -4,12 +4,14 @@ import { catalogAPI } from '../../services/api';
 import { useUI } from '../../contexts/UIContext';
 import BottomNav from '../../components/navigation/BottomNav';
 import Icon from '../../components/common/Icon';
+import { useI18n } from '../../contexts/I18nContext';
 
 /**
  * Admin Catalog Page
  * Manage fabrics, curtains, and services
  */
 const AdminCatalog = () => {
+    const { t } = useI18n();
     const navigate = useNavigate();
     const { confirm, showToast } = useUI();
     const [activeTab, setActiveTab] = useState('fabrics');
@@ -70,8 +72,8 @@ const AdminCatalog = () => {
     };
 
     const tabs = [
-        { id: 'fabrics', label: 'Тауарлар', icon: 'inventory_2', count: fabrics.length },
-        { id: 'services', label: 'Қызметтер', icon: 'build', count: services.length },
+        { id: 'fabrics', label: t('adminCatalog.tabs.products'), icon: 'inventory_2', count: fabrics.length },
+        { id: 'services', label: t('adminCatalog.tabs.services'), icon: 'build', count: services.length },
     ];
 
     const filteredFabrics = fabrics.filter(f => {
@@ -89,7 +91,7 @@ const AdminCatalog = () => {
             {/* Header */}
             <header className="sticky top-0 z-30 bg-white/80 backdrop-blur-md border-b border-gray-100 px-4 py-4">
                 <div className="flex justify-between items-center">
-                    <h1 className="text-xl font-bold text-gray-900">Каталог</h1>
+                    <h1 className="text-xl font-bold text-gray-900">{t('adminCatalog.title')}</h1>
                     <button
                         onClick={() => navigate(activeTab === 'fabrics' ? '/admin/catalog/products/new' : '/admin/catalog/services/new')}
                         className="size-10 bg-primary rounded-xl flex items-center justify-center shadow-lg hover:brightness-110 transition-all"
@@ -128,7 +130,7 @@ const AdminCatalog = () => {
                         type="text"
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        placeholder="Атау немесе бренд бойынша іздеу..."
+                        placeholder={t('adminCatalog.searchPlaceholder')}
                         className="w-full pl-10 pr-4 py-3 bg-white border-2 border-gray-100 rounded-xl focus:border-primary transition-all"
                     />
                 </div>
@@ -162,7 +164,7 @@ const AdminCatalog = () => {
                             <div className="bg-white rounded-xl p-8 text-center">
                                 <Icon name="inventory_2" size={40} className="text-gray-300" />
                                 <p className="text-gray-500 mt-2">
-                                    {searchQuery ? 'Ештеңе табылмады' : 'Каталог бос'}
+                                    {searchQuery ? t('adminCatalog.empty.notFound') : t('adminCatalog.empty.catalogEmpty')}
                                 </p>
                             </div>
                         ) : (
@@ -188,13 +190,7 @@ const AdminCatalog = () => {
                                                 <p className="text-sm text-gray-500">{fabric.brand || '—'}</p>
                                                 <div className="flex gap-1 mt-1">
                                                     <span className="px-2 py-0.5 bg-gray-100 text-gray-600 text-xs rounded font-medium">
-                                                        {fabric.type === 'curtain' ? 'Перде'
-                                                            : fabric.type === 'tulle' ? 'Тюль'
-                                                            : fabric.type === 'cornice' ? 'Карниз'
-                                                            : fabric.type === 'jalousie' ? 'Жалюзи'
-                                                            : fabric.type === 'accessory' ? 'Фурнитура'
-                                                            : fabric.type === 'ready_made' ? 'Дайын өнім'
-                                                            : fabric.type}
+                                                        {t(`adminCatalog.categories.${fabric.type}`, fabric.type)}
                                                     </span>
                                                 </div>
                                             </div>
@@ -202,15 +198,9 @@ const AdminCatalog = () => {
                                         <div className="text-right">
                                             <p className="font-bold text-lg text-gray-900">{fabric.pricePerMeter?.toLocaleString()} ₸</p>
                                             <p className="text-[10px] text-gray-400 uppercase font-bold">
-                                                {fabric.unit === 'pcs' ? 'Дана'
-                                                    : fabric.unit === 'set' ? 'Жинақ'
-                                                        : fabric.unit === 'roll' ? 'Орам'
-                                                            : fabric.unit === 'pack' ? 'Қап'
-                                                                : fabric.unit === 'box' ? 'Қорап'
-                                                                    : fabric.unit === 'pair' ? 'Жұп'
-                                                                        : 'Метр'}
+                                                {t(`adminCatalog.units.${fabric.unit || 'meter'}`)}
                                             </p>
-                                            <p className="text-[10px] text-gray-400 mt-1">Кіріс: {fabric.costPrice?.toLocaleString()} ₸</p>
+                                            <p className="text-[10px] text-gray-400 mt-1">{t('adminCatalog.card.cost')}: {fabric.costPrice?.toLocaleString()} ₸</p>
                                         </div>
                                     </div>
                                 </div>
@@ -222,7 +212,7 @@ const AdminCatalog = () => {
                         {services.length === 0 ? (
                             <div className="bg-white rounded-xl p-8 text-center">
                                 <Icon name="build" size={40} className="text-gray-300" />
-                                <p className="text-gray-500 mt-2">Қызметтер жоқ</p>
+                                <p className="text-gray-500 mt-2">{t('adminCatalog.empty.servicesEmpty')}</p>
                             </div>
                         ) : (
                             services.map(service => (

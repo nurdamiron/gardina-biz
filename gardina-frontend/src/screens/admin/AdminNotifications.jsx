@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import api from '../../services/api';
 import BottomNav from '../../components/navigation/BottomNav';
 import Icon from '../../components/common/Icon';
+import { useI18n } from '../../contexts/I18nContext';
 
 const ROLES = [
   { value: '', label: 'Барлық пайдаланушылар' },
@@ -19,6 +20,7 @@ const TYPE_CONFIG = {
 };
 
 const AdminNotifications = () => {
+  const { t } = useI18n();
   const navigate = useNavigate();
   const [tab, setTab] = useState('send'); // 'send' | 'history' | 'stats'
   const [stats, setStats] = useState(null);
@@ -129,7 +131,7 @@ const AdminNotifications = () => {
           <button onClick={() => navigate(-1)} className="p-2 -ml-2 rounded-full hover:bg-gray-100">
             <Icon name="arrow_back" size={22} />
           </button>
-          <h1 className="text-xl font-bold flex-1">Хабарламалар</h1>
+          <h1 className="text-xl font-bold flex-1">{t('adminNotifications.title')}</h1>
           {stats && (
             <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded-full font-semibold">
               {stats.activePushSubscriptions} push
@@ -140,9 +142,9 @@ const AdminNotifications = () => {
         {/* Tabs */}
         <div className="flex px-4 pb-3 gap-2">
           {[
-            { key: 'send', label: 'Жіберу', icon: 'notifications_active' },
-            { key: 'history', label: 'Тарих', icon: 'view_agenda' },
-            { key: 'stats', label: 'Статистика', icon: 'bar_chart' },
+            { key: 'send', label: t('adminNotifications.tabs.send'), icon: 'notifications_active' },
+            { key: 'history', label: t('adminNotifications.tabs.history'), icon: 'view_agenda' },
+            { key: 'stats', label: t('adminNotifications.tabs.stats'), icon: 'bar_chart' },
           ].map(t => (
             <button
               key={t.key}
@@ -174,7 +176,7 @@ const AdminNotifications = () => {
             <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 space-y-4">
               <h2 className="font-bold text-gray-800 flex items-center gap-2">
                 <Icon name="group" className="text-primary" size={20} />
-                Алушылар
+                {t('adminNotifications.sections.recipients')}
               </h2>
 
               <div>
@@ -211,7 +213,7 @@ const AdminNotifications = () => {
             <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 space-y-4">
               <h2 className="font-bold text-gray-800 flex items-center gap-2">
                 <Icon name="edit" className="text-primary" size={20} />
-                Хабарлама
+                {t('adminNotifications.sections.message')}
               </h2>
 
               {/* Type selector */}
@@ -391,7 +393,7 @@ const AdminNotifications = () => {
                   <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4">
                     <h3 className="font-bold text-gray-800 mb-3 flex items-center gap-2">
                       <Icon name="bar_chart" size={18} className="text-primary" />
-                      Түр бойынша
+                      {t('adminNotifications.sections.byType')}
                     </h3>
                     <div className="space-y-2">
                       {stats.byType.map(t => {
@@ -421,7 +423,7 @@ const AdminNotifications = () => {
                   <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4">
                     <h3 className="font-bold text-gray-800 mb-3 flex items-center gap-2">
                       <Icon name="timeline" size={18} className="text-primary" />
-                      Соңғы 7 күн
+                      {t('adminNotifications.sections.recent7d')}
                     </h3>
                     <div className="space-y-2">
                       {stats.recentActivity.map(a => (

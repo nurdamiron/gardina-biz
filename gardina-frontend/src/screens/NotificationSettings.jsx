@@ -14,6 +14,7 @@ import {
 } from '../services/pushService';
 import BottomNav from '../components/navigation/BottomNav';
 import Icon from '../components/common/Icon';
+import { useI18n } from '../contexts/I18nContext';
 
 /**
  * Notification Settings Page
@@ -21,6 +22,7 @@ import Icon from '../components/common/Icon';
  */
 const NotificationSettings = () => {
   const navigate = useNavigate();
+  const { t } = useI18n();
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [pushSupported] = useState(isPushSupported());
@@ -83,7 +85,7 @@ const NotificationSettings = () => {
           [channel]: !newValue
         }
       }));
-      showMessage('Сақтау қатесі', 'error');
+      showMessage(t('notificationSettings.saveError'), 'error');
     }
   };
 
@@ -118,7 +120,7 @@ const NotificationSettings = () => {
         [`quiet_hours_${field}`]: value
       });
     } catch (error) {
-      showMessage('Сақтау қатесі', 'error');
+      showMessage(t('notificationSettings.saveError'), 'error');
     }
   };
 
@@ -130,9 +132,9 @@ const NotificationSettings = () => {
     if (result.success) {
       setPushStatus({ isSubscribed: true, deviceCount: pushStatus.deviceCount + 1 });
       setPushPermission('granted');
-      showMessage('Push хабарламалар қосылды!', 'success');
+      showMessage(t('notificationSettings.pushEnabled'), 'success');
     } else {
-      showMessage(result.error || 'Қосу мүмкін болмады', 'error');
+      showMessage(result.error || t('notificationSettings.cannotEnable'), 'error');
     }
   };
 
@@ -143,16 +145,16 @@ const NotificationSettings = () => {
 
     if (result.success) {
       setPushStatus({ isSubscribed: false, deviceCount: Math.max(0, pushStatus.deviceCount - 1) });
-      showMessage('Push хабарламалар өшірілді', 'success');
+      showMessage(t('notificationSettings.pushDisabled'), 'success');
     }
   };
 
   const handleTestPush = async () => {
     const result = await sendTestPush();
     if (result.success && result.data?.sent > 0) {
-      showMessage('Тест хабарлама жіберілді!', 'success');
+      showMessage(t('notificationSettings.testSent'), 'success');
     } else if (result.success && result.data?.sent === 0) {
-      showMessage('Алдымен push хабарламаларды қосыңыз', 'error');
+      showMessage(t('notificationSettings.pushNeedEnable'), 'error');
     } else {
       showMessage(result.error || 'Хабарлама жіберілмеді', 'error');
     }
@@ -166,38 +168,38 @@ const NotificationSettings = () => {
   const categories = [
     {
       key: 'dealStatus',
-      title: 'Тапсырыс статусы',
-      description: 'Тапсырыс статусы өзгергенде хабарлау',
+      title: t('notificationSettings.categories.dealStatus.0'),
+      description: t('notificationSettings.categories.dealStatus.1'),
       icon: 'sync'
     },
     {
       key: 'payment',
-      title: 'Төлемдер',
-      description: 'Төлем түскенде хабарлау',
+      title: t('notificationSettings.categories.payment.0'),
+      description: t('notificationSettings.categories.payment.1'),
       icon: 'payments'
     },
     {
       key: 'taskAssigned',
-      title: 'Тапсырмалар',
-      description: 'Жаңа тапсырма тағайындалғанда',
+      title: t('notificationSettings.categories.taskAssigned.0'),
+      description: t('notificationSettings.categories.taskAssigned.1'),
       icon: 'task'
     },
     {
       key: 'measurementReminder',
-      title: 'Еске салулар',
-      description: 'Өлшем алдында еске салу',
+      title: t('notificationSettings.categories.measurementReminder.0'),
+      description: t('notificationSettings.categories.measurementReminder.1'),
       icon: 'alarm'
     },
     {
       key: 'proposalViewed',
-      title: 'КП қаралды',
-      description: 'Клиент КП-ны қарағанда',
+      title: t('notificationSettings.categories.proposalViewed.0'),
+      description: t('notificationSettings.categories.proposalViewed.1'),
       icon: 'visibility'
     },
     {
       key: 'stockLow',
-      title: 'Қалдық аз',
-      description: 'Материал қалдығы аз болғанда',
+      title: t('notificationSettings.categories.stockLow.0'),
+      description: t('notificationSettings.categories.stockLow.1'),
       icon: 'inventory'
     }
   ];
@@ -218,7 +220,7 @@ const NotificationSettings = () => {
           <button onClick={() => navigate(-1)} className="p-2 -ml-2">
             <Icon name="arrow_back" />
           </button>
-          <h1 className="text-xl font-bold">Хабарлама баптаулары</h1>
+          <h1 className="text-xl font-bold">{t('notificationSettings.title')}</h1>
         </div>
       </div>
 
@@ -238,7 +240,7 @@ const NotificationSettings = () => {
           <div className="p-4 border-b border-gray-100">
             <h2 className="font-bold text-lg flex items-center gap-2">
               <Icon name="notifications_active" className="text-primary" />
-              Push хабарламалар
+              {t('notificationSettings.pushTitle')}
             </h2>
           </div>
 
@@ -249,23 +251,23 @@ const NotificationSettings = () => {
                 <div className="flex items-start gap-3">
                   <Icon name="install_mobile" className="text-amber-500 flex-shrink-0" />
                   <div>
-                    <p className="font-semibold text-amber-800 mb-1">iPhone-да орнату қажет</p>
-                    <p className="text-sm text-amber-700 mb-2">Хабарламалар үшін: Safari → Бөлісу → Үй экранына қосу</p>
+                    <p className="font-semibold text-amber-800 mb-1">{t('notificationSettings.iosInstallTitle')}</p>
+                    <p className="text-sm text-amber-700 mb-2">{t('notificationSettings.iosInstallDesc')}</p>
                   </div>
                 </div>
               </div>
             ) : !pushSupported ? (
               <div className="flex items-center gap-3 text-gray-500">
                 <Icon name="info" />
-                <span className="text-sm">Бұл браузер push хабарламаларды қолдамайды</span>
+                <span className="text-sm">{t('notificationSettings.unsupported')}</span>
               </div>
             ) : pushPermission === 'denied' ? (
               <div className="bg-red-50 border border-red-200 rounded-xl p-4">
                 <div className="flex items-start gap-3">
                   <Icon name="block" className="text-red-500 flex-shrink-0" />
                   <div>
-                    <p className="text-red-700 font-semibold mb-1">Хабарламалар бұғатталған</p>
-                    <p className="text-sm text-red-600">Браузер → Сайт баптаулары → Хабарламалар → Рұқсат</p>
+                    <p className="text-red-700 font-semibold mb-1">{t('notificationSettings.blockedTitle')}</p>
+                    <p className="text-sm text-red-600">{t('notificationSettings.blockedDesc')}</p>
                   </div>
                 </div>
               </div>
@@ -281,12 +283,12 @@ const NotificationSettings = () => {
                       </div>
                       <div>
                         <p className={`font-bold ${pushStatus.isSubscribed ? 'text-green-800' : 'text-gray-700'}`}>
-                          {pushStatus.isSubscribed ? 'Қосылған' : 'Өшірілген'}
+                          {pushStatus.isSubscribed ? t('notificationSettings.enabled') : t('notificationSettings.disabled')}
                         </p>
                         <p className="text-sm text-gray-500">
                           {pushStatus.isSubscribed
                             ? `${pushStatus.deviceCount} құрылғыда белсенді`
-                            : 'Push хабарламалар жетпейді'}
+                            : t('notificationSettings.pushOffDesc')}
                         </p>
                       </div>
                     </div>
@@ -309,8 +311,8 @@ const NotificationSettings = () => {
                     className="w-full py-3.5 bg-primary text-white font-bold rounded-xl hover:brightness-110 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
                   >
                     {isSaving
-                      ? <><div className="size-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />Қосылуда...</>
-                      : <><Icon name="notifications" />Хабарламаларды қосу</>}
+                      ? <><div className="size-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />{t('notificationSettings.enablingPush')}</>
+                      : <><Icon name="notifications" />{t('notificationSettings.enablePush')}</>}
                   </button>
                 ) : (
                   <button
@@ -318,7 +320,7 @@ const NotificationSettings = () => {
                     className="w-full py-3 border-2 border-primary text-primary font-bold rounded-xl hover:bg-primary/5 transition-colors flex items-center justify-center gap-2"
                   >
                     <Icon name="play_arrow" />
-                    Тест хабарлама жіберу
+                    {t('notificationSettings.testPush')}
                   </button>
                 )}
               </>
@@ -329,7 +331,7 @@ const NotificationSettings = () => {
         {/* Notification Categories */}
         <div className="bg-white rounded-xl shadow-sm overflow-hidden">
           <div className="p-4 border-b border-gray-100">
-            <h2 className="font-bold text-lg">Хабарлама түрлері</h2>
+            <h2 className="font-bold text-lg">{t('notificationSettings.typesTitle')}</h2>
           </div>
 
           <div className="divide-y divide-gray-50">
@@ -346,20 +348,20 @@ const NotificationSettings = () => {
                 {preferences && preferences[category.key] && (
                   <div className="flex gap-2 ml-9">
                     <ChannelToggle
-                      label="In-App"
+                      label={t('notificationSettings.inApp')}
                       icon="smartphone"
                       enabled={preferences[category.key].inapp}
                       onChange={() => handleToggle(category.key, 'inapp')}
                     />
                     <ChannelToggle
-                      label="Push"
+                      label={t('notificationSettings.push')}
                       icon="notifications"
                       enabled={preferences[category.key].push}
                       onChange={() => handleToggle(category.key, 'push')}
                       disabled={!pushStatus.isSubscribed}
                     />
                     <ChannelToggle
-                      label="SMS"
+                      label={t('notificationSettings.sms')}
                       icon="sms"
                       enabled={preferences[category.key].sms}
                       onChange={() => handleToggle(category.key, 'sms')}
@@ -376,15 +378,15 @@ const NotificationSettings = () => {
           <div className="p-4 border-b border-gray-100">
             <h2 className="font-bold text-lg flex items-center gap-2">
               <Icon name="do_not_disturb_on" className="text-primary" />
-              Тыныш сағаттар
+              {t('notificationSettings.quietHoursTitle')}
             </h2>
           </div>
 
           <div className="p-4">
             <div className="flex items-center justify-between mb-4">
               <div>
-                <p className="font-medium">Тыныш режім</p>
-                <p className="text-sm text-gray-500">Push және SMS хабарламаларды уақытша тоқтату</p>
+                <p className="font-medium">{t('notificationSettings.quietMode')}</p>
+                <p className="text-sm text-gray-500">{t('notificationSettings.quietModeDesc')}</p>
               </div>
               <label className="relative inline-flex items-center cursor-pointer">
                 <input
@@ -400,7 +402,7 @@ const NotificationSettings = () => {
             {preferences?.quietHours?.enabled && (
               <div className="flex items-center gap-4 mt-4">
                 <div>
-                  <label className="text-sm text-gray-500">Басталуы</label>
+                  <label className="text-sm text-gray-500">{t('notificationSettings.startsAt')}</label>
                   <input
                     type="time"
                     value={preferences.quietHours.start || '22:00'}
@@ -410,7 +412,7 @@ const NotificationSettings = () => {
                 </div>
                 <div className="text-gray-400 mt-6">-</div>
                 <div>
-                  <label className="text-sm text-gray-500">Аяқталуы</label>
+                  <label className="text-sm text-gray-500">{t('notificationSettings.endsAt')}</label>
                   <input
                     type="time"
                     value={preferences.quietHours.end || '08:00'}

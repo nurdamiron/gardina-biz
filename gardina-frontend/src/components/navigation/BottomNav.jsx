@@ -2,39 +2,41 @@ import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import Icon from '../common/Icon';
+import { useI18n } from '../../contexts/I18nContext';
 
 const BottomNav = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { user } = useAuth();
+  const { t } = useI18n();
 
   const designerTabs = [
-    { id: 'home', icon: 'home', label: 'Басты', path: '/designer/dashboard' },
-    { id: 'measurements', icon: 'straighten', label: 'Өлшемдер', path: '/designer/measurements' },
-    { id: 'profile', icon: 'person', label: 'Профиль', path: '/designer/profile' },
+    { id: 'home', icon: 'home', label: t('nav.home'), path: '/designer/dashboard' },
+    { id: 'measurements', icon: 'straighten', label: t('nav.measurements'), path: '/designer/measurements' },
+    { id: 'profile', icon: 'person', label: t('common.profile'), path: '/designer/profile' },
   ];
 
   const managerTabs = [
-    { id: 'home', icon: 'home', label: 'Басты', path: '/manager/dashboard' },
-    { id: 'orders', icon: 'handshake', label: 'Тапсырыс', path: '/manager/orders' },
-    { id: 'funnel', icon: 'filter_alt', label: 'Воронка', path: '/manager/funnel' },
-    { id: 'clients', icon: 'group', label: 'Клиенттер', path: '/manager/clients' },
-    { id: 'profile', icon: 'person', label: 'Профиль', path: '/manager/profile' },
+    { id: 'home', icon: 'home', label: t('nav.home'), path: '/manager/dashboard' },
+    { id: 'orders', icon: 'handshake', label: t('nav.orders'), path: '/manager/orders' },
+    { id: 'funnel', icon: 'filter_alt', label: t('nav.funnel'), path: '/manager/funnel' },
+    { id: 'clients', icon: 'group', label: t('nav.clients'), path: '/manager/clients' },
+    { id: 'profile', icon: 'person', label: t('common.profile'), path: '/manager/profile' },
   ];
 
   const salesTabs = [
-    { id: 'clients', icon: 'group', label: 'Лидтер', path: '/sales/clients' },
-    { id: 'order', icon: 'add_circle', label: 'Тапсырыс', path: '/sales/order/new' },
-    { id: 'funnel', icon: 'filter_alt', label: 'Воронка', path: '/sales/funnel' },
-    { id: 'profile', icon: 'person', label: 'Профиль', path: '/sales/profile' },
+    { id: 'clients', icon: 'group', label: t('nav.leads'), path: '/sales/clients' },
+    { id: 'order', icon: 'add_circle', label: t('nav.orders'), path: '/sales/order/new' },
+    { id: 'funnel', icon: 'filter_alt', label: t('nav.funnel'), path: '/sales/funnel' },
+    { id: 'profile', icon: 'person', label: t('common.profile'), path: '/sales/profile' },
   ];
 
   const adminTabs = [
-    { id: 'home', icon: 'dashboard', label: 'Басты', path: '/admin/dashboard' },
-    { id: 'catalog', icon: 'inventory_2', label: 'Каталог', path: '/admin/catalog' },
-    { id: 'orders', icon: 'shopping_cart', label: 'Заказдар', path: '/admin/orders' },
-    { id: 'clients', icon: 'group', label: 'Клиенттер', path: '/admin/clients' },
-    { id: 'settings', icon: 'settings', label: 'Баптаулар', path: '/admin/settings' },
+    { id: 'home', icon: 'dashboard', label: t('nav.home'), path: '/admin/dashboard' },
+    { id: 'catalog', icon: 'inventory_2', label: t('nav.catalog'), path: '/admin/catalog' },
+    { id: 'orders', icon: 'shopping_cart', label: t('nav.orders'), path: '/admin/orders' },
+    { id: 'clients', icon: 'group', label: t('nav.clients'), path: '/admin/clients' },
+    { id: 'settings', icon: 'settings', label: t('nav.settings'), path: '/admin/settings' },
   ];
 
   let tabs = designerTabs;

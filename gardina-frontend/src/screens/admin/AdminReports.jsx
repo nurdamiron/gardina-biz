@@ -3,13 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import api from '../../services/api';
 import BottomNav from '../../components/navigation/BottomNav';
 import Icon from '../../components/common/Icon';
-
-const PERIOD_OPTIONS = [
-  { value: '7', label: '7 күн' },
-  { value: '30', label: '30 күн' },
-  { value: '90', label: '3 ай' },
-  { value: '365', label: '1 жыл' },
-];
+import { useI18n } from '../../contexts/I18nContext';
 
 const fmt = (n, unit = '₸') => {
   if (!n) return `0 ${unit}`;
@@ -19,7 +13,15 @@ const fmt = (n, unit = '₸') => {
 };
 
 const AdminReports = () => {
+  const { t } = useI18n();
   const navigate = useNavigate();
+  const PERIOD_OPTIONS = [
+    { value: '7', label: t('adminReports.periods.d7') },
+    { value: '30', label: t('adminReports.periods.d30') },
+    { value: '90', label: t('adminReports.periods.d90') },
+    { value: '365', label: t('adminReports.periods.d365') },
+  ];
+
   const [period, setPeriod] = useState('30');
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState({
@@ -76,7 +78,7 @@ const AdminReports = () => {
           <button onClick={() => navigate(-1)} className="p-2 -ml-2 rounded-full hover:bg-gray-100">
             <Icon name="arrow_back" size={22} />
           </button>
-          <h1 className="text-xl font-bold flex-1">Есептер</h1>
+          <h1 className="text-xl font-bold flex-1">{t('adminReports.title')}</h1>
           <button onClick={load} className="p-2 rounded-full hover:bg-gray-100">
             <Icon name="refresh" size={20} className="text-gray-500" />
           </button>
@@ -100,7 +102,7 @@ const AdminReports = () => {
         ) : (
           <>
             {/* ── Overview KPIs ───────────────────────────────── */}
-            <Section title="Жалпы көрсеткіштер" icon="monitoring">
+            <Section title={t('adminReports.sections.overview')} icon="monitoring">
               <div className="grid grid-cols-2 gap-3">
                 {[
                   { label: 'Жалпы табыс', value: fmt(d?.totalRevenue), icon: 'payments', color: 'green' },
@@ -115,7 +117,7 @@ const AdminReports = () => {
 
             {/* ── Revenue Trend ────────────────────────────────── */}
             {data.monthlyTrends.length > 0 && (
-              <Section title="Табыс тренді" icon="show_chart">
+              <Section title={t('adminReports.sections.revenueTrend')} icon="show_chart">
                 <div className="space-y-2">
                   {data.monthlyTrends.slice(0, 6).map((m, i) => {
                     const pct = maxTrend > 0 ? Math.round(((m.revenue || 0) / maxTrend) * 100) : 0;
@@ -137,7 +139,7 @@ const AdminReports = () => {
 
             {/* ── Revenue Breakdown ────────────────────────────── */}
             {data.revenueBreakdown && (
-              <Section title="Табыс құрамы" icon="bar_chart">
+              <Section title={t('adminReports.sections.revenueBreakdown')} icon="bar_chart">
                 <div className="space-y-3">
                   {[
                     { label: 'Мата', key: 'fabricRevenue', color: 'bg-primary' },
@@ -166,7 +168,7 @@ const AdminReports = () => {
 
             {/* ── Designers Ranking ───────────────────────────── */}
             {data.designersRanking.length > 0 && (
-              <Section title="Дизайнерлер рейтингі" icon="star">
+              <Section title={t('adminReports.sections.designersRanking')} icon="star">
                 <div className="space-y-3">
                   {data.designersRanking.map((des, i) => (
                     <div key={des.id || i} className="flex items-center gap-3">
@@ -189,7 +191,7 @@ const AdminReports = () => {
 
             {/* ── Team KPIs ────────────────────────────────────── */}
             {data.teamKPIs && (
-              <Section title="Команда KPI" icon="groups">
+              <Section title={t('adminReports.sections.teamKpi')} icon="groups">
                 <div className="grid grid-cols-2 gap-3">
                   {[
                     { label: 'Орт. конверсия', value: `${data.teamKPIs.avgConversionRate ?? 0}%`, icon: 'sync' },
@@ -209,7 +211,7 @@ const AdminReports = () => {
 
             {/* ── Client Funnel ─────────────────────────────────── */}
             {data.clientFunnel && (
-              <Section title="Клиент воронкасы" icon="filter_alt">
+              <Section title={t('adminReports.sections.clientFunnel')} icon="filter_alt">
                 <div className="space-y-2">
                   {[
                     { label: 'Жаңа клиент', key: 'newClients', color: 'bg-primary' },
@@ -239,7 +241,7 @@ const AdminReports = () => {
 
             {/* ── Top Products ─────────────────────────────────── */}
             {data.topProducts.length > 0 && (
-              <Section title="Үздік маталар" icon="star">
+              <Section title={t('adminReports.sections.topProducts')} icon="star">
                 <div className="space-y-3">
                   {data.topProducts.map((p, i) => (
                     <div key={p.id || i} className="flex items-center gap-3">
@@ -259,7 +261,7 @@ const AdminReports = () => {
 
             {/* ── Payment Risks ─────────────────────────────────── */}
             {data.paymentRisks.length > 0 && (
-              <Section title="Төлем тәуекелдері" icon="warning">
+              <Section title={t('adminReports.sections.paymentRisks')} icon="warning">
                 <div className="space-y-3">
                   {data.paymentRisks.slice(0, 5).map((r, i) => (
                     <div key={r.id || i} className="flex items-start gap-3">

@@ -3,18 +3,19 @@ import { useNavigate } from 'react-router-dom';
 import api from '../../services/api';
 import BottomNav from '../../components/navigation/BottomNav';
 import Icon from '../../components/common/Icon';
+import { useI18n } from '../../contexts/I18nContext';
 
-const ROLES = [
-  { value: 'designer', label: 'Дизайнер', color: 'bg-primary/10 text-primary' },
-  { value: 'manager', label: 'Менеджер', color: 'bg-primary/15 text-primary-dark' },
-  { value: 'admin', label: 'Әкімші', color: 'bg-primary/10 text-primary-dark' },
-];
-
-const roleConfig = (role) => ROLES.find(r => r.value === role) || { label: role, color: 'bg-gray-100 text-gray-600' };
+const ROLE_VALUES = ['designer', 'manager', 'admin'];
+const ROLE_COLORS = {
+  designer: 'bg-primary/10 text-primary',
+  manager: 'bg-primary/15 text-primary-dark',
+  admin: 'bg-primary/10 text-primary-dark',
+};
 
 const EMPTY_FORM = { name: '', phone: '', password: '', role: 'designer' };
 
 const AdminUsers = () => {
+  const { t } = useI18n();
   const navigate = useNavigate();
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -61,46 +62,46 @@ const AdminUsers = () => {
 
   const handleCreate = async () => {
     setFormError(null);
-    if (!form.name.trim() || !form.phone.trim() || !form.password) { setFormError('Барлық өрістерді толтырыңыз'); return; }
-    if (form.password.length < 6) { setFormError('Пароль кемінде 6 таңба'); return; }
+    if (!form.name.trim() || !form.phone.trim() || !form.password) { setFormError(t('adminUsers.errors.allRequired')); return; }
+    if (form.password.length < 6) { setFormError(t('adminUsers.errors.passwordTooShort')); return; }
     setSaving(true);
     try {
       await api.post('/users/admin/create', form);
-      showToast('Пайдаланушы сәтті жасалды');
+      showToast(t('adminUsers.toast.userCreated'));
       closeModal();
       load();
     } catch (e) {
-      setFormError(e.response?.data?.error || 'Қате орын алды');
+      setFormError(e.response?.data?.error || t('adminUsers.errors.generic'));
     }
     setSaving(false);
   };
 
   const handleEdit = async () => {
     setFormError(null);
-    if (!form.name.trim()) { setFormError('Аты міндетті'); return; }
+    if (!form.name.trim()) { setFormError(t('adminUsers.errors.nameRequired')); return; }
     setSaving(true);
     try {
       await api.put(`/users/admin/${selected.id}`, form);
-      showToast('Өзгерістер сақталды');
+      showToast(t('adminUsers.toast.saved'));
       closeModal();
       load();
     } catch (e) {
-      setFormError(e.response?.data?.error || 'Қате орын алды');
+      setFormError(e.response?.data?.error || t('adminUsers.errors.generic'));
     }
     setSaving(false);
   };
 
   const handleResetPassword = async () => {
     setFormError(null);
-    if (!pwForm.newPassword || pwForm.newPassword.length < 6) { setFormError('Пароль кемінде 6 таңба'); return; }
-    if (pwForm.newPassword !== pwForm.confirm) { setFormError('Парольдер сәйкес келмейді'); return; }
+    if (!pwForm.newPassword || pwForm.newPassword.length < 6) { setFormError(t('adminUsers.errors.passwordTooShort')); return; }
+    if (pwForm.newPassword !== pwForm.confirm) { setFormError(t('adminUsers.errors.passwordsMismatch')); return; }
     setSaving(true);
     try {
       await api.post(`/users/admin/${selected.id}/reset-password`, { newPassword: pwForm.newPassword });
-      showToast('Пароль өзгертілді');
+      showToast(t('adminUsers.toast.passwordChanged'));
       closeModal();
     } catch (e) {
-      setFormError(e.response?.data?.error || 'Қате орын алды');
+      setFormError(e.response?.data?.error || t('adminUsers.errors.generic'));
     }
     setSaving(false);
   };
@@ -108,25 +109,34 @@ const AdminUsers = () => {
   const handleToggleActive = async (u) => {
     try {
       await api.put(`/users/admin/${u.id}`, { isActive: !u.is_active });
-      showToast(u.is_active ? 'Деактивацияланды' : 'Активацияланды');
+      showToast(u.is_active ? t('adminUsers.toast.deactivated') : t('adminUsers.toast.activated'));
       load();
-    } catch { showToast('Қате орын алды', false); }
+    } catch { showToast(t('adminUsers.errors.generic'), false); }
   };
 
   const handleDelete = async () => {
     setSaving(true);
     try {
       await api.delete(`/users/admin/${selected.id}`);
-      showToast('Пайдаланушы деактивацияланды');
+      showToast(t('adminUsers.toast.userDeactivated'));
       closeModal();
       load();
     } catch (e) {
-      showToast(e.response?.data?.error || 'Қате орын алды', false);
+      showToast(e.response?.data?.error || t('adminUsers.errors.generic'), false);
       closeModal();
     }
   };
 
-  const counts = ROLES.map(r => ({ ...r, count: users.filter(u => u.role === r.value).length }));
+  const counts = ROLE_VALUES.map(value => ({
+    value,
+    label: t(`adminUsers.roles.${value}`),
+    color: ROLE_COLORS[value],
+    count: users.filter(u => u.role === value).length,
+  }));
+  const roleConfig = (role) => ({
+    label: t(`adminUsers.roles.${role}`, role),
+    color: ROLE_COLORS[role] || 'bg-gray-100 text-gray-600',
+  });
 
   return (
     <div className="bg-background-light min-h-screen pb-28">
@@ -136,10 +146,10 @@ const AdminUsers = () => {
           <button onClick={() => navigate(-1)} className="p-2 -ml-2 rounded-full hover:bg-gray-100">
             <Icon name="arrow_back" size={22} />
           </button>
-          <h1 className="text-xl font-bold flex-1">Қызметкерлер</h1>
+          <h1 className="text-xl font-bold flex-1">{t('adminUsers.title')}</h1>
           <button onClick={openCreate} className="flex items-center gap-1.5 bg-primary text-white px-3 py-2 rounded-xl text-sm font-bold hover:brightness-110 transition-all">
             <Icon name="add" size={18} />
-            Жасау
+            {t('adminUsers.create')}
           </button>
         </div>
 
@@ -151,12 +161,12 @@ const AdminUsers = () => {
               type="text"
               value={search}
               onChange={e => setSearch(e.target.value)}
-              placeholder="Аты немесе логин бойынша іздеу..."
+              placeholder={t('adminUsers.searchPlaceholder')}
               className="w-full pl-9 pr-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none"
             />
           </div>
           <div className="flex gap-2 overflow-x-auto pb-0.5">
-            <FilterChip active={!filterRole} onClick={() => setFilterRole('')} label={`Барлығы (${users.length})`} />
+            <FilterChip active={!filterRole} onClick={() => setFilterRole('')} label={`${t('common.yes')[0] === 'Д' ? 'Все' : 'Барлығы'} (${users.length})`} />
             {counts.map(r => <FilterChip key={r.value} active={filterRole === r.value} onClick={() => setFilterRole(r.value)} label={`${r.label} (${r.count})`} />)}
           </div>
         </div>
@@ -179,7 +189,7 @@ const AdminUsers = () => {
         {!loading && filtered.length === 0 && (
           <div className="text-center py-12 text-gray-400">
             <Icon name="person_search" size={40} className="mx-auto mb-3 opacity-40" />
-            <p>Пайдаланушылар табылмады</p>
+            <p>{t('adminUsers.noUsers')}</p>
           </div>
         )}
 
@@ -199,7 +209,7 @@ const AdminUsers = () => {
                   <div className="flex items-center gap-2 flex-wrap">
                     <p className="font-bold text-gray-900">{u.name}</p>
                     <span className={`text-xs px-2 py-0.5 rounded-full font-semibold ${rc.color}`}>{rc.label}</span>
-                    {!u.is_active && <span className="text-xs px-2 py-0.5 rounded-full bg-red-100 text-red-600 font-semibold">Деактив</span>}
+                    {!u.is_active && <span className="text-xs px-2 py-0.5 rounded-full bg-red-100 text-red-600 font-semibold">{t('adminUsers.statuses.deactivated')}</span>}
                   </div>
                   <p className="text-sm text-gray-500 mt-0.5">{u.phone || u.email || '—'}</p>
                   <p className="text-xs text-gray-400 mt-0.5">
@@ -227,23 +237,19 @@ const AdminUsers = () => {
 
       <BottomNav />
 
-      {/* CREATE Modal */}
       {modal === 'create' && (
-        <ModalBase title="Жаңа қызметкер" onClose={closeModal}>
-          <UserForm form={form} setForm={setForm} showPassword error={formError} />
-          <ModalFooter onClose={closeModal} onSave={handleCreate} saving={saving} saveLabel="Жасау" />
+        <ModalBase title={t('adminUsers.modals.createTitle')} onClose={closeModal}>
+          <UserForm form={form} setForm={setForm} showPassword error={formError} t={t} />
+          <ModalFooter onClose={closeModal} onSave={handleCreate} saving={saving} saveLabel={t('adminUsers.modals.createLabel')} t={t} />
         </ModalBase>
       )}
 
-      {/* EDIT Modal */}
       {modal === 'edit' && selected && (
-        <ModalBase title={`Өзгерту: ${selected.name}`} onClose={closeModal}>
-          <UserForm form={form} setForm={setForm} error={formError} />
-          {/* Active toggle */}
+        <ModalBase title={`${t('adminUsers.modals.editTitle')}: ${selected.name}`} onClose={closeModal}>
+          <UserForm form={form} setForm={setForm} error={formError} t={t} />
           <div className="flex items-center justify-between py-3 border-t border-gray-100">
             <div>
-              <p className="font-medium text-sm">Белсенді</p>
-              <p className="text-xs text-gray-400">Жүйеге кіру мүмкіндігі</p>
+              <p className="font-medium text-sm">{t('adminUsers.statuses.active')}</p>
             </div>
             <button
               onClick={() => setForm(f => ({ ...f, isActive: !f.isActive }))}
@@ -252,37 +258,38 @@ const AdminUsers = () => {
               <span className={`absolute top-0.5 left-0.5 size-5 bg-white rounded-full shadow transition-transform ${form.isActive !== false ? 'translate-x-6' : 'translate-x-0'}`} />
             </button>
           </div>
-          <ModalFooter onClose={closeModal} onSave={handleEdit} saving={saving} saveLabel="Сақтау" />
+          <ModalFooter onClose={closeModal} onSave={handleEdit} saving={saving} saveLabel={t('adminUsers.modals.saveLabel')} t={t} />
         </ModalBase>
       )}
 
-      {/* RESET PASSWORD Modal */}
       {modal === 'password' && selected && (
-        <ModalBase title={`Пароль: ${selected.name}`} onClose={closeModal}>
+        <ModalBase title={`${t('adminUsers.modals.resetPasswordTitle')}: ${selected.name}`} onClose={closeModal}>
           {formError && <p className="text-sm text-red-600 bg-red-50 p-3 rounded-xl mb-4">{formError}</p>}
-          {[{ label: 'Жаңа пароль', key: 'newPassword' }, { label: 'Растау', key: 'confirm' }].map(f => (
+          {[
+            { label: t('adminUsers.fields.newPassword'), key: 'newPassword' },
+            { label: t('adminUsers.fields.confirmPassword'), key: 'confirm' },
+          ].map(f => (
             <div key={f.key} className="mb-3">
               <label className="text-sm font-semibold text-gray-700 block mb-1">{f.label}</label>
               <input type="password" value={pwForm[f.key]} onChange={e => setPwForm(p => ({ ...p, [f.key]: e.target.value }))}
                 className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:border-primary outline-none" />
             </div>
           ))}
-          <ModalFooter onClose={closeModal} onSave={handleResetPassword} saving={saving} saveLabel="Өзгерту" />
+          <ModalFooter onClose={closeModal} onSave={handleResetPassword} saving={saving} saveLabel={t('adminUsers.modals.changeLabel')} t={t} />
         </ModalBase>
       )}
 
-      {/* DELETE/DEACTIVATE Confirm */}
       {modal === 'delete' && selected && (
-        <ModalBase title="Деактивациялау" onClose={closeModal}>
+        <ModalBase title={t('adminUsers.modals.deactivateTitle')} onClose={closeModal}>
           <div className="text-center py-2">
             <div className="size-14 rounded-full bg-red-100 flex items-center justify-center mx-auto mb-4">
               <Icon name="person_off" size={24} className="text-red-500" />
             </div>
             <p className="text-gray-600 text-sm">
-              <span className="font-bold">{selected.name}</span> пайдаланушысын деактивациялау. Жүйеге кіре алмайды.
+              <span className="font-bold">{selected.name}</span> — {t('adminUsers.modals.deactivateConfirm')}
             </p>
           </div>
-          <ModalFooter onClose={closeModal} onSave={handleDelete} saving={saving} saveLabel="Деактивациялау" danger />
+          <ModalFooter onClose={closeModal} onSave={handleDelete} saving={saving} saveLabel={t('adminUsers.modals.deactivateLabel')} danger t={t} />
         </ModalBase>
       )}
     </div>
@@ -306,15 +313,15 @@ const ModalBase = ({ title, onClose, children }) => (
   </div>
 );
 
-const UserForm = ({ form, setForm, showPassword = false, error }) => {
+const UserForm = ({ form, setForm, showPassword = false, error, t }) => {
   const f = (key, val) => setForm(p => ({ ...p, [key]: val }));
   return (
     <>
       {error && <p className="text-sm text-red-600 bg-red-50 p-3 rounded-xl mb-4">{error}</p>}
       {[
-        { label: 'Аты-жөні *', key: 'name', type: 'text', placeholder: 'Толық аты' },
-        { label: 'Логин / Телефон *', key: 'phone', type: 'text', placeholder: 'akbota немесе +77001234567' },
-        ...(showPassword ? [{ label: 'Пароль *', key: 'password', type: 'password', placeholder: 'Кемінде 6 таңба' }] : []),
+        { label: t('adminUsers.fields.fullName'), key: 'name', type: 'text', placeholder: t('adminUsers.fields.fullNamePlaceholder') },
+        { label: t('adminUsers.fields.login'), key: 'phone', type: 'text', placeholder: t('adminUsers.fields.loginPlaceholder') },
+        ...(showPassword ? [{ label: t('adminUsers.fields.password'), key: 'password', type: 'password', placeholder: t('adminUsers.fields.passwordPlaceholder') }] : []),
       ].map(field => (
         <div key={field.key} className="mb-3">
           <label className="text-sm font-semibold text-gray-700 block mb-1">{field.label}</label>
@@ -328,12 +335,12 @@ const UserForm = ({ form, setForm, showPassword = false, error }) => {
         </div>
       ))}
       <div className="mb-4">
-        <label className="text-sm font-semibold text-gray-700 block mb-1">Рөл</label>
+        <label className="text-sm font-semibold text-gray-700 block mb-1">{t('adminUsers.fields.role')}</label>
         <div className="grid grid-cols-3 gap-2">
-          {ROLES.map(r => (
-            <button key={r.value} onClick={() => f('role', r.value)}
-              className={`py-2 rounded-xl text-sm font-semibold border-2 transition-all ${form.role === r.value ? 'border-primary bg-primary/5 text-primary' : 'border-gray-100 text-gray-600 hover:border-gray-200'}`}>
-              {r.label}
+          {ROLE_VALUES.map(value => (
+            <button key={value} onClick={() => f('role', value)}
+              className={`py-2 rounded-xl text-sm font-semibold border-2 transition-all ${form.role === value ? 'border-primary bg-primary/5 text-primary' : 'border-gray-100 text-gray-600 hover:border-gray-200'}`}>
+              {t(`adminUsers.roles.${value}`)}
             </button>
           ))}
         </div>
@@ -342,11 +349,11 @@ const UserForm = ({ form, setForm, showPassword = false, error }) => {
   );
 };
 
-const ModalFooter = ({ onClose, onSave, saving, saveLabel, danger = false }) => (
+const ModalFooter = ({ onClose, onSave, saving, saveLabel, danger = false, t }) => (
   <div className="flex gap-3 mt-2">
-    <button onClick={onClose} className="flex-1 py-3 bg-gray-100 text-gray-700 font-bold rounded-xl hover:bg-gray-200">Болдырмау</button>
+    <button onClick={onClose} className="flex-1 py-3 bg-gray-100 text-gray-700 font-bold rounded-xl hover:bg-gray-200">{t ? t('common.cancel') : 'Cancel'}</button>
     <button onClick={onSave} disabled={saving} className={`flex-1 py-3 text-white font-bold rounded-xl disabled:opacity-50 ${danger ? 'bg-red-500 hover:bg-red-600' : 'bg-primary hover:brightness-110'}`}>
-      {saving ? 'Жүктелуде...' : saveLabel}
+      {saving ? (t ? t('adminUsers.modals.saving') : 'Loading…') : saveLabel}
     </button>
   </div>
 );
