@@ -2,11 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useApp } from '../contexts/AppContext';
+import { useI18n } from '../contexts/I18nContext';
 import BottomNav from '../components/navigation/BottomNav';
 import RiskOrdersSection from '../components/manager/RiskOrdersSection';
 import PaymentRiskIndicator from '../components/payment/PaymentRiskIndicator';
 import { SkeletonCard, SkeletonStats } from '../components/common/Skeleton';
-import { formatTime24, formatDateKZ } from '../utils/dateUtils';
+import { formatTime24, formatDate, weekdayShort } from '../utils/dateUtils';
 // Import analytics components
 import FunnelChart from '../components/analytics/FunnelChart';
 import ChartBar from '../components/analytics/ChartBar';
@@ -15,6 +16,7 @@ import Icon from '../components/common/Icon';
 
 const ManagerDashboard = () => {
   const navigate = useNavigate();
+  const { t, lang } = useI18n();
   const { user } = useAuth();
   const {
     measurements,
@@ -57,15 +59,15 @@ const ManagerDashboard = () => {
     ...deals.filter(d => d.paymentStatus === 'pending' && d.prepayment?.amount > 0).map(d => ({
       type: 'payment',
       severity: 'high',
-      title: `${d.client?.name || 'Клиент'} - Төлем күтілуде`,
+      title: t('dashboard.manager.paymentPending', { name: d.client?.name || t('dashboard.fallbacks.client') }),
       description: `${d.totalAmount?.amount || 0}₸`,
       action: () => navigate(`/deals/${d.id}`),
     })),
     ...measurements.filter(m => m.status === 'scheduled' && !m.confirmed).map(m => ({
       type: 'confirmation',
       severity: 'medium',
-      title: `${m.clientName || 'Клиент'} - Растау керек`,
-      description: `${formatDateKZ(m.scheduledAt)}, ${formatTime24(m.scheduledAt)}`,
+      title: t('dashboard.manager.confirmRequired', { name: m.clientName || t('dashboard.fallbacks.client') }),
+      description: `${formatDate(m.scheduledAt, lang)}, ${formatTime24(m.scheduledAt)}`,
       action: () => navigate(`/manager/measurements/${m.id}`),
     })),
   ];
@@ -75,8 +77,8 @@ const ManagerDashboard = () => {
       {/* Header */}
       <header className="sticky top-0 z-30 bg-white/80 backdrop-blur-md border-b border-gray-100 px-4 py-3">
         <div>
-          <h1 className="text-xl font-bold text-gray-900 leading-tight">Менеджер панелі</h1>
-          <p className="text-gray-500 text-[11px] font-medium uppercase tracking-wide">Сәлем, {user?.name}!</p>
+          <h1 className="text-xl font-bold text-gray-900 leading-tight">{t('dashboard.manager.panelTitle')}</h1>
+          <p className="text-gray-500 text-[11px] font-medium uppercase tracking-wide">{t('dashboard.manager.hello', { name: user?.name || '' })}</p>
         </div>
       </header>
 
@@ -94,8 +96,8 @@ const ManagerDashboard = () => {
                 </div>
                 <span className="text-3xl font-black text-gray-900">{stats.scheduledMeasurements}</span>
               </div>
-              <p className="text-sm font-bold text-gray-700">Өлшемдер</p>
-              <p className="text-xs text-gray-500">Жоспарланған</p>
+              <p className="text-sm font-bold text-gray-700">{t('dashboard.manager.measurements')}</p>
+              <p className="text-xs text-gray-500">{t('dashboard.manager.measurementsScheduled')}</p>
             </div>
 
             {/* Proposals Sent */}
@@ -106,8 +108,8 @@ const ManagerDashboard = () => {
                 </div>
                 <span className="text-3xl font-black text-gray-900">{stats.proposalsSent}</span>
               </div>
-              <p className="text-sm font-bold text-gray-700">Ұсыныстар</p>
-              <p className="text-xs text-gray-500">Жіберілді</p>
+              <p className="text-sm font-bold text-gray-700">{t('dashboard.funnel.proposals')}</p>
+              <p className="text-xs text-gray-500">{t('dashboard.manager.proposalsSent')}</p>
             </div>
 
             {/* Closed Deals */}
@@ -118,8 +120,8 @@ const ManagerDashboard = () => {
                 </div>
                 <span className="text-3xl font-black text-gray-900">{stats.closedDeals}</span>
               </div>
-              <p className="text-sm font-bold text-gray-700">Аяқталды</p>
-              <p className="text-xs text-gray-500">Сәтті жабылған</p>
+              <p className="text-sm font-bold text-gray-700">{t('dashboard.statuses.completed')}</p>
+              <p className="text-xs text-gray-500">{t('dashboard.manager.closedSuccess')}</p>
             </div>
 
             {/* Total Revenue */}
@@ -130,21 +132,21 @@ const ManagerDashboard = () => {
                 </div>
                 <span className="text-2xl font-black text-gray-900">{Math.round(stats.totalRevenue / 1000)}k</span>
               </div>
-              <p className="text-sm font-bold text-gray-700">Кіріс</p>
-              <p className="text-xs text-gray-500">Барлық мәмілелер</p>
+              <p className="text-sm font-bold text-gray-700">{t('dashboard.stats.revenue')}</p>
+              <p className="text-xs text-gray-500">{t('dashboard.manager.revenueDeals')}</p>
             </div>
           </div>
         )}
 
         {/* Sales Funnel Mini */}
         <FunnelChart
-          title="Сату воронкасы (мини)"
+          title={t('dashboard.sections.salesFunnelMini')}
           data={[
-            { label: 'Лидтер', value: deals.filter(d => d.status === 'new' || d.status === 'proposal_sent').length, color: 'bg-primary' },
-            { label: 'Ұсыныстар', value: deals.filter(d => d.status === 'proposal_accepted').length, color: 'bg-primary-light' },
-            { label: 'Келісім', value: deals.filter(d => d.status === 'contract_signed').length, color: 'bg-primary-light' },
-            { label: 'Өндірісте', value: deals.filter(d => d.status === 'in_production').length, color: 'bg-orange-500' },
-            { label: 'Аяқталды', value: deals.filter(d => d.status === 'completed').length, color: 'bg-green-500' }
+            { label: t('dashboard.funnel.leads'), value: deals.filter(d => d.status === 'new' || d.status === 'proposal_sent').length, color: 'bg-primary' },
+            { label: t('dashboard.funnel.proposals'), value: deals.filter(d => d.status === 'proposal_accepted').length, color: 'bg-primary-light' },
+            { label: t('dashboard.funnel.contracts'), value: deals.filter(d => d.status === 'contract_signed').length, color: 'bg-primary-light' },
+            { label: t('dashboard.funnel.inProduction'), value: deals.filter(d => d.status === 'in_production').length, color: 'bg-orange-500' },
+            { label: t('dashboard.funnel.completed'), value: deals.filter(d => d.status === 'completed').length, color: 'bg-green-500' },
           ]}
           orientation="horizontal"
           valueFormat="deals"
@@ -152,20 +154,23 @@ const ManagerDashboard = () => {
 
         {/* Weekly Activity Chart */}
         <ChartBar
-          title="Апталық белсенділік"
-          data={analytics.weeklyActivity?.days?.map((day, idx) => ({
-            label: day.shortName || ['Дүй', 'Сей', 'Сәр', 'Бей', 'Жұм', 'Сен', 'Жек'][idx],
-            value: day.activities || 0,
-            color: ['bg-primary', 'bg-green-500', 'bg-primary-light', 'bg-yellow-500', 'bg-orange-500', 'bg-red-500', 'bg-gray-500'][idx]
-          })) || [
-            { label: 'Дүй', value: 12, color: 'bg-primary' },
-            { label: 'Сей', value: 18, color: 'bg-green-500' },
-            { label: 'Сәр', value: 15, color: 'bg-primary-light' },
-            { label: 'Бей', value: 22, color: 'bg-yellow-500' },
-            { label: 'Жұм', value: 25, color: 'bg-orange-500' },
-            { label: 'Сен', value: 8, color: 'bg-red-500' },
-            { label: 'Жек', value: 5, color: 'bg-gray-500' }
-          ]}
+          title={t('dashboard.sections.weeklyActivity')}
+          data={(() => {
+            const wd = weekdayShort(lang);
+            // Mon..Sun order in our chart
+            const order = [1, 2, 3, 4, 5, 6, 0];
+            const colors = ['bg-primary', 'bg-green-500', 'bg-primary-light', 'bg-yellow-500', 'bg-orange-500', 'bg-red-500', 'bg-gray-500'];
+            const fallback = [12, 18, 15, 22, 25, 8, 5];
+            return analytics.weeklyActivity?.days?.map((day, idx) => ({
+              label: day.shortName || wd[order[idx]],
+              value: day.activities || 0,
+              color: colors[idx],
+            })) || order.map((dow, idx) => ({
+              label: wd[dow],
+              value: fallback[idx],
+              color: colors[idx],
+            }));
+          })()}
           height={150}
           showValues={true}
           loading={analyticsLoading}
@@ -175,7 +180,7 @@ const ManagerDashboard = () => {
         <RiskOrdersSection
           orders={deals.map(deal => ({
             id: deal.id,
-            clientName: deal.client?.name || 'Клиент',
+            clientName: deal.client?.name || t('dashboard.fallbacks.client'),
             clientPhone: deal.client?.phone || '',
             status: deal.status,
             totalAmount: deal.totalAmount?.amount || 0,
@@ -186,11 +191,11 @@ const ManagerDashboard = () => {
 
         {/* Urgent Tasks */}
         <div>
-          <h2 className="text-lg font-bold mb-3">Шұғыл тапсырмалар</h2>
+          <h2 className="text-lg font-bold mb-3">{t('dashboard.manager.urgentTasks')}</h2>
           {urgentTasks.length === 0 ? (
             <div className="bg-white rounded-xl p-6 text-center shadow-sm">
               <Icon name="check_circle" size={40} className="text-green-500" />
-              <p className="text-text-secondary mt-2">Барлық тапсырмалар орындалды!</p>
+              <p className="text-text-secondary mt-2">{t('dashboard.manager.allDone')}</p>
             </div>
           ) : (
             <div className="space-y-3">

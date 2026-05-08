@@ -11,12 +11,14 @@ import ChartLine from '../../components/analytics/ChartLine';
 import KPICard from '../../components/analytics/KPICard';
 import FunnelChart from '../../components/analytics/FunnelChart';
 import Icon from '../../components/common/Icon';
+import { useI18n } from '../../contexts/I18nContext';
 
 /**
  * Admin Dashboard
  * Comprehensive view with timeline, analytics, and measurements
  */
 const AdminDashboard = () => {
+    const { t, lang } = useI18n();
     const navigate = useNavigate();
     const { user } = useAuth();
     const {
@@ -139,10 +141,10 @@ const AdminDashboard = () => {
     const financialBreakdown = getFinancialBreakdown();
 
     const statCards = [
-        { label: 'Жалпы өлшемдер', value: stats.totalMeasurements, icon: 'straighten', color: 'bg-primary', subtext: `${stats.completedMeasurements} аяқталды` },
-        { label: 'Клиенттер', value: stats.totalClients, icon: 'group', color: 'bg-green-500', subtext: 'Жалпы клиенттер' },
-        { label: 'Мәмілелер', value: stats.totalDeals, icon: 'handshake', color: 'bg-primary-light', subtext: 'Барлық мәмілелер' },
-        { label: 'Кіріс', value: `${(stats.revenue / 1000).toFixed(0)}K ₸`, icon: 'payments', color: 'bg-amber-500', subtext: 'Жалпы кіріс' },
+        { label: t('dashboard.stats.totalMeasurements'), value: stats.totalMeasurements, icon: 'straighten', color: 'bg-primary', subtext: `${stats.completedMeasurements} ${t('dashboard.stats.completedSuffix')}` },
+        { label: t('dashboard.stats.totalClients'), value: stats.totalClients, icon: 'group', color: 'bg-green-500', subtext: t('dashboard.stats.clientsSubtext') },
+        { label: t('dashboard.stats.totalDeals'), value: stats.totalDeals, icon: 'handshake', color: 'bg-primary-light', subtext: t('dashboard.stats.dealsSubtext') },
+        { label: t('dashboard.stats.revenue'), value: `${(stats.revenue / 1000).toFixed(0)}K ₸`, icon: 'payments', color: 'bg-amber-500', subtext: t('dashboard.stats.revenueSubtext') },
     ];
 
     return (
@@ -150,7 +152,7 @@ const AdminDashboard = () => {
             {/* Header */}
             <header className="sticky top-0 z-30 bg-white/80 backdrop-blur-md border-b border-gray-100 px-4 py-4">
                 <div className="flex items-center justify-between mb-3">
-                    <h1 className="text-xl font-bold text-gray-900">Админ панелі</h1>
+                    <h1 className="text-xl font-bold text-gray-900">{t('adminDashboard.title')}</h1>
                     <button onClick={refreshData} className="size-10 rounded-full bg-gray-50 hover:bg-gray-100 flex items-center justify-center transition-colors">
                         <Icon name="refresh" className="text-gray-600" />
                     </button>
@@ -164,7 +166,7 @@ const AdminDashboard = () => {
                             activeTab === 'overview' ? 'bg-primary text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                         }`}
                     >
-                        Жалпы
+                        {t('adminDashboard.tabs.overview')}
                     </button>
                     <button
                         onClick={() => setActiveTab('timeline')}
@@ -172,7 +174,7 @@ const AdminDashboard = () => {
                             activeTab === 'timeline' ? 'bg-primary text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                         }`}
                     >
-                        Timeline
+                        {t('adminDashboard.tabs.timeline')}
                     </button>
                     <button
                         onClick={() => setActiveTab('finance')}
@@ -180,7 +182,7 @@ const AdminDashboard = () => {
                             activeTab === 'finance' ? 'bg-primary text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                         }`}
                     >
-                        Қаржы
+                        {t('adminDashboard.tabs.finance')}
                     </button>
                     <button
                         onClick={() => setActiveTab('team')}
@@ -188,7 +190,7 @@ const AdminDashboard = () => {
                             activeTab === 'team' ? 'bg-primary text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                         }`}
                     >
-                        Команда
+                        {t('adminDashboard.tabs.team')}
                     </button>
                     <button
                         onClick={() => setActiveTab('products')}
@@ -196,7 +198,7 @@ const AdminDashboard = () => {
                             activeTab === 'products' ? 'bg-primary text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                         }`}
                     >
-                        Продукттар
+                        {t('adminDashboard.tabs.products')}
                     </button>
                     <button
                         onClick={() => setActiveTab('clients')}
@@ -204,7 +206,7 @@ const AdminDashboard = () => {
                             activeTab === 'clients' ? 'bg-primary text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                         }`}
                     >
-                        Клиенттер
+                        {t('adminDashboard.tabs.clients')}
                     </button>
                 </div>
             </header>
@@ -491,25 +493,25 @@ const AdminDashboard = () => {
                 {/* TEAM TAB */}
                 {activeTab === 'team' && (
                     <div className="space-y-4">
-                        <h2 className="text-lg font-bold">Команда өнімділігі</h2>
+                        <h2 className="text-lg font-bold">{lang === 'kz' ? 'Команда өнімділігі' : 'Производительность команды'}</h2>
 
                         {/* Team KPIs */}
                         <div className="grid grid-cols-2 gap-3">
                             <KPICard
-                                title="Дизайнерлер KPI"
+                                title={t('dashboard.sections.designersKpi')}
                                 value={analytics.teamKPIs?.designers?.completedMeasurements || measurements.filter(m => m.status === 'completed').length}
                                 target={analytics.teamKPIs?.designers?.target || 50}
-                                unit="өлшем"
-                                period="ай"
+                                unit={t('dashboard.stats.measurementUnit')}
+                                period={t('common.month')}
                                 icon="design_services"
                                 loading={analyticsLoading}
                             />
                             <KPICard
-                                title="Менеджерлер KPI"
+                                title={t('dashboard.sections.managersKpi')}
                                 value={analytics.teamKPIs?.managers?.closedDeals || deals.filter(d => d.status === 'completed').length}
                                 target={analytics.teamKPIs?.managers?.target || 30}
-                                unit="мәміле"
-                                period="ай"
+                                unit={t('dashboard.stats.dealUnit')}
+                                period={t('common.month')}
                                 icon="support_agent"
                                 loading={analyticsLoading}
                             />
@@ -517,17 +519,16 @@ const AdminDashboard = () => {
 
                         {/* Performance Chart */}
                         <ChartBar
-                            title="Дизайнерлер рейтингі"
+                            title={t('dashboard.sections.designersRanking')}
                             data={analytics.designersRanking?.map((designer, idx) => ({
-                                label: designer.name || `Дизайнер ${idx + 1}`,
+                                label: designer.name || `${t('dashboard.ranking.designer')} ${idx + 1}`,
                                 value: designer.completedMeasurements || 0,
                                 color: ['bg-primary', 'bg-green-500', 'bg-primary-light', 'bg-yellow-500'][idx % 4]
-                            })) || [
-                                { label: 'Дизайнер 1', value: 25, color: 'bg-primary' },
-                                { label: 'Дизайнер 2', value: 20, color: 'bg-green-500' },
-                                { label: 'Дизайнер 3', value: 15, color: 'bg-primary-light' },
-                                { label: 'Дизайнер 4', value: 10, color: 'bg-yellow-500' }
-                            ]}
+                            })) || [1, 2, 3, 4].map((n, idx) => ({
+                                label: `${t('dashboard.ranking.designer')} ${n}`,
+                                value: [25, 20, 15, 10][idx],
+                                color: ['bg-primary', 'bg-green-500', 'bg-primary-light', 'bg-yellow-500'][idx],
+                            }))}
                             height={200}
                             valueFormat="number"
                             loading={analyticsLoading}
@@ -557,20 +558,20 @@ const AdminDashboard = () => {
                 {/* PRODUCTS TAB */}
                 {activeTab === 'products' && (
                     <div className="space-y-4">
-                        <h2 className="text-lg font-bold">Өнімдер аналитикасы</h2>
+                        <h2 className="text-lg font-bold">{lang === 'kz' ? 'Өнімдер аналитикасы' : 'Аналитика по продуктам'}</h2>
 
                         {/* Product Sales Distribution */}
                         <ChartBar
-                            title="Категория бойынша сатылымдар"
+                            title={t('dashboard.sections.salesByCategory')}
                             data={analytics.productSales?.categories?.map((cat, idx) => ({
                                 label: cat.name || cat.category,
                                 value: cat.percentage || cat.value || 0,
                                 color: ['bg-primary', 'bg-primary-light', 'bg-green-500', 'bg-yellow-500'][idx % 4]
                             })) || [
-                                { label: 'Перде', value: 45, color: 'bg-primary' },
-                                { label: 'Тюль', value: 30, color: 'bg-primary-light' },
-                                { label: 'Карниз', value: 15, color: 'bg-green-500' },
-                                { label: 'Жалюзи', value: 10, color: 'bg-yellow-500' }
+                                { label: t('dashboard.categories.curtain'), value: 45, color: 'bg-primary' },
+                                { label: t('dashboard.categories.tulle'), value: 30, color: 'bg-primary-light' },
+                                { label: t('dashboard.categories.cornice'), value: 15, color: 'bg-green-500' },
+                                { label: t('dashboard.categories.jalousie'), value: 10, color: 'bg-yellow-500' },
                             ]}
                             height={200}
                             horizontal={true}
@@ -580,15 +581,11 @@ const AdminDashboard = () => {
 
                         {/* Monthly Sales Trend */}
                         <ChartLine
-                            title="Айлық сатылымдар трэнді"
-                            data={analytics.monthlyTrends || [
-                                { label: 'Қаң', value: 3200000 },
-                                { label: 'Ақп', value: 3500000 },
-                                { label: 'Нау', value: 4100000 },
-                                { label: 'Сәу', value: 3800000 },
-                                { label: 'Мам', value: 4500000 },
-                                { label: 'Мау', value: 5200000 }
-                            ]}
+                            title={t('dashboard.sections.monthlyTrend')}
+                            data={analytics.monthlyTrends || monthShort(undefined).slice(0, 6).map((label, i) => ({
+                                label,
+                                value: [3200000, 3500000, 4100000, 3800000, 4500000, 5200000][i],
+                            }))}
                             height={200}
                             valueFormat="currency"
                             loading={analyticsLoading}

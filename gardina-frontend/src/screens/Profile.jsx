@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { useI18n } from '../contexts/I18nContext';
 import api from '../services/api';
 import BottomNav from '../components/navigation/BottomNav';
 import Icon from '../components/common/Icon';
 
 // ─── Edit Profile Modal ────────────────────────────────────────────────────────
 const EditProfileModal = ({ user, onClose, onSaved }) => {
+  const { t } = useI18n();
   const [name, setName] = useState(user?.name || '');
   const [phone, setPhone] = useState(user?.phone || '');
   const [loading, setLoading] = useState(false);
@@ -14,7 +16,7 @@ const EditProfileModal = ({ user, onClose, onSaved }) => {
 
   const handleSave = async () => {
     if (!name.trim()) {
-      setError('Аты міндетті түрде толтырылуы керек');
+      setError(t('profile.edit.errorNameRequired'));
       return;
     }
     setLoading(true);
@@ -24,7 +26,7 @@ const EditProfileModal = ({ user, onClose, onSaved }) => {
       onSaved(res.data.data);
       onClose();
     } catch (e) {
-      setError(e.response?.data?.error || 'Қате орын алды');
+      setError(e.response?.data?.error || t('profile.edit.errorGeneric'));
     } finally {
       setLoading(false);
     }
@@ -32,7 +34,7 @@ const EditProfileModal = ({ user, onClose, onSaved }) => {
 
   return (
     <ModalBackdrop onClose={onClose}>
-      <h3 className="text-lg font-bold text-gray-900 mb-5">Жеке мәліметтер</h3>
+      <h3 className="text-lg font-bold text-gray-900 mb-5">{t('profile.edit.title')}</h3>
 
       {error && (
         <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-700">{error}</div>
@@ -40,23 +42,24 @@ const EditProfileModal = ({ user, onClose, onSaved }) => {
 
       <div className="space-y-4">
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-1.5">Аты-жөні</label>
+          <label className="block text-sm font-semibold text-gray-700 mb-1.5">{t('profile.edit.name')}</label>
           <input
             type="text"
             value={name}
             onChange={e => setName(e.target.value)}
             className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none"
-            placeholder="Аты-жөніңізді енгізіңіз"
+            placeholder={t('profile.edit.namePlaceholder')}
           />
         </div>
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-1.5">Логин / Телефон</label>
+          <label className="block text-sm font-semibold text-gray-700 mb-1.5">{t('profile.edit.phone')}</label>
           <input
             type="text"
             value={phone}
             onChange={e => setPhone(e.target.value)}
             className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none"
-            placeholder="+7 (XXX) XXX-XX-XX"
+            placeholder={t('profile.edit.phonePlaceholder')}
+            inputMode="tel"
           />
         </div>
       </div>
@@ -66,7 +69,7 @@ const EditProfileModal = ({ user, onClose, onSaved }) => {
           onClick={onClose}
           className="flex-1 py-3 bg-gray-100 text-gray-700 font-bold rounded-xl hover:bg-gray-200 transition-colors"
         >
-          Болдырмау
+          {t('common.cancel')}
         </button>
         <button
           onClick={handleSave}
@@ -74,7 +77,7 @@ const EditProfileModal = ({ user, onClose, onSaved }) => {
           className="flex-1 py-3 bg-primary text-white font-bold rounded-xl hover:brightness-110 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
         >
           {loading && <div className="size-4 border-2 border-white border-t-transparent rounded-full animate-spin" />}
-          Сақтау
+          {t('common.save')}
         </button>
       </div>
     </ModalBackdrop>
@@ -83,6 +86,7 @@ const EditProfileModal = ({ user, onClose, onSaved }) => {
 
 // ─── Change Password Modal ─────────────────────────────────────────────────────
 const ChangePasswordModal = ({ onClose }) => {
+  const { t } = useI18n();
   const [current, setCurrent] = useState('');
   const [next, setNext] = useState('');
   const [confirm, setConfirm] = useState('');
@@ -96,15 +100,15 @@ const ChangePasswordModal = ({ onClose }) => {
   const handleSave = async () => {
     setError(null);
     if (!current || !next || !confirm) {
-      setError('Барлық өрістерді толтырыңыз');
+      setError(t('profile.password.errorAllRequired'));
       return;
     }
     if (next.length < 6) {
-      setError('Жаңа пароль кемінде 6 таңба болуы керек');
+      setError(t('profile.password.errorTooShort'));
       return;
     }
     if (next !== confirm) {
-      setError('Жаңа парольдер сәйкес келмейді');
+      setError(t('profile.password.errorMismatch'));
       return;
     }
     setLoading(true);
@@ -116,7 +120,7 @@ const ChangePasswordModal = ({ onClose }) => {
       setSuccess(true);
       setTimeout(onClose, 1500);
     } catch (e) {
-      setError(e.response?.data?.error || 'Қате орын алды');
+      setError(e.response?.data?.error || t('profile.edit.errorGeneric'));
     } finally {
       setLoading(false);
     }
@@ -124,14 +128,14 @@ const ChangePasswordModal = ({ onClose }) => {
 
   return (
     <ModalBackdrop onClose={onClose}>
-      <h3 className="text-lg font-bold text-gray-900 mb-5">Құпия сөзді өзгерту</h3>
+      <h3 className="text-lg font-bold text-gray-900 mb-5">{t('profile.password.title')}</h3>
 
       {success ? (
         <div className="text-center py-4">
           <div className="size-14 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-3">
             <Icon name="check_circle" size={24} className="text-green-500" />
           </div>
-          <p className="font-semibold text-gray-800">Пароль сәтті өзгертілді!</p>
+          <p className="font-semibold text-gray-800">{t('profile.password.successTitle')}</p>
         </div>
       ) : (
         <>
@@ -141,28 +145,28 @@ const ChangePasswordModal = ({ onClose }) => {
 
           <div className="space-y-4">
             <PasswordField
-              label="Ағымдағы пароль"
+              label={t('profile.password.current')}
               value={current}
               onChange={setCurrent}
               show={showCurrent}
               onToggle={() => setShowCurrent(v => !v)}
-              placeholder="Ағымдағы парольді енгізіңіз"
+              placeholder={t('profile.password.currentPlaceholder')}
             />
             <PasswordField
-              label="Жаңа пароль"
+              label={t('profile.password.next')}
               value={next}
               onChange={setNext}
               show={showNext}
               onToggle={() => setShowNext(v => !v)}
-              placeholder="Кемінде 6 таңба"
+              placeholder={t('profile.password.nextPlaceholder')}
             />
             <PasswordField
-              label="Жаңа парольді растау"
+              label={t('profile.password.confirm')}
               value={confirm}
               onChange={setConfirm}
               show={showConfirm}
               onToggle={() => setShowConfirm(v => !v)}
-              placeholder="Парольді қайталаңыз"
+              placeholder={t('profile.password.confirmPlaceholder')}
             />
           </div>
 
@@ -171,7 +175,7 @@ const ChangePasswordModal = ({ onClose }) => {
               onClick={onClose}
               className="flex-1 py-3 bg-gray-100 text-gray-700 font-bold rounded-xl hover:bg-gray-200 transition-colors"
             >
-              Болдырмау
+              {t('common.cancel')}
             </button>
             <button
               onClick={handleSave}
@@ -179,7 +183,7 @@ const ChangePasswordModal = ({ onClose }) => {
               className="flex-1 py-3 bg-primary text-white font-bold rounded-xl hover:brightness-110 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
             >
               {loading && <div className="size-4 border-2 border-white border-t-transparent rounded-full animate-spin" />}
-              Өзгерту
+              {t('profile.password.submit')}
             </button>
           </div>
         </>
@@ -189,32 +193,35 @@ const ChangePasswordModal = ({ onClose }) => {
 };
 
 // ─── Help Modal ────────────────────────────────────────────────────────────────
-const HelpModal = ({ onClose }) => (
-  <ModalBackdrop onClose={onClose}>
-    <div className="flex items-center gap-3 mb-5">
-      <div className="size-10 rounded-full bg-primary/10 flex items-center justify-center">
-        <Icon name="help" className="text-primary" />
+const HelpModal = ({ onClose }) => {
+  const { t } = useI18n();
+  return (
+    <ModalBackdrop onClose={onClose}>
+      <div className="flex items-center gap-3 mb-5">
+        <div className="size-10 rounded-full bg-primary/10 flex items-center justify-center">
+          <Icon name="help" className="text-primary" />
+        </div>
+        <h3 className="text-lg font-bold text-gray-900">{t('profile.help.title')}</h3>
       </div>
-      <h3 className="text-lg font-bold text-gray-900">Көмек</h3>
-    </div>
 
-    <div className="space-y-4 text-sm text-gray-600">
-      <HelpItem icon="phone" title="Байланыс" value="+7 (777) 123-45-67" />
-      <HelpItem icon="mail" title="Email" value="support@gardina.kz" />
-      <HelpItem icon="schedule" title="Жұмыс уақыты" value="Дс–Жм: 09:00–18:00" />
-      <div className="pt-3 border-t border-gray-100">
-        <p className="text-xs text-gray-400 text-center">Gardina v1.0.0</p>
+      <div className="space-y-4 text-sm text-gray-600">
+        <HelpItem icon="phone" title={t('profile.help.contact')} value={t('profile.help.contactValue')} />
+        <HelpItem icon="mail" title={t('profile.help.email')} value={t('profile.help.emailValue')} />
+        <HelpItem icon="schedule" title={t('profile.help.schedule')} value={t('profile.help.scheduleValue')} />
+        <div className="pt-3 border-t border-gray-100">
+          <p className="text-xs text-gray-400 text-center">{t('profile.help.appVersion')}</p>
+        </div>
       </div>
-    </div>
 
-    <button
-      onClick={onClose}
-      className="w-full mt-6 py-3 bg-gray-100 text-gray-700 font-bold rounded-xl hover:bg-gray-200 transition-colors"
-    >
-      Жабу
-    </button>
-  </ModalBackdrop>
-);
+      <button
+        onClick={onClose}
+        className="w-full mt-6 py-3 bg-gray-100 text-gray-700 font-bold rounded-xl hover:bg-gray-200 transition-colors"
+      >
+        {t('common.close')}
+      </button>
+    </ModalBackdrop>
+  );
+};
 
 // ─── Shared helpers ────────────────────────────────────────────────────────────
 const ModalBackdrop = ({ children, onClose }) => (
@@ -266,6 +273,7 @@ const HelpItem = ({ icon, title, value }) => (
 // ─── Main Profile Screen ───────────────────────────────────────────────────────
 const Profile = () => {
   const navigate = useNavigate();
+  const { t } = useI18n();
   const { user, logout, setUser } = useAuth();
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [modal, setModal] = useState(null); // 'edit' | 'password' | 'help'
@@ -279,39 +287,42 @@ const Profile = () => {
     if (setUser) setUser(prev => ({ ...prev, ...updatedUser }));
   };
 
-  const roleLabels = {
-    admin: { label: 'Әкімші', color: 'bg-primary/10 text-primary-dark' },
-    manager: { label: 'Менеджер', color: 'bg-primary/15 text-primary-dark' },
-    designer: { label: 'Дизайнер', color: 'bg-primary/10 text-primary' },
-    production: { label: 'Өндіріс', color: 'bg-orange-100 text-orange-700' },
-    installer: { label: 'Орнатушы', color: 'bg-green-100 text-green-700' },
+  const roleColors = {
+    admin: 'bg-primary/10 text-primary-dark',
+    manager: 'bg-primary/15 text-primary-dark',
+    sales_manager: 'bg-primary/15 text-primary-dark',
+    sales: 'bg-primary/15 text-primary-dark',
+    designer: 'bg-primary/10 text-primary',
+    production: 'bg-orange-100 text-orange-700',
+    installer: 'bg-green-100 text-green-700',
   };
 
-  const roleInfo = roleLabels[user?.role] || { label: 'Қызметкер', color: 'bg-gray-100 text-gray-700' };
+  const roleColor = roleColors[user?.role] || 'bg-gray-100 text-gray-700';
+  const roleLabel = t(`profile.roles.${user?.role || 'employee'}`, t('profile.roles.employee'));
 
   const menuItems = [
     {
       icon: 'person',
-      label: 'Жеке мәліметтер',
-      desc: 'Аты-жөні, телефон',
+      label: t('profile.menu.personal'),
+      desc: t('profile.menu.personalDesc'),
       onClick: () => setModal('edit'),
     },
     {
       icon: 'notifications',
-      label: 'Хабарландырулар',
-      desc: 'Push, email баптаулары',
+      label: t('profile.menu.notifications'),
+      desc: t('profile.menu.notificationsDesc'),
       onClick: () => navigate('/notifications/settings'),
     },
     {
       icon: 'lock',
-      label: 'Құпия сөзді өзгерту',
-      desc: 'Қауіпсіздік',
+      label: t('profile.menu.password'),
+      desc: t('profile.menu.passwordDesc'),
       onClick: () => setModal('password'),
     },
     {
       icon: 'help',
-      label: 'Көмек',
-      desc: 'Байланыс, нұсқаулық',
+      label: t('profile.menu.help'),
+      desc: t('profile.menu.helpDesc'),
       onClick: () => setModal('help'),
     },
   ];
@@ -319,7 +330,7 @@ const Profile = () => {
   return (
     <div className="bg-background-light min-h-screen pb-24">
       <header className="sticky top-0 z-30 bg-white/80 backdrop-blur-md border-b border-gray-100 px-4 py-4">
-        <h1 className="text-xl font-bold text-gray-900">Профиль</h1>
+        <h1 className="text-xl font-bold text-gray-900">{t('profile.title')}</h1>
       </header>
 
       <main className="p-4 space-y-4">
@@ -330,15 +341,16 @@ const Profile = () => {
               <Icon name="person" size={28} className="text-primary" />
             </div>
             <div className="flex-1">
-              <h2 className="text-lg font-bold text-gray-900">{user?.name || 'Пайдаланушы'}</h2>
-              <p className="text-sm text-gray-500">{user?.phone || '—'}</p>
-              <span className={`inline-block mt-1 px-3 py-1 rounded-full text-xs font-bold ${roleInfo.color}`}>
-                {roleInfo.label}
+              <h2 className="text-lg font-bold text-gray-900">{user?.name || t('profile.defaultUserName')}</h2>
+              <p className="text-sm text-gray-500">{user?.phone || t('profile.unknownPhone')}</p>
+              <span className={`inline-block mt-1 px-3 py-1 rounded-full text-xs font-bold ${roleColor}`}>
+                {roleLabel}
               </span>
             </div>
             <button
               onClick={() => setModal('edit')}
               className="size-9 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors"
+              aria-label={t('common.edit')}
             >
               <Icon name="edit" size={20} className="text-gray-600" />
             </button>
@@ -352,8 +364,8 @@ const Profile = () => {
               <Icon name="badge" className="text-primary" />
             </div>
             <div className="flex-1">
-              <p className="text-xs text-gray-500">Логин</p>
-              <p className="font-semibold text-gray-900">{user?.phone || '—'}</p>
+              <p className="text-xs text-gray-500">{t('profile.loginLabel')}</p>
+              <p className="font-semibold text-gray-900">{user?.phone || t('profile.unknownPhone')}</p>
             </div>
           </div>
         </div>
@@ -385,7 +397,7 @@ const Profile = () => {
           className="w-full flex items-center justify-center gap-2 p-4 bg-red-50 text-red-600 font-bold rounded-2xl hover:bg-red-100 transition-colors"
         >
           <Icon name="logout" />
-          Шығу
+          {t('profile.logout.cta')}
         </button>
       </main>
 
@@ -414,20 +426,20 @@ const Profile = () => {
               <div className="size-14 rounded-full bg-red-100 flex items-center justify-center mx-auto mb-4">
                 <Icon name="logout" size={24} className="text-red-500" />
               </div>
-              <h3 className="text-lg font-bold text-gray-900 mb-2">Шығу</h3>
-              <p className="text-gray-500 text-sm mb-6">Жүйеден шыққыңыз келе ме?</p>
+              <h3 className="text-lg font-bold text-gray-900 mb-2">{t('profile.logout.confirmTitle')}</h3>
+              <p className="text-gray-500 text-sm mb-6">{t('profile.logout.confirmText')}</p>
               <div className="flex gap-3">
                 <button
                   onClick={() => setShowLogoutConfirm(false)}
                   className="flex-1 py-3 bg-gray-100 text-gray-700 font-bold rounded-xl hover:bg-gray-200 transition-colors"
                 >
-                  Болдырмау
+                  {t('common.cancel')}
                 </button>
                 <button
                   onClick={handleLogout}
                   className="flex-1 py-3 bg-red-500 text-white font-bold rounded-xl hover:bg-red-600 transition-colors"
                 >
-                  Шығу
+                  {t('profile.logout.cta')}
                 </button>
               </div>
             </div>

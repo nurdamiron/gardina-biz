@@ -3,6 +3,10 @@ import auth from './ru/auth';
 import nav from './ru/nav';
 import landing from './ru/landing';
 import onboarding from './ru/onboarding';
+import profile from './ru/profile';
+import dashboard from './ru/dashboard';
+import orders from './ru/orders';
+import notifications from './ru/notifications';
 import adminLayout from './ru/adminLayout';
 import adminSettings from './ru/adminSettings';
 import notificationSettings from './ru/notificationSettings';
@@ -18,6 +22,10 @@ const ru = {
   nav,
   landing,
   onboarding,
+  profile,
+  dashboard,
+  orders,
+  notifications,
   adminLayout,
   adminSettings,
   notificationSettings,

@@ -3,6 +3,10 @@ import auth from './kz/auth';
 import nav from './kz/nav';
 import landing from './kz/landing';
 import onboarding from './kz/onboarding';
+import profile from './kz/profile';
+import dashboard from './kz/dashboard';
+import orders from './kz/orders';
+import notifications from './kz/notifications';
 import adminLayout from './kz/adminLayout';
 import adminSettings from './kz/adminSettings';
 import notificationSettings from './kz/notificationSettings';
@@ -18,6 +22,10 @@ const kz = {
   nav,
   landing,
   onboarding,
+  profile,
+  dashboard,
+  orders,
+  notifications,
   adminLayout,
   adminSettings,
   notificationSettings,

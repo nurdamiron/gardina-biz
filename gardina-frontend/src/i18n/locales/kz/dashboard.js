@@ -1,0 +1,120 @@
+const dashboard = {
+  greeting: 'Сәлеметсіз бе',
+  todayAt: 'Бүгін',
+  loading: 'Дашборд жүктелуде…',
+  empty: 'Әзірге дерек жоқ',
+  more: 'Тағы',
+  viewAll: 'Барлығы',
+
+  stats: {
+    totalMeasurements: 'Жалпы өлшемдер',
+    completedSuffix: 'аяқталды',
+    totalClients: 'Клиенттер',
+    clientsSubtext: 'Жалпы клиенттер',
+    totalDeals: 'Мәмілелер',
+    dealsSubtext: 'Барлық мәмілелер',
+    revenue: 'Кіріс',
+    revenueSubtext: 'Жалпы кіріс',
+    averageCheck: 'Орташа чек',
+    averageCheckSubtitle: 'өлшем үшін',
+    conversion: 'Конверсия',
+    conversionSubtitle: 'өлшем → сатылым',
+    monthlyKpi: 'Айлық KPI',
+    monthlyTarget: 'Мақсат',
+    measurementUnit: 'өлшем',
+    dealUnit: 'мәміле',
+  },
+
+  sections: {
+    todayTasks: 'Бүгін',
+    todayTasksEmpty: 'Бүгінге тапсырма жоқ',
+    todayTasksHint: 'Жаңа тапсырмалар менеджерден келеді',
+    upcomingMeasurements: 'Жоспарланған өлшемдер',
+    noUpcoming: 'Жоспарланған өлшем жоқ',
+    noUpcomingHint: 'Менеджер жаңа тапсырма тағайындағанда хабарлама аласыз',
+    revenueDynamics: 'Табыс динамикасы',
+    salesFunnelMini: 'Сату воронкасы (мини)',
+    weeklyActivity: 'Апталық белсенділік',
+    needsAction: 'Әрекет қажет',
+    designersKpi: 'Дизайнерлер KPI',
+    managersKpi: 'Менеджерлер KPI',
+    designersRanking: 'Дизайнерлер рейтингі',
+    salesByCategory: 'Категория бойынша сатылымдар',
+    monthlyTrend: 'Айлық сатылымдар трэнді',
+    topProducts: 'Топ өнімдер',
+    paymentRisks: 'Тәуекелді төлемдер',
+  },
+
+  funnel: {
+    leads: 'Лидтер',
+    proposals: 'Ұсыныстар',
+    contracts: 'Келісім',
+    inProduction: 'Өндірісте',
+    completed: 'Аяқталды',
+  },
+
+  statuses: {
+    scheduled: 'Жоспарланған',
+    in_progress: 'Орындалуда',
+    measured: 'Өлшем алынды',
+    in_production: 'Өндірісте',
+    ready: 'Дайын',
+    installing: 'Монтаж',
+    completed: 'Аяқталды',
+    cancelled: 'Болдырылмады',
+    proposal_sent: 'Клиент жауабын күтуде',
+    payment_pending: 'Төлем күтілуде',
+    payment_due: 'Төлем қажет',
+    confirm_required: 'Растау керек',
+  },
+
+  fallbacks: {
+    client: 'Клиент',
+    address: 'Мекенжай көрсетілмеген',
+    designer: 'Дизайнер',
+  },
+
+  categories: {
+    curtain: 'Перде',
+    tulle: 'Тюль',
+    cornice: 'Карниз',
+    jalousie: 'Жалюзи',
+    decor: 'Декор',
+    other: 'Басқа',
+  },
+
+  quickActions: {
+    newClient: 'Жаңа клиент',
+    newMeasurement: 'Жаңа өлшем',
+    newOrder: 'Жаңа тапсырыс',
+    funnel: 'Воронка',
+  },
+
+  designerHello: 'Сәлем, {name}!',
+  todayLabel: 'Бүгін',
+  thisWeek: 'Осы апта',
+  thisMonth: 'Осы ай',
+  completedMeasurements: 'Орындалған өлшемдер',
+  inCompany: 'Компанияда',
+  monthlyMetric: 'Айлық көрсеткіш',
+
+  ranking: {
+    designer: 'Дизайнер',
+  },
+
+  manager: {
+    panelTitle: 'Менеджер панелі',
+    hello: 'Сәлем, {name}!',
+    measurements: 'Өлшемдер',
+    measurementsScheduled: 'Жоспарланған',
+    proposalsSent: 'Жіберілді',
+    closedSuccess: 'Сәтті жабылған',
+    revenueDeals: 'Барлық мәмілелер',
+    urgentTasks: 'Шұғыл тапсырмалар',
+    allDone: 'Барлық тапсырмалар орындалды!',
+    paymentPending: '{name} — Төлем күтілуде',
+    confirmRequired: '{name} — Растау керек',
+  },
+};
+
+export default dashboard;

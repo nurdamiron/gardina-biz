@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState } from 'react';
 import ConfirmDialog from '../components/common/ConfirmDialog';
 import Icon from '../components/common/Icon';
+import { useI18n } from './I18nContext';
 
 const UIContext = createContext();
 
@@ -13,13 +14,14 @@ export const useUI = () => {
 };
 
 export const UIProvider = ({ children }) => {
+  const { t } = useI18n();
   const [confirmDialog, setConfirmDialog] = useState({
     isOpen: false,
     title: '',
     message: '',
     onConfirm: () => {},
-    confirmText: 'Иә',
-    cancelText: 'Жоқ',
+    confirmText: '',
+    cancelText: '',
     type: 'warning'
   });
 
@@ -34,10 +36,10 @@ export const UIProvider = ({ children }) => {
     return new Promise((resolve) => {
       setConfirmDialog({
         isOpen: true,
-        title: title || 'Растау',
+        title: title || t('common.confirm'),
         message,
-        confirmText: confirmText || 'Иә',
-        cancelText: cancelText || 'Жоқ',
+        confirmText: confirmText || t('common.yes'),
+        cancelText: cancelText || t('common.no'),
         type: type || 'warning',
         onConfirm: () => {
           resolve(true);
