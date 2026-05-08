@@ -1,0 +1,91 @@
+name: Deploy to AWS EC2
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:  # Allow manual trigger
+
+jobs:
+  deploy:
+    name: Deploy to Production EC2
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+
+      - name: Create deployment archive
+        run: |
+          tar --exclude='node_modules' \
+              --exclude='coverage' \
+              --exclude='logs' \
+              --exclude='.git' \
+              --exclude='.env' \
+              --exclude='*.log' \
+              --warning=no-file-changed \
+              -czf gardina-backend.tar.gz . || [[ $? -eq 1 ]]
+
+      - name: Configure SSH
+        env:
+          EC2_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
+        run: |
+          mkdir -p ~/.ssh
+          echo "$EC2_SSH_KEY" > ~/.ssh/ec2-key.pem
+          chmod 600 ~/.ssh/ec2-key.pem
+          ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Upload to EC2
+        run: |
+          scp -i ~/.ssh/ec2-key.pem \
+              gardina-backend.tar.gz \
+              ubuntu@${{ secrets.EC2_HOST }}:/tmp/
+
+      - name: Deploy on EC2
+        run: |
+          ssh -i ~/.ssh/ec2-key.pem ubuntu@${{ secrets.EC2_HOST }} << 'ENDSSH'
+            set -e
+
+            echo "📂 Extracting archive..."
+            cd /home/ubuntu/gardina-backend
+            tar -xzf /tmp/gardina-backend.tar.gz
+
+            echo "📦 Installing dependencies..."
+            npm install --production
+
+            echo "🔄 Restarting application..."
+            pm2 restart gardina-backend
+
+            echo "⏳ Waiting for startup..."
+            sleep 3
+
+            echo "✅ Checking status..."
+            pm2 info gardina-backend | grep status
+
+            echo "🧹 Cleanup..."
+            rm /tmp/gardina-backend.tar.gz
+
+            echo "🎉 Deployment complete!"
+          ENDSSH
+
+      - name: Health Check
+        run: |
+          sleep 5
+          curl -f https://api.gardina.kz/health || exit 1
+
+      - name: Notify Success
+        if: success()
+        run: |
+          echo "✅ Deployment successful!"
+          echo "🌐 API: https://api.gardina.kz/api"
+
+      - name: Notify Failure
+        if: failure()
+        run: |
+          echo "❌ Deployment failed!"
+          echo "📝 Check logs: ssh ubuntu@${{ secrets.EC2_HOST }} 'pm2 logs gardina-backend'"
