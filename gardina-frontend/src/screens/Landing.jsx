@@ -10,6 +10,8 @@ import {
   useSpring,
 } from 'framer-motion';
 import Icon from '../components/common/Icon';
+import LanguageSwitcher from '../components/common/LanguageSwitcher';
+import { useI18n } from '../contexts/I18nContext';
 
 // ─── Animation primitives ────────────────────────────────────────────────────
 const fadeUp = {
@@ -25,13 +27,9 @@ const stagger = {
   },
 };
 
-const cardHover = {
-  rest: { y: 0, boxShadow: '0 4px 12px -2px rgba(27, 94, 69, 0.1), 0 2px 6px -1px rgba(0, 0, 0, 0.04)' },
-  hover: { y: -6, boxShadow: '0 24px 40px -12px rgba(27, 94, 69, 0.18), 0 8px 16px -4px rgba(0, 0, 0, 0.08)', transition: { duration: 0.25 } },
-};
-
 // ─── Header with scroll-triggered styling ───────────────────────────────────
 function LandingHeader() {
+  const { t } = useI18n();
   const { scrollY } = useScroll();
   const [scrolled, setScrolled] = useState(false);
 
@@ -40,12 +38,12 @@ function LandingHeader() {
   }, [scrollY]);
 
   const links = [
-    { href: '#problems', label: 'Мәселе → шешім' },
-    { href: '#features', label: 'Артықшылық' },
-    { href: '#modules', label: 'Бөлімдер' },
-    { href: '#compare', label: 'Салыстыру' },
-    { href: '#pricing', label: 'Тарифтер' },
-    { href: '#faq', label: 'Сұрақтар' },
+    { href: '#problems', label: t('landing.nav.problems') },
+    { href: '#features', label: t('landing.nav.features') },
+    { href: '#modules', label: t('landing.nav.modules') },
+    { href: '#compare', label: t('landing.nav.compare') },
+    { href: '#pricing', label: t('landing.nav.pricing') },
+    { href: '#faq', label: t('landing.nav.faq') },
   ];
 
   return (
@@ -75,11 +73,12 @@ function LandingHeader() {
         </nav>
 
         <div className="flex items-center gap-2">
+          <LanguageSwitcher compact />
           <Link
             to="/login"
             className="hidden sm:inline-flex items-center gap-1.5 px-4 py-2 text-sm font-bold text-primary hover:bg-primary/5 rounded-lg transition-colors"
           >
-            Кіру
+            {t('landing.nav.login')}
           </Link>
           <a
             href="https://wa.me/77715373201"
@@ -87,7 +86,7 @@ function LandingHeader() {
             rel="noopener noreferrer"
             className="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-bold text-white bg-primary hover:bg-primary-light rounded-lg transition-colors shadow-lg shadow-primary/20"
           >
-            WhatsApp
+            {t('landing.nav.whatsapp')}
           </a>
         </div>
       </div>
@@ -95,8 +94,9 @@ function LandingHeader() {
   );
 }
 
-// ─── Hero with parallax mockup ──────────────────────────────────────────────
+// ─── Hero ───────────────────────────────────────────────────────────────────
 function Hero() {
+  const { t } = useI18n();
   const heroRef = useRef(null);
   const { scrollYProgress } = useScroll({ target: heroRef, offset: ['start start', 'end start'] });
   const mockY = useTransform(scrollYProgress, [0, 1], [0, -80]);
@@ -104,7 +104,6 @@ function Hero() {
 
   return (
     <section ref={heroRef} className="relative pt-28 sm:pt-32 pb-16 sm:pb-24 overflow-hidden">
-      {/* Background blobs */}
       <div className="absolute inset-0 -z-10">
         <motion.div
           className="absolute top-20 -left-20 size-[420px] rounded-full bg-primary/15 blur-3xl"
@@ -122,17 +121,16 @@ function Hero() {
         <motion.div initial="hidden" animate="visible" variants={stagger} className="text-center lg:text-left">
           <motion.div variants={fadeUp} className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-bold mb-6">
             <Icon name="install_mobile" size={16} />
-            Кез келген жерден ашылады · командаға ыңғайлы
+            {t('landing.hero.badge')}
           </motion.div>
           <motion.h1 variants={fadeUp} className="text-4xl sm:text-5xl lg:text-6xl font-black text-text-main leading-[1.05] tracking-tight">
-            Перде бизнесіңізді{' '}
+            {t('landing.hero.title1')}{' '}
             <span className="bg-gradient-to-br from-primary via-primary-light to-accent bg-clip-text text-transparent">
-              бір жүйеден басқарыңыз
+              {t('landing.hero.title2')}
             </span>
           </motion.h1>
           <motion.p variants={fadeUp} className="mt-5 text-base sm:text-lg text-text-secondary leading-relaxed max-w-xl mx-auto lg:mx-0">
-            Gardina — перде салоныңызға арналған жұмыс құралы. Клиент, ұсыныс, өлшем, тігу
-            және төлем бойынша барлық мәлімет бір жерде. Ештеңе жоғалмайды.
+            {t('landing.hero.description')}
           </motion.p>
           <motion.div variants={fadeUp} className="mt-7 flex flex-col sm:flex-row gap-3 justify-center lg:justify-start">
             <Link
@@ -140,7 +138,7 @@ function Hero() {
               className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-primary text-white font-bold text-base hover:brightness-110 active:scale-[0.99] shadow-xl shadow-primary/25 transition-all"
             >
               <Icon name="arrow_forward" size={20} />
-              7 күн тегін бастау
+              {t('landing.hero.ctaPrimary')}
             </Link>
             <a
               href="https://wa.me/77715373201"
@@ -149,15 +147,15 @@ function Hero() {
               className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl border-2 border-primary/20 text-primary font-bold text-base hover:bg-primary/5 transition-all"
             >
               <Icon name="chat" size={20} />
-              Демо сұрау
+              {t('landing.hero.ctaSecondary')}
             </a>
           </motion.div>
 
           <motion.div variants={fadeUp} className="mt-10 grid grid-cols-3 gap-4 max-w-md mx-auto lg:mx-0">
             {[
-              { value: 'Клиенттер', label: 'Барлығы бір тізімде' },
-              { value: 'Ұсыныс', label: 'Жіберу және бақылау' },
-              { value: 'Бақылау', label: 'Күн сайын анық' },
+              { value: t('landing.hero.statsClients'), label: t('landing.hero.statsClientsHint') },
+              { value: t('landing.hero.statsProposals'), label: t('landing.hero.statsProposalsHint') },
+              { value: t('landing.hero.statsControl'), label: t('landing.hero.statsControlHint') },
             ].map((s) => (
               <div key={s.value} className="text-center lg:text-left">
                 <div className="text-sm font-bold text-primary">{s.value}</div>
@@ -167,7 +165,6 @@ function Hero() {
           </motion.div>
         </motion.div>
 
-        {/* Mockup */}
         <motion.div
           style={{ y: mockY, opacity: mockOpacity }}
           initial={{ opacity: 0, scale: 0.92, rotate: -2 }}
@@ -183,14 +180,14 @@ function Hero() {
                   <span className="size-2.5 rounded-full bg-yellow-400" />
                   <span className="size-2.5 rounded-full bg-green-400" />
                 </div>
-                <span className="text-[11px] font-bold text-text-secondary">Gardina · бүгінгі тапсырыстар</span>
+                <span className="text-[11px] font-bold text-text-secondary">{t('landing.hero.mockTitle')}</span>
               </div>
 
               <div className="space-y-2.5">
                 {[
                   { type: 'line', w: 'w-full' },
                   { type: 'line', w: 'w-3/4' },
-                  { type: 'accent', text: 'Жаңа келісім · өлшем жоспарланды' },
+                  { type: 'accent', text: t('landing.hero.mockAccent') },
                   { type: 'line', w: 'w-5/6' },
                   { type: 'line', w: 'w-2/3' },
                 ].map((row, i) => (
@@ -211,7 +208,11 @@ function Hero() {
               </div>
 
               <div className="mt-5 grid grid-cols-3 gap-2">
-                {['Лидтер', 'Ұсыныс', 'Аяқталған'].map((label, i) => (
+                {[
+                  t('landing.hero.mockLabelLeads'),
+                  t('landing.hero.mockLabelProposals'),
+                  t('landing.hero.mockLabelDone'),
+                ].map((label, i) => (
                   <motion.div
                     key={label}
                     initial={{ opacity: 0, y: 10 }}
@@ -227,7 +228,6 @@ function Hero() {
             </div>
           </div>
 
-          {/* Floating notification */}
           <motion.div
             initial={{ opacity: 0, x: 40, y: -10 }}
             animate={{ opacity: 1, x: 0, y: 0 }}
@@ -236,10 +236,10 @@ function Hero() {
           >
             <div className="flex items-center gap-2 mb-1">
               <span className="size-2 rounded-full bg-green-500" />
-              <span className="text-[10px] font-bold text-text-secondary">Push хабарлама</span>
+              <span className="text-[10px] font-bold text-text-secondary">{t('landing.hero.pushTag')}</span>
             </div>
-            <div className="text-xs font-bold text-text-main">Жаңа лид</div>
-            <div className="text-[11px] text-text-secondary leading-tight mt-0.5">WhatsApp арқылы өтінім түсті</div>
+            <div className="text-xs font-bold text-text-main">{t('landing.hero.pushTitle')}</div>
+            <div className="text-[11px] text-text-secondary leading-tight mt-0.5">{t('landing.hero.pushBody')}</div>
           </motion.div>
         </motion.div>
       </div>
@@ -247,8 +247,8 @@ function Hero() {
   );
 }
 
-// ─── Animated stat counter ──────────────────────────────────────────────────
 function StatNumber({ to, suffix = '' }) {
+  const { lang } = useI18n();
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: '-50px' });
   const motionValue = useMotionValue(0);
@@ -263,20 +263,22 @@ function StatNumber({ to, suffix = '' }) {
     return spring.on('change', (v) => setDisplay(Math.round(v)));
   }, [spring]);
 
+  const localeTag = lang === 'kz' ? 'kk-KZ' : 'ru-RU';
   return (
     <span ref={ref}>
-      {display.toLocaleString('kk-KZ')}
+      {display.toLocaleString(localeTag)}
       {suffix}
     </span>
   );
 }
 
 function StatsBand() {
+  const { t } = useI18n();
   const stats = [
-    { value: 60, suffix: '+', label: 'Перде салондары әлеуетте' },
-    { value: 4, suffix: ' роль', label: 'Дизайнер, менеджер, өндіріс, әкімші' },
-    { value: 2, suffix: ' тіл', label: 'Қазақша және орысша' },
-    { value: 100, suffix: '%', label: 'Бұлт · кез келген құрылғыдан' },
+    { value: 60, suffix: '+', label: t('landing.stats.badge1') },
+    { value: 4, suffix: '', labelOverride: t('landing.stats.label2'), label: t('landing.stats.badge2') },
+    { value: 2, suffix: '', labelOverride: t('landing.stats.label3'), label: t('landing.stats.badge3') },
+    { value: 100, suffix: '%', label: t('landing.stats.badge4') },
   ];
 
   return (
@@ -284,7 +286,7 @@ function StatsBand() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 grid grid-cols-2 lg:grid-cols-4 gap-8">
         {stats.map((s, i) => (
           <motion.div
-            key={s.label}
+            key={i}
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, amount: 0.05 }}
@@ -292,7 +294,11 @@ function StatsBand() {
             className="text-center"
           >
             <div className="text-3xl sm:text-4xl font-black bg-gradient-to-br from-primary to-accent bg-clip-text text-transparent">
-              <StatNumber to={s.value} suffix={s.suffix} />
+              {s.labelOverride ? (
+                s.labelOverride
+              ) : (
+                <StatNumber to={s.value} suffix={s.suffix} />
+              )}
             </div>
             <div className="text-xs sm:text-sm text-text-secondary mt-1.5 font-medium leading-snug">{s.label}</div>
           </motion.div>
@@ -302,7 +308,6 @@ function StatsBand() {
   );
 }
 
-// ─── Section heading helper ─────────────────────────────────────────────────
 function SectionHeading({ badge, badgeIcon, title, subtitle }) {
   return (
     <motion.div
@@ -328,37 +333,22 @@ function SectionHeading({ badge, badgeIcon, title, subtitle }) {
   );
 }
 
-// ─── Problem → Solution cards ───────────────────────────────────────────────
 function Problems() {
+  const { t } = useI18n();
   const items = [
-    {
-      problem: '«Клиент қайда, тапсырыс қай күйде?»',
-      pain: 'Телефон, WhatsApp, дәптер, Excel — бәрі бөлек. Тапсырыс іздеу үшін 5 минут үзілесіз.',
-      solution: 'Бір жерде: клиент, тапсырыс күйі, келесі қадам — бәрі бірден көрінеді.',
-      icon: 'person_search',
-    },
-    {
-      problem: '«Дизайнер білді, менеджер білмеді»',
-      pain: 'Командада ақпарат дұрыс жетпейді. Терезе өлшемі немесе түсі қайда сақталғанын сұрайсыз.',
-      solution: 'Өлшем, фото, ұсыныс бір тапсырысқа жиналады. Әр қызметкер өзіне керегін көреді.',
-      icon: 'groups',
-    },
-    {
-      problem: '«Төлем аз, кешіккен жоқ па?»',
-      pain: 'Алдын ала төлем қанша, қалғаны қанша — еске түсірмей қойсаңыз, шот жіберіп аласыз.',
-      solution: 'Төлем күйі анық, қай клиентпен қайта байланысу керек екені бірден көрінеді.',
-      icon: 'payments',
-    },
+    { keyId: 'item1', icon: 'person_search' },
+    { keyId: 'item2', icon: 'groups' },
+    { keyId: 'item3', icon: 'payments' },
   ];
 
   return (
     <section id="problems" className="py-20 sm:py-28">
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
         <SectionHeading
-          badge="Нені шешеміз"
+          badge={t('landing.problems.badge')}
           badgeIcon="error"
-          title="Күнделікті қиындықтар түсінікті тілде"
-          subtitle="Көп салондарда бірдей сурет: деректер шашыраған, кім не істеп жатқаны бұлыңғыр, төлем мен мерзім ұмытылады."
+          title={t('landing.problems.title')}
+          subtitle={t('landing.problems.subtitle')}
         />
 
         <motion.div
@@ -370,23 +360,29 @@ function Problems() {
         >
           {items.map((it) => (
             <motion.article
-              key={it.problem}
+              key={it.keyId}
               variants={fadeUp}
-              initial="rest"
-              whileHover="hover"
-              animate="rest"
-              className="rounded-3xl bg-white p-7 border border-border-light/80"
+              whileHover={{ y: -6, transition: { duration: 0.25 } }}
+              className="rounded-3xl bg-white p-7 border border-border-light/80 shadow-card hover:shadow-lg"
             >
-              <motion.div variants={cardHover} className="contents">
-                <div className="size-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary mb-5">
-                  <Icon name={it.icon} size={24} />
-                </div>
-                <div className="text-[10px] font-black uppercase tracking-wider text-red-500 mb-1.5">Мәселе</div>
-                <h3 className="text-lg font-bold text-text-main mb-2 leading-tight">{it.problem}</h3>
-                <p className="text-sm text-text-secondary leading-relaxed mb-5">{it.pain}</p>
-                <div className="text-[10px] font-black uppercase tracking-wider text-primary mb-1.5">Шешім</div>
-                <p className="text-sm text-text-main leading-relaxed font-medium">{it.solution}</p>
-              </motion.div>
+              <div className="size-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary mb-5">
+                <Icon name={it.icon} size={24} />
+              </div>
+              <div className="text-[10px] font-black uppercase tracking-wider text-red-500 mb-1.5">
+                {t('landing.problems.labelProblem')}
+              </div>
+              <h3 className="text-lg font-bold text-text-main mb-2 leading-tight">
+                {t(`landing.problems.${it.keyId}Problem`)}
+              </h3>
+              <p className="text-sm text-text-secondary leading-relaxed mb-5">
+                {t(`landing.problems.${it.keyId}Pain`)}
+              </p>
+              <div className="text-[10px] font-black uppercase tracking-wider text-primary mb-1.5">
+                {t('landing.problems.labelSolution')}
+              </div>
+              <p className="text-sm text-text-main leading-relaxed font-medium">
+                {t(`landing.problems.${it.keyId}Solution`)}
+              </p>
             </motion.article>
           ))}
         </motion.div>
@@ -395,34 +391,64 @@ function Problems() {
   );
 }
 
-// ─── Phone demo with rotating screens ───────────────────────────────────────
 function PhoneDemo() {
+  const { t } = useI18n();
   const screens = [
     {
       time: '09:42',
-      title: 'Лид қабылдау',
-      step: 'Жаңа клиент өтінішін тіркеп, келесі әрекетті бірден қоясыз.',
+      title: t('landing.phoneDemo.step1Title'),
+      step: t('landing.phoneDemo.step1Body'),
       cards: [
-        { tag: 'Gardina', when: 'Қазір', heading: 'Жаңа лид', body: 'WhatsApp арқылы өтініш түсті. Клиент карточкасы ашылды.' },
-        { tag: 'Клиенттер', when: '09:38', body: 'Бүгін 3 жаңа өтінім тіркелді.', muted: true },
+        {
+          tag: t('landing.phoneDemo.s1Card1Tag'),
+          when: t('landing.phoneDemo.s1Card1Time'),
+          heading: t('landing.phoneDemo.s1Card1Heading'),
+          body: t('landing.phoneDemo.s1Card1Body'),
+        },
+        {
+          tag: t('landing.phoneDemo.s1Card2Tag'),
+          when: t('landing.phoneDemo.s1Card2Time'),
+          body: t('landing.phoneDemo.s1Card2Body'),
+          muted: true,
+        },
       ],
     },
     {
       time: '11:10',
-      title: 'Замер және ұсыныс',
-      step: 'Өлшем, фото, ұсыныс бір тапсырыс ішінде қалады.',
+      title: t('landing.phoneDemo.step2Title'),
+      step: t('landing.phoneDemo.step2Body'),
       cards: [
-        { tag: 'Замер', when: 'Қазір', heading: 'Өлшем бекітілді', body: 'Өлшем, фото және ескертпе тапсырысқа тіркелді.' },
-        { tag: 'Ұсыныс', when: '11:05', body: 'Клиентке коммерциялық ұсыныс жіберілді.', muted: true },
+        {
+          tag: t('landing.phoneDemo.s2Card1Tag'),
+          when: t('landing.phoneDemo.s2Card1Time'),
+          heading: t('landing.phoneDemo.s2Card1Heading'),
+          body: t('landing.phoneDemo.s2Card1Body'),
+        },
+        {
+          tag: t('landing.phoneDemo.s2Card2Tag'),
+          when: t('landing.phoneDemo.s2Card2Time'),
+          body: t('landing.phoneDemo.s2Card2Body'),
+          muted: true,
+        },
       ],
     },
     {
       time: '17:26',
-      title: 'Тігу, монтаж, төлем',
-      step: 'Орындау кезеңдері мен төлем күйін командамен бірге бақылайсыз.',
+      title: t('landing.phoneDemo.step3Title'),
+      step: t('landing.phoneDemo.step3Body'),
       cards: [
-        { tag: 'Монтаж', when: 'Қазір', heading: 'Монтажға дайын', body: 'Пошив аяқталды, монтаж уақыты қойылды, төлем жаңарды.' },
-        { tag: 'Төлем', when: '17:20', body: 'Қалған сома бойынша клиентке еске салу жіберілді.', muted: true },
+        {
+          tag: t('landing.phoneDemo.s3Card1Tag'),
+          when: t('landing.phoneDemo.s3Card1Time'),
+          heading: t('landing.phoneDemo.s3Card1Heading'),
+          body: t('landing.phoneDemo.s3Card1Body'),
+        },
+        {
+          tag: t('landing.phoneDemo.s3Card2Tag'),
+          when: t('landing.phoneDemo.s3Card2Time'),
+          body: t('landing.phoneDemo.s3Card2Body'),
+          muted: true,
+        },
       ],
     },
   ];
@@ -438,14 +464,13 @@ function PhoneDemo() {
     <section className="py-20 sm:py-28 bg-gradient-to-b from-background-light to-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
         <SectionHeading
-          badge="Қалай жұмыс істейді"
+          badge={t('landing.phoneDemo.badge')}
           badgeIcon="install_mobile"
-          title="Телефондағыдай көріңіз"
-          subtitle="Клиенттен төлемге дейінгі процесс бір экранда қалай жүретінін төмендегі демодан көріңіз."
+          title={t('landing.phoneDemo.title')}
+          subtitle={t('landing.phoneDemo.subtitle')}
         />
 
         <div className="grid lg:grid-cols-[auto_1fr] gap-12 items-center max-w-5xl mx-auto">
-          {/* Phone frame */}
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             whileInView={{ opacity: 1, scale: 1 }}
@@ -466,7 +491,9 @@ function PhoneDemo() {
                     className="absolute inset-0 px-4 pt-10 pb-4"
                   >
                     <div className="flex items-center justify-between mb-4">
-                      <strong className="text-sm font-bold text-text-main">Бүгінгі оқиғалар</strong>
+                      <strong className="text-sm font-bold text-text-main">
+                        {t('landing.phoneDemo.todayHeading')}
+                      </strong>
                       <span className="text-xs text-text-secondary">{screens[active].time}</span>
                     </div>
                     <div className="space-y-3">
@@ -495,7 +522,6 @@ function PhoneDemo() {
             </div>
           </motion.div>
 
-          {/* Steps */}
           <div className="space-y-3">
             {screens.map((s, i) => (
               <motion.button
@@ -527,25 +553,25 @@ function PhoneDemo() {
   );
 }
 
-// ─── Features grid ──────────────────────────────────────────────────────────
 function Features() {
+  const { t } = useI18n();
   const items = [
-    { icon: 'groups', title: 'Клиенттер бір тізімде', body: 'Кім қоңырау шалды, қай тапсырыс қай кезеңде — бәрі бір жерде.' },
-    { icon: 'straighten', title: 'Өлшем мен фото', body: 'Әр терезе, өлшем, түсірілген фото бір тапсырысқа бекітіледі.' },
-    { icon: 'receipt_long', title: 'Ұсыныс және келісім', body: 'Клиентке КП жібересіз, оның жауабын бірден көресіз.' },
-    { icon: 'precision_manufacturing', title: 'Өндіріс пен тігу', body: 'Тапсырыс цехқа өтті ме, тігу бітті ме — әр кезең бірден көрінеді.' },
-    { icon: 'payments', title: 'Төлемдер анық', body: 'Алдын ала төлем, қалғаны, төленбеген сома — көрініп тұрады.' },
-    { icon: 'badge', title: 'Қызметкерлерге ыңғайлы', body: 'Дизайнер, менеджер, өндіріс — әркім өз жұмысына керек бөлікті көреді.' },
+    { icon: 'groups', keyId: 'f1' },
+    { icon: 'straighten', keyId: 'f2' },
+    { icon: 'receipt_long', keyId: 'f3' },
+    { icon: 'precision_manufacturing', keyId: 'f4' },
+    { icon: 'payments', keyId: 'f5' },
+    { icon: 'badge', keyId: 'f6' },
   ];
 
   return (
     <section id="features" className="py-20 sm:py-28">
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
         <SectionHeading
-          badge="Неге Gardina"
+          badge={t('landing.features.badge')}
           badgeIcon="check_circle"
-          title="Бизнесіңізге нақты пайда"
-          subtitle="Тапсырысты бақылаңыз, жұмысты бөлісіңіз, клиентті күттірмеңіз."
+          title={t('landing.features.title')}
+          subtitle={t('landing.features.subtitle')}
         />
 
         <motion.div
@@ -557,7 +583,7 @@ function Features() {
         >
           {items.map((f) => (
             <motion.div
-              key={f.title}
+              key={f.keyId}
               variants={fadeUp}
               whileHover={{ y: -4, transition: { duration: 0.2 } }}
               className="rounded-2xl bg-white p-6 border border-border-light/80 shadow-card hover:shadow-lg transition-shadow"
@@ -565,8 +591,8 @@ function Features() {
               <div className="size-11 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center text-white mb-4">
                 <Icon name={f.icon} size={22} />
               </div>
-              <h3 className="font-bold text-text-main mb-1.5">{f.title}</h3>
-              <p className="text-sm text-text-secondary leading-relaxed">{f.body}</p>
+              <h3 className="font-bold text-text-main mb-1.5">{t(`landing.features.${f.keyId}Title`)}</h3>
+              <p className="text-sm text-text-secondary leading-relaxed">{t(`landing.features.${f.keyId}Body`)}</p>
             </motion.div>
           ))}
         </motion.div>
@@ -575,25 +601,25 @@ function Features() {
   );
 }
 
-// ─── Modules grid ───────────────────────────────────────────────────────────
 function Modules() {
+  const { t } = useI18n();
   const items = [
-    { icon: 'person_search', title: 'Клиенттер мен тапсырыстар', body: 'Жаңа өтініштен бастап дайын орнатуға дейінгі жол нақты көрінеді.' },
-    { icon: 'photo_camera', title: 'Өлшем және суреттер', body: 'Бөлме, терезе, фото және ескертпелер тапсырыспен бірге сақталады.' },
-    { icon: 'inventory', title: 'Маталар мен есеп', body: 'Қай мата таңдалды, қанша қажет, қанша қалды — анық көрінеді.' },
-    { icon: 'notifications', title: 'Хабарламалар', body: 'Маңызды жаңалықты өткізіп алмайсыз: тапсырыс, төлем, мерзім.' },
-    { icon: 'analytics', title: 'Нәтиже мен шолу', body: 'Не сатылды, қай тапсырыс кідіріп тұр, қай жерде назар керек.' },
-    { icon: 'lock', title: 'Қауіпсіз сақталады', body: 'Клиент пен тапсырыс мәліметі сенімді сақталады, тек сіздің команда көреді.' },
+    { icon: 'person_search', keyId: 'm1' },
+    { icon: 'photo_camera', keyId: 'm2' },
+    { icon: 'inventory', keyId: 'm3' },
+    { icon: 'notifications', keyId: 'm4' },
+    { icon: 'analytics', keyId: 'm5' },
+    { icon: 'lock', keyId: 'm6' },
   ];
 
   return (
     <section id="modules" className="py-20 sm:py-28 bg-gradient-to-b from-white to-background-light">
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
         <SectionHeading
-          badge="Жүйеде не бар"
+          badge={t('landing.modules.badge')}
           badgeIcon="dashboard"
-          title="Негізгі бөлімдер"
-          subtitle="Күнделікті жұмысыңызға керекті бөлімдер. Барлығы түсінікті және ретімен."
+          title={t('landing.modules.title')}
+          subtitle={t('landing.modules.subtitle')}
         />
         <motion.div
           initial="hidden"
@@ -604,7 +630,7 @@ function Modules() {
         >
           {items.map((m) => (
             <motion.div
-              key={m.title}
+              key={m.keyId}
               variants={fadeUp}
               whileHover={{ scale: 1.02, transition: { duration: 0.2 } }}
               className="rounded-2xl bg-white p-6 border border-border-light/80 flex gap-4 items-start"
@@ -613,8 +639,8 @@ function Modules() {
                 <Icon name={m.icon} size={20} />
               </div>
               <div>
-                <h3 className="font-bold text-text-main mb-1">{m.title}</h3>
-                <p className="text-sm text-text-secondary leading-relaxed">{m.body}</p>
+                <h3 className="font-bold text-text-main mb-1">{t(`landing.modules.${m.keyId}Title`)}</h3>
+                <p className="text-sm text-text-secondary leading-relaxed">{t(`landing.modules.${m.keyId}Body`)}</p>
               </div>
             </motion.div>
           ))}
@@ -624,22 +650,23 @@ function Modules() {
   );
 }
 
-// ─── Comparison vs competitors ─────────────────────────────────────────────
 function Comparison() {
+  const { t } = useI18n();
   const rows = [
-    { feature: 'Перде салонына арналған дизайн', gardina: true, amocrm: false, bitrix: false },
-    { feature: 'Тіндер мен метраж есебі', gardina: true, amocrm: false, bitrix: false },
-    { feature: 'Өлшем фото-карточкалары', gardina: true, amocrm: false, bitrix: 'partial' },
-    { feature: 'Дизайнер/менеджер/цех рөлдері', gardina: true, amocrm: 'partial', bitrix: true },
-    { feature: 'KZ тілінде интерфейс', gardina: true, amocrm: 'partial', bitrix: 'partial' },
-    { feature: 'Мобильге PWA офлайн', gardina: true, amocrm: true, bitrix: true },
-    { feature: 'Бастапқы баға (1-3 қол)', gardina: '15 000 ₸', amocrm: '36 000 ₸', bitrix: '22 700 ₸' },
+    { keyId: 'rowVertical', gardina: true, amocrm: false, bitrix: false },
+    { keyId: 'rowFabric', gardina: true, amocrm: false, bitrix: false },
+    { keyId: 'rowPhotos', gardina: true, amocrm: false, bitrix: 'partial' },
+    { keyId: 'rowRoles', gardina: true, amocrm: 'partial', bitrix: true },
+    { keyId: 'rowKzUi', gardina: true, amocrm: 'partial', bitrix: 'partial' },
+    { keyId: 'rowPwa', gardina: true, amocrm: true, bitrix: true },
+    { keyId: 'rowPrice', gardina: '15 000 ₸', amocrm: '36 000 ₸', bitrix: '22 700 ₸' },
   ];
 
   const cellIcon = (v) => {
     if (v === true) return <Icon name="check_circle" size={20} className="text-primary mx-auto" />;
     if (v === false) return <Icon name="close" size={20} className="text-text-secondary/40 mx-auto" />;
-    if (v === 'partial') return <span className="inline-block size-4 rounded-full bg-amber-400 mx-auto" title="Ішінара" />;
+    if (v === 'partial')
+      return <span className="inline-block size-4 rounded-full bg-amber-400 mx-auto" title={t('landing.compare.valuePartial')} />;
     return <span className="text-sm font-bold text-text-main">{v}</span>;
   };
 
@@ -647,10 +674,10 @@ function Comparison() {
     <section id="compare" className="py-20 sm:py-28">
       <div className="max-w-5xl mx-auto px-4 sm:px-6">
         <SectionHeading
-          badge="Бәсекеге салыстыру"
+          badge={t('landing.compare.badge')}
           badgeIcon="bar_chart"
-          title="Gardina vs AmoCRM vs Битрикс24"
-          subtitle="Жалпы CRM-дермен салыстырғанда Gardina перде бизнесіне тікелей жасалған. Барлық деректер сол үшін бапталған."
+          title={t('landing.compare.title')}
+          subtitle={t('landing.compare.subtitle')}
         />
 
         <motion.div
@@ -664,7 +691,9 @@ function Comparison() {
             <table className="w-full">
               <thead>
                 <tr className="border-b border-border-light/70 bg-background-light">
-                  <th className="text-left px-5 py-4 text-xs font-black uppercase tracking-wider text-text-secondary">Мүмкіндік</th>
+                  <th className="text-left px-5 py-4 text-xs font-black uppercase tracking-wider text-text-secondary">
+                    {t('landing.compare.colFeature')}
+                  </th>
                   <th className="px-5 py-4 text-xs font-black uppercase tracking-wider">
                     <span className="text-primary">Gardina</span>
                   </th>
@@ -675,14 +704,14 @@ function Comparison() {
               <tbody>
                 {rows.map((r, i) => (
                   <motion.tr
-                    key={r.feature}
+                    key={r.keyId}
                     initial={{ opacity: 0, x: -20 }}
                     whileInView={{ opacity: 1, x: 0 }}
                     viewport={{ once: true, amount: 0.05 }}
                     transition={{ duration: 0.3, delay: i * 0.05 }}
                     className="border-b border-border-light/40 last:border-0"
                   >
-                    <td className="px-5 py-4 text-sm text-text-main font-medium">{r.feature}</td>
+                    <td className="px-5 py-4 text-sm text-text-main font-medium">{t(`landing.compare.${r.keyId}`)}</td>
                     <td className="px-5 py-4 text-center bg-primary/5">{cellIcon(r.gardina)}</td>
                     <td className="px-5 py-4 text-center">{cellIcon(r.amocrm)}</td>
                     <td className="px-5 py-4 text-center">{cellIcon(r.bitrix)}</td>
@@ -693,34 +722,29 @@ function Comparison() {
           </div>
         </motion.div>
 
-        <p className="text-center text-xs text-text-secondary mt-4">
-          AmoCRM «Базовый» 1 пайдаланушыға, Битрикс24 «Стандартный» (барлығы), 2026 жылдың бастапқы бағасы.
-        </p>
+        <p className="text-center text-xs text-text-secondary mt-4">{t('landing.compare.note')}</p>
       </div>
     </section>
   );
 }
 
-// ─── Testimonials marquee (placeholder data) ─────────────────────────────────
 function Testimonials() {
-  const items = [
-    { name: 'Айгүл К.', role: 'Перде салоны иесі', quote: '«Бұрын тапсырысты Excel-де іздейтінбіз, қазір бір экранда. Команда тез үйренді».' },
-    { name: 'Ерлан М.', role: 'Студия әкімшісі', quote: '«Өлшемге барған дизайнер фотоны бірден бекітеді. Менеджер сол сәтте КП жіберіп үлгереді».' },
-    { name: 'Аружан С.', role: 'Сатылым бөлімі', quote: '«Төленбеген қалдықты ұмытып қалмаймыз. Жүйе өзі еске салады».' },
-    { name: 'Дамир О.', role: 'Желі менеджері', quote: '«2 нүкте жұмысын бір жерден көру керек еді — Network тарифімен мәселе шешілді».' },
-  ];
-
-  // Duplicate for infinite marquee
+  const { t } = useI18n();
+  const items = [0, 1, 2, 3].map((i) => ({
+    name: t(`landing.testimonials.items.${i}.name`),
+    role: t(`landing.testimonials.items.${i}.role`),
+    quote: t(`landing.testimonials.items.${i}.quote`),
+  }));
   const doubled = [...items, ...items];
 
   return (
     <section className="py-20 sm:py-24 overflow-hidden bg-background-light">
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
         <SectionHeading
-          badge="Команда айтады"
+          badge={t('landing.testimonials.badge')}
           badgeIcon="star"
-          title="Бірінші клиенттеріміздің сөздері"
-          subtitle="Бұл — early-access кезеңіндегі Gardina пайдаланушыларының пікірлері."
+          title={t('landing.testimonials.title')}
+          subtitle={t('landing.testimonials.subtitle')}
         />
       </div>
 
@@ -729,7 +753,7 @@ function Testimonials() {
         animate={{ x: ['0%', '-50%'] }}
         transition={{ duration: 30, repeat: Infinity, ease: 'linear' }}
       >
-        {doubled.map((t, i) => (
+        {doubled.map((tItem, i) => (
           <article
             key={i}
             className="shrink-0 w-[320px] sm:w-[380px] rounded-2xl bg-white p-6 border border-border-light/70 shadow-card"
@@ -739,14 +763,14 @@ function Testimonials() {
                 <Icon key={k} name="star" size={16} />
               ))}
             </div>
-            <p className="text-sm text-text-main leading-relaxed mb-5">{t.quote}</p>
+            <p className="text-sm text-text-main leading-relaxed mb-5">{tItem.quote}</p>
             <div className="flex items-center gap-3">
               <div className="size-10 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center text-white font-bold">
-                {t.name[0]}
+                {tItem.name[0]}
               </div>
               <div>
-                <div className="text-sm font-bold text-text-main">{t.name}</div>
-                <div className="text-xs text-text-secondary">{t.role}</div>
+                <div className="text-sm font-bold text-text-main">{tItem.name}</div>
+                <div className="text-xs text-text-secondary">{tItem.role}</div>
               </div>
             </div>
           </article>
@@ -756,52 +780,31 @@ function Testimonials() {
   );
 }
 
-// ─── Pricing ────────────────────────────────────────────────────────────────
 function Pricing() {
+  const { t } = useI18n();
   const [yearly, setYearly] = useState(false);
 
   const plans = [
     {
-      name: 'Start',
-      audience: 'Кіші салондарға',
+      keyId: 'start',
       monthly: '15 000',
       yearly: '150 000',
-      features: [
-        '1 салон, 3 пайдаланушыға дейін',
-        'Клиенттер, өтінімдер, воронка',
-        'Кездесу мен өлшем күнтізбесі',
-        'Негізгі аналитика',
-      ],
-      cta: 'Start таңдау',
+      featuresCount: 4,
       highlighted: false,
     },
     {
-      name: 'Pro',
-      audience: 'Негізгі жұмыс тарифі',
+      keyId: 'pro',
       monthly: '35 000',
       yearly: '350 000',
-      features: [
-        '1 салон, 8 пайдаланушыға дейін',
-        'Толық цикл: өтінімнен монтажға',
-        'Өндіріс/монтаж этаптары',
-        'Тіндер мен қалдық есебі',
-        '7 күн тегін Pro trial',
-      ],
-      cta: '7 күн тегін көру',
+      featuresCount: 5,
       highlighted: true,
     },
     {
-      name: 'Network',
-      audience: 'Бірнеше салонға',
-      monthly: '60 000 бастап',
-      yearly: '600 000 бастап',
-      features: [
-        '2+ салон, рөлдер және рұқсаттар',
-        'Барлығы Pro тарифінен',
-        'Салондар бойынша жиынтық аналитика',
-        'Баға салон санына қарай',
-      ],
-      cta: 'Кеңес алу',
+      keyId: 'network',
+      monthly: '60 000',
+      yearly: '600 000',
+      featuresCount: 4,
+      suffix: ' +',
       highlighted: false,
     },
   ];
@@ -810,10 +813,10 @@ function Pricing() {
     <section id="pricing" className="py-20 sm:py-28">
       <div className="max-w-6xl mx-auto px-4 sm:px-6">
         <SectionHeading
-          badge="Тарифтер"
+          badge={t('landing.pricing.badge')}
           badgeIcon="store"
-          title="Өзіңізге ыңғайлы тарифті таңдаңыз"
-          subtitle="Үш деңгей: Start, Pro, Network. Pro тарифінде 7 күн тегін сынап көріңіз."
+          title={t('landing.pricing.title')}
+          subtitle={t('landing.pricing.subtitle')}
         />
 
         <motion.div
@@ -827,13 +830,13 @@ function Pricing() {
               onClick={() => setYearly(false)}
               className={`relative z-10 px-5 py-2 text-sm font-bold rounded-xl transition-colors ${!yearly ? 'text-primary' : 'text-text-secondary'}`}
             >
-              Айлық
+              {t('landing.pricing.monthly')}
             </button>
             <button
               onClick={() => setYearly(true)}
               className={`relative z-10 px-5 py-2 text-sm font-bold rounded-xl transition-colors ${yearly ? 'text-primary' : 'text-text-secondary'}`}
             >
-              Жылдық
+              {t('landing.pricing.yearly')}
             </button>
             <motion.span
               className="absolute top-1 bottom-1 bg-white rounded-xl shadow ring-1 ring-black/5"
@@ -847,7 +850,7 @@ function Pricing() {
               animate={{ opacity: 1, scale: 1 }}
               className="ml-3 self-center text-xs font-bold bg-primary/10 text-primary px-3 py-1 rounded-full"
             >
-              2 ай сыйлық
+              {t('landing.pricing.bonus')}
             </motion.span>
           )}
         </motion.div>
@@ -861,7 +864,7 @@ function Pricing() {
         >
           {plans.map((p) => (
             <motion.article
-              key={p.name}
+              key={p.keyId}
               variants={fadeUp}
               whileHover={{ y: -6, transition: { duration: 0.2 } }}
               className={`relative rounded-3xl p-7 border ${
@@ -872,11 +875,15 @@ function Pricing() {
             >
               {p.highlighted && (
                 <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-accent text-primary-dark text-[10px] font-black uppercase tracking-wider">
-                  Ұсынылады
+                  {t('landing.pricing.recommended')}
                 </div>
               )}
-              <h3 className={`text-xl font-bold ${p.highlighted ? 'text-white' : 'text-text-main'}`}>{p.name}</h3>
-              <p className={`text-sm mt-1 ${p.highlighted ? 'text-white/80' : 'text-text-secondary'}`}>{p.audience}</p>
+              <h3 className={`text-xl font-bold ${p.highlighted ? 'text-white' : 'text-text-main'}`}>
+                {t(`landing.pricing.plans.${p.keyId}.name`)}
+              </h3>
+              <p className={`text-sm mt-1 ${p.highlighted ? 'text-white/80' : 'text-text-secondary'}`}>
+                {t(`landing.pricing.plans.${p.keyId}.audience`)}
+              </p>
 
               <div className="mt-6 mb-1">
                 <AnimatePresence mode="wait">
@@ -888,24 +895,25 @@ function Pricing() {
                     transition={{ duration: 0.2 }}
                     className={`text-3xl sm:text-4xl font-black ${p.highlighted ? 'text-white' : 'text-text-main'}`}
                   >
-                    {yearly ? p.yearly : p.monthly} ₸
+                    {(yearly ? p.yearly : p.monthly)}
+                    {p.suffix || ''} ₸
                   </motion.span>
                 </AnimatePresence>
                 <span className={`text-sm ml-1 ${p.highlighted ? 'text-white/70' : 'text-text-secondary'}`}>
-                  / {yearly ? 'жыл' : 'ай'}
+                  {yearly ? t('landing.pricing.period_year') : t('landing.pricing.period_month')}
                 </span>
               </div>
 
               <ul className="mt-6 space-y-2.5">
-                {p.features.map((f) => (
-                  <li key={f} className="flex gap-2 items-start">
+                {Array.from({ length: p.featuresCount }, (_, i) => (
+                  <li key={i} className="flex gap-2 items-start">
                     <Icon
                       name="check_circle"
                       size={18}
                       className={`shrink-0 mt-0.5 ${p.highlighted ? 'text-accent' : 'text-primary'}`}
                     />
                     <span className={`text-sm leading-relaxed ${p.highlighted ? 'text-white/95' : 'text-text-main'}`}>
-                      {f}
+                      {t(`landing.pricing.plans.${p.keyId}.f${i + 1}`)}
                     </span>
                   </li>
                 ))}
@@ -919,7 +927,7 @@ function Pricing() {
                     : 'border-2 border-primary text-primary hover:bg-primary hover:text-white'
                 }`}
               >
-                {p.cta}
+                {t(`landing.pricing.plans.${p.keyId}.cta`)}
               </Link>
             </motion.article>
           ))}
@@ -929,45 +937,19 @@ function Pricing() {
   );
 }
 
-// ─── FAQ accordion ──────────────────────────────────────────────────────────
 function FAQ() {
-  const items = [
-    {
-      q: 'Картаны қажет ете ме сынау үшін?',
-      a: 'Жоқ, 7 күн Pro trial толықтай тегін, картасыз. Сынау аяқталғанда автоматты түрде Start тарифіне ауысады, ешбір төлем алынбайды.',
-    },
-    {
-      q: 'Қандай құрылғыдан жұмыс істей аламын?',
-      a: 'Кез келген: телефон, планшет, ноутбук, компьютер. Gardina — браузерде ашылатын PWA. Орнату қажет емес.',
-    },
-    {
-      q: 'Деректерім қаншалықты қауіпсіз?',
-      a: 'Барлық трафик HTTPS арқылы шифрланған. Әр салонның деректері басқалардан толық оқшауланған. Қол жеткізу журналы 1 жыл бойы сақталады.',
-    },
-    {
-      q: 'Бар Excel-деректерімді жүктей аламын ба?',
-      a: 'Иә. Кеңес сатысында сіздің бастапқы базаңызды (клиенттер, тапсырыстар) импорттауға көмектесеміз.',
-    },
-    {
-      q: 'Команда қанша адам болады?',
-      a: 'Start — 3 пайдаланушыға дейін, Pro — 8, Network — шектеусіз (бірнеше салон бойынша).',
-    },
-    {
-      q: 'Тарифтен қалай шығу керек?',
-      a: 'Кез келген уақытта: әкімші панелінен төмен тарифке ауысыңыз немесе аккаунтты белсенді емес ете аласыз. Деректер сақталады.',
-    },
-  ];
-
+  const { t } = useI18n();
+  const ids = [0, 1, 2, 3, 4, 5];
   const [open, setOpen] = useState(0);
 
   return (
     <section id="faq" className="py-20 sm:py-28 bg-gradient-to-b from-background-light to-white">
       <div className="max-w-3xl mx-auto px-4 sm:px-6">
         <SectionHeading
-          badge="Жиі қойылатын сұрақтар"
+          badge={t('landing.faq.badge')}
           badgeIcon="help"
-          title="Сұрақтар бар ма?"
-          subtitle="Көп нәрсе осы жерде шешіледі. Қалғаны үшін WhatsApp-ке жазыңыз — біздің команда жауап береді."
+          title={t('landing.faq.title')}
+          subtitle={t('landing.faq.subtitle')}
         />
 
         <motion.div
@@ -977,9 +959,9 @@ function FAQ() {
           variants={stagger}
           className="space-y-3"
         >
-          {items.map((it, i) => (
+          {ids.map((i) => (
             <motion.div
-              key={it.q}
+              key={i}
               variants={fadeUp}
               className="rounded-2xl bg-white border border-border-light/70 overflow-hidden"
             >
@@ -987,7 +969,7 @@ function FAQ() {
                 onClick={() => setOpen(open === i ? -1 : i)}
                 className="w-full flex items-center justify-between gap-4 px-5 sm:px-6 py-5 text-left hover:bg-background-light transition-colors"
               >
-                <span className="font-bold text-text-main">{it.q}</span>
+                <span className="font-bold text-text-main">{t(`landing.faq.items.${i}.q`)}</span>
                 <motion.span
                   animate={{ rotate: open === i ? 45 : 0 }}
                   transition={{ duration: 0.2 }}
@@ -1005,7 +987,9 @@ function FAQ() {
                     transition={{ duration: 0.25, ease: 'easeOut' }}
                     className="overflow-hidden"
                   >
-                    <div className="px-5 sm:px-6 pb-5 text-sm text-text-secondary leading-relaxed">{it.a}</div>
+                    <div className="px-5 sm:px-6 pb-5 text-sm text-text-secondary leading-relaxed">
+                      {t(`landing.faq.items.${i}.a`)}
+                    </div>
                   </motion.div>
                 )}
               </AnimatePresence>
@@ -1017,23 +1001,18 @@ function FAQ() {
   );
 }
 
-// ─── Process steps ──────────────────────────────────────────────────────────
 function Process() {
-  const steps = [
-    { n: '1', title: 'Кеңес', body: 'WhatsApp немесе хат арқылы сөйлесеміз. Салоныңызға не керек екенін бірге анықтаймыз.' },
-    { n: '2', title: 'Қосу', body: 'Компанияңызды қосып береміз. Қызметкерлерге қолжетімділікті өзіміз реттеп береміз.' },
-    { n: '3', title: 'Оқыту', body: 'Командаға қысқа әрі түсінікті нұсқаулық береміз: күнделікті жұмысты қалай жүргізу.' },
-    { n: '4', title: 'Жұмыс', body: 'Күнделікті жұмысты бір жерден жүргізесіз. Қажет кезде бізге бірден жаза аласыз.' },
-  ];
+  const { t } = useI18n();
+  const steps = [1, 2, 3, 4];
 
   return (
     <section className="py-20 sm:py-28">
       <div className="max-w-6xl mx-auto px-4 sm:px-6">
         <SectionHeading
-          badge="Қалай бастайсыз"
+          badge={t('landing.process.badge')}
           badgeIcon="arrow_forward"
-          title="Төрт қарапайым қадам"
-          subtitle="Сізге түсінікті, қарапайым жолмен бастаймыз."
+          title={t('landing.process.title')}
+          subtitle={t('landing.process.subtitle')}
         />
 
         <motion.ol
@@ -1043,14 +1022,14 @@ function Process() {
           variants={stagger}
           className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5"
         >
-          {steps.map((s, i) => (
-            <motion.li key={s.n} variants={fadeUp} className="relative">
+          {steps.map((n, i) => (
+            <motion.li key={n} variants={fadeUp} className="relative">
               <div className="rounded-2xl bg-white p-6 border border-border-light/80 shadow-card h-full">
                 <div className="size-12 rounded-xl bg-gradient-to-br from-primary to-accent text-white flex items-center justify-center font-black text-lg mb-4">
-                  {s.n}
+                  {n}
                 </div>
-                <h3 className="font-bold text-text-main mb-1.5">{s.title}</h3>
-                <p className="text-sm text-text-secondary leading-relaxed">{s.body}</p>
+                <h3 className="font-bold text-text-main mb-1.5">{t(`landing.process.s${n}Title`)}</h3>
+                <p className="text-sm text-text-secondary leading-relaxed">{t(`landing.process.s${n}Body`)}</p>
               </div>
               {i < steps.length - 1 && (
                 <div className="hidden lg:block absolute top-12 -right-3 z-10 text-primary/40">
@@ -1065,8 +1044,8 @@ function Process() {
   );
 }
 
-// ─── Final CTA ──────────────────────────────────────────────────────────────
 function CTA() {
+  const { t } = useI18n();
   return (
     <section className="py-20 sm:py-28">
       <div className="max-w-5xl mx-auto px-4 sm:px-6">
@@ -1090,10 +1069,10 @@ function CTA() {
 
           <div className="relative">
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-white tracking-tight">
-              Gardina сізге сай ма?
+              {t('landing.cta.title')}
             </h2>
             <p className="mt-4 text-base sm:text-lg text-white/85 leading-relaxed max-w-xl mx-auto">
-              Қысқа сұхбатта түсінеміз. Кейін жүйеге кіру немесе толық демо — сіздің таңдауыңыз.
+              {t('landing.cta.subtitle')}
             </p>
 
             <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center">
@@ -1102,7 +1081,7 @@ function CTA() {
                 className="inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl bg-white text-primary font-bold hover:bg-accent transition-all"
               >
                 <Icon name="arrow_forward" size={20} />
-                Тегін бастау
+                {t('landing.cta.primary')}
               </Link>
               <a
                 href="https://wa.me/77715373201"
@@ -1111,14 +1090,14 @@ function CTA() {
                 className="inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl border-2 border-white/30 text-white font-bold hover:bg-white/10 transition-all"
               >
                 <Icon name="chat" size={20} />
-                WhatsApp
+                {t('landing.cta.whatsapp')}
               </a>
               <a
                 href="tel:+77715373201"
                 className="inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl text-white/90 font-bold hover:text-white transition-all"
               >
                 <Icon name="phone" size={20} />
-                +7 771 537 3201
+                {t('landing.cta.phone')}
               </a>
             </div>
           </div>
@@ -1128,55 +1107,52 @@ function CTA() {
   );
 }
 
-// ─── Footer ─────────────────────────────────────────────────────────────────
 function LandingFooter() {
+  const { t } = useI18n();
   return (
     <footer className="bg-primary-dark text-white/85 py-14">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
         <div>
           <img src="/images/logo-header.png" alt="Gardina" className="h-10 w-auto mb-4 brightness-0 invert" />
-          <p className="text-sm leading-relaxed text-white/70">
-            Перде салондары мен ательелерге арналған жүйе: клиенттер, тапсырыс, өлшеу, ұсыныс, өндіріс және төлемдер бір жерде.
-          </p>
+          <p className="text-sm leading-relaxed text-white/70">{t('landing.footer.description')}</p>
         </div>
         <div>
-          <h4 className="font-bold text-white mb-3 text-sm uppercase tracking-wide">Навигация</h4>
+          <h4 className="font-bold text-white mb-3 text-sm uppercase tracking-wide">{t('landing.footer.nav')}</h4>
           <ul className="space-y-2 text-sm">
-            <li><a href="#problems" className="hover:text-white">Мәселе → шешім</a></li>
-            <li><a href="#features" className="hover:text-white">Артықшылық</a></li>
-            <li><a href="#modules" className="hover:text-white">Бөлімдер</a></li>
-            <li><a href="#pricing" className="hover:text-white">Тарифтер</a></li>
-            <li><a href="#faq" className="hover:text-white">Сұрақтар</a></li>
+            <li><a href="#problems" className="hover:text-white">{t('landing.nav.problems')}</a></li>
+            <li><a href="#features" className="hover:text-white">{t('landing.nav.features')}</a></li>
+            <li><a href="#modules" className="hover:text-white">{t('landing.nav.modules')}</a></li>
+            <li><a href="#pricing" className="hover:text-white">{t('landing.nav.pricing')}</a></li>
+            <li><a href="#faq" className="hover:text-white">{t('landing.nav.faq')}</a></li>
           </ul>
         </div>
         <div>
-          <h4 className="font-bold text-white mb-3 text-sm uppercase tracking-wide">Қосымша</h4>
+          <h4 className="font-bold text-white mb-3 text-sm uppercase tracking-wide">{t('landing.footer.extra')}</h4>
           <ul className="space-y-2 text-sm">
-            <li><Link to="/login" className="hover:text-white">Жүйеге кіру</Link></li>
-            <li><a href="mailto:info@gardina.kz" className="hover:text-white">info@gardina.kz</a></li>
-            <li><a href="https://wa.me/77715373201" target="_blank" rel="noreferrer" className="hover:text-white">WhatsApp</a></li>
-            <li><a href="/terms.html" className="hover:text-white">Қызмет көрсету шарты</a></li>
-            <li><a href="/privacy.html" className="hover:text-white">Құпиялылық саясаты</a></li>
+            <li><Link to="/login" className="hover:text-white">{t('landing.footer.login')}</Link></li>
+            <li><a href="mailto:info@gardina.kz" className="hover:text-white">{t('landing.footer.helpEmail')}</a></li>
+            <li><a href="https://wa.me/77715373201" target="_blank" rel="noreferrer" className="hover:text-white">{t('landing.footer.whatsapp')}</a></li>
+            <li><a href="/terms.html" className="hover:text-white">{t('landing.footer.terms')}</a></li>
+            <li><a href="/privacy.html" className="hover:text-white">{t('landing.footer.privacy')}</a></li>
           </ul>
         </div>
         <div>
-          <h4 className="font-bold text-white mb-3 text-sm uppercase tracking-wide">Байланыс</h4>
+          <h4 className="font-bold text-white mb-3 text-sm uppercase tracking-wide">{t('landing.footer.contact')}</h4>
           <ul className="space-y-2 text-sm">
             <li><a href="tel:+77715373201" className="hover:text-white">+7 771 537 3201</a></li>
             <li><a href="mailto:info@gardina.kz" className="hover:text-white">info@gardina.kz</a></li>
-            <li>Қазақстан</li>
+            <li>{t('landing.footer.address')}</li>
           </ul>
         </div>
       </div>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 mt-10 pt-6 border-t border-white/10 flex flex-col sm:flex-row justify-between text-xs text-white/60 gap-2">
-        <span>© 2026 Gardina. Барлық құқықтар қорғалған.</span>
-        <span>Жасаған: <a href="https://aqulas.me" className="hover:text-white">Aqulas</a></span>
+        <span>{t('landing.footer.copy')}</span>
+        <span>{t('landing.footer.by')}<a href="https://aqulas.me" className="hover:text-white">Aqulas</a></span>
       </div>
     </footer>
   );
 }
 
-// ─── Floating WhatsApp button ────────────────────────────────────────────────
 function FloatingWhatsApp() {
   return (
     <motion.a
@@ -1196,9 +1172,7 @@ function FloatingWhatsApp() {
   );
 }
 
-// ─── Main export ────────────────────────────────────────────────────────────
 export default function Landing() {
-  // Smooth-scroll for in-page anchors
   useEffect(() => {
     const onClick = (e) => {
       const a = e.target.closest('a[href^="#"]');

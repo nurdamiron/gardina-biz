@@ -4,28 +4,31 @@ import { useAuth } from '../contexts/AuthContext';
 import { billingAPI } from '../services/api';
 import Icon from '../components/common/Icon';
 import LanguageSwitcher from '../components/common/LanguageSwitcher';
+import { useI18n } from '../contexts/I18nContext';
 
-const PRICES = {
-  monthly: {
-    start: '15 000 ₸',
-    pro: '35 000 ₸',
-    network: '60 000 ₸ бастап',
-  },
-  yearly: {
-    start: '150 000 ₸',
-    pro: '350 000 ₸',
-    network: '600 000 ₸ бастап',
-  },
+const PRICE_AMOUNTS = {
+  monthly: { start: '15 000', pro: '35 000', network: '60 000' },
+  yearly:  { start: '150 000', pro: '350 000', network: '600 000' },
 };
 
 const PlanOnboarding = () => {
   const navigate = useNavigate();
   const { user, refreshUser, loading: authLoading } = useAuth();
+  const { t, lang } = useI18n();
   const [billingCycle, setBillingCycle] = useState('monthly');
   const [loadingStatus, setLoadingStatus] = useState(true);
   const [currentPlan, setCurrentPlan] = useState(null);
   const [saving, setSaving] = useState(null);
   const [error, setError] = useState(null);
+
+  const formatPrice = (planCode, cycle) => {
+    const amount = PRICE_AMOUNTS[cycle][planCode];
+    const fromWord = lang === 'kz' ? 'бастап' : 'от';
+    if (planCode === 'network') {
+      return lang === 'kz' ? `${amount} ₸ ${fromWord}` : `${fromWord} ${amount} ₸`;
+    }
+    return `${amount} ₸`;
+  };
 
   useEffect(() => {
     let cancelled = false;
@@ -63,11 +66,14 @@ const PlanOnboarding = () => {
   }
 
   const cycle = billingCycle;
-  const periodLabel = cycle === 'yearly' ? '/ жыл' : '/ ай';
-  const giftNote = cycle === 'yearly' ? '2 ай сыйлық (10× айлық)' : null;
+  const periodLabel =
+    cycle === 'yearly'
+      ? lang === 'kz' ? '/ жыл' : '/ год'
+      : lang === 'kz' ? '/ ай' : '/ мес';
+  const giftNote = cycle === 'yearly' ? t('onboarding.bonus') : null;
 
   const parseApiError = (err) =>
-    err.response?.data?.error || err.message || 'Сақтау сәтсіз аяқталды';
+    err.response?.data?.error || err.message || t('onboarding.errorSaveFailed');
 
   const afterSuccess = async () => {
     await refreshUser();
@@ -161,10 +167,9 @@ const PlanOnboarding = () => {
           <div className="flex justify-center mb-2">
             <LanguageSwitcher compact />
           </div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-text-main tracking-tight">Тарифті таңдаңыз</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-text-main tracking-tight">{t('onboarding.title')}</h1>
           <p className="text-text-secondary text-sm sm:text-base mt-2 max-w-xl mx-auto leading-relaxed">
-            Тіркелу аяқталды. Салоныңызға сәйкес тарифті таңдаңыз — таңдау жүйеде сақталады, кейін әкімші
-            панелінен өзгертуге болады.
+            {t('onboarding.subtitle')}
           </p>
           {user.organization?.name && (
             <p className="text-xs text-text-secondary mt-2 font-medium">
@@ -175,7 +180,7 @@ const PlanOnboarding = () => {
         </div>
 
         <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-8">
-          <span className="text-sm font-bold text-text-secondary">Төлем циклі:</span>
+          <span className="text-sm font-bold text-text-secondary">{t('onboarding.cycleLabel')}</span>
           <div className="flex p-1 rounded-xl bg-gray-100 border border-gray-200/80">
             <button
               type="button"
@@ -186,7 +191,7 @@ const PlanOnboarding = () => {
                   : 'text-text-secondary'
               }`}
             >
-              Айлық
+              {t('onboarding.monthly')}
             </button>
             <button
               type="button"
@@ -197,7 +202,7 @@ const PlanOnboarding = () => {
                   : 'text-text-secondary'
               }`}
             >
-              Жылдық
+              {t('onboarding.yearly')}
             </button>
           </div>
           {giftNote && (
@@ -225,26 +230,26 @@ const PlanOnboarding = () => {
               }`}
             >
               <div className="flex items-center justify-between mb-3">
-                <h2 className="text-lg font-bold text-text-main">Start</h2>
+                <h2 className="text-lg font-bold text-text-main">{t('onboarding.start.name')}</h2>
                 {currentPlan === 'start' && (
                   <span className="text-[10px] font-bold uppercase tracking-wide text-primary bg-primary/10 px-2 py-0.5 rounded">
-                    Ағымдағы
+                    {t('onboarding.current')}
                   </span>
                 )}
               </div>
-              <p className="text-xs text-text-secondary mb-4 leading-relaxed">Кіші салондарға: клиенттер, воронка, күнтізбе.</p>
+              <p className="text-xs text-text-secondary mb-4 leading-relaxed">{t('onboarding.start.description')}</p>
               <div className="mb-4">
-                <span className="text-2xl font-black text-primary">{PRICES[cycle].start}</span>
+                <span className="text-2xl font-black text-primary">{formatPrice('start', cycle)}</span>
                 <span className="text-sm text-text-secondary font-medium">{periodLabel}</span>
               </div>
               <ul className="text-xs text-text-secondary space-y-2 mb-6 flex-1">
                 <li className="flex gap-2">
                   <Icon name="check_circle" size={16} className="text-primary shrink-0 mt-0.5" />
-                  1 салон, 3 пайдаланушыға дейін
+                  {t('onboarding.start.feature1')}
                 </li>
                 <li className="flex gap-2">
                   <Icon name="check_circle" size={16} className="text-primary shrink-0 mt-0.5" />
-                  Негізгі аналитика
+                  {t('onboarding.start.feature2')}
                 </li>
               </ul>
               <button
@@ -253,7 +258,7 @@ const PlanOnboarding = () => {
                 onClick={onSelectStart}
                 className="w-full py-3 rounded-xl border-2 border-primary text-primary font-bold hover:bg-primary/5 transition-all disabled:opacity-50"
               >
-                {saving === 'start' ? 'Сақталуда…' : 'Start таңдау'}
+                {saving === 'start' ? t('onboarding.saving') : t('onboarding.start.cta')}
               </button>
             </div>
 
@@ -266,29 +271,29 @@ const PlanOnboarding = () => {
               }`}
             >
               <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 rounded-full bg-primary text-white text-[10px] font-bold uppercase tracking-wide">
-                Ұсынылады
+                {t('onboarding.recommended')}
               </div>
               <div className="flex items-center justify-between mb-3 mt-2">
-                <h2 className="text-lg font-bold text-text-main">Pro</h2>
+                <h2 className="text-lg font-bold text-text-main">{t('onboarding.pro.name')}</h2>
                 {currentPlan === 'pro' && (
                   <span className="text-[10px] font-bold uppercase tracking-wide text-primary bg-primary/10 px-2 py-0.5 rounded">
-                    Ағымдағы
+                    {t('onboarding.current')}
                   </span>
                 )}
               </div>
-              <p className="text-xs text-text-secondary mb-4 leading-relaxed">Толық цикл: өтінімнен монтажға дейін, склад, тапсырмалар.</p>
+              <p className="text-xs text-text-secondary mb-4 leading-relaxed">{t('onboarding.pro.description')}</p>
               <div className="mb-4">
-                <span className="text-2xl font-black text-primary">{PRICES[cycle].pro}</span>
+                <span className="text-2xl font-black text-primary">{formatPrice('pro', cycle)}</span>
                 <span className="text-sm text-text-secondary font-medium">{periodLabel}</span>
               </div>
               <ul className="text-xs text-text-secondary space-y-2 mb-4 flex-1">
                 <li className="flex gap-2">
                   <Icon name="check_circle" size={16} className="text-primary shrink-0 mt-0.5" />
-                  8 пайдаланушыға дейін, толық workflow
+                  {t('onboarding.pro.feature1')}
                 </li>
                 <li className="flex gap-2">
                   <Icon name="check_circle" size={16} className="text-primary shrink-0 mt-0.5" />
-                  7 күн Pro trial (карта қажет емес)
+                  {t('onboarding.pro.feature2')}
                 </li>
               </ul>
               <div className="space-y-2 mt-auto">
@@ -298,7 +303,7 @@ const PlanOnboarding = () => {
                   onClick={onProTrial}
                   className="w-full py-3 rounded-xl bg-primary text-white font-bold hover:brightness-110 transition-all disabled:opacity-50 shadow-lg shadow-primary/20"
                 >
-                  {saving === 'pro-trial' ? 'Белгіленуде…' : '7 күн тегін Pro'}
+                  {saving === 'pro-trial' ? t('onboarding.starting') : t('onboarding.pro.ctaTrial')}
                 </button>
                 <button
                   type="button"
@@ -306,7 +311,11 @@ const PlanOnboarding = () => {
                   onClick={onProPaid}
                   className="w-full py-2.5 rounded-xl border border-gray-200 text-text-main text-sm font-bold hover:bg-gray-50 transition-all disabled:opacity-50"
                 >
-                  {saving === 'pro-paid' ? 'Сақталуда…' : `Pro — төлем (${cycle === 'yearly' ? 'жылдық' : 'айлық'})`}
+                  {saving === 'pro-paid'
+                    ? t('onboarding.saving')
+                    : t('onboarding.pro.ctaPaid', {
+                        cycle: cycle === 'yearly' ? t('onboarding.pro.cycleYearly') : t('onboarding.pro.cycleMonthly'),
+                      })}
                 </button>
               </div>
             </div>
@@ -318,26 +327,26 @@ const PlanOnboarding = () => {
               }`}
             >
               <div className="flex items-center justify-between mb-3">
-                <h2 className="text-lg font-bold text-text-main">Network</h2>
+                <h2 className="text-lg font-bold text-text-main">{t('onboarding.network.name')}</h2>
                 {currentPlan === 'network' && (
                   <span className="text-[10px] font-bold uppercase tracking-wide text-primary bg-primary/10 px-2 py-0.5 rounded">
-                    Ағымдағы
+                    {t('onboarding.current')}
                   </span>
                 )}
               </div>
-              <p className="text-xs text-text-secondary mb-4 leading-relaxed">Бірнеше салон, жиынтық аналитика.</p>
+              <p className="text-xs text-text-secondary mb-4 leading-relaxed">{t('onboarding.network.description')}</p>
               <div className="mb-4">
-                <span className="text-2xl font-black text-primary">{PRICES[cycle].network}</span>
+                <span className="text-2xl font-black text-primary">{formatPrice('network', cycle)}</span>
                 <span className="text-sm text-text-secondary font-medium">{periodLabel}</span>
               </div>
               <ul className="text-xs text-text-secondary space-y-2 mb-6 flex-1">
                 <li className="flex gap-2">
                   <Icon name="check_circle" size={16} className="text-primary shrink-0 mt-0.5" />
-                  Pro мүмкіндіктері + бірнеше нүкте
+                  {t('onboarding.network.feature1')}
                 </li>
                 <li className="flex gap-2">
                   <Icon name="check_circle" size={16} className="text-primary shrink-0 mt-0.5" />
-                  Баға салон санына байланысты
+                  {t('onboarding.network.feature2')}
                 </li>
               </ul>
               <button
@@ -346,15 +355,13 @@ const PlanOnboarding = () => {
                 onClick={onSelectNetwork}
                 className="w-full py-3 rounded-xl border-2 border-primary text-primary font-bold hover:bg-primary/5 transition-all disabled:opacity-50"
               >
-                {saving === 'network' ? 'Сақталуда…' : 'Network таңдау'}
+                {saving === 'network' ? t('onboarding.saving') : t('onboarding.network.cta')}
               </button>
             </div>
           </div>
         )}
 
-        <p className="text-center text-xs text-text-secondary mt-8 max-w-lg mx-auto leading-relaxed">
-          Төлем шлюзі қосылғанша тариф жүйеде келісім ретінде сақталады. Trial кезінде карта қажет емес.
-        </p>
+        <p className="text-center text-xs text-text-secondary mt-8 max-w-lg mx-auto leading-relaxed">{t('onboarding.notice')}</p>
 
         <div className="flex justify-center mt-6">
           <button
@@ -363,7 +370,7 @@ const PlanOnboarding = () => {
             onClick={onSkipLater}
             className="text-sm text-text-secondary hover:text-primary font-medium underline-offset-2 hover:underline disabled:opacity-50"
           >
-            {saving === 'skip' ? 'Күте тұрыңыз…' : 'Кейінірек — Start қалдыру'}
+            {saving === 'skip' ? t('onboarding.please_wait') : t('onboarding.skipLater')}
           </button>
         </div>
       </div>

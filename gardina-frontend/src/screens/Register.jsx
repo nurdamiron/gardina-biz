@@ -67,18 +67,18 @@ const Register = () => {
 
   const validate = () => {
     if (mode === MODES.salon) {
-      if (!organizationName.trim()) return 'Салон атауын енгізіңіз';
+      if (!organizationName.trim()) return t('auth.errorOrgNameRequired');
       if (!organizationSlug.trim() || organizationSlug.trim().length < 2) {
-        return 'Сілтеме коды (slug) кемінде 2 таңба, латын және сан';
+        return t('auth.errorSlugTooShort');
       }
     } else {
-      if (!organizationSlug.trim()) return 'Салон slug-ын енгізіңіз';
+      if (!organizationSlug.trim()) return t('auth.errorSlugRequired');
     }
-    if (!name.trim()) return 'Аты-жөніңізді енгізіңіз';
-    if (!phone.trim()) return 'Телефон немесе логин қажет';
-    if (!password || password.length < 6) return 'Құпия сөз кемінде 6 таңба';
-    if (password !== confirmPassword) return 'Құпия сөздер сәйкес емес';
-    if (!acceptedTerms) return 'Шарттарды және құпиялылық саясатын қабылдау қажет';
+    if (!name.trim()) return t('auth.errorNameRequired');
+    if (!phone.trim()) return t('auth.errorPhoneRequired');
+    if (!password || password.length < 6) return t('auth.errorPasswordTooShort');
+    if (password !== confirmPassword) return t('auth.errorPasswordsMismatch');
+    if (!acceptedTerms) return t('auth.errorConsentRequired');
     return null;
   };
 
@@ -146,9 +146,7 @@ const Register = () => {
             <LanguageSwitcher compact />
           </div>
           <h1 className="text-2xl font-bold text-text-main tracking-tight">{t('auth.registerTitle')}</h1>
-          <p className="text-sm text-text-secondary mt-1.5 font-medium">
-            Жаңа салон ашыңыз немесе командаға қосылыңыз
-          </p>
+          <p className="text-sm text-text-secondary mt-1.5 font-medium">{t('auth.registerSubtitle')}</p>
         </div>
 
         <div className="rounded-3xl bg-white shadow-xl shadow-primary/5 border border-primary/10 overflow-hidden">
@@ -166,7 +164,7 @@ const Register = () => {
                 }`}
               >
                 <Icon name="storefront" size={18} />
-                Жаңа салон
+                {t('auth.modeNewSalon')}
               </button>
               <button
                 type="button"
@@ -178,7 +176,7 @@ const Register = () => {
                 }`}
               >
                 <Icon name="group_add" size={18} />
-                Командаға
+                {t('auth.modeJoin')}
               </button>
             </div>
 
@@ -194,7 +192,7 @@ const Register = () => {
                 <>
                   <div>
                     <label className="block text-xs font-bold text-text-secondary uppercase tracking-wide mb-1.5">
-                      Салон атауы
+                      {t('auth.organizationName')}
                     </label>
                     <div className="relative">
                       <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -205,14 +203,14 @@ const Register = () => {
                         value={organizationName}
                         onChange={(e) => onOrgNameChange(e.target.value)}
                         className="block w-full pl-10 pr-3 py-3 border border-gray-200 rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-shadow"
-                        placeholder="Мысалы: Gardina Алматы"
+                        placeholder={t('auth.organizationNamePlaceholder')}
                         autoComplete="organization"
                       />
                     </div>
                   </div>
                   <div>
                     <label className="block text-xs font-bold text-text-secondary uppercase tracking-wide mb-1.5">
-                      Сілтеме коды (slug)
+                      {t('auth.organizationSlug')}
                     </label>
                     <div className="relative">
                       <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -232,13 +230,11 @@ const Register = () => {
                           );
                         }}
                         className="block w-full pl-10 pr-3 py-3 border border-gray-200 rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-shadow font-mono text-sm"
-                        placeholder="gardina-almaty"
+                        placeholder={t('auth.organizationSlugPlaceholder')}
                         autoComplete="off"
                       />
                     </div>
-                    <p className="text-xs text-text-secondary mt-1.5 leading-relaxed">
-                      Тек латын әріптері, сандар және дефис. Кіру кезінде осы код қажет болуы мүмкін.
-                    </p>
+                    <p className="text-xs text-text-secondary mt-1.5 leading-relaxed">{t('auth.organizationSlugHint')}</p>
                   </div>
                 </>
               )}
@@ -246,7 +242,7 @@ const Register = () => {
               {mode === MODES.join && (
                 <div>
                   <label className="block text-xs font-bold text-text-secondary uppercase tracking-wide mb-1.5">
-                    Салон slug-ы
+                    {t('auth.organizationSlugJoin')}
                   </label>
                   <div className="relative">
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -265,19 +261,17 @@ const Register = () => {
                         )
                       }
                       className="block w-full pl-10 pr-3 py-3 border border-gray-200 rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-shadow font-mono text-sm"
-                      placeholder="әкімші берген код"
+                      placeholder={t('auth.organizationSlugJoinPlaceholder')}
                       autoComplete="off"
                     />
                   </div>
-                  <p className="text-xs text-text-secondary mt-1.5">
-                    Әкімшіден алған салон идентификаторын енгізіңіз. Қоғамдық тіркелу өшік болса, бұл режим жұмыс істемейді.
-                  </p>
+                  <p className="text-xs text-text-secondary mt-1.5">{t('auth.organizationSlugJoinHint')}</p>
                 </div>
               )}
 
               <div>
                 <label className="block text-xs font-bold text-text-secondary uppercase tracking-wide mb-1.5">
-                  Аты-жөніңіз
+                  {t('auth.fullName')}
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -288,7 +282,7 @@ const Register = () => {
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     className="block w-full pl-10 pr-3 py-3 border border-gray-200 rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-shadow"
-                    placeholder="Толық аты"
+                    placeholder={t('auth.fullNamePlaceholder')}
                     autoComplete="name"
                   />
                 </div>
@@ -296,7 +290,7 @@ const Register = () => {
 
               <div>
                 <label className="block text-xs font-bold text-text-secondary uppercase tracking-wide mb-1.5">
-                  Телефон / логин
+                  {t('auth.phone')}
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -307,15 +301,16 @@ const Register = () => {
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
                     className="block w-full pl-10 pr-3 py-3 border border-gray-200 rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-shadow"
-                    placeholder="+7 … немесе логин"
+                    placeholder={t('auth.phonePlaceholder')}
                     autoComplete="tel"
+                    inputMode="tel"
                   />
                 </div>
               </div>
 
               <div>
                 <label className="block text-xs font-bold text-text-secondary uppercase tracking-wide mb-1.5">
-                  Email <span className="font-normal normal-case text-text-secondary/70">(қалауыңызша)</span>
+                  {t('auth.email')} <span className="font-normal normal-case text-text-secondary/70">{t('auth.emailOptional')}</span>
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -334,7 +329,7 @@ const Register = () => {
 
               <div>
                 <label className="block text-xs font-bold text-text-secondary uppercase tracking-wide mb-1.5">
-                  Құпия сөз
+                  {t('auth.password')}
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -345,14 +340,14 @@ const Register = () => {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     className="block w-full pl-10 pr-12 py-3 border border-gray-200 rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-shadow"
-                    placeholder="Кемінде 6 таңба"
+                    placeholder={t('auth.passwordPlaceholderMin')}
                     autoComplete="new-password"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
                     className="absolute inset-y-0 right-0 pr-3 flex items-center"
-                    aria-label={showPassword ? 'Жасыру' : 'Көрсету'}
+                    aria-label={showPassword ? t('auth.hidePassword') : t('auth.showPassword')}
                   >
                     <Icon
                       name={showPassword ? 'visibility_off' : 'visibility'}
@@ -365,7 +360,7 @@ const Register = () => {
 
               <div>
                 <label className="block text-xs font-bold text-text-secondary uppercase tracking-wide mb-1.5">
-                  Құпия сөзді растаңыз
+                  {t('auth.passwordConfirm')}
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -376,7 +371,7 @@ const Register = () => {
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     className="block w-full pl-10 pr-3 py-3 border border-gray-200 rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-shadow"
-                    placeholder="Қайта енгізіңіз"
+                    placeholder={t('auth.passwordConfirmPlaceholder')}
                     autoComplete="new-password"
                   />
                 </div>
@@ -390,10 +385,10 @@ const Register = () => {
                   className="mt-0.5 size-4 rounded border-gray-300 text-primary focus:ring-primary"
                 />
                 <span className="text-xs text-text-secondary leading-relaxed">
-                  <a href="/terms.html" target="_blank" rel="noreferrer" className="text-primary font-bold hover:underline">Қызмет көрсету шартын</a>
-                  {' '}және{' '}
-                  <a href="/privacy.html" target="_blank" rel="noreferrer" className="text-primary font-bold hover:underline">Дербес деректерді өңдеу саясатын</a>
-                  {' '}оқыдым және қабылдаймын
+                  {t('auth.consentText')}{' '}
+                  <a href="/terms.html" target="_blank" rel="noreferrer" className="text-primary font-bold hover:underline">{t('auth.consentTerms')}</a>
+                  {' '}{t('auth.consentAnd')}{' '}
+                  <a href="/privacy.html" target="_blank" rel="noreferrer" className="text-primary font-bold hover:underline">{t('auth.consentPrivacy')}</a>
                 </span>
               </label>
 
@@ -409,7 +404,7 @@ const Register = () => {
                   </>
                 ) : (
                   <>
-                    {mode === MODES.salon ? 'Салонды тіркеу' : 'Аккаунт құру'}
+                    {mode === MODES.salon ? t('auth.registerSalonCta') : t('auth.registerJoinCta')}
                     <Icon name="arrow_forward" />
                   </>
                 )}
@@ -425,9 +420,7 @@ const Register = () => {
           </div>
         </div>
 
-        <p className="text-center text-xs text-text-secondary/90 mt-6">
-          © 2026 Gardina. Барлық құқықтар қорғалған.
-        </p>
+        <p className="text-center text-xs text-text-secondary/90 mt-6">{t('auth.copyright')}</p>
       </div>
     </div>
   );

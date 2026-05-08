@@ -1,0 +1,65 @@
+const auth = {
+  loginTitle: 'Кіру',
+  loginSubtitle: 'Перде салондары мен ательелерге арналған жүйе',
+  registerTitle: 'Тіркелу',
+  registerSubtitle: 'Жаңа салон ашыңыз немесе командаға қосылыңыз',
+
+  modeNewSalon: 'Жаңа салон',
+  modeJoin: 'Командаға',
+
+  organizationName: 'Салон атауы',
+  organizationNamePlaceholder: 'Мысалы: Gardina Алматы',
+  organizationSlug: 'Сілтеме коды (slug)',
+  organizationSlugPlaceholder: 'gardina-almaty',
+  organizationSlugHint: 'Тек латын әріптері, сандар және дефис. Кіру кезінде осы код қажет болуы мүмкін.',
+  organizationSlugJoin: 'Салон slug-ы',
+  organizationSlugJoinPlaceholder: 'әкімші берген код',
+  organizationSlugJoinHint:
+    'Әкімшіден алған салон идентификаторын енгізіңіз. Қоғамдық тіркелу өшік болса, бұл режим жұмыс істемейді.',
+  fullName: 'Аты-жөніңіз',
+  fullNamePlaceholder: 'Толық аты',
+  loginField: 'Логин',
+  loginFieldPlaceholder: 'Телефон немесе логин',
+  phone: 'Телефон / логин',
+  phonePlaceholder: '+7 … немесе логин',
+  email: 'Email',
+  emailOptional: '(қалауыңызша)',
+  emailPlaceholder: 'you@example.com',
+  password: 'Құпия сөз',
+  passwordPlaceholderMin: 'Кемінде 6 таңба',
+  passwordConfirm: 'Құпия сөзді растаңыз',
+  passwordConfirmPlaceholder: 'Қайта енгізіңіз',
+  organizationSlugLogin: 'Salon slug',
+  organizationSlugLoginOptional: '(бірнеше салонда болсаңыз)',
+
+  login: 'Кіру',
+  loginCta: 'Жүйеге кіру',
+  register: 'Тіркелу',
+  registerSalonCta: 'Салонды тіркеу',
+  registerJoinCta: 'Аккаунт құру',
+  showPassword: 'Көрсету',
+  hidePassword: 'Жасыру',
+
+  noAccount: 'Жаңа аккаунт керек пе?',
+  hasAccount: 'Аккаунтыңыз бар ма?',
+  forgotPassword: 'Құпия сөзді ұмыттыңыз ба?',
+
+  consentText: 'Мен оқыдым және қабылдаймын:',
+  consentTerms: 'Қызмет көрсету шарты',
+  consentAnd: 'және',
+  consentPrivacy: 'Дербес деректерді өңдеу саясаты',
+
+  errorOrgNameRequired: 'Салон атауын енгізіңіз',
+  errorSlugRequired: 'Салон slug-ын енгізіңіз',
+  errorSlugTooShort: 'Slug — кемінде 2 таңба, латын және сан',
+  errorNameRequired: 'Аты-жөніңізді енгізіңіз',
+  errorPhoneRequired: 'Телефон немесе логин қажет',
+  errorPasswordTooShort: 'Құпия сөз — кемінде 6 таңба',
+  errorPasswordsMismatch: 'Құпия сөздер сәйкес емес',
+  errorConsentRequired: 'Шарттар мен саясатты қабылдау қажет',
+  errorLoginFailed: 'Логин немесе құпия сөз қате',
+
+  copyright: '© 2026 Gardina. Барлық құқықтар қорғалған.',
+};
+
+export default auth;
