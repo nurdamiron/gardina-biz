@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useApp } from '../contexts/AppContext';
+import { useI18n } from '../contexts/I18nContext';
 import { usersAPI } from '../services/api';
 import BottomNav from '../components/navigation/BottomNav';
 import { SkeletonCard } from '../components/common/Skeleton';
@@ -10,6 +11,7 @@ import Icon from '../components/common/Icon';
 const ManagerTasksList = () => {
     const navigate = useNavigate();
     const { user } = useAuth();
+    const { t, lang } = useI18n();
     const { measurements, loadData } = useApp();
 
     const [loading, setLoading] = useState(false);
@@ -54,12 +56,12 @@ const ManagerTasksList = () => {
     });
 
     const getStatusBadge = (status) => {
-        switch (status) {
-            case 'scheduled': return <span className="px-2 py-0.5 rounded bg-primary/15 text-primary text-xs font-medium">Жоспарланған</span>;
-            case 'in_progress': return <span className="px-2 py-0.5 rounded bg-yellow-100 text-yellow-800 text-xs font-medium">Орындалуда</span>;
-            case 'completed': return <span className="px-2 py-0.5 rounded bg-green-100 text-green-800 text-xs font-medium">Аяқталды</span>;
-            default: return <span className="px-2 py-0.5 rounded bg-gray-100 text-gray-800 text-xs font-medium">{status}</span>;
-        }
+        const cls = {
+            scheduled: 'bg-primary/15 text-primary',
+            in_progress: 'bg-yellow-100 text-yellow-800',
+            completed: 'bg-green-100 text-green-800',
+        }[status] || 'bg-gray-100 text-gray-800';
+        return <span className={`px-2 py-0.5 rounded text-xs font-medium ${cls}`}>{t(`measurements.status.${status}`, status)}</span>;
     };
 
     return (
@@ -67,13 +69,13 @@ const ManagerTasksList = () => {
             {/* Header */}
             <header className="sticky top-0 z-30 bg-white/80 backdrop-blur-md border-b border-gray-100 px-4 py-3">
                 <div className="flex items-center justify-between">
-                    <h1 className="text-xl font-bold text-gray-900">Тапсырмалар</h1>
+                    <h1 className="text-xl font-bold text-gray-900">{t('tasks.list.title')}</h1>
                     <button
                         onClick={() => navigate('/manager/order/new')}
                         className="flex items-center gap-1 bg-primary text-white px-3 py-1.5 rounded-lg text-sm font-medium hover:brightness-110 transition-all shadow-sm active:scale-95"
                     >
                         <Icon name="add" size={18} />
-                        Жаңа
+                        {t('clients.list.add')}
                     </button>
                 </div>
 
@@ -84,10 +86,10 @@ const ManagerTasksList = () => {
                         onChange={(e) => setStatusFilter(e.target.value)}
                         className="bg-white border border-gray-200 text-gray-700 text-sm rounded-lg focus:ring-primary focus:border-primary block p-2"
                     >
-                        <option value="all">Барлық статус</option>
-                        <option value="scheduled">Жоспарланған</option>
-                        <option value="in_progress">Орындалуда</option>
-                        <option value="completed">Аяқталды</option>
+                        <option value="all">{t('orders.filters.allStatus')}</option>
+                        <option value="scheduled">{t('measurements.status.scheduled')}</option>
+                        <option value="in_progress">{t('measurements.status.in_progress')}</option>
+                        <option value="completed">{t('measurements.status.completed')}</option>
                     </select>
 
                     <select
@@ -95,7 +97,7 @@ const ManagerTasksList = () => {
                         onChange={(e) => setDesignerFilter(e.target.value)}
                         className="bg-white border border-gray-200 text-gray-700 text-sm rounded-lg focus:ring-primary focus:border-primary block p-2"
                     >
-                        <option value="all">Барлық дизайнерлер</option>
+                        <option value="all">{t('orders.filters.allDesigners')}</option>
                         {designers.map(d => (
                             <option key={d.id} value={d.id}>{d.name}</option>
                         ))}
@@ -120,7 +122,7 @@ const ManagerTasksList = () => {
                         >
                             <div className="flex justify-between items-start mb-2">
                                 <div>
-                                    <h3 className="font-bold text-gray-900">{item.clientName || 'Белгісіз клиент'}</h3>
+                                    <h3 className="font-bold text-gray-900">{item.clientName || t('orders.card.unknownClient')}</h3>
                                     <p className="text-xs text-gray-500">{item.clientPhone}</p>
                                 </div>
                                 {getStatusBadge(item.status)}
@@ -136,10 +138,10 @@ const ManagerTasksList = () => {
                                     <div className="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center text-xs font-bold text-gray-600">
                                         {item.designerId ? 'D' : '?'}
                                     </div>
-                                    <span className="text-xs text-gray-500">Дизайнер тағайындалған</span>
+                                    <span className="text-xs text-gray-500">{t('tasks.card.designer')}</span>
                                 </div>
                                 <span className="text-xs font-medium text-gray-400">
-                                    {new Date(item.scheduledAt).toLocaleDateString()}
+                                    {new Date(item.scheduledAt).toLocaleDateString(lang === 'kz' ? 'kk-KZ' : 'ru-RU')}
                                 </span>
                             </div>
                         </div>
@@ -147,7 +149,7 @@ const ManagerTasksList = () => {
                 ) : (
                     <div className="flex flex-col items-center justify-center py-12 text-gray-400">
                         <Icon name="inbox" size={48} />
-                        <p>Тапсырмалар табылмады</p>
+                        <p>{t('tasks.list.empty')}</p>
                     </div>
                 )}
             </main>

@@ -8,6 +8,13 @@ import dashboard from './kz/dashboard';
 import orders from './kz/orders';
 import notifications from './kz/notifications';
 import measurements from './kz/measurements';
+import clients from './kz/clients';
+import deals from './kz/deals';
+import tasks from './kz/tasks';
+import proposalsNs from './kz/proposals';
+import fabrics from './kz/fabrics';
+import services from './kz/services';
+import prompts from './kz/prompts';
 import adminLayout from './kz/adminLayout';
 import adminSettings from './kz/adminSettings';
 import notificationSettings from './kz/notificationSettings';
@@ -28,6 +35,13 @@ const kz = {
   orders,
   notifications,
   measurements,
+  clients,
+  deals,
+  tasks,
+  proposals: proposalsNs,
+  fabrics,
+  services,
+  prompts,
   adminLayout,
   adminSettings,
   notificationSettings,

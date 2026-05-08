@@ -8,19 +8,14 @@ import {
   isStandalone,
 } from '../../services/pushService';
 import Icon from './Icon';
+import { useI18n } from '../../contexts/I18nContext';
 
 const DISMISSED_KEY = 'push_prompt_dismissed_at';
 const ENABLED_KEY = 'push_subscribed';
 
-/**
- * One-time push notification permission prompt.
- * - Shows once, 4 seconds after login
- * - Respects "dismissed" state (7 days cooldown)
- * - iOS Safari: shows install guide instead
- * - Can be re-triggered from NotificationSettings
- */
 const PushPermissionPrompt = ({ onComplete }) => {
   const navigate = useNavigate();
+  const { t } = useI18n();
   const [visible, setVisible] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -29,23 +24,15 @@ const PushPermissionPrompt = ({ onComplete }) => {
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      // Already subscribed
       if (localStorage.getItem(ENABLED_KEY)) return;
-
-      // Dismissed recently (7 days)
       const dismissed = localStorage.getItem(DISMISSED_KEY);
       if (dismissed && Date.now() - parseInt(dismissed) < 7 * 86400000) return;
-
-      // Not supported at all (and not iOS)
       if (!iosDevice && !isPushSupported()) return;
-
-      // Already granted or denied (non-iOS)
       if (!iosDevice && getPermissionStatus() !== 'default') return;
-
       setVisible(true);
     }, 4000);
-
     return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const dismiss = () => {
@@ -74,45 +61,43 @@ const PushPermissionPrompt = ({ onComplete }) => {
 
   if (!visible) return null;
 
-  // iOS Safari browser — show PWA install guide
   if (iosDevice && !standalone) {
     return (
       <Backdrop onClose={dismiss}>
         <div className="bg-gradient-to-r from-primary to-primary/80 -mx-6 -mt-6 px-6 py-5 rounded-t-2xl text-white text-center mb-5">
           <Icon name="install_mobile" size={32} className="mx-auto mb-2" />
-          <h2 className="text-lg font-bold">Қолданбаны орнатыңыз</h2>
+          <h2 className="text-lg font-bold">{t('prompts.pwa.iosTitle')}</h2>
         </div>
-        <p className="text-sm text-gray-600 mb-4 text-center">
-          iPhone-да хабарламалар алу үшін қолданбаны үй экранына қосыңыз
-        </p>
+        <p className="text-sm text-gray-600 mb-4 text-center">{t('prompts.pwa.iosBody')}</p>
         <div className="space-y-3 mb-5">
-          <Step n="1">Safari → <b>«Бөлісу»</b> <Icon name="ios_share" size={16} className="inline text-primary" /></Step>
-          <Step n="2"><b>«Үй экранына қосу»</b> тандаңыз</Step>
-          <Step n="3">Қолданбаны іске қосыңыз → хабарламаларды қосыңыз</Step>
+          <Step n="1">
+            {t('prompts.pwa.iosStep1')}<b>{t('prompts.pwa.iosStep1Bold')}</b> <Icon name="ios_share" size={16} className="inline text-primary" />
+          </Step>
+          <Step n="2">
+            <b>{t('prompts.pwa.iosStep2Bold')}</b>{t('prompts.pwa.iosStep2')}
+          </Step>
+          <Step n="3">{t('prompts.pwa.iosStep3')}</Step>
         </div>
-        <button onClick={dismiss} className="w-full py-3 text-gray-400 text-sm hover:text-gray-600">Кейінірек</button>
+        <button onClick={dismiss} className="w-full py-3 text-gray-400 text-sm hover:text-gray-600">{t('prompts.push.later')}</button>
       </Backdrop>
     );
   }
 
-  // Standard permission request
   return (
     <Backdrop onClose={dismiss}>
-      {/* Header */}
       <div className="bg-gradient-to-r from-primary to-primary/80 -mx-6 -mt-6 px-6 py-6 rounded-t-2xl text-white text-center mb-5">
         <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-3">
           <Icon name="notifications_active" size={30} />
         </div>
-        <h2 className="text-xl font-bold">Хабарламаларды қосу</h2>
-        <p className="text-white/80 text-sm mt-1">Маңызды оқиғаларды жіберіп алмаңыз</p>
+        <h2 className="text-xl font-bold">{t('prompts.push.title')}</h2>
+        <p className="text-white/80 text-sm mt-1">{t('prompts.push.subtitle')}</p>
       </div>
 
-      {/* Benefits */}
       <div className="space-y-2.5 mb-5">
         {[
-          { icon: 'assignment', text: 'Жаңа тапсырма тағайындалғанда' },
-          { icon: 'payments', text: 'Төлем түскенде' },
-          { icon: 'sync', text: 'Тапсырыс статусы өзгергенде' },
+          { icon: 'assignment', text: t('prompts.pushBenefits.taskAssigned') },
+          { icon: 'payments', text: t('prompts.pushBenefits.paymentReceived') },
+          { icon: 'sync', text: t('prompts.pushBenefits.statusChanged') },
         ].map(({ icon, text }) => (
           <div key={text} className="flex items-center gap-3 text-sm text-gray-700">
             <div className="size-8 rounded-full bg-green-50 flex items-center justify-center flex-shrink-0">
@@ -127,7 +112,6 @@ const PushPermissionPrompt = ({ onComplete }) => {
         <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-700">{error}</div>
       )}
 
-      {/* Actions */}
       <div className="space-y-2">
         <button
           onClick={handleEnable}
@@ -135,14 +119,14 @@ const PushPermissionPrompt = ({ onComplete }) => {
           className="w-full py-3.5 bg-primary text-white font-bold rounded-xl hover:brightness-110 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
         >
           {loading
-            ? <><div className="size-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />Қосылуда...</>
-            : <><Icon name="notifications" />Хабарламаларды қосу</>}
+            ? <><div className="size-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />{t('prompts.pushSubscribing')}</>
+            : <><Icon name="notifications" />{t('prompts.push.enable')}</>}
         </button>
         <button onClick={goToSettings} className="w-full py-2.5 text-primary text-sm font-medium hover:underline">
-          Баптауларда өзгерту
+          {t('prompts.pushOpenSettings')}
         </button>
         <button onClick={dismiss} className="w-full py-2 text-gray-400 text-sm hover:text-gray-600">
-          Кейінірек
+          {t('prompts.push.later')}
         </button>
       </div>
     </Backdrop>

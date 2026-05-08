@@ -8,6 +8,13 @@ import dashboard from './ru/dashboard';
 import orders from './ru/orders';
 import notifications from './ru/notifications';
 import measurements from './ru/measurements';
+import clients from './ru/clients';
+import deals from './ru/deals';
+import tasks from './ru/tasks';
+import proposalsNs from './ru/proposals';
+import fabrics from './ru/fabrics';
+import services from './ru/services';
+import prompts from './ru/prompts';
 import adminLayout from './ru/adminLayout';
 import adminSettings from './ru/adminSettings';
 import notificationSettings from './ru/notificationSettings';
@@ -28,6 +35,13 @@ const ru = {
   orders,
   notifications,
   measurements,
+  clients,
+  deals,
+  tasks,
+  proposals: proposalsNs,
+  fabrics,
+  services,
+  prompts,
   adminLayout,
   adminSettings,
   notificationSettings,

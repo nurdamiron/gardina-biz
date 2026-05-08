@@ -2,12 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { clientsAPI } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
+import { useI18n } from '../contexts/I18nContext';
 import BottomNav from '../components/navigation/BottomNav';
 import Icon from '../components/common/Icon';
 
 const ManagerClientsList = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { t } = useI18n();
   const basePath = user?.role === 'sales' ? '/sales' : user?.role === 'admin' ? '/admin' : '/manager';
   const [clients, setClients] = useState([]);
   const [search, setSearch] = useState('');
@@ -33,17 +35,20 @@ const ManagerClientsList = () => {
     c.phone?.includes(search)
   );
 
+  const isSales = user?.role === 'sales';
+  const title = isSales ? t('clients.list.leadsTitle') : t('clients.list.title');
+
   return (
     <div className="bg-background-light min-h-screen pb-24">
       <header className="sticky top-0 z-30 bg-white/80 backdrop-blur-md border-b border-gray-100 px-4 py-3">
         <div className="flex items-center justify-between">
-          <h1 className="text-xl font-bold text-gray-900">Клиенттер</h1>
+          <h1 className="text-xl font-bold text-gray-900">{title}</h1>
           <button
             onClick={() => navigate(`${basePath}/client/new`)}
             className="bg-primary text-white px-5 py-2.5 rounded-xl font-bold text-sm shadow-lg shadow-primary/20 hover:brightness-110 active:scale-95 transition-all flex items-center gap-2"
           >
             <Icon name="add_circle" size={20} />
-            Клиент
+            {t('clients.list.add')}
           </button>
         </div>
         <div className="mt-3">
@@ -53,7 +58,7 @@ const ManagerClientsList = () => {
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Іздеу..."
+              placeholder={t('clients.list.searchPlaceholder')}
               className="w-full pl-10 pr-4 py-2 bg-gray-50 border-none rounded-xl text-sm focus:ring-2 focus:ring-primary/20 transition-all"
             />
           </div>
@@ -68,7 +73,8 @@ const ManagerClientsList = () => {
         ) : filteredClients.length === 0 ? (
           <div className="bg-white rounded-xl p-8 text-center">
             <Icon name="person_off" size={48} className="text-gray-300" />
-            <p className="text-text-secondary mt-4">Клиент табылмады</p>
+            <p className="text-text-secondary mt-4">{t('clients.list.empty')}</p>
+            <p className="text-xs text-gray-400 mt-1">{t('clients.list.emptyHint')}</p>
           </div>
         ) : (
           filteredClients.map(client => (
@@ -83,11 +89,6 @@ const ManagerClientsList = () => {
                   <p className="text-sm text-text-secondary">{client.phone}</p>
                   {client.address && (
                     <p className="text-xs text-gray-400 mt-1">{client.address}</p>
-                  )}
-                  {user?.role === 'admin' && client.created_by_name && (
-                    <p className="text-xs text-primary/70 mt-1 font-medium">
-                      Қосқан: {client.created_by_name}
-                    </p>
                   )}
                 </div>
                 <Icon name="chevron_right" className="text-gray-400" />

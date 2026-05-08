@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import Icon from './Icon';
+import { useI18n } from '../../contexts/I18nContext';
 
 const PWAInstallPrompt = () => {
   const location = useLocation();
+  const { t } = useI18n();
   const [deferredPrompt, setDeferredPrompt] = useState(null);
   const [showPrompt, setShowPrompt] = useState(false);
 
@@ -69,20 +71,19 @@ const PWAInstallPrompt = () => {
             <Icon name="download" size={24} />
           </div>
           <div className="flex-1">
-            <h3 className="font-bold text-lg mb-1">Қосымшаны орнату</h3>
-            <p className="text-sm opacity-90 mb-3">
-              Gardina қосымшасын телефоныңызға орнатыңыз және тез қол жеткізу алыңыз!
-            </p>
+            <h3 className="font-bold text-lg mb-1">{t('prompts.pwa.title')}</h3>
+            <p className="text-sm opacity-90 mb-3">{t('prompts.pwa.body')}</p>
             <div className="flex gap-2">
               <button
                 onClick={handleInstall}
                 className="flex-1 bg-white text-primary font-bold py-2 px-4 rounded-xl hover:bg-white/90 transition-all"
               >
-                Орнату
+                {t('prompts.pwa.install')}
               </button>
               <button
                 onClick={handleDismiss}
                 className="px-4 py-2 bg-white/10 hover:bg-white/20 rounded-xl transition-all"
+                aria-label={t('common.close')}
               >
                 <Icon name="close" />
               </button>
