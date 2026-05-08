@@ -38,14 +38,14 @@
   --shadow-lg: 0 10px 25px -5px rgba(27, 94, 69, 0.14), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
 }
 
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
-body {
-  font-family: 'Inter', sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+/* Wrap reset/base inside Tailwind's @layer base so it doesn't override
+   utility classes. Unlayered rules in CSS Cascade Layers always win
+   against any @layer, which means a top-level `* { padding: 0 }` would
+   silently nuke every Tailwind p-* class on the page. */
+@layer base {
+  body {
+    font-family: 'Inter', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
 }
