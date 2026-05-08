@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { useAuth } from '../contexts/AuthContext';
 import { useUI } from '../contexts/UIContext';
+import { useI18n } from '../contexts/I18nContext';
 import { clientsAPI, measurementsAPI, usersAPI, ordersAPI } from '../services/api';
 import KazakhDatePicker from '../components/common/KazakhDatePicker';
 import Icon from '../components/common/Icon';
@@ -14,6 +15,7 @@ import Icon from '../components/common/Icon';
  * Создание задачи на замер (Create Order Flow)
  */
 const CreateMeasurementTask = () => {
+  const { t, lang } = useI18n();
   const navigate = useNavigate();
   const { user } = useAuth();
   const { confirm, showToast } = useUI();
@@ -267,17 +269,16 @@ const CreateMeasurementTask = () => {
 
   // CONSTANTS
   const ROOM_TYPES = [
-    { id: 'living', label: 'Қонақ бөлме', icon: 'weekend' },
-    { id: 'bedroom', label: 'Жатын бөлме', icon: 'bed' },
-    { id: 'kitchen', label: 'Ас үй', icon: 'kitchen' },
-    { id: 'kids', label: 'Балалар', icon: 'child_care' },
-    { id: 'office', label: 'Кабинет', icon: 'desk' },
-    { id: 'hall', label: 'Холл/Коридор', icon: 'meeting_room' },
-    { id: 'dining', label: 'Асхана', icon: 'restaurant' },
-    { id: 'all', label: 'Барлығы', icon: 'home' },
-    { id: 'other', label: 'Басқа', icon: 'other_houses' },
-
-  ];
+    { id: 'living', icon: 'weekend' },
+    { id: 'bedroom', icon: 'bed' },
+    { id: 'kitchen', icon: 'kitchen' },
+    { id: 'kids', icon: 'child_care' },
+    { id: 'office', icon: 'desk' },
+    { id: 'hall', icon: 'meeting_room' },
+    { id: 'dining', icon: 'restaurant' },
+    { id: 'all', icon: 'home' },
+    { id: 'other', icon: 'other_houses' },
+  ].map(r => ({ ...r, label: r.id === 'all' ? (lang === 'kz' ? 'Барлығы' : 'Все') : t(`rooms.${r.id}`) }));
 
   const TECHNICAL_FEATURES = [
     { id: 'high_ceiling', label: 'Биік төбе (3м+)', icon: 'height' },

@@ -105,10 +105,10 @@ const AdminReports = () => {
             <Section title={t('adminReports.sections.overview')} icon="monitoring">
               <div className="grid grid-cols-2 gap-3">
                 {[
-                  { label: 'Жалпы табыс', value: fmt(d?.totalRevenue), icon: 'payments', color: 'green' },
-                  { label: 'Аяқталған', value: d?.completedDeals ?? '—', icon: 'check_circle', color: 'blue' },
-                  { label: 'Жасалған', value: d?.totalDeals ?? '—', icon: 'assignment', color: 'purple' },
-                  { label: 'Клиенттер', value: d?.totalClients ?? '—', icon: 'group', color: 'amber' },
+                  { label: t('adminReports.stats.totalRevenue'), value: fmt(d?.totalRevenue), icon: 'payments', color: 'green' },
+                  { label: t('adminReports.stats.completedDeals'), value: d?.completedDeals ?? '—', icon: 'check_circle', color: 'blue' },
+                  { label: t('adminReports.stats.totalDeals'), value: d?.totalDeals ?? '—', icon: 'assignment', color: 'purple' },
+                  { label: t('adminReports.stats.totalClients'), value: d?.totalClients ?? '—', icon: 'group', color: 'amber' },
                 ].map(s => (
                   <StatCard key={s.label} {...s} />
                 ))}
@@ -142,10 +142,10 @@ const AdminReports = () => {
               <Section title={t('adminReports.sections.revenueBreakdown')} icon="bar_chart">
                 <div className="space-y-3">
                   {[
-                    { label: 'Мата', key: 'fabricRevenue', color: 'bg-primary' },
-                    { label: 'Тігу', key: 'sewingRevenue', color: 'bg-green-500' },
-                    { label: 'Орнату', key: 'installationRevenue', color: 'bg-amber-500' },
-                    { label: 'Жеткізу', key: 'deliveryRevenue', color: 'bg-primary-light' },
+                    { label: t('adminReports.revenueParts.fabric'), key: 'fabricRevenue', color: 'bg-primary' },
+                    { label: t('adminReports.revenueParts.sewing'), key: 'sewingRevenue', color: 'bg-green-500' },
+                    { label: t('adminReports.revenueParts.installation'), key: 'installationRevenue', color: 'bg-amber-500' },
+                    { label: t('adminReports.revenueParts.delivery'), key: 'deliveryRevenue', color: 'bg-primary-light' },
                   ].filter(item => data.revenueBreakdown[item.key]).map(item => {
                     const val = data.revenueBreakdown[item.key] || 0;
                     const total = data.revenueBreakdown.totalRevenue || 1;

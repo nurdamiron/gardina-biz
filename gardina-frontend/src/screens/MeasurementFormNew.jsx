@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useUI } from '../contexts/UIContext';
+import { useI18n } from '../contexts/I18nContext';
 import { measurementsAPI, uploadAPI } from '../services/api';
 import {
   calculateTotalTapeMeters,
@@ -17,15 +18,15 @@ import {
   MeasurementSummary,
 } from '../components/measurement';
 
-const ROOM_TYPES = [
-  { id: 'living', label: 'Қонақ бөлме', icon: 'weekend' },
-  { id: 'bedroom', label: 'Жатын бөлме', icon: 'bed' },
-  { id: 'kitchen', label: 'Ас үй', icon: 'kitchen' },
-  { id: 'kids', label: 'Балалар', icon: 'child_care' },
-  { id: 'office', label: 'Кабинет', icon: 'desk' },
-  { id: 'hall', label: 'Холл/Коридор', icon: 'meeting_room' },
-  { id: 'dining', label: 'Асхана', icon: 'restaurant' },
-  { id: 'other', label: 'Басқа', icon: 'add', isCustom: true },
+const ROOM_DEFS = [
+  { id: 'living', icon: 'weekend' },
+  { id: 'bedroom', icon: 'bed' },
+  { id: 'kitchen', icon: 'kitchen' },
+  { id: 'kids', icon: 'child_care' },
+  { id: 'office', icon: 'desk' },
+  { id: 'hall', icon: 'meeting_room' },
+  { id: 'dining', icon: 'restaurant' },
+  { id: 'other', icon: 'add', isCustom: true },
 ];
 
 /**
@@ -36,6 +37,8 @@ const MeasurementFormNew = () => {
   const { id: measurementId } = useParams();
   const { user } = useAuth();
   const { showToast, confirm } = useUI();
+  const { t } = useI18n();
+  const ROOM_TYPES = ROOM_DEFS.map(r => ({ ...r, label: t(`rooms.${r.id}`) }));
   const photoInputRef = useRef(null);
 
   // Состояния

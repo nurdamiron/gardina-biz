@@ -15,6 +15,7 @@ import proposalsNs from './kz/proposals';
 import fabrics from './kz/fabrics';
 import services from './kz/services';
 import prompts from './kz/prompts';
+import rooms from './kz/rooms';
 import adminLayout from './kz/adminLayout';
 import adminSettings from './kz/adminSettings';
 import notificationSettings from './kz/notificationSettings';
@@ -42,6 +43,7 @@ const kz = {
   fabrics,
   services,
   prompts,
+  rooms,
   adminLayout,
   adminSettings,
   notificationSettings,

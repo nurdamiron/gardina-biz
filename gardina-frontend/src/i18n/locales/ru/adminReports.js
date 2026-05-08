@@ -1,5 +1,5 @@
 const adminReports = {
-  title: 'Отчеты',
+  title: 'Отчёты',
   periods: {
     d7: '7 дней',
     d30: '30 дней',
@@ -15,6 +15,18 @@ const adminReports = {
     clientFunnel: 'Воронка клиентов',
     topProducts: 'Лучшие ткани',
     paymentRisks: 'Риски оплат',
+  },
+  stats: {
+    totalRevenue: 'Общая выручка',
+    completedDeals: 'Завершённые',
+    totalDeals: 'Всего сделок',
+    totalClients: 'Клиенты',
+  },
+  revenueParts: {
+    fabric: 'Ткани',
+    sewing: 'Пошив',
+    installation: 'Монтаж',
+    delivery: 'Доставка',
   },
 };
 

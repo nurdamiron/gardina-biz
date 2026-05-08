@@ -2,14 +2,16 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ordersAPI, measurementsAPI } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
+import { useI18n } from '../contexts/I18nContext';
 import { STATUS_LABELS, STATUS_COLORS } from '../utils/statusLabels';
 import BottomNav from '../components/navigation/BottomNav';
 import { SkeletonCard } from '../components/common/Skeleton';
-import { formatTime24 } from '../utils/dateUtils';
+import { formatTime24, monthNames, weekdayNames } from '../utils/dateUtils';
 import AuditLog from '../components/AuditLog/AuditLog';
 import Icon from '../components/common/Icon';
 
 const DealDetail = () => {
+    const { t, lang } = useI18n();
     const { id } = useParams();
     const navigate = useNavigate();
     const { user } = useAuth();
@@ -83,15 +85,7 @@ const DealDetail = () => {
 
     const getStatusLabel = (status) => STATUS_LABELS[status] || status;
 
-    const getPaymentStatusLabel = (status) => {
-        const labels = {
-            'pending': 'Төленбеген',
-            'partial': 'Жартылай төленді',
-            'paid': 'Төленді',
-            'refunded': 'Қайтарылды'
-        };
-        return labels[status] || status;
-    };
+    const getPaymentStatusLabel = (status) => t(`orders.payment.${status}`, status);
 
     const getPaymentStatusColor = (status) => {
         const colors = {
@@ -119,46 +113,39 @@ const DealDetail = () => {
         let dayLabel = '';
         let dayColor = 'text-gray-900';
 
-        const kazakhMonths = [
-            'қаңтар', 'ақпан', 'наурыз', 'сәуір', 'мамыр', 'маусым',
-            'шілде', 'тамыз', 'қыркүйек', 'қазан', 'қараша', 'желтоқсан'
-        ];
+        const months = monthNames(lang);
+        const weekdays = weekdayNames(lang);
+        const labels = {
+            today: lang === 'kz' ? 'Бүгін' : 'Сегодня',
+            tomorrow: lang === 'kz' ? 'Ертең' : 'Завтра',
+            yesterday: lang === 'kz' ? 'Кеше' : 'Вчера',
+        };
 
         if (scheduledDate.getTime() === today.getTime()) {
-            dayLabel = 'Бүгін';
+            dayLabel = labels.today;
             dayColor = 'text-green-600';
         } else if (scheduledDate.getTime() === tomorrow.getTime()) {
-            dayLabel = 'Ертең';
+            dayLabel = labels.tomorrow;
             dayColor = 'text-primary';
         } else if (scheduledDate.getTime() === yesterday.getTime()) {
-            dayLabel = 'Кеше';
+            dayLabel = labels.yesterday;
             dayColor = 'text-gray-500';
         } else if (scheduledDate > today) {
             const daysUntil = Math.ceil((scheduledDate - today) / (1000 * 60 * 60 * 24));
             if (daysUntil <= 7) {
-                const weekdays = ['Жексенбі', 'Дүйсенбі', 'Сейсенбі', 'Сәрсенбі', 'Бейсенбі', 'Жұма', 'Сенбі'];
                 dayLabel = weekdays[scheduledDate.getDay()];
                 dayColor = 'text-primary';
             } else {
-                const day = scheduledDate.getDate();
-                const month = kazakhMonths[scheduledDate.getMonth()];
-                dayLabel = `${day} ${month}`;
+                dayLabel = `${scheduledDate.getDate()} ${months[scheduledDate.getMonth()]}`;
                 dayColor = 'text-gray-900';
             }
         } else {
-            const day = scheduledDate.getDate();
-            const month = kazakhMonths[scheduledDate.getMonth()];
-            dayLabel = `${day} ${month}`;
+            dayLabel = `${scheduledDate.getDate()} ${months[scheduledDate.getMonth()]}`;
             dayColor = 'text-gray-500';
         }
 
-        // Use formatTime24 to get the correct time without timezone conversion
         const time = formatTime24(dateString);
-
-        const day = scheduledDate.getDate();
-        const month = kazakhMonths[scheduledDate.getMonth()];
-        const year = scheduledDate.getFullYear();
-        const fullDateKazakh = `${day} ${month} ${year}`;
+        const fullDateKazakh = `${scheduledDate.getDate()} ${months[scheduledDate.getMonth()]} ${scheduledDate.getFullYear()}`;
 
         return { dayLabel, time, dayColor, fullDate: date, fullDateKazakh };
     };

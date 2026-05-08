@@ -15,6 +15,7 @@ import proposalsNs from './ru/proposals';
 import fabrics from './ru/fabrics';
 import services from './ru/services';
 import prompts from './ru/prompts';
+import rooms from './ru/rooms';
 import adminLayout from './ru/adminLayout';
 import adminSettings from './ru/adminSettings';
 import notificationSettings from './ru/notificationSettings';
@@ -42,6 +43,7 @@ const ru = {
   fabrics,
   services,
   prompts,
+  rooms,
   adminLayout,
   adminSettings,
   notificationSettings,

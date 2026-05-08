@@ -2,12 +2,14 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate, useLocation, useParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useUI } from '../contexts/UIContext';
+import { useI18n } from '../contexts/I18nContext';
 import { measurementsAPI, ordersAPI, clientsAPI, uploadAPI, catalogAPI } from '../services/api';
 import ClientForm from '../components/forms/ClientForm';
 import MeasurementItemForm from '../components/forms/MeasurementItemForm';
 import Icon from '../components/common/Icon';
 
 const MeasurementForm = () => {
+  const { t } = useI18n();
   const navigate = useNavigate();
   const { user } = useAuth();
   const { showToast } = useUI();
@@ -45,15 +47,15 @@ const MeasurementForm = () => {
   const [roomToDelete, setRoomToDelete] = useState(null);
 
   const ROOM_TYPES = [
-    { id: 'living', label: 'Қонақ бөлме', icon: 'weekend' },
-    { id: 'bedroom', label: 'Жатын бөлме', icon: 'bed' },
-    { id: 'kitchen', label: 'Ас үй', icon: 'kitchen' },
-    { id: 'kids', label: 'Балалар', icon: 'child_care' },
-    { id: 'office', label: 'Кабинет', icon: 'desk' },
-    { id: 'hall', label: 'Холл/Коридор', icon: 'meeting_room' },
-    { id: 'dining', label: 'Асхана', icon: 'restaurant' },
-    { id: 'balcony', label: 'Балкон', icon: 'balcony' },
-  ];
+    { id: 'living', icon: 'weekend' },
+    { id: 'bedroom', icon: 'bed' },
+    { id: 'kitchen', icon: 'kitchen' },
+    { id: 'kids', icon: 'child_care' },
+    { id: 'office', icon: 'desk' },
+    { id: 'hall', icon: 'meeting_room' },
+    { id: 'dining', icon: 'restaurant' },
+    { id: 'balcony', icon: 'balcony' },
+  ].map(r => ({ ...r, label: t(`rooms.${r.id}`) }));
 
   /* 
     DESIGNER FLOW:

@@ -5,18 +5,13 @@ import BottomNav from '../../components/navigation/BottomNav';
 import Icon from '../../components/common/Icon';
 import { useI18n } from '../../contexts/I18nContext';
 
-const ROLES = [
-  { value: '', label: 'Барлық пайдаланушылар' },
-  { value: 'admin', label: 'Әкімшілер' },
-  { value: 'manager', label: 'Менеджерлер' },
-  { value: 'designer', label: 'Дизайнерлер' },
-];
+const ROLE_VALUES = ['', 'admin', 'manager', 'designer'];
 
-const TYPE_CONFIG = {
-  info:    { color: 'bg-primary/15 text-primary-dark',   icon: 'info',          label: 'Ақпарат' },
-  success: { color: 'bg-green-100 text-green-700', icon: 'check_circle',  label: 'Сәтті' },
-  warning: { color: 'bg-amber-100 text-amber-700', icon: 'warning',       label: 'Ескерту' },
-  error:   { color: 'bg-red-100 text-red-700',     icon: 'error',         label: 'Қате' },
+const TYPE_STYLES = {
+  info:    { color: 'bg-primary/15 text-primary-dark',  icon: 'info' },
+  success: { color: 'bg-green-100 text-green-700',      icon: 'check_circle' },
+  warning: { color: 'bg-amber-100 text-amber-700',      icon: 'warning' },
+  error:   { color: 'bg-red-100 text-red-700',          icon: 'error' },
 };
 
 const AdminNotifications = () => {
@@ -180,28 +175,28 @@ const AdminNotifications = () => {
               </h2>
 
               <div>
-                <label className="text-sm font-semibold text-gray-700 block mb-1.5">Рөл бойынша</label>
+                <label className="text-sm font-semibold text-gray-700 block mb-1.5">{t('adminNotifications.sections.recipients')}</label>
                 <select
                   value={form.targetRole}
                   onChange={e => setForm(f => ({ ...f, targetRole: e.target.value, targetUserId: '' }))}
                   className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none bg-white"
                 >
-                  {ROLES.map(r => <option key={r.value} value={r.value}>{r.label}</option>)}
+                  {ROLE_VALUES.map(value => (
+                    <option key={value || 'all'} value={value}>
+                      {t(`adminNotifications.recipientFilters.${value || 'all'}`)}
+                    </option>
+                  ))}
                 </select>
               </div>
 
-              <div className="flex items-center gap-2 text-gray-400 text-sm">
-                <div className="flex-1 h-px bg-gray-100" /> немесе нақты <div className="flex-1 h-px bg-gray-100" />
-              </div>
-
               <div>
-                <label className="text-sm font-semibold text-gray-700 block mb-1.5">Нақты пайдаланушы</label>
+                <label className="text-sm font-semibold text-gray-700 block mb-1.5">—</label>
                 <select
                   value={form.targetUserId}
                   onChange={e => setForm(f => ({ ...f, targetUserId: e.target.value, targetRole: '' }))}
                   className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none bg-white"
                 >
-                  <option value="">— Таңдамаңыз —</option>
+                  <option value="">—</option>
                   {users.map(u => (
                     <option key={u.id} value={u.id}>{u.name} ({u.role})</option>
                   ))}
@@ -218,7 +213,7 @@ const AdminNotifications = () => {
 
               {/* Type selector */}
               <div className="grid grid-cols-4 gap-2">
-                {Object.entries(TYPE_CONFIG).map(([key, cfg]) => (
+                {Object.entries(TYPE_STYLES).map(([key, cfg]) => (
                   <button
                     key={key}
                     onClick={() => setForm(f => ({ ...f, type: key }))}
@@ -227,40 +222,40 @@ const AdminNotifications = () => {
                     }`}
                   >
                     <Icon name={cfg.icon} size={18} className={form.type === key ? 'text-primary' : 'text-gray-400'} />
-                    <span className="text-xs font-medium">{cfg.label}</span>
+                    <span className="text-xs font-medium">{t(`adminNotifications.types.${key}`)}</span>
                   </button>
                 ))}
               </div>
 
               <div>
-                <label className="text-sm font-semibold text-gray-700 block mb-1.5">Тақырып *</label>
+                <label className="text-sm font-semibold text-gray-700 block mb-1.5">{t('adminNotifications.fields.title')} *</label>
                 <input
                   type="text"
                   value={form.title}
                   onChange={e => setForm(f => ({ ...f, title: e.target.value }))}
-                  placeholder="Хабарлама тақырыбы"
+                  placeholder={t('adminNotifications.fields.titlePlaceholder')}
                   className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none"
                 />
               </div>
 
               <div>
-                <label className="text-sm font-semibold text-gray-700 block mb-1.5">Мәтін *</label>
+                <label className="text-sm font-semibold text-gray-700 block mb-1.5">{t('adminNotifications.fields.body')} *</label>
                 <textarea
                   value={form.body}
                   onChange={e => setForm(f => ({ ...f, body: e.target.value }))}
-                  placeholder="Хабарлама мазмұны..."
+                  placeholder={t('adminNotifications.fields.bodyPlaceholder')}
                   rows={3}
                   className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none resize-none"
                 />
               </div>
 
               <div>
-                <label className="text-sm font-semibold text-gray-700 block mb-1.5">Сілтеме (міндетті емес)</label>
+                <label className="text-sm font-semibold text-gray-700 block mb-1.5">{t('adminNotifications.fields.actionUrl')}</label>
                 <input
                   type="text"
                   value={form.actionUrl}
                   onChange={e => setForm(f => ({ ...f, actionUrl: e.target.value }))}
-                  placeholder="/manager/orders  немесе  /admin/catalog"
+                  placeholder="/manager/orders"
                   className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none"
                 />
               </div>
@@ -270,8 +265,7 @@ const AdminNotifications = () => {
                 <div className="flex items-center gap-2">
                   <Icon name="notifications" size={20} className="text-gray-500" />
                   <div>
-                    <p className="font-medium text-sm">Push жіберу</p>
-                    <p className="text-xs text-gray-400">Құрылғыға хабарлама</p>
+                    <p className="font-medium text-sm">{t('adminNotifications.fields.sendPush')}</p>
                   </div>
                 </div>
                 <button
@@ -285,10 +279,10 @@ const AdminNotifications = () => {
 
             {/* Preview */}
             {(form.title || form.body) && (
-              <div className={`rounded-2xl p-4 border-2 ${TYPE_CONFIG[form.type]?.color?.split(' ')[0] || 'bg-gray-50'} border-gray-100`}>
-                <p className="text-xs font-bold uppercase tracking-wide text-gray-400 mb-2">Алдын ала қарау</p>
+              <div className={`rounded-2xl p-4 border-2 ${TYPE_STYLES[form.type]?.color?.split(' ')[0] || 'bg-gray-50'} border-gray-100`}>
+                <p className="text-xs font-bold uppercase tracking-wide text-gray-400 mb-2">{t('common.search')}</p>
                 <div className="flex items-start gap-3">
-                  <Icon name={TYPE_CONFIG[form.type]?.icon || 'notifications'} size={20} className={TYPE_CONFIG[form.type]?.color?.split(' ')[1] || ''} />
+                  <Icon name={TYPE_STYLES[form.type]?.icon || 'notifications'} size={20} className={TYPE_STYLES[form.type]?.color?.split(' ')[1] || ''} />
                   <div>
                     <p className="font-bold text-gray-900">{form.title || '—'}</p>
                     <p className="text-sm text-gray-600 mt-0.5">{form.body || form.message || '—'}</p>
@@ -304,8 +298,8 @@ const AdminNotifications = () => {
               className="w-full py-4 bg-primary text-white font-bold rounded-2xl hover:brightness-110 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
             >
               {sending
-                ? <><div className="size-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />Жіберілуде...</>
-                : <><Icon name="notifications_active" />Хабарлама жіберу</>}
+                ? <><div className="size-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />{t('adminNotifications.sending')}</>
+                : <><Icon name="notifications_active" />{t('adminNotifications.send')}</>}
             </button>
           </div>
         )}
@@ -314,7 +308,7 @@ const AdminNotifications = () => {
         {tab === 'history' && (
           <div className="space-y-3">
             <div className="flex items-center justify-between">
-              <p className="text-sm text-gray-500">Барлығы: <span className="font-bold text-gray-800">{historyTotal}</span></p>
+              <p className="text-sm text-gray-500">{t('common.total')}: <span className="font-bold text-gray-800">{historyTotal}</span></p>
               <button onClick={loadHistory} className="p-2 rounded-full hover:bg-gray-100">
                 <Icon name="refresh" size={18} className="text-gray-500" />
               </button>
@@ -325,12 +319,12 @@ const AdminNotifications = () => {
             {!loading && history.length === 0 && (
               <div className="text-center py-12 text-gray-400">
                 <Icon name="notifications_off" size={40} className="mx-auto mb-3 opacity-40" />
-                <p>Хабарламалар жоқ</p>
+                <p>{t('notifications.empty')}</p>
               </div>
             )}
 
             {history.map(n => {
-              const cfg = TYPE_CONFIG[n.type] || TYPE_CONFIG.info;
+              const cfg = TYPE_STYLES[n.type] || TYPE_STYLES.info;
               return (
                 <div key={n.id} className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4">
                   <div className="flex items-start gap-3">
@@ -397,7 +391,7 @@ const AdminNotifications = () => {
                     </h3>
                     <div className="space-y-2">
                       {stats.byType.map(t => {
-                        const cfg = TYPE_CONFIG[t.type] || TYPE_CONFIG.info;
+                        const cfg = TYPE_STYLES[t.type] || TYPE_STYLES.info;
                         const pct = Math.round((t.count / stats.total) * 100);
                         return (
                           <div key={t.type}>
