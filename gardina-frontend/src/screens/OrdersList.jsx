@@ -1,52 +1,54 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { useI18n } from '../contexts/I18nContext';
 import { ordersAPI, usersAPI, measurementsAPI } from '../services/api';
 import BottomNav from '../components/navigation/BottomNav';
 import OrderDetailModal from '../components/admin/OrderDetailModal';
 import { SkeletonCard } from '../components/common/Skeleton';
-import { formatTime24, formatDateKZ, formatDateTimeFull } from '../utils/dateUtils';
-import { getStatusLabel, getStatusColor } from '../utils/statusLabels';
+import { formatTime24, formatDate, formatDateTimeFull } from '../utils/dateUtils';
 import Icon from '../components/common/Icon';
 
-// Helper: Calculate time until scheduled measurement
-const getTimeUntil = (scheduledAt) => {
+// Helper: Calculate time until scheduled measurement (locale-aware)
+const buildGetTimeUntil = (t, lang) => (scheduledAt) => {
     if (!scheduledAt) return null;
-
     const now = new Date();
     const scheduled = new Date(scheduledAt);
     const diffMs = scheduled - now;
     const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
     const diffDays = Math.floor(diffHours / 24);
 
-    if (diffMs < 0) return { label: 'Өткен', color: 'text-red-600', isPast: true };
-    if (diffHours < 1) return { label: '< 1 сағат', color: 'text-red-600', isPast: false };
-    if (diffHours < 3) return { label: `${diffHours} сағатта`, color: 'text-orange-600', isPast: false };
-    if (diffDays < 1) return { label: 'Бүгін', color: 'text-green-600', isPast: false };
-    if (diffDays === 1) return { label: 'Ертең', color: 'text-primary', isPast: false };
-    if (diffDays < 7) return { label: `${diffDays} күнде`, color: 'text-gray-600', isPast: false };
-
-    return { label: formatDateKZ(scheduledAt), color: 'text-gray-500', isPast: false };
+    if (diffMs < 0)        return { label: t('orders.time.past'), color: 'text-red-600', isPast: true };
+    if (diffHours < 1)     return { label: t('orders.time.lessThanHour'), color: 'text-red-600', isPast: false };
+    if (diffHours < 3)     return { label: t('orders.time.inHours', { hours: diffHours }), color: 'text-orange-600', isPast: false };
+    if (diffDays < 1)      return { label: t('orders.time.today'), color: 'text-green-600', isPast: false };
+    if (diffDays === 1)    return { label: t('orders.time.tomorrow'), color: 'text-primary', isPast: false };
+    if (diffDays < 7)      return { label: t('orders.time.inDays', { days: diffDays }), color: 'text-gray-600', isPast: false };
+    return { label: formatDate(scheduledAt, lang), color: 'text-gray-500', isPast: false };
 };
 
-// Helper: Get order progress based on simplified status
-const getOrderProgress = (status) => {
-    const stages = {
-        'scheduled': { step: 1, total: 6, label: 'Жаңа', icon: 'event', color: 'blue' },
-        'measured': { step: 2, total: 6, label: 'Өлшем аяқталды', icon: 'straighten', color: 'purple' },
-        'in_production': { step: 3, total: 6, label: 'Өндірісте', icon: 'factory', color: 'orange' },
-        'ready': { step: 4, total: 6, label: 'Дайын', icon: 'check_circle', color: 'green' },
-        'installing': { step: 5, total: 6, label: 'Орнатылуда', icon: 'construction', color: 'lime' },
-        'completed': { step: 6, total: 6, label: 'Аяқталды', icon: 'task_alt', color: 'green' },
-        'cancelled': { step: 0, total: 6, label: 'Болдырылды', icon: 'cancel', color: 'red' },
-        'rejected': { step: 0, total: 6, label: 'Бас тартты', icon: 'block', color: 'gray' }
-    };
-    return stages[status] || { step: 1, total: 6, label: status, icon: 'help', color: 'gray' };
+// Helper: Get order progress (icons & step counts only — labels via t())
+const PROGRESS_STAGES = {
+    scheduled:     { step: 1, total: 6, icon: 'event', color: 'blue' },
+    measured:      { step: 2, total: 6, icon: 'straighten', color: 'purple' },
+    in_production: { step: 3, total: 6, icon: 'factory', color: 'orange' },
+    ready:         { step: 4, total: 6, icon: 'check_circle', color: 'green' },
+    installing:    { step: 5, total: 6, icon: 'construction', color: 'lime' },
+    completed:     { step: 6, total: 6, icon: 'task_alt', color: 'green' },
+    cancelled:     { step: 0, total: 6, icon: 'cancel', color: 'red' },
+    rejected:      { step: 0, total: 6, icon: 'block', color: 'gray' },
+};
+const getOrderProgress = (status, t) => {
+    const stage = PROGRESS_STAGES[status];
+    if (!stage) return { step: 1, total: 6, label: status, icon: 'help', color: 'gray' };
+    return { ...stage, label: t(`orders.status.${status}`, status) };
 };
 
 const OrdersList = ({ filterByManager = false }) => {
     const navigate = useNavigate();
     const { user } = useAuth();
+    const { t, lang } = useI18n();
+    const getTimeUntil = buildGetTimeUntil(t, lang);
 
     // Modal state
     const [selectedOrder, setSelectedOrder] = useState(null);
@@ -144,15 +146,7 @@ const OrdersList = ({ filterByManager = false }) => {
         return colors[status] || 'bg-gray-50 text-gray-600 border border-gray-200';
     };
 
-    const getPaymentLabel = (status) => {
-        const labels = {
-            'pending': 'Төленбеген',
-            'partial': 'Жартылай төленді',
-            'paid': 'Төленді',
-            'refunded': 'Қайтарылды'
-        };
-        return labels[status] || status;
-    };
+    const getPaymentLabel = (status) => t(`orders.payment.${status}`, status);
 
     // Filter logic (для менеджера дизайнерский фильтр не нужен)
     const filteredOrders = orders.filter(order => {
@@ -170,35 +164,37 @@ const OrdersList = ({ filterByManager = false }) => {
             {/* Header */}
             <header className="sticky top-0 z-30 bg-white border-b border-gray-100 px-4 py-3">
                 <div className="flex items-center justify-between gap-4">
-                    <h1 className="text-xl font-bold text-gray-900">Барлық тапсырыстар</h1>
+                    <h1 className="text-xl font-bold text-gray-900">{t('orders.title')}</h1>
                     <button
                         onClick={() => navigate(user?.role === 'admin' ? '/admin/order/new' : user?.role === 'sales' ? '/sales/order/new' : '/manager/order/new')}
                         className="bg-primary text-white px-5 py-2.5 rounded-xl font-bold text-sm shadow-lg shadow-primary/20 hover:brightness-110 active:scale-95 transition-all flex items-center gap-2"
                     >
                         <Icon name="add_circle" size={20} />
-                        Тапсырыс
+                        {t('orders.newOrder')}
                     </button>
                 </div>
 
                 {/* Filters */}
                 <div className="mt-3 flex gap-2 overflow-x-auto no-scrollbar pb-1">
                     <div className="text-[10px] font-bold uppercase tracking-wide text-primary bg-primary/10 px-2.5 py-1.5 rounded-full whitespace-nowrap">
-                        {filterByManager ? 'Менеджер режимі' : 'Админ режимі'}
+                        {filterByManager
+                            ? t('orders.modes.manager')
+                            : user?.role === 'sales' ? t('orders.modes.sales') : t('orders.modes.admin')}
                     </div>
                     <select
                         value={statusFilter}
                         onChange={(e) => setStatusFilter(e.target.value)}
                         className="bg-gray-50 border-none text-gray-600 text-xs font-semibold rounded-full py-1.5 px-3 min-w-[120px]"
                     >
-                        <option value="all">Барлық статус</option>
-                        <option value="scheduled">Жаңа</option>
-                        <option value="measured">Өлшем аяқталды</option>
-                        <option value="in_production">Өндірісте</option>
-                        <option value="ready">Дайын</option>
-                        <option value="installing">Орнатылуда</option>
-                        <option value="completed">Аяқталды</option>
-                        <option value="cancelled">Болдырылды</option>
-                        <option value="rejected">Бас тартты</option>
+                        <option value="all">{t('orders.filters.allStatus')}</option>
+                        <option value="scheduled">{t('orders.status.scheduled')}</option>
+                        <option value="measured">{t('orders.status.measured')}</option>
+                        <option value="in_production">{t('orders.status.in_production')}</option>
+                        <option value="ready">{t('orders.status.ready')}</option>
+                        <option value="installing">{t('orders.status.installing')}</option>
+                        <option value="completed">{t('orders.status.completed')}</option>
+                        <option value="cancelled">{t('orders.status.cancelled')}</option>
+                        <option value="rejected">{t('orders.status.rejected')}</option>
                     </select>
 
                     {!filterByManager && (
@@ -207,7 +203,7 @@ const OrdersList = ({ filterByManager = false }) => {
                             onChange={(e) => setDesignerFilter(e.target.value)}
                             className="bg-gray-50 border-none text-gray-600 text-xs font-semibold rounded-full py-1.5 px-3 min-w-[120px]"
                         >
-                            <option value="all">Дизайнерлер</option>
+                            <option value="all">{t('orders.filters.allDesigners')}</option>
                             {designers.map(d => (
                                 <option key={d.id} value={d.id}>{d.name}</option>
                             ))}
@@ -229,7 +225,7 @@ const OrdersList = ({ filterByManager = false }) => {
                         const measurementKey = `${order.clientId}_${order.designerId}`;
                         const measurement = measurements[measurementKey];
                         const isPriorityHigh = measurement?.priority === 'high';
-                        const progress = getOrderProgress(order.status);
+                        const progress = getOrderProgress(order.status, t);
                         const timeUntil = measurement?.scheduledAt ? getTimeUntil(measurement.scheduledAt) : null;
 
                         // Financial calculations
@@ -257,16 +253,16 @@ const OrdersList = ({ filterByManager = false }) => {
                                                 {isPriorityHigh && (
                                                     <div className="flex items-center gap-1 bg-red-50 text-red-600 px-2 py-0.5 rounded-full text-[9px] font-bold border border-red-100">
                                                         <Icon name="local_fire_department" size={11} />
-                                                        ШҰҒЫЛ
+                                                        {t('orders.card.urgent')}
                                                     </div>
                                                 )}
                                             </div>
                                             <h3 className="font-bold text-gray-900 text-lg leading-tight line-clamp-1 group-hover:text-primary transition-colors">
-                                                {order.client?.name || 'Клиент'}
+                                                {order.client?.name || t('orders.card.unknownClient')}
                                             </h3>
                                             <div className="flex items-center gap-1 text-xs text-gray-500">
                                                 <Icon name="location_on" size={14} className="text-gray-400" />
-                                                <span className="line-clamp-1">{measurement?.address || order.client?.address || 'Мекенжай жоқ'}</span>
+                                                <span className="line-clamp-1">{measurement?.address || order.client?.address || t('orders.card.unknownAddress')}</span>
                                             </div>
                                         </div>
                                         <div className="flex flex-col items-end gap-1">
@@ -292,21 +288,21 @@ const OrdersList = ({ filterByManager = false }) => {
                                         <div className="bg-gray-50 border border-gray-100 rounded-xl px-3 py-2.5 flex items-center gap-2">
                                             <Icon name="event" size={18} className="text-primary" />
                                             <div className="text-sm">
-                                                <p className="text-[10px] text-gray-500 font-bold uppercase">Күн</p>
+                                                <p className="text-[10px] text-gray-500 font-bold uppercase">{t('orders.card.label')}</p>
                                                 <p className="font-bold text-gray-900">
-                                                    {measurement?.scheduledAt ? formatDateTimeFull(measurement.scheduledAt) : '—'}
+                                                    {measurement?.scheduledAt ? formatDateTimeFull(measurement.scheduledAt, lang) : '—'}
                                                 </p>
                                             </div>
                                         </div>
                                         <div className="bg-gray-50 border border-gray-100 rounded-xl px-3 py-2.5 flex items-center justify-between">
                                             <div>
-                                                <p className="text-[10px] text-gray-500 font-bold uppercase">Сома</p>
-                                                <p className="font-black text-gray-900 text-lg">{(order.totalAmount || 0).toLocaleString()} ₸</p>
+                                                <p className="text-[10px] text-gray-500 font-bold uppercase">{t('orders.card.amount')}</p>
+                                                <p className="font-black text-gray-900 text-lg">{(order.totalAmount || 0).toLocaleString(lang === 'kz' ? 'kk-KZ' : 'ru-RU')} ₸</p>
                                             </div>
                                             {prepayment > 0 && (
                                                 <div className="flex flex-col items-end">
-                                                    <span className="text-[10px] text-gray-500 font-bold uppercase">Алынды</span>
-                                                    <span className="text-sm font-bold text-green-600">{prepayment.toLocaleString()} ₸</span>
+                                                    <span className="text-[10px] text-gray-500 font-bold uppercase">{t('orders.card.paid')}</span>
+                                                    <span className="text-sm font-bold text-green-600">{prepayment.toLocaleString(lang === 'kz' ? 'kk-KZ' : 'ru-RU')} ₸</span>
                                                 </div>
                                             )}
                                         </div>
@@ -340,14 +336,14 @@ const OrdersList = ({ filterByManager = false }) => {
                                                 {order.designer?.name?.[0] || '?'}
                                             </div>
                                         <div>
-                                                <p className="text-[9px] text-gray-400 font-bold">Дизайнер</p>
-                                                <p className="text-xs font-bold text-gray-700">{order.designer?.name || '---'}</p>
+                                                <p className="text-[9px] text-gray-400 font-bold">{t('orders.card.designer')}</p>
+                                                <p className="text-xs font-bold text-gray-700">{order.designer?.name || t('orders.card.unknownDesigner')}</p>
                                             </div>
                                         </div>
                                         {measurement?.windows?.length > 0 && (
                                             <div className="flex items-center gap-1.5 bg-gray-50 px-2.5 py-1.5 rounded-lg">
                                                 <Icon name="window" size={16} className="text-gray-600" />
-                                                <span className="text-xs font-bold text-gray-700">{measurement.windows.length} терезе</span>
+                                                <span className="text-xs font-bold text-gray-700">{t('orders.card.windows', { count: measurement.windows.length })}</span>
                                             </div>
                                         )}
                                     </div>
@@ -360,9 +356,9 @@ const OrdersList = ({ filterByManager = false }) => {
                         <div className="size-20 bg-gray-50 rounded-full flex items-center justify-center mb-4">
                             <Icon name="inbox" size={32} className="text-gray-300" />
                         </div>
-                        <p className="font-medium">Тапсырыстар жоқ</p>
+                        <p className="font-medium">{t('orders.empty')}</p>
                         <button onClick={() => navigate(user?.role === 'admin' ? '/admin/order/new' : user?.role === 'sales' ? '/sales/order/new' : '/manager/order/new')} className="text-primary text-sm font-bold mt-2">
-                            + Жаңа тапсырыс
+                            {t('orders.emptyCta')}
                         </button>
                     </div>
                 )}

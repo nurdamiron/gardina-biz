@@ -32,6 +32,19 @@ const notifications = {
     enable: 'Включить',
     later: 'Позже',
   },
+
+  // Relative time labels
+  time: {
+    now: 'Только что',
+    minutesAgo: '{minutes} мин назад',
+    hoursAgo: '{hours} ч назад',
+    yesterday: 'Вчера',
+    daysAgo: '{days} дн назад',
+    today: 'Сегодня',
+  },
+
+  emptyAllRead: 'Все уведомления прочитаны',
+  emptyHintNew: 'Новые уведомления появятся здесь',
 };
 
 export default notifications;

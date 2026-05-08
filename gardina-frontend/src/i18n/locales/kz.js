@@ -7,6 +7,7 @@ import profile from './kz/profile';
 import dashboard from './kz/dashboard';
 import orders from './kz/orders';
 import notifications from './kz/notifications';
+import measurements from './kz/measurements';
 import adminLayout from './kz/adminLayout';
 import adminSettings from './kz/adminSettings';
 import notificationSettings from './kz/notificationSettings';
@@ -26,6 +27,7 @@ const kz = {
   dashboard,
   orders,
   notifications,
+  measurements,
   adminLayout,
   adminSettings,
   notificationSettings,

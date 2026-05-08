@@ -7,6 +7,7 @@ import profile from './ru/profile';
 import dashboard from './ru/dashboard';
 import orders from './ru/orders';
 import notifications from './ru/notifications';
+import measurements from './ru/measurements';
 import adminLayout from './ru/adminLayout';
 import adminSettings from './ru/adminSettings';
 import notificationSettings from './ru/notificationSettings';
@@ -26,6 +27,7 @@ const ru = {
   dashboard,
   orders,
   notifications,
+  measurements,
   adminLayout,
   adminSettings,
   notificationSettings,

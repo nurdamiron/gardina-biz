@@ -3,12 +3,14 @@ import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import BottomNav from '../components/navigation/BottomNav';
 import Icon from '../components/common/Icon';
+import { useI18n } from '../contexts/I18nContext';
 
 /**
  * Full Notifications List Page
  */
 const NotificationsList = () => {
   const navigate = useNavigate();
+  const { t, lang } = useI18n();
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
@@ -16,6 +18,7 @@ const NotificationsList = () => {
 
   useEffect(() => {
     loadNotifications();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filter]);
 
   const loadNotifications = async () => {
@@ -69,7 +72,7 @@ const NotificationsList = () => {
       urgent: 'priority_high',
       warning: 'warning',
       info: 'info',
-      success: 'check_circle'
+      success: 'check_circle',
     };
     return icons[type] || 'notifications';
   };
@@ -79,12 +82,12 @@ const NotificationsList = () => {
       urgent: 'bg-red-100 text-red-600',
       warning: 'bg-orange-100 text-orange-600',
       info: 'bg-primary/15 text-primary',
-      success: 'bg-green-100 text-green-600'
+      success: 'bg-green-100 text-green-600',
     };
     return colors[type] || 'bg-gray-100 text-gray-600';
   };
 
-  const formatDate = (dateString) => {
+  const formatRelative = (dateString) => {
     const date = new Date(dateString);
     const now = new Date();
     const diffMs = now - date;
@@ -92,21 +95,20 @@ const NotificationsList = () => {
     const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
     const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
 
-    if (diffMins < 1) return 'Қазір';
-    if (diffMins < 60) return `${diffMins} минут бұрын`;
-    if (diffHours < 24) return `${diffHours} сағат бұрын`;
-    if (diffDays === 1) return 'Кеше';
-    if (diffDays < 7) return `${diffDays} күн бұрын`;
+    if (diffMins < 1) return t('notifications.time.now');
+    if (diffMins < 60) return t('notifications.time.minutesAgo', { minutes: diffMins });
+    if (diffHours < 24) return t('notifications.time.hoursAgo', { hours: diffHours });
+    if (diffDays === 1) return t('notifications.time.yesterday');
+    if (diffDays < 7) return t('notifications.time.daysAgo', { days: diffDays });
 
-    return date.toLocaleDateString('kk-KZ', {
+    return date.toLocaleDateString(lang === 'kz' ? 'kk-KZ' : 'ru-RU', {
       day: 'numeric',
       month: 'long',
       hour: '2-digit',
-      minute: '2-digit'
+      minute: '2-digit',
     });
   };
 
-  // Group notifications by date
   const groupedNotifications = notifications.reduce((groups, notification) => {
     const date = new Date(notification.created_at);
     const today = new Date();
@@ -115,66 +117,58 @@ const NotificationsList = () => {
 
     let groupKey;
     if (date.toDateString() === today.toDateString()) {
-      groupKey = 'Бүгін';
+      groupKey = t('notifications.time.today');
     } else if (date.toDateString() === yesterday.toDateString()) {
-      groupKey = 'Кеше';
+      groupKey = t('notifications.time.yesterday');
     } else {
-      groupKey = date.toLocaleDateString('kk-KZ', { day: 'numeric', month: 'long' });
+      groupKey = date.toLocaleDateString(lang === 'kz' ? 'kk-KZ' : 'ru-RU', {
+        day: 'numeric',
+        month: 'long',
+      });
     }
 
-    if (!groups[groupKey]) {
-      groups[groupKey] = [];
-    }
+    if (!groups[groupKey]) groups[groupKey] = [];
     groups[groupKey].push(notification);
     return groups;
   }, {});
 
   return (
     <div className="min-h-screen bg-background-light pb-24">
-      {/* Header */}
       <div className="bg-white border-b border-gray-100 sticky top-0 z-10">
         <div className="flex items-center justify-between p-4">
           <div className="flex items-center gap-4">
-            <button onClick={() => navigate(-1)} className="p-2 -ml-2">
+            <button onClick={() => navigate(-1)} className="p-2 -ml-2" aria-label={t('common.back')}>
               <Icon name="arrow_back" />
             </button>
             <div>
-              <h1 className="text-xl font-bold">Хабарламалар</h1>
+              <h1 className="text-xl font-bold">{t('notifications.title')}</h1>
               {unreadCount > 0 && (
-                <p className="text-sm text-gray-500">{unreadCount} оқылмаған</p>
+                <p className="text-sm text-gray-500">{unreadCount} {t('notifications.unread')}</p>
               )}
             </div>
           </div>
 
-          <button
-            onClick={() => navigate('/notifications/settings')}
-            className="p-2"
-          >
+          <button onClick={() => navigate('/notifications/settings')} className="p-2" aria-label={t('common.settings')}>
             <Icon name="settings" />
           </button>
         </div>
 
-        {/* Filter Tabs */}
         <div className="flex gap-2 px-4 pb-4">
           <button
             onClick={() => setFilter('all')}
             className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-              filter === 'all'
-                ? 'bg-primary text-white'
-                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+              filter === 'all' ? 'bg-primary text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
             }`}
           >
-            Барлығы
+            {t('notifications.filters.all')}
           </button>
           <button
             onClick={() => setFilter('unread')}
             className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-              filter === 'unread'
-                ? 'bg-primary text-white'
-                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+              filter === 'unread' ? 'bg-primary text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
             }`}
           >
-            Оқылмаған
+            {t('notifications.filters.unread')}
             {unreadCount > 0 && (
               <span className="ml-1.5 px-1.5 py-0.5 bg-red-500 text-white text-xs rounded-full">
                 {unreadCount}
@@ -183,17 +177,13 @@ const NotificationsList = () => {
           </button>
 
           {unreadCount > 0 && (
-            <button
-              onClick={markAllAsRead}
-              className="ml-auto text-sm text-primary hover:text-primary/80"
-            >
-              Барлығын оқу
+            <button onClick={markAllAsRead} className="ml-auto text-sm text-primary hover:text-primary/80">
+              {t('notifications.markAllRead')}
             </button>
           )}
         </div>
       </div>
 
-      {/* Content */}
       {isLoading ? (
         <div className="flex items-center justify-center p-12">
           <div className="w-10 h-10 border-4 border-primary/30 border-t-primary rounded-full animate-spin" />
@@ -201,9 +191,9 @@ const NotificationsList = () => {
       ) : notifications.length === 0 ? (
         <div className="flex flex-col items-center justify-center p-12 text-gray-400">
           <Icon name="notifications_off" size={48} />
-          <p className="text-lg font-medium">Хабарламалар жоқ</p>
+          <p className="text-lg font-medium">{t('notifications.empty')}</p>
           <p className="text-sm mt-1">
-            {filter === 'unread' ? 'Барлық хабарламалар оқылды' : 'Жаңа хабарламалар осында пайда болады'}
+            {filter === 'unread' ? t('notifications.emptyAllRead') : t('notifications.emptyHintNew')}
           </p>
         </div>
       ) : (
@@ -221,12 +211,10 @@ const NotificationsList = () => {
                     } ${!notification.is_read ? 'bg-primary/10/30' : ''}`}
                   >
                     <div className="flex gap-4">
-                      {/* Icon */}
                       <div className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center ${getIconColor(notification.type)}`}>
                         <Icon name={getIcon(notification.type)} />
                       </div>
 
-                      {/* Content */}
                       <div className="flex-1 min-w-0">
                         <div className="flex items-start justify-between gap-2">
                           <h4 className={`font-medium ${!notification.is_read ? 'text-gray-900' : 'text-gray-700'}`}>
@@ -236,12 +224,8 @@ const NotificationsList = () => {
                             <div className="w-2 h-2 bg-primary rounded-full flex-shrink-0 mt-2" />
                           )}
                         </div>
-                        <p className="text-sm text-gray-500 mt-1">
-                          {notification.message}
-                        </p>
-                        <p className="text-xs text-gray-400 mt-2">
-                          {formatDate(notification.created_at)}
-                        </p>
+                        <p className="text-sm text-gray-500 mt-1">{notification.message}</p>
+                        <p className="text-xs text-gray-400 mt-2">{formatRelative(notification.created_at)}</p>
                       </div>
                     </div>
                   </div>

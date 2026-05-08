@@ -32,6 +32,18 @@ const notifications = {
     enable: 'Қосу',
     later: 'Кейінірек',
   },
+
+  time: {
+    now: 'Қазір',
+    minutesAgo: '{minutes} минут бұрын',
+    hoursAgo: '{hours} сағат бұрын',
+    yesterday: 'Кеше',
+    daysAgo: '{days} күн бұрын',
+    today: 'Бүгін',
+  },
+
+  emptyAllRead: 'Барлық хабарламалар оқылды',
+  emptyHintNew: 'Жаңа хабарламалар осында пайда болады',
 };
 
 export default notifications;
