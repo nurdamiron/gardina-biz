@@ -10,6 +10,8 @@ import LanguageSwitcher from './components/common/LanguageSwitcher';
 import Login from './screens/Login';
 import Register from './screens/Register';
 import PlanOnboarding from './screens/PlanOnboarding';
+import ForgotPassword from './screens/ForgotPassword';
+import ResetPassword from './screens/ResetPassword';
 import PWAInstallPrompt from './components/common/PWAInstallPrompt';
 import PushPermissionPrompt from './components/common/PushPermissionPrompt';
 
@@ -120,6 +122,8 @@ const AppRoutes = () => {
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/onboarding/plan" element={<ProtectedRoute><PlanOnboarding /></ProtectedRoute>} />
         <Route path="/" element={<HomeRoute />} />
 

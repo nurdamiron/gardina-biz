@@ -4,6 +4,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useApp } from '../../contexts/AppContext';
 import { formatDateKZ, formatTime24 } from '../../utils/dateUtils';
 import BottomNav from '../../components/navigation/BottomNav';
+import OnboardingChecklist from '../../components/admin/OnboardingChecklist';
 // Import new analytics components
 import StatsCard from '../../components/analytics/StatsCard';
 import ChartBar from '../../components/analytics/ChartBar';
@@ -212,6 +213,7 @@ const AdminDashboard = () => {
             </header>
 
             <main className="p-4 space-y-4">
+                <OnboardingChecklist />
                 {/* Stats Grid */}
                 <div className="grid grid-cols-2 gap-3">
                     {statCards.map((stat, idx) => (

@@ -1,9 +1,10 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { Link, Navigate, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import Icon from '../components/common/Icon';
 import { useI18n } from '../contexts/I18nContext';
 import LanguageSwitcher from '../components/common/LanguageSwitcher';
+import api from '../services/api';
 
 const MODES = {
   salon: 'salon',
@@ -42,6 +43,26 @@ const Register = () => {
   const [loading, setLoading] = useState(false);
   const [localError, setLocalError] = useState(null);
   const [acceptedTerms, setAcceptedTerms] = useState(false);
+
+  // Live slug availability check (debounced). Only relevant when creating
+  // a new salon; in join mode the slug is given by the admin.
+  const [slugStatus, setSlugStatus] = useState({ checking: false, available: null });
+  useEffect(() => {
+    if (mode !== MODES.salon || !organizationSlug || organizationSlug.length < 2) {
+      setSlugStatus({ checking: false, available: null });
+      return;
+    }
+    setSlugStatus({ checking: true, available: null });
+    const handle = setTimeout(async () => {
+      try {
+        const res = await api.get(`/auth/check-slug?slug=${encodeURIComponent(organizationSlug)}`);
+        setSlugStatus({ checking: false, available: !!res.data?.available });
+      } catch {
+        setSlugStatus({ checking: false, available: null });
+      }
+    }, 350);
+    return () => clearTimeout(handle);
+  }, [organizationSlug, mode]);
 
   const onOrgNameChange = useCallback(
     (value) => {
@@ -235,6 +256,21 @@ const Register = () => {
                       />
                     </div>
                     <p className="text-xs text-text-secondary mt-1.5 leading-relaxed">{t('auth.organizationSlugHint')}</p>
+                    {organizationSlug.length >= 2 && (
+                      <p className={`text-xs mt-1 font-bold ${
+                        slugStatus.checking ? 'text-text-secondary' :
+                        slugStatus.available === true ? 'text-green-600' :
+                        slugStatus.available === false ? 'text-red-600' : 'text-text-secondary'
+                      }`}>
+                        {slugStatus.checking
+                          ? t('auth.slugChecking')
+                          : slugStatus.available === true
+                            ? t('auth.slugAvailable')
+                            : slugStatus.available === false
+                              ? t('auth.slugTaken')
+                              : ''}
+                      </p>
+                    )}
                   </div>
                 </>
               )}

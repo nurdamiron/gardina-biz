@@ -157,6 +157,7 @@ import notificationRoutes from './presentation/http/routes/notification.routes.j
 import installationRoutes from './presentation/http/routes/installation.routes.js';
 import auditRoutes from './presentation/http/routes/audit.routes.js';
 import billingRoutes from './presentation/http/routes/billing.routes.js';
+import onboardingRoutes from './presentation/http/routes/onboarding.routes.js';
 
 // Use routes
 app.use('/api/auth', authRoutes);
@@ -173,6 +174,7 @@ app.use('/api/notifications', notificationRoutes);
 app.use('/api/installations', installationRoutes);
 app.use('/api/audit', auditRoutes);
 app.use('/api/billing', billingRoutes);
+app.use('/api/onboarding', onboardingRoutes);
 
 // ============================================
 // ERROR HANDLING
@@ -229,6 +231,15 @@ if (process.env.NODE_ENV !== 'test') {
     console.log('✅  Server is ready to accept connections!');
     console.log('');
   });
+
+  // Background cron — trial-warning, expiry, cleanup. In multi-instance
+  // setups only one instance should run this; gate via CRON_LEADER=1 env
+  // var on the chosen instance, default ON for single-instance deploys.
+  if (process.env.CRON_LEADER !== '0') {
+    import('./application/services/BillingCron.js')
+      .then(({ startBillingCron }) => startBillingCron())
+      .catch((e) => console.error('[BillingCron] failed to start:', e.message));
+  }
 }
 
 // Graceful shutdown

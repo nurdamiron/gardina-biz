@@ -1,5 +1,8 @@
 import common from './ru/common';
 import auth from './ru/auth';
+import forgotPassword from './ru/forgotPassword';
+import resetPassword from './ru/resetPassword';
+import onboardingChecklist from './ru/onboardingChecklist';
 import nav from './ru/nav';
 import landing from './ru/landing';
 import onboarding from './ru/onboarding';
@@ -28,6 +31,9 @@ import adminUsers from './ru/adminUsers';
 const ru = {
   common,
   auth,
+  forgotPassword,
+  resetPassword,
+  onboardingChecklist,
   nav,
   landing,
   onboarding,

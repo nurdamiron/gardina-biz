@@ -1,10 +1,22 @@
 import { Router } from 'express';
 import rateLimit from 'express-rate-limit';
 import { AuthController } from '../controllers/AuthController.js';
+import { PasswordResetController } from '../controllers/PasswordResetController.js';
 import { authenticate } from '../middleware/auth.middleware.js';
 
 const router = Router();
 const authController = new AuthController();
+const passwordResetController = new PasswordResetController();
+
+// Throttle password-reset requests to prevent email-bombing / abuse.
+// Five requests per IP per 15 minutes is plenty for a real human.
+const passwordResetLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 5,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { success: false, error: 'Слишком много запросов. Попробуйте через 15 минут.' },
+});
 
 // Strict per-IP limiter for password attempts.
 // 5 failed logins per 15 minutes per IP. Successful logins do not count
@@ -70,6 +82,35 @@ router.get('/me', authenticate, (req, res) => authController.me(req, res));
 
 // POST /api/auth/refresh-token - Refresh access token
 router.post('/refresh-token', refreshLimiter, (req, res) => authController.refreshToken(req, res));
+
+// POST /api/auth/password-reset/request — issue email with token
+router.post('/password-reset/request', passwordResetLimiter, (req, res) =>
+  passwordResetController.request(req, res)
+);
+
+// POST /api/auth/password-reset/confirm — exchange token for new password
+router.post('/password-reset/confirm', passwordResetLimiter, (req, res) =>
+  passwordResetController.confirm(req, res)
+);
+
+// GET /api/auth/check-slug?slug=foo — public availability check
+router.get('/check-slug', async (req, res) => {
+  try {
+    const slug = String(req.query.slug || '')
+      .trim()
+      .toLowerCase()
+      .replace(/\s+/g, '-')
+      .replace(/[^a-z0-9-]/g, '');
+    if (slug.length < 2) {
+      return res.json({ success: true, available: false, reason: 'too_short' });
+    }
+    const { default: pool } = await import('../../../infrastructure/database/config.js');
+    const r = await pool.query('SELECT 1 FROM organizations WHERE slug = $1', [slug]);
+    return res.json({ success: true, available: r.rows.length === 0, slug });
+  } catch (e) {
+    return res.status(500).json({ success: false, error: 'Failed to check slug' });
+  }
+});
 
 // POST /api/auth/logout - Logout
 router.post('/logout', authenticate, (req, res) => authController.logout(req, res));

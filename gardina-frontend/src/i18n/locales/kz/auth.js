@@ -58,6 +58,9 @@ const auth = {
   errorPasswordsMismatch: 'Құпия сөздер сәйкес емес',
   errorConsentRequired: 'Шарттар мен саясатты қабылдау қажет',
   errorLoginFailed: 'Логин немесе құпия сөз қате',
+  slugChecking: 'Тексерілуде…',
+  slugAvailable: '✓ Бос',
+  slugTaken: '✗ Бос емес, басқасын таңдаңыз',
 
   copyright: '© 2026 Gardina. Барлық құқықтар қорғалған.',
 };

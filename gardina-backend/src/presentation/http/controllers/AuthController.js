@@ -3,6 +3,8 @@ import pool from '../../../infrastructure/database/config.js';
 import { PostgresUserRepository } from '../../../infrastructure/repositories/PostgresUserRepository.js';
 import { PostgresOrganizationRepository } from '../../../infrastructure/repositories/PostgresOrganizationRepository.js';
 import { AuthService } from '../../../infrastructure/services/AuthService.js';
+import { emailService } from '../../../infrastructure/services/EmailService.js';
+import { seedDemoData } from '../../../application/services/SeedService.js';
 import { blacklistToken } from '../middleware/auth.middleware.js';
 
 /**
@@ -209,10 +211,29 @@ export class AuthController {
         [orgId, name.trim(), email?.trim() || null, phone.trim(), passwordHash]
       );
 
+      // Seed demo data inside the same transaction so first-run experience
+      // isn't an empty product. The user can wipe samples from the admin
+      // panel later via DELETE /api/onboarding/sample-data.
+      await seedDemoData(client, orgId);
+
       await client.query('COMMIT');
 
       const user = userRes.rows[0];
       const tokens = this.authService.generateTokenPair(user);
+
+      // Welcome email — fire and forget, don't block the response on SMTP.
+      // EmailService logs but doesn't throw when SMTP is not configured,
+      // so dev/local registrations still succeed cleanly.
+      if (user.email) {
+        const lang = (req.headers['accept-language'] || '').toLowerCase().includes('kk') ? 'kz' : 'ru';
+        emailService
+          .send('welcome', user.email, {
+            name: user.name,
+            organizationName: orgRes.rows[0].name,
+            organizationSlug: orgRes.rows[0].slug,
+          }, lang)
+          .catch((e) => console.error(`[registerSalon] welcome email failed: ${e.message}`));
+      }
 
       res.status(201).json({
         success: true,

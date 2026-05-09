@@ -1,5 +1,8 @@
 import common from './kz/common';
 import auth from './kz/auth';
+import forgotPassword from './kz/forgotPassword';
+import resetPassword from './kz/resetPassword';
+import onboardingChecklist from './kz/onboardingChecklist';
 import nav from './kz/nav';
 import landing from './kz/landing';
 import onboarding from './kz/onboarding';
@@ -28,6 +31,9 @@ import adminUsers from './kz/adminUsers';
 const kz = {
   common,
   auth,
+  forgotPassword,
+  resetPassword,
+  onboardingChecklist,
   nav,
   landing,
   onboarding,

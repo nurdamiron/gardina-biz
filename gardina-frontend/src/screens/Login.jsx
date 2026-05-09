@@ -127,12 +127,17 @@ const Login = () => {
             )}
           </button>
 
-          <p className="text-center text-sm text-text-secondary mt-5">
-            {t('auth.noAccount')}{' '}
-            <Link to="/register" className="font-bold text-primary hover:underline">
-              {t('auth.register')}
+          <div className="flex items-center justify-between mt-5 text-sm">
+            <Link to="/forgot-password" className="text-primary hover:underline font-medium">
+              {t('auth.forgotPassword')}
             </Link>
-          </p>
+            <span className="text-text-secondary">
+              {t('auth.noAccount')}{' '}
+              <Link to="/register" className="font-bold text-primary hover:underline">
+                {t('auth.register')}
+              </Link>
+            </span>
+          </div>
           </form>
         </div>
 
