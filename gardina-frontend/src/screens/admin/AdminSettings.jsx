@@ -128,7 +128,7 @@ const AdminSettings = () => {
         <h1 className="text-xl font-bold text-gray-900">{t('adminSettings.title')}</h1>
       </header>
 
-      <main className="p-4 space-y-4">
+      <main className="p-4 space-y-4 max-w-3xl mx-auto">
         {/* Admin Profile Card */}
         <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
           <div className="flex items-center gap-4">

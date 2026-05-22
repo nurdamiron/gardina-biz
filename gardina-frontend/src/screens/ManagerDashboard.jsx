@@ -82,12 +82,12 @@ const ManagerDashboard = () => {
         </div>
       </header>
 
-      <main className="p-4 space-y-6">
+      <main className="p-4 space-y-6 max-w-7xl mx-auto">
         {/* Stats */}
         {loading ? (
           <SkeletonStats />
         ) : (
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
             {/* Scheduled Measurements */}
             <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
               <div className="flex items-center gap-3 mb-2">
@@ -189,82 +189,85 @@ const ManagerDashboard = () => {
           }))}
         />
 
-        {/* Urgent Tasks */}
-        <div>
-          <h2 className="text-lg font-bold mb-3">{t('dashboard.manager.urgentTasks')}</h2>
-          {urgentTasks.length === 0 ? (
-            <div className="bg-white rounded-xl p-6 text-center shadow-sm">
-              <Icon name="check_circle" size={40} className="text-green-500" />
-              <p className="text-text-secondary mt-2">{t('dashboard.manager.allDone')}</p>
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {urgentTasks.map((task, idx) => (
-                <div
-                  key={idx}
-                  onClick={task.action}
-                  className={`bg-white rounded-xl p-4 shadow-sm border-l-4 cursor-pointer hover:shadow-md transition-all ${task.severity === 'high' ? 'border-red-500' : 'border-yellow-500'
-                    }`}
-                >
-                  <div className="flex items-center gap-3">
-                    <div className={`size-10 rounded-full flex items-center justify-center ${task.severity === 'high' ? 'bg-red-100 text-red-600' : 'bg-yellow-100 text-yellow-600'
-                      }`}>
-                      <Icon name={task.type === 'payment' ? 'attach_money' : 'event'} />
-                    </div>
-                    <div className="flex-1">
-                      <p className="font-bold text-sm">{task.title}</p>
-                      <p className="text-xs text-text-secondary">{task.description}</p>
-                    </div>
-                    <Icon name="chevron_right" />
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* Today's Measurements */}
-        <div>
-          <h2 className="text-lg font-bold mb-3">Бүгінгі өлшемдер</h2>
-          {loading ? (
-            <>
-              <SkeletonCard />
-              <SkeletonCard />
-            </>
-          ) : measurements.filter(m => {
-            const today = new Date().toDateString();
-            return new Date(m.scheduledAt).toDateString() === today;
-          }).length === 0 ? (
-            <div className="bg-white rounded-xl p-6 text-center shadow-sm">
-              <Icon name="event_busy" size={40} className="text-gray-300" />
-              <p className="text-text-secondary mt-2">Бүгін өлшем жоқ</p>
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {measurements
-                .filter(m => {
-                  const today = new Date().toDateString();
-                  return new Date(m.scheduledAt).toDateString() === today;
-                })
-                .map(m => (
-                  <div key={m.id} className="bg-white rounded-xl p-4 shadow-sm">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <p className="text-xs text-primary font-bold">
-                          {formatTime24(m.scheduledAt)}
-                        </p>
-                        <p className="font-bold">{m.clientName}</p>
-                        <p className="text-sm text-text-secondary">{m.address}</p>
-                      </div>
-                      <span className={`px-2 py-1 rounded text-xs font-bold ${m.status === 'completed' ? 'bg-green-100 text-green-700' : 'bg-primary/15 text-primary-dark'
+        {/* Urgent Tasks + Today's Measurements — side by side on lg */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Urgent Tasks */}
+          <div>
+            <h2 className="text-lg font-bold mb-3">{t('dashboard.manager.urgentTasks')}</h2>
+            {urgentTasks.length === 0 ? (
+              <div className="bg-white rounded-xl p-6 text-center shadow-sm">
+                <Icon name="check_circle" size={40} className="text-green-500" />
+                <p className="text-text-secondary mt-2">{t('dashboard.manager.allDone')}</p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {urgentTasks.map((task, idx) => (
+                  <div
+                    key={idx}
+                    onClick={task.action}
+                    className={`bg-white rounded-xl p-4 shadow-sm border-l-4 cursor-pointer hover:shadow-md transition-all ${task.severity === 'high' ? 'border-red-500' : 'border-yellow-500'
+                      }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className={`size-10 rounded-full flex items-center justify-center ${task.severity === 'high' ? 'bg-red-100 text-red-600' : 'bg-yellow-100 text-yellow-600'
                         }`}>
-                        {m.status === 'completed' ? 'Аяқталды' : 'Жоспарланған'}
-                      </span>
+                        <Icon name={task.type === 'payment' ? 'attach_money' : 'event'} />
+                      </div>
+                      <div className="flex-1">
+                        <p className="font-bold text-sm">{task.title}</p>
+                        <p className="text-xs text-text-secondary">{task.description}</p>
+                      </div>
+                      <Icon name="chevron_right" />
                     </div>
                   </div>
                 ))}
-            </div>
-          )}
+              </div>
+            )}
+          </div>
+
+          {/* Today's Measurements */}
+          <div>
+            <h2 className="text-lg font-bold mb-3">Бүгінгі өлшемдер</h2>
+            {loading ? (
+              <div className="space-y-3">
+                <SkeletonCard />
+                <SkeletonCard />
+              </div>
+            ) : measurements.filter(m => {
+              const today = new Date().toDateString();
+              return new Date(m.scheduledAt).toDateString() === today;
+            }).length === 0 ? (
+              <div className="bg-white rounded-xl p-6 text-center shadow-sm">
+                <Icon name="event_busy" size={40} className="text-gray-300" />
+                <p className="text-text-secondary mt-2">Бүгін өлшем жоқ</p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {measurements
+                  .filter(m => {
+                    const today = new Date().toDateString();
+                    return new Date(m.scheduledAt).toDateString() === today;
+                  })
+                  .map(m => (
+                    <div key={m.id} className="bg-white rounded-xl p-4 shadow-sm">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <p className="text-xs text-primary font-bold">
+                            {formatTime24(m.scheduledAt)}
+                          </p>
+                          <p className="font-bold">{m.clientName}</p>
+                          <p className="text-sm text-text-secondary">{m.address}</p>
+                        </div>
+                        <span className={`px-2 py-1 rounded text-xs font-bold ${m.status === 'completed' ? 'bg-green-100 text-green-700' : 'bg-primary/15 text-primary-dark'
+                          }`}>
+                          {m.status === 'completed' ? 'Аяқталды' : 'Жоспарланған'}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Top Designers */}

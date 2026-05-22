@@ -257,7 +257,7 @@ const DealDetail = () => {
                 </div>
             </header>
 
-            <main className="p-4 space-y-4">
+            <main className="p-4 max-w-5xl mx-auto space-y-4">
                 {/* Amount Card */}
                 <div className="bg-gradient-to-br from-primary to-primary-dark rounded-2xl p-6 shadow-lg text-white">
                     <div className="flex items-center justify-between mb-4">
@@ -294,6 +294,8 @@ const DealDetail = () => {
                     )}
                 </div>
 
+                {/* Info cards — 2-col on desktop */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                 {/* Client Info */}
                 <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
                     <h3 className="font-bold mb-4 flex items-center gap-2 text-gray-900">
@@ -460,6 +462,8 @@ const DealDetail = () => {
                         </div>
                     </div>
                 )}
+
+                </div>{/* end info grid */}
 
                 {/* Actions */}
                 <div className="space-y-3 pt-4">

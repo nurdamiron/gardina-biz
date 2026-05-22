@@ -197,7 +197,7 @@ const NotificationsList = () => {
           </p>
         </div>
       ) : (
-        <div className="p-4 space-y-6">
+        <div className="p-4 space-y-6 max-w-3xl mx-auto">
           {Object.entries(groupedNotifications).map(([date, items]) => (
             <div key={date}>
               <h3 className="text-sm font-medium text-gray-500 mb-3">{date}</h3>

@@ -323,7 +323,7 @@ const MeasurementDetails = () => {
         </div>
       </header>
 
-      <main className="p-4 max-w-2xl mx-auto space-y-4">
+      <main className="p-4 max-w-5xl mx-auto space-y-4">
 
         {/* CLIENT INFO */}
         <section className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
@@ -359,7 +359,7 @@ const MeasurementDetails = () => {
         </section>
 
         {/* SUMMARY STATS */}
-        <section className="grid grid-cols-2 gap-3">
+        <section className="grid grid-cols-2 lg:grid-cols-4 gap-3">
           <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 text-center">
             <div className="size-10 rounded-full bg-primary/10 text-primary flex items-center justify-center mx-auto mb-2">
               <Icon name="door_sliding" />

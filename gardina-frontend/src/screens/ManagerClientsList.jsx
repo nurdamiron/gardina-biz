@@ -65,7 +65,7 @@ const ManagerClientsList = () => {
         </div>
       </header>
 
-      <main className="p-4 space-y-3">
+      <main className="p-4 max-w-7xl mx-auto">
         {loading ? (
           <div className="text-center py-8">
             <div className="size-12 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto"></div>
@@ -77,24 +77,26 @@ const ManagerClientsList = () => {
             <p className="text-xs text-gray-400 mt-1">{t('clients.list.emptyHint')}</p>
           </div>
         ) : (
-          filteredClients.map(client => (
-            <div
-              key={client.id}
-              onClick={() => navigate(`${basePath}/clients/${client.id}`)}
-              className="bg-white rounded-xl p-4 shadow-sm cursor-pointer hover:shadow-md transition-all"
-            >
-              <div className="flex items-center justify-between">
-                <div className="flex-1">
-                  <p className="font-bold">{client.name}</p>
-                  <p className="text-sm text-text-secondary">{client.phone}</p>
-                  {client.address && (
-                    <p className="text-xs text-gray-400 mt-1">{client.address}</p>
-                  )}
+          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
+            {filteredClients.map(client => (
+              <div
+                key={client.id}
+                onClick={() => navigate(`${basePath}/clients/${client.id}`)}
+                className="bg-white rounded-xl p-4 shadow-sm cursor-pointer hover:shadow-md transition-all"
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex-1">
+                    <p className="font-bold">{client.name}</p>
+                    <p className="text-sm text-text-secondary">{client.phone}</p>
+                    {client.address && (
+                      <p className="text-xs text-gray-400 mt-1">{client.address}</p>
+                    )}
+                  </div>
+                  <Icon name="chevron_right" className="text-gray-400" />
                 </div>
-                <Icon name="chevron_right" className="text-gray-400" />
               </div>
-            </div>
-          ))
+            ))}
+          </div>
         )}
       </main>
 

@@ -101,7 +101,7 @@ const AdminCatalog = () => {
                 </div>
             </header>
 
-            <main className="p-4 space-y-4">
+            <main className="p-4 space-y-4 max-w-5xl mx-auto">
                 {/* Tabs */}
                 <div className="flex gap-2">
                     {tabs.map(tab => (
@@ -159,7 +159,7 @@ const AdminCatalog = () => {
                         <div className="size-10 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
                     </div>
                 ) : activeTab === 'fabrics' ? (
-                    <div className="space-y-3">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
                         {filteredFabrics.length === 0 ? (
                             <div className="bg-white rounded-xl p-8 text-center">
                                 <Icon name="inventory_2" size={40} className="text-gray-300" />
@@ -208,7 +208,7 @@ const AdminCatalog = () => {
                         )}
                     </div>
                 ) : activeTab === 'services' ? (
-                    <div className="space-y-3">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                         {services.length === 0 ? (
                             <div className="bg-white rounded-xl p-8 text-center">
                                 <Icon name="build" size={40} className="text-gray-300" />

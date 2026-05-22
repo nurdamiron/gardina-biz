@@ -106,46 +106,48 @@ const ManagerTasksList = () => {
             </header>
 
             {/* Content */}
-            <main className="flex-1 px-4 pt-4 flex flex-col gap-3">
+            <main className="flex-1 px-4 pt-4 max-w-7xl mx-auto w-full">
                 {loading ? (
-                    <>
+                    <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
                         <SkeletonCard />
                         <SkeletonCard />
                         <SkeletonCard />
-                    </>
+                    </div>
                 ) : filteredMeasurements.length > 0 ? (
-                    filteredMeasurements.map(item => (
-                        <div
-                            key={item.id}
-                            onClick={() => navigate(`/manager/measurements/${item.id}`)}
-                            className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 active:scale-[0.99] transition-transform"
-                        >
-                            <div className="flex justify-between items-start mb-2">
-                                <div>
-                                    <h3 className="font-bold text-gray-900">{item.clientName || t('orders.card.unknownClient')}</h3>
-                                    <p className="text-xs text-gray-500">{item.clientPhone}</p>
-                                </div>
-                                {getStatusBadge(item.status)}
-                            </div>
-
-                            <div className="flex items-center gap-2 text-sm text-gray-600 mb-2">
-                                <Icon name="location_on" size={18} />
-                                <span className="line-clamp-1">{item.address}</span>
-                            </div>
-
-                            <div className="flex justify-between items-center mt-3 pt-3 border-t border-gray-50">
-                                <div className="flex items-center gap-2">
-                                    <div className="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center text-xs font-bold text-gray-600">
-                                        {item.designerId ? 'D' : '?'}
+                    <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
+                        {filteredMeasurements.map(item => (
+                            <div
+                                key={item.id}
+                                onClick={() => navigate(`/manager/measurements/${item.id}`)}
+                                className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 active:scale-[0.99] transition-transform cursor-pointer hover:shadow-md"
+                            >
+                                <div className="flex justify-between items-start mb-2">
+                                    <div>
+                                        <h3 className="font-bold text-gray-900">{item.clientName || t('orders.card.unknownClient')}</h3>
+                                        <p className="text-xs text-gray-500">{item.clientPhone}</p>
                                     </div>
-                                    <span className="text-xs text-gray-500">{t('tasks.card.designer')}</span>
+                                    {getStatusBadge(item.status)}
                                 </div>
-                                <span className="text-xs font-medium text-gray-400">
-                                    {new Date(item.scheduledAt).toLocaleDateString(lang === 'kz' ? 'kk-KZ' : 'ru-RU')}
-                                </span>
+
+                                <div className="flex items-center gap-2 text-sm text-gray-600 mb-2">
+                                    <Icon name="location_on" size={18} />
+                                    <span className="line-clamp-1">{item.address}</span>
+                                </div>
+
+                                <div className="flex justify-between items-center mt-3 pt-3 border-t border-gray-50">
+                                    <div className="flex items-center gap-2">
+                                        <div className="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center text-xs font-bold text-gray-600">
+                                            {item.designerId ? 'D' : '?'}
+                                        </div>
+                                        <span className="text-xs text-gray-500">{t('tasks.card.designer')}</span>
+                                    </div>
+                                    <span className="text-xs font-medium text-gray-400">
+                                        {new Date(item.scheduledAt).toLocaleDateString(lang === 'kz' ? 'kk-KZ' : 'ru-RU')}
+                                    </span>
+                                </div>
                             </div>
-                        </div>
-                    ))
+                        ))}
+                    </div>
                 ) : (
                     <div className="flex flex-col items-center justify-center py-12 text-gray-400">
                         <Icon name="inbox" size={48} />

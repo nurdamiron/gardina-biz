@@ -134,6 +134,7 @@ const FabricSelection = () => {
         </div>
       </header>
 
+      <div className="max-w-5xl mx-auto">
       {/* Client Budget */}
       <section className="mt-4 px-4">
         <div className="bg-white rounded-xl p-4 shadow-sm border border-primary/20 flex items-center justify-between">
@@ -301,6 +302,8 @@ const FabricSelection = () => {
           rows="3"
         />
       </section>
+
+      </div>{/* end max-w-5xl */}
 
       {/* Footer */}
       <div className="fixed bottom-0 left-0 w-full bg-white border-t border-gray-100 p-4 pb-safe z-30 shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">

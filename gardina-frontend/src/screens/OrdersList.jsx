@@ -213,15 +213,16 @@ const OrdersList = ({ filterByManager = false }) => {
             </header>
 
             {/* Content */}
-            <main className="flex-1 px-4 pt-4 flex flex-col gap-3">
+            <main className="flex-1 px-4 pt-4 max-w-7xl mx-auto w-full">
                 {loading ? (
-                    <>
+                    <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
                         <SkeletonCard />
                         <SkeletonCard />
                         <SkeletonCard />
-                    </>
+                    </div>
                 ) : filteredOrders.length > 0 ? (
-                    filteredOrders.map(order => {
+                    <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
+                    {filteredOrders.map(order => {
                         const measurementKey = `${order.clientId}_${order.designerId}`;
                         const measurement = measurements[measurementKey];
                         const isPriorityHigh = measurement?.priority === 'high';
@@ -350,7 +351,8 @@ const OrdersList = ({ filterByManager = false }) => {
                                 </div>
                             </div>
                         );
-                    })
+                    })}
+                    </div>
                 ) : (
                     <div className="flex flex-col items-center justify-center py-16 text-gray-400">
                         <div className="size-20 bg-gray-50 rounded-full flex items-center justify-center mb-4">

@@ -112,9 +112,9 @@ const ClientDetail = () => {
                 </div>
             </header>
 
-            <main className="p-4">
+            <main className="p-4 max-w-6xl mx-auto lg:grid lg:grid-cols-[320px_1fr] lg:gap-6 lg:items-start">
                 {/* Client Info Card */}
-                <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 mb-6">
+                <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 mb-6 lg:mb-0 lg:sticky lg:top-20">
                     <div className="flex flex-col gap-4">
                         <div className="flex items-start gap-3">
                             <div className="size-12 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
@@ -141,6 +141,8 @@ const ClientDetail = () => {
                     </div>
                 </div>
 
+                {/* Right column: tabs + list */}
+                <div>
                 {/* Tabs */}
                 <div className="flex p-1 bg-gray-200 rounded-xl mb-6">
                     <button
@@ -199,6 +201,7 @@ const ClientDetail = () => {
                             </div>
                         )
                     )}
+                </div>
                 </div>
             </main>
 

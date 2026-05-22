@@ -212,10 +212,10 @@ const AdminDashboard = () => {
                 </div>
             </header>
 
-            <main className="p-4 space-y-4">
+            <main className="p-4 space-y-4 max-w-7xl mx-auto">
                 <OnboardingChecklist />
                 {/* Stats Grid */}
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
                     {statCards.map((stat, idx) => (
                         <div key={idx} className={`${stat.color} rounded-2xl p-4 shadow-lg text-white`}>
                             <div className="flex items-center justify-between mb-2">
@@ -250,7 +250,7 @@ const AdminDashboard = () => {
                                 </div>
                             </button>
 
-                            <div className="grid grid-cols-2 gap-3">
+                            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
                                 <button
                                     onClick={() => navigate('/admin/clients')}
                                     className="bg-white hover:bg-gray-50 border-2 border-gray-200 text-gray-700 font-bold py-4 rounded-xl shadow-sm transition-all flex flex-col items-center justify-center gap-2"
@@ -264,6 +264,20 @@ const AdminDashboard = () => {
                                 >
                                     <Icon name="shopping_cart" size={28} className="text-primary" />
                                     <p className="text-sm">Тапсырыстар</p>
+                                </button>
+                                <button
+                                    onClick={() => navigate('/admin/users')}
+                                    className="bg-white hover:bg-gray-50 border-2 border-gray-200 text-gray-700 font-bold py-4 rounded-xl shadow-sm transition-all flex flex-col items-center justify-center gap-2"
+                                >
+                                    <Icon name="manage_accounts" size={28} className="text-primary-light" />
+                                    <p className="text-sm">Команда</p>
+                                </button>
+                                <button
+                                    onClick={() => navigate('/admin/reports')}
+                                    className="bg-white hover:bg-gray-50 border-2 border-gray-200 text-gray-700 font-bold py-4 rounded-xl shadow-sm transition-all flex flex-col items-center justify-center gap-2"
+                                >
+                                    <Icon name="bar_chart" size={28} className="text-green-600" />
+                                    <p className="text-sm">Есептер</p>
                                 </button>
                             </div>
                         </div>

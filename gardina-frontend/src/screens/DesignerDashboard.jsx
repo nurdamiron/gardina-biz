@@ -241,6 +241,7 @@ const DesignerDashboard = () => {
         </div>
       </header>
 
+      <div className="max-w-7xl mx-auto">
       {/* Statistics */}
       <section className="px-4 mt-4">
         <div className="bg-primary rounded-2xl p-5 text-white shadow-lg">
@@ -282,7 +283,7 @@ const DesignerDashboard = () => {
         />
 
         {/* Performance Metrics */}
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
           <StatsCard
             title={t('dashboard.stats.averageCheck')}
             value={analytics.designerPerformance?.averageCheck ?
@@ -375,7 +376,7 @@ const DesignerDashboard = () => {
             description={t('dashboard.sections.todayTasksHint')}
           />
         ) : (
-          <div className="space-y-3">
+          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-3">
             {todayMeasurements
               .sort((a, b) => new Date(a.scheduledAt) - new Date(b.scheduledAt))
               .map(m => (
@@ -399,7 +400,7 @@ const DesignerDashboard = () => {
             </span>
           </div>
 
-          <div className="space-y-3">
+          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-3">
             {tomorrowMeasurements
               .sort((a, b) => new Date(a.scheduledAt) - new Date(b.scheduledAt))
               .map(m => (
@@ -426,7 +427,7 @@ const DesignerDashboard = () => {
             </button>
           </div>
 
-          <div className="space-y-3">
+          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-3">
             {upcomingMeasurements.map(m => (
               <TaskCard key={m.id} measurement={m} showDate />
             ))}
@@ -444,6 +445,8 @@ const DesignerDashboard = () => {
           />
         </section>
       )}
+
+      </div>{/* end max-w-7xl */}
 
       <BottomNav />
     </div>

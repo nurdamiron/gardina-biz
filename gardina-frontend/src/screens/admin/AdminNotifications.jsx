@@ -162,7 +162,7 @@ const AdminNotifications = () => {
         </div>
       )}
 
-      <main className="p-4 space-y-4">
+      <main className="p-4 space-y-4 max-w-3xl mx-auto">
 
         {/* ── SEND TAB ─────────────────────────────────────── */}
         {tab === 'send' && (

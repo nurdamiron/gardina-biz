@@ -234,7 +234,7 @@ const NotificationSettings = () => {
         </div>
       )}
 
-      <div className="p-4 space-y-6">
+      <div className="p-4 space-y-6 max-w-3xl mx-auto">
         {/* Push Notifications Section */}
         <div className="bg-white rounded-xl shadow-sm overflow-hidden">
           <div className="p-4 border-b border-gray-100">

@@ -412,7 +412,7 @@ const MeasurementFormNew = () => {
         </div>
       </header>
 
-      <main className="p-4 space-y-6">
+      <main className="p-4 space-y-6 max-w-2xl mx-auto">
         {/* ШАГ 1: Список комнат */}
         {step === 'rooms' && (
           <>

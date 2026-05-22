@@ -124,13 +124,13 @@ const DealsFunnel = ({ filterByManager = false }) => {
                     <p className="text-sm text-gray-500">{t('orders.funnel.countSuffix', { count: deals.length })}</p>
                 </header>
 
-                <main className="p-4 space-y-3">
+                <main className="p-4 max-w-7xl mx-auto">
                     {loading ? (
-                        <>
+                        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
                             <SkeletonCard />
                             <SkeletonCard />
                             <SkeletonCard />
-                        </>
+                        </div>
                     ) : deals.length === 0 ? (
                         <div className="text-center py-12">
                             <div className="size-16 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-4">
@@ -145,7 +145,8 @@ const DealsFunnel = ({ filterByManager = false }) => {
                             </button>
                         </div>
                     ) : (
-                        deals.map((deal) => {
+                        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
+                        {deals.map((deal) => {
                             const statusInfo = getStatusInfo(deal.status);
                             return (
                                 <div
@@ -173,7 +174,8 @@ const DealsFunnel = ({ filterByManager = false }) => {
                                     </div>
                                 </div>
                             );
-                        })
+                        })}
+                        </div>
                     )}
 
                     {/* FAB для создания задачи */}
@@ -225,7 +227,7 @@ const DealsFunnel = ({ filterByManager = false }) => {
                 )}
             </header>
 
-            <main className="p-4">
+            <main className="p-4 max-w-3xl mx-auto">
                 {/* Summary Card */}
                 <div className="bg-gray-900 text-white rounded-2xl p-5 shadow-lg mb-6">
                     <p className="text-gray-400 text-sm mb-1">{t('orders.funnel.totalResult')}</p>

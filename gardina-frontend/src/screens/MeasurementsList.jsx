@@ -189,9 +189,9 @@ const MeasurementsList = () => {
         </div>
       </header>
 
-      <main className="flex-1 px-4 pt-4">
+      <main className="flex-1 px-4 pt-4 max-w-7xl mx-auto w-full">
         {loading ? (
-          <div className="flex flex-col gap-3">
+          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
             <SkeletonCard />
             <SkeletonCard />
             <SkeletonCard />
@@ -203,7 +203,7 @@ const MeasurementsList = () => {
             <p className="text-text-secondary mt-2 text-center px-4">{t('measurements.emptyHint')}</p>
           </div>
         ) : (
-          <div className="flex flex-col gap-3">
+          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
             {measurements.map(m => (
               <MeasurementCard key={m.id} measurement={m} />
             ))}

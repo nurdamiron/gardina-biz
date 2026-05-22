@@ -238,7 +238,7 @@ const AdminUsers = () => {
         </div>
       )}
 
-      <main className="p-4 space-y-3">
+      <main className="p-4 max-w-7xl mx-auto">
         {loading && (
           <div className="flex justify-center py-12">
             <div className="size-10 border-4 border-primary/30 border-t-primary rounded-full animate-spin" />
@@ -252,6 +252,7 @@ const AdminUsers = () => {
           </div>
         )}
 
+        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-3">
         {filtered.map(u => {
           const rc = roleConfig(u.role);
           return (
@@ -292,6 +293,7 @@ const AdminUsers = () => {
             </div>
           );
         })}
+        </div>
       </main>
 
       <BottomNav />

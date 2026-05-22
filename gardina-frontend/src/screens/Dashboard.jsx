@@ -89,6 +89,7 @@ const Dashboard = () => {
         </div>
       </header>
 
+      <div className="max-w-5xl mx-auto">
       {/* 1. MY RESULTS - First */}
       <section className="mt-4 mb-6">
         <h2 className="text-xl font-bold px-4 pb-3">
@@ -133,7 +134,7 @@ const Dashboard = () => {
       {/* 2. URGENT ACTIONS - Second */}
       <section className="mt-8">
         <h2 className="text-xl font-bold px-4 pb-3">Назар аудару қажет</h2>
-        <div className="px-4 flex flex-col gap-3">
+        <div className="px-4 grid grid-cols-1 lg:grid-cols-2 gap-3">
           {urgentActions.length === 0 ? (
             <div className="bg-white p-6 rounded-xl shadow-sm text-center">
               <Icon name="check_circle" size={32} className="text-green-500" />
@@ -260,6 +261,7 @@ const Dashboard = () => {
         </div>
       </section>
 
+      </div>{/* end max-w-5xl */}
       <div className="fixed bottom-24 right-4 z-30">
         <button onClick={() => navigate('/measurements/new')} className="flex items-center justify-center size-14 rounded-full bg-primary text-white shadow-[0_4px_14px_rgba(27,94,69,0.45)] hover:brightness-110 active:scale-95">
           <Icon name="add" size={32} />

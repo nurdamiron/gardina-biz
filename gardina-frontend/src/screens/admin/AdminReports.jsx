@@ -94,7 +94,7 @@ const AdminReports = () => {
         </div>
       </header>
 
-      <main className="p-4 space-y-5">
+      <main className="p-4 space-y-5 max-w-7xl mx-auto">
         {loading ? (
           <div className="flex justify-center py-16">
             <div className="size-12 border-4 border-primary/30 border-t-primary rounded-full animate-spin" />
@@ -103,7 +103,7 @@ const AdminReports = () => {
           <>
             {/* ── Overview KPIs ───────────────────────────────── */}
             <Section title={t('adminReports.sections.overview')} icon="monitoring">
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
                 {[
                   { label: t('adminReports.stats.totalRevenue'), value: fmt(d?.totalRevenue), icon: 'payments', color: 'green' },
                   { label: t('adminReports.stats.completedDeals'), value: d?.completedDeals ?? '—', icon: 'check_circle', color: 'blue' },
@@ -192,7 +192,7 @@ const AdminReports = () => {
             {/* ── Team KPIs ────────────────────────────────────── */}
             {data.teamKPIs && (
               <Section title={t('adminReports.sections.teamKpi')} icon="groups">
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
                   {[
                     { label: 'Орт. конверсия', value: `${data.teamKPIs.avgConversionRate ?? 0}%`, icon: 'sync' },
                     { label: 'Орт. сумма', value: fmt(data.teamKPIs.avgDealValue), icon: 'payments' },
