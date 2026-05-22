@@ -1,3 +1,4 @@
+import * as Sentry from '@sentry/node';
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
@@ -9,6 +10,14 @@ import { fileURLToPath } from 'url';
 import pool from './infrastructure/database/config.js';
 
 dotenv.config();
+
+if (process.env.SENTRY_DSN) {
+  Sentry.init({
+    dsn: process.env.SENTRY_DSN,
+    environment: process.env.NODE_ENV || 'development',
+    tracesSampleRate: 0.1,
+  });
+}
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -191,6 +200,7 @@ app.use((req, res) => {
 
 // Global error handler
 app.use((err, req, res, next) => {
+  if (process.env.SENTRY_DSN) Sentry.captureException(err);
   console.error(`[${new Date().toISOString()}] Error in ${req.method} ${req.url}:`, err.message);
   if (process.env.NODE_ENV === 'development') {
     console.error('Stack:', err.stack);

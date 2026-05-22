@@ -36,6 +36,10 @@ $COMPOSE build --pull
 echo "==> Restart services"
 $COMPOSE up -d --remove-orphans
 
+echo "==> Running DB migrations"
+$COMPOSE exec -T backend node scripts/run-saas-features-migration.js || \
+  echo "Migration skipped (container may still be starting — run manually if needed)"
+
 echo "==> Running status"
 $COMPOSE ps
 

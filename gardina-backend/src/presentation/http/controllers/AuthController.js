@@ -221,9 +221,7 @@ export class AuthController {
       const user = userRes.rows[0];
       const tokens = this.authService.generateTokenPair(user);
 
-      // Welcome email — fire and forget, don't block the response on SMTP.
-      // EmailService logs but doesn't throw when SMTP is not configured,
-      // so dev/local registrations still succeed cleanly.
+      // Welcome email + verification email — fire and forget, don't block the response.
       if (user.email) {
         const lang = (req.headers['accept-language'] || '').toLowerCase().includes('kk') ? 'kz' : 'ru';
         emailService
@@ -233,6 +231,9 @@ export class AuthController {
             organizationSlug: orgRes.rows[0].slug,
           }, lang)
           .catch((e) => console.error(`[registerSalon] welcome email failed: ${e.message}`));
+        // Send email verification link
+        this._sendVerificationEmail(user.id, user.email, user.name, req)
+          .catch((e) => console.error(`[registerSalon] verify email failed: ${e.message}`));
       }
 
       res.status(201).json({
@@ -413,6 +414,7 @@ export class AuthController {
           id: user.id,
           name: user.name,
           email: user.email,
+          emailVerified: Boolean(user.email_verified),
           phone: user.phone,
           role: user.role,
           avatarUrl: user.avatar_url,
@@ -487,6 +489,87 @@ export class AuthController {
         message: error.message,
       });
     }
+  }
+
+  /**
+   * GET /api/auth/verify-email?token=xxx
+   * Verify email address using token sent to user's email
+   */
+  async verifyEmail(req, res) {
+    const { token } = req.query;
+    if (!token) {
+      return res.status(400).json({ success: false, error: 'Token жоқ' });
+    }
+    try {
+      const result = await pool.query(
+        `SELECT user_id, expires_at, used_at
+         FROM email_verification_tokens
+         WHERE token = $1`,
+        [token]
+      );
+      const row = result.rows[0];
+      if (!row) {
+        return res.status(400).json({ success: false, error: 'Токен жарамсыз немесе қолданылған' });
+      }
+      if (row.used_at) {
+        return res.status(400).json({ success: false, error: 'Токен бұрын қолданылған' });
+      }
+      if (new Date(row.expires_at) < new Date()) {
+        return res.status(400).json({ success: false, error: 'Токен мерзімі өтіп кеткен' });
+      }
+      await pool.query(
+        `UPDATE users SET email_verified = true, updated_at = NOW() WHERE id = $1`,
+        [row.user_id]
+      );
+      await pool.query(
+        `UPDATE email_verification_tokens SET used_at = NOW() WHERE token = $1`,
+        [token]
+      );
+      return res.json({ success: true, message: 'Email сәтті расталды' });
+    } catch (error) {
+      console.error(`[AuthController.verifyEmail] ${error.message}`);
+      return res.status(500).json({ success: false, error: 'Растау сәтсіз аяқталды' });
+    }
+  }
+
+  /**
+   * POST /api/auth/resend-verification
+   * Resend email verification link (rate limited by caller)
+   */
+  async resendVerification(req, res) {
+    try {
+      const user = await this.userRepository.findById(req.user.id);
+      if (!user) return res.status(404).json({ success: false, error: 'Пайдаланушы табылмады' });
+      if (user.email_verified) {
+        return res.json({ success: true, message: 'Email бұрыннан расталған' });
+      }
+      if (!user.email) {
+        return res.status(400).json({ success: false, error: 'Email мекенжайы жоқ' });
+      }
+      await this._sendVerificationEmail(user.id, user.email, user.name, req);
+      return res.json({ success: true, message: 'Растау хаты жіберілді' });
+    } catch (error) {
+      console.error(`[AuthController.resendVerification] ${error.message}`);
+      return res.status(500).json({ success: false, error: 'Жіберу сәтсіз аяқталды' });
+    }
+  }
+
+  async _sendVerificationEmail(userId, email, name, req) {
+    const token = crypto.randomBytes(32).toString('hex');
+    const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24h
+    await pool.query(
+      `INSERT INTO email_verification_tokens (user_id, token, expires_at)
+       VALUES ($1, $2, $3)
+       ON CONFLICT (user_id) DO UPDATE
+         SET token = $2, expires_at = $3, used_at = NULL, created_at = NOW()`,
+      [userId, token, expiresAt]
+    );
+    const appUrl = process.env.FRONTEND_URL || process.env.APP_URL || 'https://app.gardina.kz';
+    const verifyUrl = `${appUrl}/verify-email?token=${token}`;
+    const lang = (req?.headers?.['accept-language'] || '').toLowerCase().includes('kk') ? 'kz' : 'ru';
+    emailService
+      .send('verify-email', email, { name, verifyUrl }, lang)
+      .catch((e) => console.error(`[AuthController] verify-email send failed: ${e.message}`));
   }
 
   /**

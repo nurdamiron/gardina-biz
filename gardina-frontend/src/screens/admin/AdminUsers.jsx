@@ -13,21 +13,24 @@ const ROLE_COLORS = {
 };
 
 const EMPTY_FORM = { name: '', phone: '', password: '', role: 'designer' };
+const EMPTY_INVITE = { email: '', role: 'designer' };
 
 const AdminUsers = () => {
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
   const navigate = useNavigate();
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [filterRole, setFilterRole] = useState('');
   const [toast, setToast] = useState(null);
+  const [limitError, setLimitError] = useState(null);
 
   // Modals
-  const [modal, setModal] = useState(null); // 'create' | 'edit' | 'password' | 'delete'
+  const [modal, setModal] = useState(null); // 'create' | 'edit' | 'password' | 'delete' | 'invite'
   const [selected, setSelected] = useState(null);
   const [form, setForm] = useState(EMPTY_FORM);
   const [pwForm, setPwForm] = useState({ newPassword: '', confirm: '' });
+  const [inviteForm, setInviteForm] = useState(EMPTY_INVITE);
   const [saving, setSaving] = useState(false);
   const [formError, setFormError] = useState(null);
 
@@ -60,6 +63,8 @@ const AdminUsers = () => {
   const openDelete = (u) => { setSelected(u); setModal('delete'); };
   const closeModal = () => { setModal(null); setSelected(null); setSaving(false); setFormError(null); };
 
+  const openInvite = () => { setInviteForm(EMPTY_INVITE); setFormError(null); setLimitError(null); setModal('invite'); };
+
   const handleCreate = async () => {
     setFormError(null);
     if (!form.name.trim() || !form.phone.trim() || !form.password) { setFormError(t('adminUsers.errors.allRequired')); return; }
@@ -71,7 +76,36 @@ const AdminUsers = () => {
       closeModal();
       load();
     } catch (e) {
-      setFormError(e.response?.data?.error || t('adminUsers.errors.generic'));
+      if (e.response?.data?.code === 'PLAN_USER_LIMIT_REACHED') {
+        setFormError(null);
+        setLimitError(e.response.data.error);
+        closeModal();
+      } else {
+        setFormError(e.response?.data?.error || t('adminUsers.errors.generic'));
+      }
+    }
+    setSaving(false);
+  };
+
+  const handleInvite = async () => {
+    setFormError(null);
+    if (!inviteForm.email || !inviteForm.email.includes('@')) {
+      setFormError(lang === 'kz' ? 'Жарамды email енгізіңіз' : 'Введите корректный email');
+      return;
+    }
+    setSaving(true);
+    try {
+      await api.post('/users/admin/invite', inviteForm);
+      showToast(lang === 'kz' ? 'Шақыру хаты жіберілді!' : 'Приглашение отправлено!');
+      closeModal();
+    } catch (e) {
+      if (e.response?.data?.code === 'PLAN_USER_LIMIT_REACHED') {
+        setFormError(null);
+        setLimitError(e.response.data.error);
+        closeModal();
+      } else {
+        setFormError(e.response?.data?.error || t('adminUsers.errors.generic'));
+      }
     }
     setSaving(false);
   };
@@ -147,10 +181,16 @@ const AdminUsers = () => {
             <Icon name="arrow_back" size={22} />
           </button>
           <h1 className="text-xl font-bold flex-1">{t('adminUsers.title')}</h1>
-          <button onClick={openCreate} className="flex items-center gap-1.5 bg-primary text-white px-3 py-2 rounded-xl text-sm font-bold hover:brightness-110 transition-all">
-            <Icon name="add" size={18} />
-            {t('adminUsers.create')}
-          </button>
+          <div className="flex gap-2">
+            <button onClick={openInvite} className="flex items-center gap-1.5 bg-primary/10 text-primary px-3 py-2 rounded-xl text-sm font-bold hover:bg-primary/20 transition-all">
+              <Icon name="mail" size={18} />
+              {lang === 'kz' ? 'Шақыру' : 'Пригласить'}
+            </button>
+            <button onClick={openCreate} className="flex items-center gap-1.5 bg-primary text-white px-3 py-2 rounded-xl text-sm font-bold hover:brightness-110 transition-all">
+              <Icon name="add" size={18} />
+              {t('adminUsers.create')}
+            </button>
+          </div>
         </div>
 
         {/* Search + filter */}
@@ -176,6 +216,25 @@ const AdminUsers = () => {
       {toast && (
         <div className={`fixed top-4 left-1/2 -translate-x-1/2 z-50 px-5 py-3 rounded-xl shadow-lg text-white text-sm font-medium ${toast.ok ? 'bg-green-600' : 'bg-red-500'}`}>
           {toast.text}
+        </div>
+      )}
+
+      {/* Plan limit error banner */}
+      {limitError && (
+        <div className="mx-4 mt-4 bg-amber-50 border border-amber-200 rounded-2xl p-4 flex gap-3">
+          <Icon name="workspace_premium" size={20} className="text-amber-600 flex-shrink-0 mt-0.5" />
+          <div className="flex-1">
+            <p className="text-sm text-amber-800 font-medium mb-2">{limitError}</p>
+            <button
+              onClick={() => navigate('/admin/billing')}
+              className="text-xs font-bold text-amber-700 underline underline-offset-2"
+            >
+              {lang === 'kz' ? 'Тарифті көру →' : 'Посмотреть тариф →'}
+            </button>
+          </div>
+          <button onClick={() => setLimitError(null)} className="text-amber-400 hover:text-amber-600">
+            <Icon name="close" size={16} />
+          </button>
         </div>
       )}
 
@@ -290,6 +349,49 @@ const AdminUsers = () => {
             </p>
           </div>
           <ModalFooter onClose={closeModal} onSave={handleDelete} saving={saving} saveLabel={t('adminUsers.modals.deactivateLabel')} danger t={t} />
+        </ModalBase>
+      )}
+
+      {modal === 'invite' && (
+        <ModalBase title={lang === 'kz' ? 'Email арқылы шақыру' : 'Пригласить по email'} onClose={closeModal}>
+          <p className="text-sm text-gray-500 mb-4">
+            {lang === 'kz'
+              ? 'Қызметкер сілтеме арқылы тіркеліп, пароль қояды.'
+              : 'Сотрудник зарегистрируется по ссылке и сам задаст пароль.'}
+          </p>
+          {formError && <p className="text-sm text-red-600 bg-red-50 p-3 rounded-xl mb-4">{formError}</p>}
+          <div className="mb-3">
+            <label className="text-sm font-semibold text-gray-700 block mb-1">Email</label>
+            <input
+              type="email"
+              value={inviteForm.email}
+              onChange={(e) => setInviteForm((f) => ({ ...f, email: e.target.value }))}
+              placeholder="ivan@example.com"
+              autoFocus
+              className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none"
+            />
+          </div>
+          <div className="mb-4">
+            <label className="text-sm font-semibold text-gray-700 block mb-1">{t('adminUsers.fields.role')}</label>
+            <div className="grid grid-cols-3 gap-2">
+              {ROLE_VALUES.map((value) => (
+                <button
+                  key={value}
+                  onClick={() => setInviteForm((f) => ({ ...f, role: value }))}
+                  className={`py-2 rounded-xl text-sm font-semibold border-2 transition-all ${inviteForm.role === value ? 'border-primary bg-primary/5 text-primary' : 'border-gray-100 text-gray-600 hover:border-gray-200'}`}
+                >
+                  {t(`adminUsers.roles.${value}`)}
+                </button>
+              ))}
+            </div>
+          </div>
+          <ModalFooter
+            onClose={closeModal}
+            onSave={handleInvite}
+            saving={saving}
+            saveLabel={lang === 'kz' ? 'Шақыру жіберу' : 'Отправить приглашение'}
+            t={t}
+          />
         </ModalBase>
       )}
     </div>

@@ -2,11 +2,13 @@ import { Router } from 'express';
 import rateLimit from 'express-rate-limit';
 import { AuthController } from '../controllers/AuthController.js';
 import { PasswordResetController } from '../controllers/PasswordResetController.js';
+import { UserController } from '../controllers/UserController.js';
 import { authenticate } from '../middleware/auth.middleware.js';
 
 const router = Router();
 const authController = new AuthController();
 const passwordResetController = new PasswordResetController();
+const userController = new UserController();
 
 // Throttle password-reset requests to prevent email-bombing / abuse.
 // Five requests per IP per 15 minutes is plenty for a real human.
@@ -114,5 +116,17 @@ router.get('/check-slug', async (req, res) => {
 
 // POST /api/auth/logout - Logout
 router.post('/logout', authenticate, (req, res) => authController.logout(req, res));
+
+// GET /api/auth/verify-email?token=xxx — verify email address (public, token in query)
+router.get('/verify-email', (req, res) => authController.verifyEmail(req, res));
+
+// POST /api/auth/resend-verification — resend verification email (protected)
+router.post('/resend-verification', authenticate, (req, res) => authController.resendVerification(req, res));
+
+// GET /api/auth/invite/:token — get invite details (public)
+router.get('/invite/:token', (req, res) => userController.getInvite(req, res));
+
+// POST /api/auth/invite/:token/accept — accept invite and create account (public)
+router.post('/invite/:token/accept', (req, res) => userController.acceptInvite(req, res));
 
 export default router;

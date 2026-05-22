@@ -5,6 +5,8 @@ import { AppProvider } from './contexts/AppContext';
 import { UIProvider } from './contexts/UIContext';
 import Icon from './components/common/Icon';
 import LanguageSwitcher from './components/common/LanguageSwitcher';
+import Sidebar from './components/navigation/Sidebar';
+import EmailVerificationBanner from './components/common/EmailVerificationBanner';
 
 // ─── Eagerly loaded (needed on first render) ──────────────────────────────────
 import Login from './screens/Login';
@@ -12,6 +14,8 @@ import Register from './screens/Register';
 import PlanOnboarding from './screens/PlanOnboarding';
 import ForgotPassword from './screens/ForgotPassword';
 import ResetPassword from './screens/ResetPassword';
+import VerifyEmail from './screens/VerifyEmail';
+import AcceptInvite from './screens/AcceptInvite';
 import PWAInstallPrompt from './components/common/PWAInstallPrompt';
 import PushPermissionPrompt from './components/common/PushPermissionPrompt';
 
@@ -56,6 +60,7 @@ const AdminSettings      = lazy(() => import('./screens/admin/AdminSettings'));
 const AdminNotifications = lazy(() => import('./screens/admin/AdminNotifications'));
 const AdminUsers         = lazy(() => import('./screens/admin/AdminUsers'));
 const AdminReports       = lazy(() => import('./screens/admin/AdminReports'));
+const AdminBilling       = lazy(() => import('./screens/admin/AdminBilling'));
 
 // Common
 const NotificationsList    = lazy(() => import('./screens/NotificationsList'));
@@ -116,14 +121,20 @@ const RoleDashboard = () => {
 
 const AppRoutes = () => {
   const [currentMeasurement, setCurrentMeasurement] = useState(null);
+  const { isAuthenticated } = useAuth();
 
   return (
     <Suspense fallback={<PageLoader />}>
+      {isAuthenticated && <Sidebar />}
+      <div className={isAuthenticated ? 'md:pl-60' : ''}>
+      {isAuthenticated && <EmailVerificationBanner />}
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
+        <Route path="/verify-email" element={<VerifyEmail />} />
+        <Route path="/accept-invite/:token" element={<AcceptInvite />} />
         <Route path="/onboarding/plan" element={<ProtectedRoute><PlanOnboarding /></ProtectedRoute>} />
         <Route path="/" element={<HomeRoute />} />
 
@@ -181,6 +192,7 @@ const AppRoutes = () => {
         <Route path="/admin/notifications"          element={<ProtectedRoute allowedRoles={['admin']}><AdminNotifications /></ProtectedRoute>} />
         <Route path="/admin/orders"                 element={<ProtectedRoute allowedRoles={['admin']}><OrdersList /></ProtectedRoute>} />
         <Route path="/admin/order/new"              element={<ProtectedRoute allowedRoles={['admin']}><CreateMeasurementTask /></ProtectedRoute>} />
+        <Route path="/admin/billing"                element={<ProtectedRoute allowedRoles={['admin']}><AdminBilling /></ProtectedRoute>} />
 
         {/* COMMON */}
         <Route path="/designer/profile"    element={<ProtectedRoute><Profile /></ProtectedRoute>} />
@@ -190,6 +202,7 @@ const AppRoutes = () => {
 
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
+      </div>
     </Suspense>
   );
 };

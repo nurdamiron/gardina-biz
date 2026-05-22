@@ -29,4 +29,12 @@ router.put('/admin/:id', authorize('admin'), (req, res) => userController.adminU
 router.post('/admin/:id/reset-password', authorize('admin'), (req, res) => userController.adminResetPassword(req, res));
 router.delete('/admin/:id', authorize('admin'), (req, res) => userController.adminDelete(req, res));
 
+// ── Invite routes ────────────────────────────────────────────────────
+// POST /api/users/admin/invite — send invite email (admin only, enforces plan limit)
+router.post('/admin/invite', authorize('admin'), (req, res) => userController.adminInvite(req, res));
+// GET /api/users/invitations — list pending invites (admin)
+router.get('/invitations', authorize('admin'), (req, res) => userController.listInvitations(req, res));
+// DELETE /api/users/invitations/:id — revoke invite (admin)
+router.delete('/invitations/:id', authorize('admin'), (req, res) => userController.revokeInvitation(req, res));
+
 export default router;

@@ -59,8 +59,8 @@ const BottomNav = () => {
   };
 
   return (
-    <nav 
-      className="fixed left-1/2 -translate-x-1/2 z-50"
+    <nav
+      className="fixed left-1/2 -translate-x-1/2 z-50 md:hidden"
       style={{ 
         bottom: 'max(24px, env(safe-area-inset-bottom, 24px))'
       }}

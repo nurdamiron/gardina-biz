@@ -1,7 +1,9 @@
+import crypto from 'node:crypto';
 import bcrypt from 'bcryptjs';
 import { PostgresUserRepository } from '../../../infrastructure/repositories/PostgresUserRepository.js';
 import pool from '../../../infrastructure/database/config.js';
 import { getTenantId } from '../../../infrastructure/tenant/tenantContext.js';
+import { emailService } from '../../../infrastructure/services/EmailService.js';
 
 /**
  * User Controller
@@ -211,6 +213,237 @@ export class UserController {
       res.json({ success: true, message: 'Пайдаланушы деактивацияланды' });
     } catch (error) {
       res.status(500).json({ success: false, error: error.message });
+    }
+  }
+
+  /**
+   * POST /api/users/admin/invite — send invite email to new team member
+   * Creates a pending invitation token; user sets password via the accept link.
+   */
+  async adminInvite(req, res) {
+    try {
+      if (req.user.role !== 'admin') return res.status(403).json({ success: false, error: 'Forbidden' });
+      const { email, role = 'designer', name } = req.body;
+      if (!email || !email.includes('@')) {
+        return res.status(400).json({ success: false, error: 'Жарамды email қажет' });
+      }
+      const validRoles = ['designer', 'manager', 'sales', 'admin'];
+      if (!validRoles.includes(role)) {
+        return res.status(400).json({ success: false, error: 'Жарамсыз рөл' });
+      }
+
+      const orgId = req.user.organizationId;
+
+      // Check if user with this email already exists in org
+      const existing = await pool.query(
+        'SELECT 1 FROM users WHERE organization_id = $1 AND email = $2',
+        [orgId, email.trim().toLowerCase()]
+      );
+      if (existing.rows.length > 0) {
+        return res.status(409).json({ success: false, error: 'Бұл email тіркелген' });
+      }
+
+      // Check plan user limit
+      const limitRes = await pool.query(
+        `SELECT COALESCE(o.max_users_override, p.max_users) AS user_limit
+         FROM organizations o
+         LEFT JOIN subscription_plans p ON p.code = o.current_plan_code
+         WHERE o.id = $1`,
+        [orgId]
+      );
+      const userLimit = parseInt(limitRes.rows[0]?.user_limit, 10);
+      if (Number.isFinite(userLimit) && userLimit > 0) {
+        const countRes = await pool.query(
+          `SELECT COUNT(*)::int AS n FROM users WHERE organization_id = $1 AND is_active = true`,
+          [orgId]
+        );
+        const activeUsers = countRes.rows[0]?.n || 0;
+        if (activeUsers >= userLimit) {
+          return res.status(402).json({
+            success: false,
+            code: 'PLAN_USER_LIMIT_REACHED',
+            error: `Тарифтегі пайдаланушы лимиті бітті (${activeUsers}/${userLimit}). Жоғары тарифке көтеріңіз.`,
+            limit: userLimit,
+            current: activeUsers,
+          });
+        }
+      }
+
+      // Delete any old pending invite for this email+org
+      await pool.query(
+        `DELETE FROM user_invitations WHERE organization_id = $1 AND email = $2`,
+        [orgId, email.trim().toLowerCase()]
+      );
+
+      const token = crypto.randomBytes(32).toString('hex');
+      const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 days
+
+      // Get org info for email
+      const orgRes = await pool.query(
+        'SELECT name, slug FROM organizations WHERE id = $1',
+        [orgId]
+      );
+      const org = orgRes.rows[0];
+
+      await pool.query(
+        `INSERT INTO user_invitations (organization_id, email, name, role, token, invited_by, expires_at)
+         VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+        [orgId, email.trim().toLowerCase(), name?.trim() || null, role, token, req.user.id, expiresAt]
+      );
+
+      const appUrl = process.env.FRONTEND_URL || process.env.APP_URL || 'https://app.gardina.kz';
+      const acceptUrl = `${appUrl}/accept-invite?token=${token}`;
+      const lang = (req.headers['accept-language'] || '').toLowerCase().includes('kk') ? 'kz' : 'ru';
+
+      await emailService.send('invite', email.trim().toLowerCase(), {
+        organizationName: org?.name || 'Gardina',
+        inviterName: req.user.name,
+        role,
+        acceptUrl,
+        expiresInDays: 7,
+      }, lang);
+
+      return res.json({ success: true, message: 'Шақыру хаты жіберілді' });
+    } catch (error) {
+      console.error(`[UserController.adminInvite] ${error.message}`);
+      return res.status(500).json({ success: false, error: error.message });
+    }
+  }
+
+  /**
+   * GET /api/users/invite/:token — validate invite token (public)
+   */
+  async getInvite(req, res) {
+    try {
+      const { token } = req.params;
+      const r = await pool.query(
+        `SELECT ui.email, ui.name, ui.role, ui.expires_at, ui.accepted_at,
+                o.name AS org_name, o.slug AS org_slug
+         FROM user_invitations ui
+         JOIN organizations o ON o.id = ui.organization_id
+         WHERE ui.token = $1`,
+        [token]
+      );
+      const inv = r.rows[0];
+      if (!inv) return res.status(404).json({ success: false, error: 'Шақыру табылмады немесе мерзімі өтті' });
+      if (inv.accepted_at) return res.status(400).json({ success: false, error: 'Шақыру бұрын қабылданған' });
+      if (new Date(inv.expires_at) < new Date()) return res.status(400).json({ success: false, error: 'Шақырудың мерзімі өтті' });
+      return res.json({ success: true, data: { email: inv.email, name: inv.name, role: inv.role, orgName: inv.org_name, orgSlug: inv.org_slug } });
+    } catch (error) {
+      return res.status(500).json({ success: false, error: error.message });
+    }
+  }
+
+  /**
+   * POST /api/users/invite/:token/accept — accept invite, create account
+   */
+  async acceptInvite(req, res) {
+    const client = await pool.connect();
+    try {
+      const { token } = req.params;
+      const { password, name: nameOverride } = req.body;
+      if (!password || password.length < 6) {
+        return res.status(400).json({ success: false, error: 'Пароль кемінде 6 таңба болуы керек' });
+      }
+
+      const r = await client.query(
+        `SELECT ui.*, o.id AS org_id FROM user_invitations ui
+         JOIN organizations o ON o.id = ui.organization_id
+         WHERE ui.token = $1 FOR UPDATE`,
+        [token]
+      );
+      const inv = r.rows[0];
+      if (!inv) return res.status(404).json({ success: false, error: 'Шақыру табылмады' });
+      if (inv.accepted_at) return res.status(400).json({ success: false, error: 'Шақыру бұрын қабылданған' });
+      if (new Date(inv.expires_at) < new Date()) return res.status(400).json({ success: false, error: 'Шақырудың мерзімі өтті' });
+
+      // Check if email already registered in this org
+      const dup = await client.query(
+        'SELECT 1 FROM users WHERE organization_id = $1 AND email = $2',
+        [inv.organization_id, inv.email]
+      );
+      if (dup.rows.length > 0) {
+        await client.query(`UPDATE user_invitations SET accepted_at = NOW() WHERE token = $1`, [token]);
+        return res.status(409).json({ success: false, error: 'Бұл email тіркелген' });
+      }
+
+      await client.query('BEGIN');
+
+      const finalName = nameOverride?.trim() || inv.name || inv.email.split('@')[0];
+      const passwordHash = await bcrypt.hash(password, 10);
+
+      // Create user — phone is optional for invite-based users (email is identifier)
+      const userRes = await client.query(
+        `INSERT INTO users (organization_id, name, email, phone, password_hash, role, email_verified)
+         VALUES ($1, $2, $3, $4, $5, $6, true)
+         RETURNING id, name, email, phone, role`,
+        [inv.organization_id, finalName, inv.email, inv.email, passwordHash, inv.role]
+      );
+      const user = userRes.rows[0];
+
+      await client.query(
+        `UPDATE user_invitations SET accepted_at = NOW() WHERE token = $1`,
+        [token]
+      );
+
+      await client.query('COMMIT');
+
+      // Import AuthService for token generation
+      const { AuthService } = await import('../../../infrastructure/services/AuthService.js');
+      const authService = new AuthService();
+      const tokens = authService.generateTokenPair(user);
+
+      return res.status(201).json({
+        success: true,
+        data: {
+          user: { id: user.id, name: user.name, email: user.email, role: user.role },
+          ...tokens,
+        },
+        message: 'Шақыру қабылданды, аккаунт жасалды',
+      });
+    } catch (error) {
+      await client.query('ROLLBACK').catch(() => {});
+      console.error(`[UserController.acceptInvite] ${error.message}`);
+      return res.status(500).json({ success: false, error: error.message });
+    } finally {
+      client.release();
+    }
+  }
+
+  /**
+   * GET /api/users/invitations — list pending invitations (admin)
+   */
+  async listInvitations(req, res) {
+    try {
+      if (req.user.role !== 'admin') return res.status(403).json({ success: false, error: 'Forbidden' });
+      const r = await pool.query(
+        `SELECT ui.id, ui.email, ui.name, ui.role, ui.expires_at, ui.accepted_at, ui.created_at,
+                u.name AS invited_by_name
+         FROM user_invitations ui
+         LEFT JOIN users u ON u.id = ui.invited_by
+         WHERE ui.organization_id = $1
+         ORDER BY ui.created_at DESC`,
+        [req.user.organizationId]
+      );
+      return res.json({ success: true, data: r.rows });
+    } catch (error) {
+      return res.status(500).json({ success: false, error: error.message });
+    }
+  }
+
+  /**
+   * DELETE /api/users/invitations/:id — revoke pending invite (admin)
+   */
+  async revokeInvitation(req, res) {
+    try {
+      if (req.user.role !== 'admin') return res.status(403).json({ success: false, error: 'Forbidden' });
+      await pool.query(
+        `DELETE FROM user_invitations WHERE id = $1 AND organization_id = $2 AND accepted_at IS NULL`,
+        [req.params.id, req.user.organizationId]
+      );
+      return res.json({ success: true });
+    } catch (error) {
+      return res.status(500).json({ success: false, error: error.message });
     }
   }
 
