@@ -42,6 +42,7 @@ const allowedOrigins = [
   'https://gardina-web.vercel.app',
   'https://app.gardina.kz',
   'https://gardina.kz',
+  'https://gardina.alashed.kz',
   process.env.FRONTEND_URL,
 ].filter(Boolean);
 
@@ -167,6 +168,7 @@ import installationRoutes from './presentation/http/routes/installation.routes.j
 import auditRoutes from './presentation/http/routes/audit.routes.js';
 import billingRoutes from './presentation/http/routes/billing.routes.js';
 import onboardingRoutes from './presentation/http/routes/onboarding.routes.js';
+import dealRoutes from './presentation/http/routes/deal.routes.js';
 
 // Use routes
 app.use('/api/auth', authRoutes);
@@ -184,6 +186,7 @@ app.use('/api/installations', installationRoutes);
 app.use('/api/audit', auditRoutes);
 app.use('/api/billing', billingRoutes);
 app.use('/api/onboarding', onboardingRoutes);
+app.use('/api/deals', dealRoutes);
 
 // ============================================
 // ERROR HANDLING
@@ -218,11 +221,69 @@ app.use((err, req, res, next) => {
 });
 
 // ============================================
+// AUTO MIGRATIONS
+// ============================================
+
+async function runAutoMigrations() {
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+
+    // measurement_windows columns (add_price_cols)
+    await client.query(`
+      ALTER TABLE measurement_windows
+        ADD COLUMN IF NOT EXISTS fabric_code TEXT,
+        ADD COLUMN IF NOT EXISTS fabric_brand TEXT,
+        ADD COLUMN IF NOT EXISTS design_photos JSONB DEFAULT '[]',
+        ADD COLUMN IF NOT EXISTS price_breakdown JSONB DEFAULT '{}';
+    `);
+
+    await client.query(`
+      ALTER TABLE measurements
+        ADD COLUMN IF NOT EXISTS delivery_cost DECIMAL(10,2) DEFAULT 0;
+    `);
+
+    // fabrics extra columns (001-catalog-system)
+    await client.query(`
+      ALTER TABLE fabrics
+        ADD COLUMN IF NOT EXISTS cost_price DECIMAL(10,2),
+        ADD COLUMN IF NOT EXISTS width_cm INTEGER DEFAULT 280,
+        ADD COLUMN IF NOT EXISTS brand VARCHAR(100);
+    `);
+
+    // service_rates table (001-catalog-system)
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS service_rates (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        name VARCHAR(255) NOT NULL,
+        description TEXT,
+        service_type VARCHAR(50) NOT NULL DEFAULT 'installation',
+        calc_method VARCHAR(50) NOT NULL DEFAULT 'per_meter',
+        base_rate DECIMAL(10,2) NOT NULL DEFAULT 0,
+        is_active BOOLEAN DEFAULT true,
+        organization_id UUID REFERENCES organizations(id) ON DELETE CASCADE,
+        created_at TIMESTAMPTZ DEFAULT NOW(),
+        updated_at TIMESTAMPTZ DEFAULT NOW()
+      );
+    `);
+
+    await client.query('COMMIT');
+    console.log('✅  Auto-migrations completed');
+  } catch (err) {
+    await client.query('ROLLBACK');
+    console.error('⚠️  Auto-migration error (non-fatal):', err.message);
+  } finally {
+    client.release();
+  }
+}
+
+// ============================================
 // START SERVER
 // ============================================
 
 // Only start server if not in test environment
 if (process.env.NODE_ENV !== 'test') {
+  runAutoMigrations().catch(e => console.error('Migration error:', e.message));
   app.listen(PORT, () => {
     console.log('');
     console.log('🎉 ================================================');
