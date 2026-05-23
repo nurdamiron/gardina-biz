@@ -412,10 +412,13 @@ const MeasurementFormNew = () => {
         </div>
       </header>
 
-      <main className="p-4 space-y-6 max-w-2xl mx-auto">
+      <main className="p-4 max-w-3xl mx-auto">
         {/* ШАГ 1: Список комнат */}
         {step === 'rooms' && (
-          <>
+          <div className="lg:grid lg:grid-cols-[1fr_260px] lg:gap-5 lg:items-start space-y-6 lg:space-y-0">
+
+            {/* LEFT: rooms list + continue */}
+            <div className="space-y-4">
             {/* Сохранённые комнаты */}
             {rooms.length > 0 && (
               <div className="space-y-3">
@@ -501,8 +504,8 @@ const MeasurementFormNew = () => {
               </div>
             )}
 
-            {/* Добавить комнату */}
-            <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+            {/* Mobile: add room panel */}
+            <div className="lg:hidden bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
               <h3 className="font-bold text-gray-900 mb-4">Бөлме қосу</h3>
               <div className="grid grid-cols-4 gap-3">
                 {ROOM_TYPES.map(room => (
@@ -528,7 +531,67 @@ const MeasurementFormNew = () => {
                 <Icon name="arrow_forward" />
               </button>
             )}
-          </>
+
+            </div>{/* end left column */}
+
+            {/* RIGHT (desktop only): add-room panel + total */}
+            <div className="hidden lg:flex flex-col gap-4 sticky top-20">
+              <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+                <h3 className="font-bold text-gray-900 mb-4">Бөлме қосу</h3>
+                <div className="grid grid-cols-3 gap-3">
+                  {ROOM_TYPES.map(room => (
+                    <button
+                      key={room.id}
+                      onClick={() => addRoom(room.id)}
+                      className="flex flex-col items-center justify-center p-3 rounded-xl bg-gray-50 hover:bg-primary/10 hover:text-primary transition-colors"
+                    >
+                      <Icon name={room.icon} size={22} className="mb-1" />
+                      <span className="text-[10px] font-medium text-center leading-tight">{room.label}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {rooms.length > 0 && (
+                <div className="bg-gray-900 text-white rounded-2xl p-4">
+                  <p className="text-xs text-gray-400 mb-1">{rooms.length} бөлме</p>
+                  <p className="text-2xl font-black">
+                    {new Intl.NumberFormat('ru-RU').format(
+                      rooms.reduce((sum, room) => {
+                        let total = 0;
+                        const corniceLen = parseFloat(room.corniceLength) || 0;
+                        const COEFFICIENTS = { curtain: 2, tulle: 3 };
+                        if (room.solutionType === 'classic') {
+                          (room.fabricItems || []).forEach(item => {
+                            const coeff = COEFFICIENTS[item.fabricType || item.type] || 2;
+                            const meters = Math.ceil(corniceLen * coeff + 0.5);
+                            total += meters * (item.pricePerMeter || 0);
+                          });
+                          const fMeters = (room.fabricItems || []).reduce((s, i) => {
+                            const c = COEFFICIENTS[i.fabricType || i.type] || 2;
+                            return s + Math.ceil(corniceLen * c + 0.5);
+                          }, 0);
+                          const sr = room.sewingRate != null && room.sewingRate !== '' ? parseInt(room.sewingRate) : 1700;
+                          total += fMeters * (isNaN(sr) ? 1700 : sr);
+                        } else if (room.solutionType === 'jalousie_h' || room.solutionType === 'jalousie_v') {
+                          const priceMap = { aluminum: 8500, wood: 15000, plastic: 6000 };
+                          total = Math.round((parseFloat(room.width) || 0) * (parseFloat(room.height) || 0) * (priceMap[room.material] || 8500));
+                        } else if (room.solutionType === 'zebra') {
+                          const priceMap = { open: 6500, cassette: 9000 };
+                          total = Math.round((parseFloat(room.width) || 0) * (parseFloat(room.height) || 0) * (priceMap[room.system] || 6500));
+                        } else if (room.solutionType === 'roman') {
+                          const romanW = (parseFloat(room.width) || 0) + 0.1;
+                          total = (romanW * (room.fabric?.pricePerMeter || 0)) + (room.mechanism === 'motor' ? 25000 : 5000) + 12000 + 8000;
+                        }
+                        return sum + total;
+                      }, 0)
+                    )} ₸
+                  </p>
+                </div>
+              )}
+            </div>
+
+          </div>
         )}
 
         {/* ШАГ 2: Редактирование комнаты */}
