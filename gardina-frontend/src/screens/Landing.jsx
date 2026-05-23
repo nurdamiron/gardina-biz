@@ -81,7 +81,7 @@ function LandingHeader() {
             {t('landing.nav.login')}
           </Link>
           <a
-            href="https://wa.me/77715373201"
+            href="https://wa.me/77079429827"
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-bold text-white bg-primary hover:bg-primary-light rounded-lg transition-colors shadow-lg shadow-primary/20"
@@ -143,7 +143,7 @@ function Hero() {
               {t('landing.hero.ctaPrimary')}
             </a>
             <a
-              href="https://wa.me/77715373201"
+              href="https://wa.me/77079429827"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl border-2 border-primary/20 text-primary font-bold text-base hover:bg-primary/5 transition-all"
@@ -1090,7 +1090,7 @@ function CTA() {
                 {t('landing.cta.primary')}
               </a>
               <a
-                href="https://wa.me/77715373201"
+                href="https://wa.me/77079429827"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl border-2 border-white/30 text-white font-bold hover:bg-white/10 transition-all"
@@ -1099,7 +1099,7 @@ function CTA() {
                 {t('landing.cta.whatsapp')}
               </a>
               <a
-                href="tel:+77715373201"
+                href="tel:+77079429827"
                 className="inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl text-white/90 font-bold hover:text-white transition-all"
               >
                 <Icon name="phone" size={20} />
@@ -1137,7 +1137,7 @@ function LandingFooter() {
           <ul className="space-y-2 text-sm">
             <li><Link to="/login" className="hover:text-white">{t('landing.footer.login')}</Link></li>
             <li><a href="mailto:info@gardina.kz" className="hover:text-white">{t('landing.footer.helpEmail')}</a></li>
-            <li><a href="https://wa.me/77715373201" target="_blank" rel="noreferrer" className="hover:text-white">{t('landing.footer.whatsapp')}</a></li>
+            <li><a href="https://wa.me/77079429827" target="_blank" rel="noreferrer" className="hover:text-white">{t('landing.footer.whatsapp')}</a></li>
             <li><a href="/terms.html" className="hover:text-white">{t('landing.footer.terms')}</a></li>
             <li><a href="/privacy.html" className="hover:text-white">{t('landing.footer.privacy')}</a></li>
           </ul>
@@ -1145,7 +1145,7 @@ function LandingFooter() {
         <div>
           <h4 className="font-bold text-white mb-3 text-sm uppercase tracking-wide">{t('landing.footer.contact')}</h4>
           <ul className="space-y-2 text-sm">
-            <li><a href="tel:+77715373201" className="hover:text-white">+7 771 537 3201</a></li>
+            <li><a href="tel:+77079429827" className="hover:text-white">+7 707 942 9827</a></li>
             <li><a href="mailto:info@gardina.kz" className="hover:text-white">info@gardina.kz</a></li>
             <li>{t('landing.footer.address')}</li>
           </ul>
@@ -1162,7 +1162,7 @@ function LandingFooter() {
 function FloatingWhatsApp() {
   return (
     <motion.a
-      href="https://wa.me/77715373201"
+      href="https://wa.me/77079429827"
       target="_blank"
       rel="noopener noreferrer"
       initial={{ opacity: 0, scale: 0 }}
