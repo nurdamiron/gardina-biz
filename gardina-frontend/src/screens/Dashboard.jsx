@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useApp } from '../contexts/AppContext';
+import { useI18n } from '../contexts/I18nContext';
 import BottomNav from '../components/navigation/BottomNav';
 import { SkeletonCard, SkeletonStats } from '../components/common/Skeleton';
 import { formatTime24 } from '../utils/dateUtils';
@@ -10,6 +11,7 @@ import Icon from '../components/common/Icon';
 const Dashboard = () => {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
+  const { t } = useI18n();
   const { measurements: allMeasurements, deals, loadData, loading: appLoading } = useApp();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -49,14 +51,14 @@ const Dashboard = () => {
       <div className="flex items-center justify-center min-h-screen bg-background-light p-4">
         <div className="text-center p-8 bg-white rounded-2xl shadow-sm max-w-md">
           <Icon name="error" size={48} className="text-red-500" />
-          <h2 className="text-xl font-bold mt-4">Қате</h2>
+          <h2 className="text-xl font-bold mt-4">{t('common.error')}</h2>
           <p className="text-text-secondary mt-2">{error}</p>
           <div className="flex gap-3 mt-6">
             <button onClick={loadDashboardData} className="flex-1 px-6 py-2 bg-primary text-white rounded-lg font-bold">
-              Қайталау
+              {t('common.retry')}
             </button>
             <button onClick={logout} className="px-6 py-2 bg-gray-100 rounded-lg font-bold">
-              Шығу
+              {t('common.logout')}
             </button>
           </div>
         </div>
@@ -76,7 +78,7 @@ const Dashboard = () => {
               <div className="absolute bottom-0 right-0 size-2.5 bg-primary rounded-full border-2 border-white"></div>
             </div>
             <div>
-              <h2 className="text-base font-bold text-gray-900 leading-tight">Сәлем, {user?.name}!</h2>
+              <h2 className="text-base font-bold text-gray-900 leading-tight">{t('dashboard.designerHello').replace('{name}', user?.name || '')}</h2>
               <p className="text-gray-500 text-[11px] font-medium uppercase tracking-wide">
                 {new Date().toLocaleDateString('kk-KZ', { weekday: 'long', day: 'numeric', month: 'long' })}
               </p>
@@ -93,7 +95,7 @@ const Dashboard = () => {
       {/* 1. MY RESULTS - First */}
       <section className="mt-4 mb-6">
         <h2 className="text-xl font-bold px-4 pb-3">
-          Менің нәтижем <span className="text-sm font-normal text-text-secondary ml-1">(Осы апта)</span>
+          {t('dashboard.myResults')} <span className="text-sm font-normal text-text-secondary ml-1">({t('dashboard.thisWeek')})</span>
         </h2>
         {loading ? (
           <div className="mx-4"><SkeletonStats /></div>
@@ -101,7 +103,7 @@ const Dashboard = () => {
           <div className="mx-4 bg-white rounded-2xl p-5 shadow-sm border">
             <div className="flex items-start justify-between mb-6">
               <div className="flex flex-col">
-                <span className="text-xs font-medium text-text-secondary uppercase">Сатылым</span>
+                <span className="text-xs font-medium text-text-secondary uppercase">{t('dashboard.sales')}</span>
                 <div className="flex items-baseline gap-2 mt-1">
                   <span className="text-3xl font-bold">{Math.round(stats.sales / 1000)}k</span>
                   <span className="text-sm font-medium text-text-secondary">₸</span>
@@ -110,17 +112,17 @@ const Dashboard = () => {
               <div className="flex gap-2">
                 <div className="bg-primary/10 rounded-lg p-2 flex flex-col items-center min-w-[70px]">
                   <span className="text-lg font-bold text-primary">{stats.measurements}</span>
-                  <span className="text-[10px] font-medium text-text-secondary">Өлшем</span>
+                  <span className="text-[10px] font-medium text-text-secondary">{t('dashboard.stats.measurementUnit')}</span>
                 </div>
                 <div className="bg-gray-100 rounded-lg p-2 flex flex-col items-center min-w-[70px]">
                   <span className="text-lg font-bold">{stats.deals}</span>
-                  <span className="text-[10px] font-medium text-text-secondary">Мәміле</span>
+                  <span className="text-[10px] font-medium text-text-secondary">{t('dashboard.stats.dealUnit')}</span>
                 </div>
               </div>
             </div>
             <div className="space-y-2">
               <div className="flex justify-between text-xs font-medium">
-                <span className="text-text-secondary">Мақсат: {stats.goal / 1000}k ₸</span>
+                <span className="text-text-secondary">{t('dashboard.goalPrefix')}: {stats.goal / 1000}k ₸</span>
                 <span className="text-primary">{progress}%</span>
               </div>
               <div className="h-3 w-full bg-gray-100 rounded-full overflow-hidden">
@@ -133,12 +135,12 @@ const Dashboard = () => {
 
       {/* 2. URGENT ACTIONS - Second */}
       <section className="mt-8">
-        <h2 className="text-xl font-bold px-4 pb-3">Назар аудару қажет</h2>
+        <h2 className="text-xl font-bold px-4 pb-3">{t('dashboard.sections.needsAction')}</h2>
         <div className="px-4 grid grid-cols-1 lg:grid-cols-2 gap-3">
           {urgentActions.length === 0 ? (
             <div className="bg-white p-6 rounded-xl shadow-sm text-center">
               <Icon name="check_circle" size={32} className="text-green-500" />
-              <p className="text-text-secondary mt-2 text-sm">Барлық тапсырмалар орындалды!</p>
+              <p className="text-text-secondary mt-2 text-sm">{t('dashboard.manager.allDone')}</p>
             </div>
           ) : (
             urgentActions.map(deal => (
@@ -148,8 +150,8 @@ const Dashboard = () => {
                 </div>
                 <div className="flex-1">
                   <div className="flex items-center justify-between mb-0.5">
-                    <p className="text-sm font-bold">Мәміле #{deal.id.slice(0, 8)}</p>
-                    <span className="text-[10px] font-bold text-red-500 bg-red-50 px-2 py-0.5 rounded-full">ШҰҒЫЛ</span>
+                    <p className="text-sm font-bold">{t('dashboard.dealShortLabel')} #{deal.id.slice(0, 8)}</p>
+                    <span className="text-[10px] font-bold text-red-500 bg-red-50 px-2 py-0.5 rounded-full">{t('dashboard.urgent')}</span>
                   </div>
                   <p className="text-xs text-text-secondary">
                     {deal.status === 'proposal_sent' ? 'Клиент жауабын күтуде' : 'Төлем күтілуде'}
@@ -165,8 +167,8 @@ const Dashboard = () => {
       {/* 3. UPCOMING MEETINGS - Third */}
       <section className="mt-8 mb-6">
         <div className="flex items-center justify-between px-4 pb-3">
-          <h2 className="text-xl font-bold">Алдағы кездесулер</h2>
-          <button onClick={() => navigate('/measurements')} className="text-sm font-medium text-primary">Барлығы</button>
+          <h2 className="text-xl font-bold">{t('dashboard.upcomingMeetings')}</h2>
+          <button onClick={() => navigate('/measurements')} className="text-sm font-medium text-primary">{t('dashboard.viewAll')}</button>
         </div>
         <div className="px-4 flex flex-col gap-4">
           {loading ? (
@@ -177,9 +179,9 @@ const Dashboard = () => {
           ) : meetings.length === 0 ? (
             <div className="bg-white rounded-2xl p-8 shadow-sm text-center">
               <Icon name="event_busy" size={48} className="text-gray-300" />
-              <p className="text-text-secondary mt-4">Жоспарланған кездесу жоқ</p>
+              <p className="text-text-secondary mt-4">{t('dashboard.sections.noUpcoming')}</p>
               <button onClick={() => navigate('/measurements/new')} className="mt-4 px-6 py-2 bg-primary text-white rounded-lg font-bold">
-                Кездесу тағайындау
+                {t('dashboard.scheduleMeeting')}
               </button>
             </div>
           ) : (
@@ -198,22 +200,22 @@ const Dashboard = () => {
                       <div className="flex items-center gap-2 mb-1">
                         <div className="flex items-center gap-1 bg-green-50 px-2 py-1 rounded text-[10px] font-bold text-green-600 border border-green-200">
                           <Icon name="stars" size={14} />
-                          Жақын кездесу
+                          {t('dashboard.nearestMeeting')}
                         </div>
                         {isPriorityHigh && (
                           <div className="flex items-center gap-1 bg-red-500 px-1.5 py-0.5 rounded text-[10px] font-bold text-white animate-pulse">
                             <Icon name="local_fire_department" size={12} />
-                            ШҰҒЫЛ
+                            {t('dashboard.urgent')}
                           </div>
                         )}
                       </div>
                       <h3 className="font-bold text-gray-900 text-lg leading-tight group-hover:text-primary transition-colors">
-                        {meeting.clientName || 'Клиент'}
+                        {meeting.clientName || t('dashboard.fallbacks.client')}
                       </h3>
                     </div>
                     <div className="flex flex-col items-end gap-1.5">
                       <span className="px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wide bg-primary/10 text-primary-dark border border-primary/25">
-                        Өлшем алу
+                        {t('dashboard.measurementType')}
                       </span>
                     </div>
                   </div>
@@ -251,7 +253,7 @@ const Dashboard = () => {
                       className="bg-primary text-white px-4 py-2 rounded-lg font-bold text-sm hover:brightness-110 transition-all shadow-lg shadow-primary/20 flex items-center gap-1"
                     >
                       <Icon name="play_arrow" size={18} />
-                      Бастау
+                      {t('dashboard.start')}
                     </button>
                   </div>
                 </div>

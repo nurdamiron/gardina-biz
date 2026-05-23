@@ -234,10 +234,10 @@ const AdminDashboard = () => {
 
                 {/* OVERVIEW TAB */}
                 {activeTab === 'overview' && (
-                    <div className="space-y-4">
-                        {/* Quick Actions */}
+                    <div className="lg:grid lg:grid-cols-[1fr_300px] lg:gap-6 space-y-4 lg:space-y-0">
+                        {/* Left: Quick Actions */}
                         <div className="space-y-3">
-                            <h2 className="text-lg font-bold">Жылдам әрекеттер</h2>
+                            <h2 className="text-lg font-bold">{t('adminDashboard.sections.quickActions')}</h2>
 
                             <button
                                 onClick={() => navigate('/admin/catalog')}
@@ -245,41 +245,78 @@ const AdminDashboard = () => {
                             >
                                 <Icon name="inventory_2" size={28} />
                                 <div className="text-left flex-1">
-                                    <p className="text-base font-bold">Каталогты басқару</p>
-                                    <p className="text-xs opacity-90">Маталар, қызметтер, бағалар</p>
+                                    <p className="text-base font-bold">{lang === 'kz' ? 'Каталогты басқару' : 'Управление каталогом'}</p>
+                                    <p className="text-xs opacity-90">{lang === 'kz' ? 'Маталар, қызметтер, бағалар' : 'Ткани, услуги, цены'}</p>
                                 </div>
                             </button>
 
                             <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
                                 <button
                                     onClick={() => navigate('/admin/clients')}
-                                    className="bg-white hover:bg-gray-50 border-2 border-gray-200 text-gray-700 font-bold py-4 rounded-xl shadow-sm transition-all flex flex-col items-center justify-center gap-2"
+                                    className="bg-white hover:bg-gray-50 border-2 border-gray-200 text-gray-700 font-bold py-4 rounded-xl shadow-sm transition-all flex flex-col items-center justify-center gap-2 hover:border-primary/40 hover:shadow-md"
                                 >
                                     <Icon name="groups" size={28} className="text-primary" />
-                                    <p className="text-sm">Клиенттер</p>
+                                    <p className="text-sm">{t('adminDashboard.tabs.clients')}</p>
                                 </button>
                                 <button
                                     onClick={() => navigate('/admin/orders')}
-                                    className="bg-white hover:bg-gray-50 border-2 border-gray-200 text-gray-700 font-bold py-4 rounded-xl shadow-sm transition-all flex flex-col items-center justify-center gap-2"
+                                    className="bg-white hover:bg-gray-50 border-2 border-gray-200 text-gray-700 font-bold py-4 rounded-xl shadow-sm transition-all flex flex-col items-center justify-center gap-2 hover:border-primary/40 hover:shadow-md"
                                 >
                                     <Icon name="shopping_cart" size={28} className="text-primary" />
-                                    <p className="text-sm">Тапсырыстар</p>
+                                    <p className="text-sm">{lang === 'kz' ? 'Тапсырыстар' : 'Заказы'}</p>
                                 </button>
                                 <button
                                     onClick={() => navigate('/admin/users')}
-                                    className="bg-white hover:bg-gray-50 border-2 border-gray-200 text-gray-700 font-bold py-4 rounded-xl shadow-sm transition-all flex flex-col items-center justify-center gap-2"
+                                    className="bg-white hover:bg-gray-50 border-2 border-gray-200 text-gray-700 font-bold py-4 rounded-xl shadow-sm transition-all flex flex-col items-center justify-center gap-2 hover:border-primary/40 hover:shadow-md"
                                 >
                                     <Icon name="manage_accounts" size={28} className="text-primary-light" />
-                                    <p className="text-sm">Команда</p>
+                                    <p className="text-sm">{t('adminDashboard.tabs.team')}</p>
                                 </button>
                                 <button
                                     onClick={() => navigate('/admin/reports')}
-                                    className="bg-white hover:bg-gray-50 border-2 border-gray-200 text-gray-700 font-bold py-4 rounded-xl shadow-sm transition-all flex flex-col items-center justify-center gap-2"
+                                    className="bg-white hover:bg-gray-50 border-2 border-gray-200 text-gray-700 font-bold py-4 rounded-xl shadow-sm transition-all flex flex-col items-center justify-center gap-2 hover:border-primary/40 hover:shadow-md"
                                 >
                                     <Icon name="bar_chart" size={28} className="text-green-600" />
-                                    <p className="text-sm">Есептер</p>
+                                    <p className="text-sm">{lang === 'kz' ? 'Есептер' : 'Отчёты'}</p>
                                 </button>
                             </div>
+                        </div>
+
+                        {/* Right: Recent Activity (desktop only) */}
+                        <div className="hidden lg:block space-y-3">
+                            <h2 className="text-lg font-bold">{lang === 'kz' ? 'Соңғы өлшемдер' : 'Последние замеры'}</h2>
+                            <div className="space-y-2">
+                                {measurements.slice(0, 5).length === 0 ? (
+                                    <div className="bg-white rounded-xl p-4 text-center text-sm text-gray-400">
+                                        {lang === 'kz' ? 'Өлшем жоқ' : 'Замеров нет'}
+                                    </div>
+                                ) : (
+                                    measurements.slice(0, 5).map(m => (
+                                        <div
+                                            key={m.id}
+                                            onClick={() => navigate(`/measurements/${m.id}`)}
+                                            className="bg-white rounded-xl p-3 border border-gray-100 hover:border-primary/30 hover:shadow-sm cursor-pointer transition-all flex items-center gap-3"
+                                        >
+                                            <div className={`size-2 rounded-full shrink-0 ${
+                                                m.status === 'completed' ? 'bg-green-500' :
+                                                m.status === 'in_progress' ? 'bg-yellow-500' :
+                                                m.status === 'scheduled' ? 'bg-primary' : 'bg-gray-400'
+                                            }`} />
+                                            <div className="flex-1 min-w-0">
+                                                <p className="text-sm font-bold truncate">{m.clientName || '—'}</p>
+                                                <p className="text-[11px] text-gray-400 truncate">{m.address || '—'}</p>
+                                            </div>
+                                            <Icon name="chevron_right" size={16} className="text-gray-400 shrink-0" />
+                                        </div>
+                                    ))
+                                )}
+                            </div>
+                            <button
+                                onClick={() => navigate('/measurements')}
+                                className="w-full text-sm font-medium text-primary bg-primary/5 hover:bg-primary/10 rounded-xl py-2.5 transition-colors"
+                            >
+                                {lang === 'kz' ? 'Барлығын көру' : 'Смотреть все'}
+                            </button>
                         </div>
                     </div>
                 )}

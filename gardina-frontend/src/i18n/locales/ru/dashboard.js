@@ -100,11 +100,21 @@ const dashboard = {
 
   designerHello: 'Привет, {name}!',
   todayLabel: 'Сегодня',
-  thisWeek: 'На неделе',
+  thisWeek: 'Неделя',
   thisMonth: 'В этом месяце',
   completedMeasurements: 'Выполнено замеров',
   inCompany: 'В компании',
   monthlyMetric: 'Цель за месяц',
+  myResults: 'Мой результат',
+  sales: 'Продажи',
+  goalPrefix: 'Цель',
+  urgent: 'СРОЧНО',
+  nearestMeeting: 'Ближайшая встреча',
+  measurementType: 'Замер',
+  scheduleMeeting: 'Назначить встречу',
+  upcomingMeetings: 'Предстоящие встречи',
+  start: 'Начать',
+  dealShortLabel: 'Сделка',
 
   ranking: {
     designer: 'Дизайнер',

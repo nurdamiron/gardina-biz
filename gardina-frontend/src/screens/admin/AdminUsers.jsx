@@ -252,7 +252,69 @@ const AdminUsers = () => {
           </div>
         )}
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-3">
+        {/* Desktop table */}
+        <div className="hidden lg:block bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-gray-100 text-left text-xs font-bold text-gray-400 uppercase tracking-wide">
+                <th className="px-4 py-3">{t('adminUsers.table.user')}</th>
+                <th className="px-4 py-3">{t('adminUsers.table.contact')}</th>
+                <th className="px-4 py-3">{t('adminUsers.table.role')}</th>
+                <th className="px-4 py-3">{t('adminUsers.table.status')}</th>
+                <th className="px-4 py-3">{t('adminUsers.table.created')}</th>
+                <th className="px-4 py-3 text-right">{t('adminUsers.table.actions')}</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-50">
+              {filtered.map(u => {
+                const rc = roleConfig(u.role);
+                return (
+                  <tr key={u.id} className={`hover:bg-gray-50 transition-colors ${!u.is_active ? 'opacity-50' : ''}`}>
+                    <td className="px-4 py-3">
+                      <div className="flex items-center gap-3">
+                        <div className={`size-9 rounded-full flex items-center justify-center flex-shrink-0 ${u.is_active ? 'bg-primary/10' : 'bg-gray-100'}`}>
+                          <span className={`text-sm font-bold ${u.is_active ? 'text-primary' : 'text-gray-400'}`}>
+                            {u.name?.[0]?.toUpperCase() || '?'}
+                          </span>
+                        </div>
+                        <p className="font-bold text-gray-900">{u.name}</p>
+                      </div>
+                    </td>
+                    <td className="px-4 py-3 text-gray-500 text-xs">{u.phone || u.email || '—'}</td>
+                    <td className="px-4 py-3">
+                      <span className={`text-xs px-2.5 py-1 rounded-full font-semibold ${rc.color}`}>{rc.label}</span>
+                    </td>
+                    <td className="px-4 py-3">
+                      {u.is_active
+                        ? <span className="text-xs px-2.5 py-1 rounded-full bg-green-50 text-green-700 font-semibold">{t('adminUsers.statuses.active')}</span>
+                        : <span className="text-xs px-2.5 py-1 rounded-full bg-red-50 text-red-600 font-semibold">{t('adminUsers.statuses.deactivated')}</span>
+                      }
+                    </td>
+                    <td className="px-4 py-3 text-xs text-gray-400">
+                      {u.created_at ? new Date(u.created_at).toLocaleDateString('ru-RU') : '—'}
+                    </td>
+                    <td className="px-4 py-3">
+                      <div className="flex items-center gap-1 justify-end">
+                        <button onClick={() => openEdit(u)} className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-500" title={t('common.edit')}>
+                          <Icon name="edit" size={16} />
+                        </button>
+                        <button onClick={() => openPassword(u)} className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-500" title={lang === 'kz' ? 'Құпия сөзді өзгерту' : 'Сменить пароль'}>
+                          <Icon name="lock" size={16} />
+                        </button>
+                        <button onClick={() => handleToggleActive(u)} className={`p-1.5 rounded-lg ${u.is_active ? 'hover:bg-amber-50 text-amber-500' : 'hover:bg-green-50 text-green-500'}`}>
+                          <Icon name={u.is_active ? 'block' : 'check_circle'} size={16} />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Mobile cards */}
+        <div className="lg:hidden grid grid-cols-1 gap-3">
         {filtered.map(u => {
           const rc = roleConfig(u.role);
           return (

@@ -59,6 +59,15 @@ const adminUsers = {
     deactivated: 'Деактивацияланды',
     userDeactivated: 'Пайдаланушы деактивацияланды',
   },
+
+  table: {
+    user: 'Пайдаланушы',
+    contact: 'Байланыс',
+    role: 'Рөл',
+    status: 'Статус',
+    created: 'Тіркелді',
+    actions: 'Әрекеттер',
+  },
 };
 
 export default adminUsers;

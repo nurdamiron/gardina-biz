@@ -16,6 +16,18 @@ const adminReports = {
     topProducts: 'Үздік маталар',
     paymentRisks: 'Төлем тәуекелдері',
   },
+  stats: {
+    totalRevenue: 'Жалпы табыс',
+    completedDeals: 'Аяқталған',
+    totalDeals: 'Барлық мәмілелер',
+    totalClients: 'Клиенттер',
+  },
+  revenueParts: {
+    fabric: 'Маталар',
+    sewing: 'Тігу',
+    installation: 'Орнату',
+    delivery: 'Жеткізу',
+  },
 };
 
 export default adminReports;

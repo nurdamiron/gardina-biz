@@ -97,6 +97,16 @@ const dashboard = {
   completedMeasurements: 'Орындалған өлшемдер',
   inCompany: 'Компанияда',
   monthlyMetric: 'Айлық көрсеткіш',
+  myResults: 'Менің нәтижем',
+  sales: 'Сатылым',
+  goalPrefix: 'Мақсат',
+  urgent: 'ШҰҒЫЛ',
+  nearestMeeting: 'Жақын кездесу',
+  measurementType: 'Өлшем алу',
+  scheduleMeeting: 'Кездесу тағайындау',
+  upcomingMeetings: 'Алдағы кездесулер',
+  start: 'Бастау',
+  dealShortLabel: 'Мәміле',
 
   ranking: {
     designer: 'Дизайнер',

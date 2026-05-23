@@ -59,6 +59,15 @@ const adminUsers = {
     deactivated: 'Деактивирован',
     userDeactivated: 'Сотрудник деактивирован',
   },
+
+  table: {
+    user: 'Пользователь',
+    contact: 'Контакт',
+    role: 'Роль',
+    status: 'Статус',
+    created: 'Зарегистрирован',
+    actions: 'Действия',
+  },
 };
 
 export default adminUsers;

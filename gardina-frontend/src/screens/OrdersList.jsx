@@ -221,7 +221,71 @@ const OrdersList = ({ filterByManager = false }) => {
                         <SkeletonCard />
                     </div>
                 ) : filteredOrders.length > 0 ? (
-                    <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
+                    <>
+                    {/* Desktop table */}
+                    <div className="hidden lg:block bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden mb-4">
+                        <table className="w-full text-sm">
+                            <thead>
+                                <tr className="border-b border-gray-100 text-left text-xs font-bold text-gray-400 uppercase tracking-wide">
+                                    <th className="px-4 py-3 w-24">{t('orders.table.id')}</th>
+                                    <th className="px-4 py-3">{t('orders.table.client')}</th>
+                                    <th className="px-4 py-3">{t('orders.card.designer')}</th>
+                                    <th className="px-4 py-3">{t('orders.table.status')}</th>
+                                    <th className="px-4 py-3">{t('orders.table.payment')}</th>
+                                    <th className="px-4 py-3 text-right">{t('orders.card.amount')}</th>
+                                    <th className="px-4 py-3 w-32">{t('orders.table.date')}</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-gray-50">
+                                {filteredOrders.map(order => {
+                                    const measurementKey = `${order.clientId}_${order.designerId}`;
+                                    const measurement = measurements[measurementKey];
+                                    const progress = getOrderProgress(order.status, t);
+                                    return (
+                                        <tr
+                                            key={order.id}
+                                            onClick={() => { setSelectedOrder(order); setSelectedMeasurement(measurement); setShowDetailModal(true); }}
+                                            className="hover:bg-gray-50 cursor-pointer transition-colors"
+                                        >
+                                            <td className="px-4 py-3 text-xs text-gray-400 font-mono">#{order.id.slice(0, 6)}</td>
+                                            <td className="px-4 py-3">
+                                                <p className="font-bold text-gray-900 truncate max-w-[180px]">{order.client?.name || '—'}</p>
+                                                <p className="text-xs text-gray-400 truncate max-w-[180px]">{measurement?.address || order.client?.address || '—'}</p>
+                                            </td>
+                                            <td className="px-4 py-3">
+                                                <div className="flex items-center gap-2">
+                                                    <div className="size-7 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-xs">
+                                                        {order.designer?.name?.[0] || '?'}
+                                                    </div>
+                                                    <span className="text-xs font-medium text-gray-700 truncate max-w-[120px]">{order.designer?.name || '—'}</span>
+                                                </div>
+                                            </td>
+                                            <td className="px-4 py-3">
+                                                <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wide ${getStatusColorClass(order.status)}`}>
+                                                    <Icon name={progress.icon} size={12} />
+                                                    {progress.label}
+                                                </span>
+                                            </td>
+                                            <td className="px-4 py-3">
+                                                <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-bold ${getPaymentStatusColor(order.paymentStatus || 'pending')}`}>
+                                                    {getPaymentLabel(order.paymentStatus || 'pending')}
+                                                </span>
+                                            </td>
+                                            <td className="px-4 py-3 text-right font-black text-gray-900">
+                                                {(order.totalAmount || 0).toLocaleString()} ₸
+                                            </td>
+                                            <td className="px-4 py-3 text-xs text-gray-500">
+                                                {measurement?.scheduledAt ? formatDate(measurement.scheduledAt, lang) : '—'}
+                                            </td>
+                                        </tr>
+                                    );
+                                })}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    {/* Mobile cards */}
+                    <div className="lg:hidden grid grid-cols-1 gap-4">
                     {filteredOrders.map(order => {
                         const measurementKey = `${order.clientId}_${order.designerId}`;
                         const measurement = measurements[measurementKey];
@@ -353,6 +417,7 @@ const OrdersList = ({ filterByManager = false }) => {
                         );
                     })}
                     </div>
+                    </>
                 ) : (
                     <div className="flex flex-col items-center justify-center py-16 text-gray-400">
                         <div className="size-20 bg-gray-50 rounded-full flex items-center justify-center mb-4">

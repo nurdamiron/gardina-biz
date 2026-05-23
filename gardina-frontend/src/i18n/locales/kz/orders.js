@@ -109,6 +109,14 @@ const orders = {
       cancelled: 'Болдырылмады',
     },
   },
+
+  table: {
+    id: '№',
+    client: 'Клиент',
+    status: 'Статус',
+    payment: 'Төлем',
+    date: 'Күні',
+  },
 };
 
 export default orders;
