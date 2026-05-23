@@ -8,6 +8,7 @@ const adminNotifications = {
   sections: {
     recipients: 'Получатели',
     message: 'Сообщение',
+    preview: 'Предпросмотр',
     byType: 'По типу',
     recent7d: 'Последние 7 дней',
   },

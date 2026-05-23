@@ -8,6 +8,7 @@ const adminNotifications = {
   sections: {
     recipients: 'Алушылар',
     message: 'Хабарлама',
+    preview: 'Алдын ала қарау',
     byType: 'Түр бойынша',
     recent7d: 'Соңғы 7 күн',
   },

@@ -162,145 +162,196 @@ const AdminNotifications = () => {
         </div>
       )}
 
-      <main className="p-4 space-y-4 max-w-3xl mx-auto">
+      <main className="p-4 max-w-5xl mx-auto space-y-4">
 
         {/* ── SEND TAB ─────────────────────────────────────── */}
         {tab === 'send' && (
-          <div className="space-y-4">
-            {/* Recipient */}
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 space-y-4">
-              <h2 className="font-bold text-gray-800 flex items-center gap-2">
-                <Icon name="group" className="text-primary" size={20} />
-                {t('adminNotifications.sections.recipients')}
-              </h2>
+          <div className="lg:grid lg:grid-cols-[1fr_300px] lg:gap-5 lg:items-start space-y-4 lg:space-y-0">
 
-              <div>
-                <label className="text-sm font-semibold text-gray-700 block mb-1.5">{t('adminNotifications.sections.recipients')}</label>
-                <select
-                  value={form.targetRole}
-                  onChange={e => setForm(f => ({ ...f, targetRole: e.target.value, targetUserId: '' }))}
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none bg-white"
-                >
-                  {ROLE_VALUES.map(value => (
-                    <option key={value || 'all'} value={value}>
-                      {t(`adminNotifications.recipientFilters.${value || 'all'}`)}
-                    </option>
-                  ))}
-                </select>
-              </div>
+            {/* LEFT: compose form */}
+            <div className="space-y-4">
+              {/* Recipient */}
+              <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 space-y-4">
+                <h2 className="font-bold text-gray-800 flex items-center gap-2">
+                  <Icon name="group" className="text-primary" size={20} />
+                  {t('adminNotifications.sections.recipients')}
+                </h2>
 
-              <div>
-                <label className="text-sm font-semibold text-gray-700 block mb-1.5">—</label>
-                <select
-                  value={form.targetUserId}
-                  onChange={e => setForm(f => ({ ...f, targetUserId: e.target.value, targetRole: '' }))}
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none bg-white"
-                >
-                  <option value="">—</option>
-                  {users.map(u => (
-                    <option key={u.id} value={u.id}>{u.name} ({u.role})</option>
-                  ))}
-                </select>
-              </div>
-            </div>
-
-            {/* Message */}
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 space-y-4">
-              <h2 className="font-bold text-gray-800 flex items-center gap-2">
-                <Icon name="edit" className="text-primary" size={20} />
-                {t('adminNotifications.sections.message')}
-              </h2>
-
-              {/* Type selector */}
-              <div className="grid grid-cols-4 gap-2">
-                {Object.entries(TYPE_STYLES).map(([key, cfg]) => (
-                  <button
-                    key={key}
-                    onClick={() => setForm(f => ({ ...f, type: key }))}
-                    className={`flex flex-col items-center gap-1 py-2 px-1 rounded-xl border-2 transition-all ${
-                      form.type === key ? 'border-primary bg-primary/5' : 'border-gray-100 hover:border-gray-200'
-                    }`}
+                <div>
+                  <label className="text-sm font-semibold text-gray-700 block mb-1.5">{t('adminNotifications.sections.recipients')}</label>
+                  <select
+                    value={form.targetRole}
+                    onChange={e => setForm(f => ({ ...f, targetRole: e.target.value, targetUserId: '' }))}
+                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none bg-white"
                   >
-                    <Icon name={cfg.icon} size={18} className={form.type === key ? 'text-primary' : 'text-gray-400'} />
-                    <span className="text-xs font-medium">{t(`adminNotifications.types.${key}`)}</span>
-                  </button>
-                ))}
+                    {ROLE_VALUES.map(value => (
+                      <option key={value || 'all'} value={value}>
+                        {t(`adminNotifications.recipientFilters.${value || 'all'}`)}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="text-sm font-semibold text-gray-700 block mb-1.5">—</label>
+                  <select
+                    value={form.targetUserId}
+                    onChange={e => setForm(f => ({ ...f, targetUserId: e.target.value, targetRole: '' }))}
+                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none bg-white"
+                  >
+                    <option value="">—</option>
+                    {users.map(u => (
+                      <option key={u.id} value={u.id}>{u.name} ({u.role})</option>
+                    ))}
+                  </select>
+                </div>
               </div>
 
-              <div>
-                <label className="text-sm font-semibold text-gray-700 block mb-1.5">{t('adminNotifications.fields.title')} *</label>
-                <input
-                  type="text"
-                  value={form.title}
-                  onChange={e => setForm(f => ({ ...f, title: e.target.value }))}
-                  placeholder={t('adminNotifications.fields.titlePlaceholder')}
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none"
-                />
-              </div>
+              {/* Message */}
+              <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 space-y-4">
+                <h2 className="font-bold text-gray-800 flex items-center gap-2">
+                  <Icon name="edit" className="text-primary" size={20} />
+                  {t('adminNotifications.sections.message')}
+                </h2>
 
-              <div>
-                <label className="text-sm font-semibold text-gray-700 block mb-1.5">{t('adminNotifications.fields.body')} *</label>
-                <textarea
-                  value={form.body}
-                  onChange={e => setForm(f => ({ ...f, body: e.target.value }))}
-                  placeholder={t('adminNotifications.fields.bodyPlaceholder')}
-                  rows={3}
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none resize-none"
-                />
-              </div>
+                <div className="grid grid-cols-4 gap-2">
+                  {Object.entries(TYPE_STYLES).map(([key, cfg]) => (
+                    <button
+                      key={key}
+                      onClick={() => setForm(f => ({ ...f, type: key }))}
+                      className={`flex flex-col items-center gap-1 py-2 px-1 rounded-xl border-2 transition-all ${
+                        form.type === key ? 'border-primary bg-primary/5' : 'border-gray-100 hover:border-gray-200'
+                      }`}
+                    >
+                      <Icon name={cfg.icon} size={18} className={form.type === key ? 'text-primary' : 'text-gray-400'} />
+                      <span className="text-xs font-medium">{t(`adminNotifications.types.${key}`)}</span>
+                    </button>
+                  ))}
+                </div>
 
-              <div>
-                <label className="text-sm font-semibold text-gray-700 block mb-1.5">{t('adminNotifications.fields.actionUrl')}</label>
-                <input
-                  type="text"
-                  value={form.actionUrl}
-                  onChange={e => setForm(f => ({ ...f, actionUrl: e.target.value }))}
-                  placeholder="/manager/orders"
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none"
-                />
-              </div>
+                <div>
+                  <label className="text-sm font-semibold text-gray-700 block mb-1.5">{t('adminNotifications.fields.title')} *</label>
+                  <input
+                    type="text"
+                    value={form.title}
+                    onChange={e => setForm(f => ({ ...f, title: e.target.value }))}
+                    placeholder={t('adminNotifications.fields.titlePlaceholder')}
+                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none"
+                  />
+                </div>
 
-              {/* Push toggle */}
-              <div className="flex items-center justify-between py-2 border-t border-gray-100">
-                <div className="flex items-center gap-2">
-                  <Icon name="notifications" size={20} className="text-gray-500" />
-                  <div>
+                <div>
+                  <label className="text-sm font-semibold text-gray-700 block mb-1.5">{t('adminNotifications.fields.body')} *</label>
+                  <textarea
+                    value={form.body}
+                    onChange={e => setForm(f => ({ ...f, body: e.target.value }))}
+                    placeholder={t('adminNotifications.fields.bodyPlaceholder')}
+                    rows={4}
+                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none resize-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-sm font-semibold text-gray-700 block mb-1.5">{t('adminNotifications.fields.actionUrl')}</label>
+                  <input
+                    type="text"
+                    value={form.actionUrl}
+                    onChange={e => setForm(f => ({ ...f, actionUrl: e.target.value }))}
+                    placeholder="/manager/orders"
+                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none"
+                  />
+                </div>
+
+                <div className="flex items-center justify-between py-2 border-t border-gray-100">
+                  <div className="flex items-center gap-2">
+                    <Icon name="notifications" size={20} className="text-gray-500" />
                     <p className="font-medium text-sm">{t('adminNotifications.fields.sendPush')}</p>
                   </div>
+                  <button
+                    onClick={() => setForm(f => ({ ...f, sendPush: !f.sendPush }))}
+                    className={`relative w-12 h-6 rounded-full transition-colors duration-300 ${form.sendPush ? 'bg-primary' : 'bg-gray-300'}`}
+                  >
+                    <span className={`absolute top-0.5 left-0.5 size-5 bg-white rounded-full shadow transition-transform duration-300 ${form.sendPush ? 'translate-x-6' : 'translate-x-0'}`} />
+                  </button>
                 </div>
-                <button
-                  onClick={() => setForm(f => ({ ...f, sendPush: !f.sendPush }))}
-                  className={`relative w-12 h-6 rounded-full transition-colors duration-300 ${form.sendPush ? 'bg-primary' : 'bg-gray-300'}`}
-                >
-                  <span className={`absolute top-0.5 left-0.5 size-5 bg-white rounded-full shadow transition-transform duration-300 ${form.sendPush ? 'translate-x-6' : 'translate-x-0'}`} />
-                </button>
               </div>
-            </div>
 
-            {/* Preview */}
-            {(form.title || form.body) && (
-              <div className={`rounded-2xl p-4 border-2 ${TYPE_STYLES[form.type]?.color?.split(' ')[0] || 'bg-gray-50'} border-gray-100`}>
-                <p className="text-xs font-bold uppercase tracking-wide text-gray-400 mb-2">{t('common.search')}</p>
-                <div className="flex items-start gap-3">
-                  <Icon name={TYPE_STYLES[form.type]?.icon || 'notifications'} size={20} className={TYPE_STYLES[form.type]?.color?.split(' ')[1] || ''} />
-                  <div>
-                    <p className="font-bold text-gray-900">{form.title || '—'}</p>
-                    <p className="text-sm text-gray-600 mt-0.5">{form.body || form.message || '—'}</p>
+              {/* Mobile-only preview */}
+              {(form.title || form.body) && (
+                <div className={`lg:hidden rounded-2xl p-4 border-2 ${TYPE_STYLES[form.type]?.color?.split(' ')[0] || 'bg-gray-50'} border-gray-100`}>
+                  <p className="text-xs font-bold uppercase tracking-wide text-gray-400 mb-2">{t('adminNotifications.sections.preview')}</p>
+                  <div className="flex items-start gap-3">
+                    <Icon name={TYPE_STYLES[form.type]?.icon || 'notifications'} size={20} className={TYPE_STYLES[form.type]?.color?.split(' ')[1] || ''} />
+                    <div>
+                      <p className="font-bold text-gray-900">{form.title || '—'}</p>
+                      <p className="text-sm text-gray-600 mt-0.5">{form.body || '—'}</p>
+                    </div>
                   </div>
                 </div>
-              </div>
-            )}
+              )}
 
-            {/* Send button */}
-            <button
-              onClick={handleSend}
-              disabled={sending || !form.title.trim() || !form.body.trim()}
-              className="w-full py-4 bg-primary text-white font-bold rounded-2xl hover:brightness-110 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
-            >
-              {sending
-                ? <><div className="size-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />{t('adminNotifications.sending')}</>
-                : <><Icon name="notifications_active" />{t('adminNotifications.send')}</>}
-            </button>
+              <button
+                onClick={handleSend}
+                disabled={sending || !form.title.trim() || !form.body.trim()}
+                className="w-full py-4 bg-primary text-white font-bold rounded-2xl hover:brightness-110 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+              >
+                {sending
+                  ? <><div className="size-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />{t('adminNotifications.sending')}</>
+                  : <><Icon name="notifications_active" />{t('adminNotifications.send')}</>}
+              </button>
+            </div>
+
+            {/* RIGHT: preview + stats (desktop only) */}
+            <div className="hidden lg:flex flex-col gap-4 sticky top-20">
+              {/* Live preview */}
+              <div className={`rounded-2xl p-4 border-2 ${TYPE_STYLES[form.type]?.color?.split(' ')[0] || 'bg-gray-50'} border-gray-100`}>
+                <p className="text-xs font-bold uppercase tracking-wide text-gray-400 mb-3">{t('adminNotifications.sections.preview')}</p>
+                <div className="flex items-start gap-3">
+                  <div className={`size-9 rounded-full ${TYPE_STYLES[form.type]?.color?.split(' ')[0] || 'bg-gray-100'} flex items-center justify-center flex-shrink-0`}>
+                    <Icon name={TYPE_STYLES[form.type]?.icon || 'notifications'} size={18} className={TYPE_STYLES[form.type]?.color?.split(' ')[1] || 'text-gray-400'} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-bold text-gray-900 text-sm">{form.title || <span className="text-gray-300">Тақырып...</span>}</p>
+                    <p className="text-sm text-gray-600 mt-0.5 line-clamp-3">{form.body || <span className="text-gray-300">Мәтін...</span>}</p>
+                    {form.actionUrl && (
+                      <p className="text-xs text-primary mt-1 font-medium">{form.actionUrl}</p>
+                    )}
+                  </div>
+                </div>
+                <div className="mt-3 pt-3 border-t border-black/5 flex items-center gap-2 text-xs text-gray-400">
+                  <Icon name={form.sendPush ? 'notifications_active' : 'notifications_off'} size={14} />
+                  <span>{form.sendPush ? 'Push + in-app' : 'Тек in-app'}</span>
+                  {(form.targetRole || form.targetUserId) && (
+                    <span className="ml-auto bg-primary/10 text-primary px-2 py-0.5 rounded-full font-medium">
+                      {form.targetUserId ? '1 адам' : form.targetRole}
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              {/* Stats mini */}
+              {stats && (
+                <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4">
+                  <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-3">Статистика</h3>
+                  <div className="space-y-3">
+                    {[
+                      { label: 'Барлық хабарлама', value: stats.total, icon: 'notifications', color: 'text-primary' },
+                      { label: 'Оқылмаған', value: stats.unread, icon: 'mark_unread_chat_alt', color: 'text-amber-500' },
+                      { label: 'Push белсенді', value: stats.activePushSubscriptions, icon: 'install_mobile', color: 'text-green-600' },
+                    ].map(s => (
+                      <div key={s.label} className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <Icon name={s.icon} size={16} className={s.color} />
+                          <span className="text-sm text-gray-600">{s.label}</span>
+                        </div>
+                        <span className="font-bold text-gray-900">{s.value}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
           </div>
         )}
 
@@ -365,7 +416,7 @@ const AdminNotifications = () => {
             {stats && (
               <>
                 {/* Overview cards */}
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
                   {[
                     { label: 'Барлық хабарлама', value: stats.total, icon: 'notifications', color: 'bg-primary/10 text-primary' },
                     { label: 'Оқылмаған', value: stats.unread, icon: 'notifications_active', color: 'bg-amber-50 text-amber-600' },
