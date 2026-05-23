@@ -142,10 +142,10 @@ const AdminDashboard = () => {
     const financialBreakdown = getFinancialBreakdown();
 
     const statCards = [
-        { label: t('dashboard.stats.totalMeasurements'), value: stats.totalMeasurements, icon: 'straighten', color: 'bg-primary', subtext: `${stats.completedMeasurements} ${t('dashboard.stats.completedSuffix')}` },
-        { label: t('dashboard.stats.totalClients'), value: stats.totalClients, icon: 'group', color: 'bg-green-500', subtext: t('dashboard.stats.clientsSubtext') },
-        { label: t('dashboard.stats.totalDeals'), value: stats.totalDeals, icon: 'handshake', color: 'bg-primary-light', subtext: t('dashboard.stats.dealsSubtext') },
-        { label: t('dashboard.stats.revenue'), value: `${(stats.revenue / 1000).toFixed(0)}K ₸`, icon: 'payments', color: 'bg-amber-500', subtext: t('dashboard.stats.revenueSubtext') },
+        { label: t('dashboard.stats.totalMeasurements'), value: stats.totalMeasurements, icon: 'straighten', accent: 'border-primary', iconBg: 'bg-primary/10', iconColor: 'text-primary', subtext: `${stats.completedMeasurements} ${t('dashboard.stats.completedSuffix')}` },
+        { label: t('dashboard.stats.totalClients'), value: stats.totalClients, icon: 'group', accent: 'border-emerald-500', iconBg: 'bg-emerald-50', iconColor: 'text-emerald-600', subtext: t('dashboard.stats.clientsSubtext') },
+        { label: t('dashboard.stats.totalDeals'), value: stats.totalDeals, icon: 'handshake', accent: 'border-primary-light', iconBg: 'bg-primary/5', iconColor: 'text-primary-light', subtext: t('dashboard.stats.dealsSubtext') },
+        { label: t('dashboard.stats.revenue'), value: `${(stats.revenue / 1000).toFixed(0)}K ₸`, icon: 'payments', accent: 'border-amber-500', iconBg: 'bg-amber-50', iconColor: 'text-amber-600', subtext: t('dashboard.stats.revenueSubtext') },
     ];
 
     return (
@@ -212,111 +212,121 @@ const AdminDashboard = () => {
                 </div>
             </header>
 
-            <main className="p-4 space-y-4 max-w-7xl mx-auto">
+            <main className="p-4 space-y-5 max-w-7xl mx-auto">
                 <OnboardingChecklist />
-                {/* Stats Grid */}
+
+                {/* ── Stats row ── compact white cards, left-accent border */}
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
                     {statCards.map((stat, idx) => (
-                        <div key={idx} className={`${stat.color} rounded-2xl p-4 shadow-lg text-white`}>
-                            <div className="flex items-center justify-between mb-2">
-                                <Icon name={stat.icon} size={24} />
+                        <div
+                            key={idx}
+                            className={`bg-white rounded-xl border-l-4 ${stat.accent} shadow-sm px-4 py-3 flex items-center gap-3 hover:shadow-md transition-shadow`}
+                        >
+                            <div className={`size-10 rounded-xl ${stat.iconBg} flex items-center justify-center shrink-0`}>
+                                <Icon name={stat.icon} size={20} className={stat.iconColor} />
                             </div>
-                            <p className="text-3xl font-black mb-1">
-                                {loading ? '...' : stat.value}
-                            </p>
-                            <p className="text-xs opacity-90 font-medium">{stat.label}</p>
-                            {stat.subtext && (
-                                <p className="text-[10px] opacity-75 mt-1">{stat.subtext}</p>
-                            )}
+                            <div className="min-w-0">
+                                <p className="text-2xl font-black text-gray-900 leading-none">
+                                    {localLoading ? <span className="inline-block w-8 h-6 bg-gray-100 rounded animate-pulse" /> : stat.value}
+                                </p>
+                                <p className="text-xs font-semibold text-gray-500 mt-0.5 truncate">{stat.label}</p>
+                                {stat.subtext && <p className="text-[10px] text-gray-400 truncate">{stat.subtext}</p>}
+                            </div>
                         </div>
                     ))}
                 </div>
 
-                {/* OVERVIEW TAB */}
+                {/* ── OVERVIEW TAB ── */}
                 {activeTab === 'overview' && (
-                    <div className="lg:grid lg:grid-cols-[1fr_300px] lg:gap-6 space-y-4 lg:space-y-0">
-                        {/* Left: Quick Actions */}
-                        <div className="space-y-3">
-                            <h2 className="text-lg font-bold">{t('adminDashboard.sections.quickActions')}</h2>
+                    <div className="lg:grid lg:grid-cols-[1fr_280px] lg:gap-5 space-y-5 lg:space-y-0">
 
-                            <button
-                                onClick={() => navigate('/admin/catalog')}
-                                className="w-full bg-gradient-to-r from-primary to-primary-dark hover:brightness-110 text-white font-bold py-5 rounded-2xl shadow-lg transition-all flex items-center gap-3 px-5"
-                            >
-                                <Icon name="inventory_2" size={28} />
-                                <div className="text-left flex-1">
-                                    <p className="text-base font-bold">{lang === 'kz' ? 'Каталогты басқару' : 'Управление каталогом'}</p>
-                                    <p className="text-xs opacity-90">{lang === 'kz' ? 'Маталар, қызметтер, бағалар' : 'Ткани, услуги, цены'}</p>
-                                </div>
-                            </button>
+                        {/* Left: nav grid */}
+                        <div className="space-y-4">
+                            <h2 className="text-sm font-bold text-gray-400 uppercase tracking-wider">{t('adminDashboard.sections.quickActions')}</h2>
 
-                            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-                                <button
-                                    onClick={() => navigate('/admin/clients')}
-                                    className="bg-white hover:bg-gray-50 border-2 border-gray-200 text-gray-700 font-bold py-4 rounded-xl shadow-sm transition-all flex flex-col items-center justify-center gap-2 hover:border-primary/40 hover:shadow-md"
-                                >
-                                    <Icon name="groups" size={28} className="text-primary" />
-                                    <p className="text-sm">{t('adminDashboard.tabs.clients')}</p>
-                                </button>
-                                <button
-                                    onClick={() => navigate('/admin/orders')}
-                                    className="bg-white hover:bg-gray-50 border-2 border-gray-200 text-gray-700 font-bold py-4 rounded-xl shadow-sm transition-all flex flex-col items-center justify-center gap-2 hover:border-primary/40 hover:shadow-md"
-                                >
-                                    <Icon name="shopping_cart" size={28} className="text-primary" />
-                                    <p className="text-sm">{lang === 'kz' ? 'Тапсырыстар' : 'Заказы'}</p>
-                                </button>
-                                <button
-                                    onClick={() => navigate('/admin/users')}
-                                    className="bg-white hover:bg-gray-50 border-2 border-gray-200 text-gray-700 font-bold py-4 rounded-xl shadow-sm transition-all flex flex-col items-center justify-center gap-2 hover:border-primary/40 hover:shadow-md"
-                                >
-                                    <Icon name="manage_accounts" size={28} className="text-primary-light" />
-                                    <p className="text-sm">{t('adminDashboard.tabs.team')}</p>
-                                </button>
-                                <button
-                                    onClick={() => navigate('/admin/reports')}
-                                    className="bg-white hover:bg-gray-50 border-2 border-gray-200 text-gray-700 font-bold py-4 rounded-xl shadow-sm transition-all flex flex-col items-center justify-center gap-2 hover:border-primary/40 hover:shadow-md"
-                                >
-                                    <Icon name="bar_chart" size={28} className="text-green-600" />
-                                    <p className="text-sm">{lang === 'kz' ? 'Есептер' : 'Отчёты'}</p>
-                                </button>
+                            {/* 5-card uniform grid: catalog + 4 nav */}
+                            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+                                {[
+                                    { path: '/admin/catalog', icon: 'inventory_2', iconBg: 'bg-primary', iconColor: 'text-white', label: lang === 'kz' ? 'Каталог' : 'Каталог', sub: lang === 'kz' ? 'Маталар, бағалар' : 'Ткани, цены', featured: true },
+                                    { path: '/admin/clients', icon: 'groups', iconBg: 'bg-emerald-50', iconColor: 'text-emerald-600', label: t('adminDashboard.tabs.clients'), sub: `${stats.totalClients}` },
+                                    { path: '/admin/orders', icon: 'shopping_cart', iconBg: 'bg-primary/10', iconColor: 'text-primary', label: lang === 'kz' ? 'Тапсырыстар' : 'Заказы', sub: `${stats.totalDeals}` },
+                                    { path: '/admin/users', icon: 'manage_accounts', iconBg: 'bg-blue-50', iconColor: 'text-blue-600', label: t('adminDashboard.tabs.team'), sub: lang === 'kz' ? 'Қызметкерлер' : 'Сотрудники' },
+                                    { path: '/admin/reports', icon: 'bar_chart', iconBg: 'bg-amber-50', iconColor: 'text-amber-600', label: lang === 'kz' ? 'Есептер' : 'Отчёты', sub: lang === 'kz' ? 'Аналитика' : 'Аналитика' },
+                                ].map((item) => (
+                                    <button
+                                        key={item.path}
+                                        onClick={() => navigate(item.path)}
+                                        className={`group flex flex-col items-start gap-2 p-4 rounded-2xl border-2 transition-all text-left
+                                            ${item.featured
+                                                ? 'bg-primary border-primary text-white hover:brightness-110'
+                                                : 'bg-white border-gray-100 hover:border-primary/30 hover:shadow-md'
+                                            }`}
+                                    >
+                                        <div className={`size-10 rounded-xl flex items-center justify-center ${item.featured ? 'bg-white/20' : item.iconBg}`}>
+                                            <Icon name={item.icon} size={22} className={item.featured ? 'text-white' : item.iconColor} />
+                                        </div>
+                                        <div>
+                                            <p className={`text-sm font-bold leading-tight ${item.featured ? 'text-white' : 'text-gray-800'}`}>{item.label}</p>
+                                            <p className={`text-[11px] mt-0.5 ${item.featured ? 'text-white/70' : 'text-gray-400'}`}>{item.sub}</p>
+                                        </div>
+                                    </button>
+                                ))}
                             </div>
-                        </div>
 
-                        {/* Right: Recent Activity (desktop only) */}
-                        <div className="hidden lg:block space-y-3">
-                            <h2 className="text-lg font-bold">{lang === 'kz' ? 'Соңғы өлшемдер' : 'Последние замеры'}</h2>
-                            <div className="space-y-2">
-                                {measurements.slice(0, 5).length === 0 ? (
-                                    <div className="bg-white rounded-xl p-4 text-center text-sm text-gray-400">
-                                        {lang === 'kz' ? 'Өлшем жоқ' : 'Замеров нет'}
-                                    </div>
-                                ) : (
-                                    measurements.slice(0, 5).map(m => (
-                                        <div
-                                            key={m.id}
-                                            onClick={() => navigate(`/measurements/${m.id}`)}
-                                            className="bg-white rounded-xl p-3 border border-gray-100 hover:border-primary/30 hover:shadow-sm cursor-pointer transition-all flex items-center gap-3"
-                                        >
-                                            <div className={`size-2 rounded-full shrink-0 ${
-                                                m.status === 'completed' ? 'bg-green-500' :
-                                                m.status === 'in_progress' ? 'bg-yellow-500' :
-                                                m.status === 'scheduled' ? 'bg-primary' : 'bg-gray-400'
-                                            }`} />
+                            {/* Recent measurements table — mobile: hidden on very small, shows on md+ */}
+                            <div className="lg:hidden">
+                                <h2 className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-3">{lang === 'kz' ? 'Соңғы өлшемдер' : 'Последние замеры'}</h2>
+                                <div className="space-y-2">
+                                    {measurements.slice(0, 3).map(m => (
+                                        <div key={m.id} onClick={() => navigate(`/measurements/${m.id}`)}
+                                            className="bg-white rounded-xl px-4 py-3 border border-gray-100 flex items-center gap-3 cursor-pointer hover:border-primary/30 transition-all">
+                                            <div className={`size-2 rounded-full shrink-0 ${m.status === 'completed' ? 'bg-emerald-500' : m.status === 'scheduled' ? 'bg-primary' : 'bg-amber-400'}`} />
                                             <div className="flex-1 min-w-0">
                                                 <p className="text-sm font-bold truncate">{m.clientName || '—'}</p>
                                                 <p className="text-[11px] text-gray-400 truncate">{m.address || '—'}</p>
                                             </div>
-                                            <Icon name="chevron_right" size={16} className="text-gray-400 shrink-0" />
+                                            <Icon name="chevron_right" size={16} className="text-gray-300 shrink-0" />
                                         </div>
-                                    ))
-                                )}
+                                    ))}
+                                </div>
                             </div>
-                            <button
-                                onClick={() => navigate('/measurements')}
-                                className="w-full text-sm font-medium text-primary bg-primary/5 hover:bg-primary/10 rounded-xl py-2.5 transition-colors"
-                            >
-                                {lang === 'kz' ? 'Барлығын көру' : 'Смотреть все'}
-                            </button>
+                        </div>
+
+                        {/* Right: activity sidebar (desktop only) */}
+                        <div className="hidden lg:flex flex-col gap-3">
+                            <h2 className="text-sm font-bold text-gray-400 uppercase tracking-wider">{lang === 'kz' ? 'Соңғы өлшемдер' : 'Последние замеры'}</h2>
+                            <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden flex-1">
+                                {measurements.slice(0, 7).length === 0 ? (
+                                    <div className="p-6 text-center text-sm text-gray-400">
+                                        <Icon name="inbox" size={28} className="mx-auto mb-2 opacity-30" />
+                                        {lang === 'kz' ? 'Өлшем жоқ' : 'Замеров нет'}
+                                    </div>
+                                ) : (
+                                    <div className="divide-y divide-gray-50">
+                                        {measurements.slice(0, 7).map(m => (
+                                            <div key={m.id} onClick={() => navigate(`/measurements/${m.id}`)}
+                                                className="px-4 py-3 flex items-center gap-3 cursor-pointer hover:bg-gray-50 transition-colors group">
+                                                <div className={`size-2 rounded-full shrink-0 ${
+                                                    m.status === 'completed' ? 'bg-emerald-500' :
+                                                    m.status === 'in_progress' ? 'bg-amber-400' :
+                                                    m.status === 'scheduled' ? 'bg-primary' : 'bg-gray-300'
+                                                }`} />
+                                                <div className="flex-1 min-w-0">
+                                                    <p className="text-sm font-semibold text-gray-800 truncate group-hover:text-primary transition-colors">{m.clientName || '—'}</p>
+                                                    <p className="text-[11px] text-gray-400 truncate">{m.address || '—'}</p>
+                                                </div>
+                                                <Icon name="chevron_right" size={14} className="text-gray-300 shrink-0 group-hover:text-primary transition-colors" />
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                                <div className="border-t border-gray-100 px-4 py-2.5">
+                                    <button onClick={() => navigate('/measurements')}
+                                        className="w-full text-xs font-semibold text-primary hover:text-primary-dark transition-colors text-center">
+                                        {lang === 'kz' ? 'Барлығын көру →' : 'Смотреть все →'}
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 )}
