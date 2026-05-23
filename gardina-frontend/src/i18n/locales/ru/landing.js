@@ -1,6 +1,6 @@
 const landing = {
   nav: {
-    problems: 'Проблемы → решения',
+    problems: 'Решения',
     features: 'Преимущества',
     modules: 'Разделы',
     compare: 'Сравнение',

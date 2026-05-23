@@ -133,13 +133,15 @@ function Hero() {
             {t('landing.hero.description')}
           </motion.p>
           <motion.div variants={fadeUp} className="mt-7 flex flex-col sm:flex-row gap-3 justify-center lg:justify-start">
-            <Link
-              to="/register"
+            <a
+              href="https://cal.com/nurdaulet/gardina?overlayCalendar=true"
+              target="_blank"
+              rel="noopener noreferrer"
               className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-primary text-white font-bold text-base hover:brightness-110 active:scale-[0.99] shadow-xl shadow-primary/25 transition-all"
             >
               <Icon name="arrow_forward" size={20} />
               {t('landing.hero.ctaPrimary')}
-            </Link>
+            </a>
             <a
               href="https://wa.me/77715373201"
               target="_blank"
@@ -919,8 +921,10 @@ function Pricing() {
                 ))}
               </ul>
 
-              <Link
-                to="/register"
+              <a
+                href="https://cal.com/nurdaulet/gardina?overlayCalendar=true"
+                target="_blank"
+                rel="noopener noreferrer"
                 className={`mt-7 block w-full text-center py-3 rounded-xl font-bold text-sm transition-all ${
                   p.highlighted
                     ? 'bg-white text-primary hover:bg-accent'
@@ -928,7 +932,7 @@ function Pricing() {
                 }`}
               >
                 {t(`landing.pricing.plans.${p.keyId}.cta`)}
-              </Link>
+              </a>
             </motion.article>
           ))}
         </motion.div>
@@ -1076,13 +1080,15 @@ function CTA() {
             </p>
 
             <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center">
-              <Link
-                to="/register"
+              <a
+                href="https://cal.com/nurdaulet/gardina?overlayCalendar=true"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl bg-white text-primary font-bold hover:bg-accent transition-all"
               >
                 <Icon name="arrow_forward" size={20} />
                 {t('landing.cta.primary')}
-              </Link>
+              </a>
               <a
                 href="https://wa.me/77715373201"
                 target="_blank"
@@ -1113,7 +1119,7 @@ function LandingFooter() {
     <footer className="bg-primary-dark text-white/85 py-14">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
         <div>
-          <img src="/images/logo-header.png" alt="Gardina" className="h-10 w-auto mb-4 brightness-0 invert" />
+          <img src="/images/logo-header.png" alt="Gardina" className="h-30 w-auto mb-4 brightness-0 invert" />
           <p className="text-sm leading-relaxed text-white/70">{t('landing.footer.description')}</p>
         </div>
         <div>
