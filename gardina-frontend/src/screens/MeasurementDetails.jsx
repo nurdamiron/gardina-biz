@@ -323,7 +323,11 @@ const MeasurementDetails = () => {
         </div>
       </header>
 
-      <main className="p-4 max-w-5xl mx-auto space-y-4">
+      <main className="p-4 max-w-5xl mx-auto">
+        <div className="lg:grid lg:grid-cols-[1fr_320px] lg:gap-5 lg:items-start space-y-4 lg:space-y-0">
+
+        {/* ── LEFT COLUMN ── */}
+        <div className="space-y-4">
 
         {/* CLIENT INFO */}
         <section className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
@@ -356,75 +360,6 @@ const MeasurementDetails = () => {
               </div>
             </div>
           </div>
-        </section>
-
-        {/* SUMMARY STATS */}
-        <section className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-          <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 text-center">
-            <div className="size-10 rounded-full bg-primary/10 text-primary flex items-center justify-center mx-auto mb-2">
-              <Icon name="door_sliding" />
-            </div>
-            <p className="text-2xl font-black text-gray-900">{totalRooms}</p>
-            <p className="text-xs text-gray-500">Бөлме</p>
-          </div>
-          <div className={`rounded-xl p-4 shadow-sm border text-center ${
-            finance.paid >= finance.eightyPercent
-              ? 'bg-white border-gray-100'
-              : finance.paid >= finance.plannedTotal * 0.5
-              ? 'bg-yellow-50 border-yellow-200'
-              : 'bg-red-50 border-red-200'
-          }`}>
-            <div className={`size-10 rounded-full flex items-center justify-center mx-auto mb-2 ${
-              finance.paid >= finance.eightyPercent
-                ? 'bg-green-50 text-green-600'
-                : finance.paid >= finance.plannedTotal * 0.5
-                ? 'bg-yellow-100 text-yellow-600'
-                : 'bg-red-100 text-red-600'
-            }`}>
-              <Icon name={finance.paid >= finance.eightyPercent ? 'check_circle' : 'warning'} />
-            </div>
-            <p className="text-xl font-black text-gray-900">{Math.round((finance.paid / finance.plannedTotal) * 100) || 0}%</p>
-            <p className="text-xs font-bold">
-              {finance.paid >= finance.eightyPercent
-                ? 'Төлем OK'
-                : finance.paid >= finance.plannedTotal * 0.5
-                ? 'Қауіп бар'
-                : 'Қауіпті!'}
-            </p>
-          </div>
-        </section>
-
-        {/* PAYMENT TRACKING WITH RISK MANAGEMENT */}
-        <section id="payment-section">
-          <PaymentTracking
-            deal={{
-              id: measurement.id,
-              totalAmount: finance.plannedTotal,
-              prepaidAmount: finance.payments
-                .filter(p => p.type === 'prepayment')
-                .reduce((sum, p) => sum + (p.amount || 0), 0),
-              finalAmount: finance.payments
-                .filter(p => p.type === 'final')
-                .reduce((sum, p) => sum + (p.amount || 0), 0),
-              payments: finance.payments.map(p => ({
-                amount: p.amount || 0,
-                type: p.type || 'prepayment',
-                note: p.note || '',
-                createdAt: p.date || new Date().toISOString()
-              })),
-              status: measurement.status === 'completed' ? 'completed' :
-                      measurement.status === 'in_progress' ? 'in_production' :
-                      'scheduled',
-              client: {
-                name: measurement.clientName,
-                phone: measurement.clientPhone
-              },
-              updatedAt: measurement.updatedAt || measurement.scheduledAt,
-              createdAt: measurement.createdAt || measurement.scheduledAt
-            }}
-            onAddPayment={handleAddPayment}
-            canEdit={user?.role !== 'designer'}
-          />
         </section>
 
         {/* STATUS WITH PAYMENT RISK */}
@@ -654,13 +589,95 @@ const MeasurementDetails = () => {
           )}
         </section>
 
+        {/* Notes */}
+        {measurement.notes && (
+          <section className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
+            <p className="text-xs font-bold text-gray-500 uppercase mb-2">Жалпы ескертпе</p>
+            <p className="text-sm text-gray-700 whitespace-pre-line">{measurement.notes}</p>
+          </section>
+        )}
+
+        </div>{/* end left column */}
+
+        {/* ── RIGHT COLUMN (sidebar) ── */}
+        <div className="space-y-4 lg:sticky lg:top-20">
+
+        {/* SUMMARY STATS */}
+        <section className="grid grid-cols-2 gap-3">
+          <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 text-center">
+            <div className="size-10 rounded-full bg-primary/10 text-primary flex items-center justify-center mx-auto mb-2">
+              <Icon name="door_sliding" />
+            </div>
+            <p className="text-2xl font-black text-gray-900">{totalRooms}</p>
+            <p className="text-xs text-gray-500">Бөлме</p>
+          </div>
+          <div className={`rounded-xl p-4 shadow-sm border text-center ${
+            finance.paid >= finance.eightyPercent
+              ? 'bg-white border-gray-100'
+              : finance.paid >= finance.plannedTotal * 0.5
+              ? 'bg-yellow-50 border-yellow-200'
+              : 'bg-red-50 border-red-200'
+          }`}>
+            <div className={`size-10 rounded-full flex items-center justify-center mx-auto mb-2 ${
+              finance.paid >= finance.eightyPercent
+                ? 'bg-green-50 text-green-600'
+                : finance.paid >= finance.plannedTotal * 0.5
+                ? 'bg-yellow-100 text-yellow-600'
+                : 'bg-red-100 text-red-600'
+            }`}>
+              <Icon name={finance.paid >= finance.eightyPercent ? 'check_circle' : 'warning'} />
+            </div>
+            <p className="text-xl font-black text-gray-900">{Math.round((finance.paid / finance.plannedTotal) * 100) || 0}%</p>
+            <p className="text-xs font-bold">
+              {finance.paid >= finance.eightyPercent
+                ? 'Төлем OK'
+                : finance.paid >= finance.plannedTotal * 0.5
+                ? 'Қауіп бар'
+                : 'Қауіпті!'}
+            </p>
+          </div>
+        </section>
+
+        {/* PAYMENT TRACKING */}
+        <section id="payment-section">
+          <PaymentTracking
+            deal={{
+              id: measurement.id,
+              totalAmount: finance.plannedTotal,
+              prepaidAmount: finance.payments
+                .filter(p => p.type === 'prepayment')
+                .reduce((sum, p) => sum + (p.amount || 0), 0),
+              finalAmount: finance.payments
+                .filter(p => p.type === 'final')
+                .reduce((sum, p) => sum + (p.amount || 0), 0),
+              payments: finance.payments.map(p => ({
+                amount: p.amount || 0,
+                type: p.type || 'prepayment',
+                note: p.note || '',
+                createdAt: p.date || new Date().toISOString()
+              })),
+              status: measurement.status === 'completed' ? 'completed' :
+                      measurement.status === 'in_progress' ? 'in_production' :
+                      'scheduled',
+              client: {
+                name: measurement.clientName,
+                phone: measurement.clientPhone
+              },
+              updatedAt: measurement.updatedAt || measurement.scheduledAt,
+              createdAt: measurement.createdAt || measurement.scheduledAt
+            }}
+            onAddPayment={handleAddPayment}
+            canEdit={user?.role !== 'designer'}
+          />
+        </section>
+
         {/* TOTAL SUMMARY */}
         {totalRooms > 0 && (
           <section className="bg-gray-900 text-white rounded-2xl p-5">
             <div className="flex items-center justify-between mb-3">
               <span className="text-gray-400">Жалпы сома</span>
               <span className="text-sm text-gray-500">{totalRooms} бөлме</span>
-                  </div>
+            </div>
             <p className="text-4xl font-black">{formatPrice(totalEstimate)}</p>
           </section>
         )}
@@ -684,7 +701,6 @@ const MeasurementDetails = () => {
                 {user?.role !== 'designer' && (
                   <button
                     onClick={() => {
-                      // Scroll to payment section
                       document.querySelector('#payment-section')?.scrollIntoView({ behavior: 'smooth' });
                     }}
                     className="mt-3 px-4 py-2 bg-orange-600 text-white rounded-lg text-xs font-bold hover:bg-orange-700 transition-colors flex items-center gap-1"
@@ -701,39 +717,39 @@ const MeasurementDetails = () => {
         {/* COMPLETE BUTTON */}
         {totalRooms > 0 && measurement.status !== 'completed' && (
           <section className="pt-2">
-                <button
-                  onClick={handleComplete}
-                  disabled={completing || finance.paid < finance.eightyPercent}
+            <button
+              onClick={handleComplete}
+              disabled={completing || finance.paid < finance.eightyPercent}
               className={`w-full font-bold py-4 rounded-2xl shadow-lg transition-all flex items-center justify-center gap-2
                 ${finance.paid < finance.eightyPercent
                   ? 'bg-gray-400 text-gray-200 cursor-not-allowed'
                   : 'bg-primary text-white hover:brightness-110'}
                 disabled:opacity-50`}
-                >
-                  {completing ? (
-                    <>
-                      <div className="size-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                      Аяқталуда...
-                    </>
-                  ) : finance.paid < finance.eightyPercent ? (
-                    <>
-                      <Icon name="block" />
-                      80% төлем қажет
-                    </>
-                  ) : (
-                    <>
-                      <Icon name="done_all" />
-                      Өлшемді аяқтау
-                    </>
-                  )}
-                </button>
-                {finance.paid < finance.eightyPercent && (
-                  <p className="text-xs text-center text-gray-500 mt-2">
-                    Өлшемді аяқтау үшін клиент минимум 80% төлеуі керек
-                  </p>
-                )}
-          </section>
+            >
+              {completing ? (
+                <>
+                  <div className="size-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  Аяқталуда...
+                </>
+              ) : finance.paid < finance.eightyPercent ? (
+                <>
+                  <Icon name="block" />
+                  80% төлем қажет
+                </>
+              ) : (
+                <>
+                  <Icon name="done_all" />
+                  Өлшемді аяқтау
+                </>
+              )}
+            </button>
+            {finance.paid < finance.eightyPercent && (
+              <p className="text-xs text-center text-gray-500 mt-2">
+                Өлшемді аяқтау үшін клиент минимум 80% төлеуі керек
+              </p>
             )}
+          </section>
+        )}
 
         {/* COMPLETED STATE */}
         {measurement.status === 'completed' && (
@@ -750,14 +766,9 @@ const MeasurementDetails = () => {
           </section>
         )}
 
-        {/* Notes */}
-        {measurement.notes && (
-          <section className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
-            <p className="text-xs font-bold text-gray-500 uppercase mb-2">Жалпы ескертпе</p>
-            <p className="text-sm text-gray-700 whitespace-pre-line">{measurement.notes}</p>
-          </section>
-        )}
+        </div>{/* end right column */}
 
+        </div>{/* end grid */}
       </main>
 
       {/* IMAGE VIEWER MODAL */}

@@ -2,9 +2,10 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useApp } from '../contexts/AppContext';
+import { useI18n } from '../contexts/I18nContext';
 import BottomNav from '../components/navigation/BottomNav';
 import { SkeletonCard } from '../components/common/Skeleton';
-import { formatTime24 } from '../utils/dateUtils';
+import { formatTime24, monthShort } from '../utils/dateUtils';
 // Import analytics components
 import ChartLine from '../components/analytics/ChartLine';
 import StatsCard from '../components/analytics/StatsCard';
