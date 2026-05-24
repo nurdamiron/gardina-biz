@@ -29,7 +29,7 @@ import {
   Location01Icon, Location04Icon, MapPinIcon,
 
   // Communication
-  Message01Icon, Call02Icon, Mail01Icon,
+  Message01Icon, Call02Icon, Mail01Icon, MailSend01Icon,
 
   // Calendar & Time
   Calendar01Icon, Calendar02Icon, Clock01Icon,
@@ -47,7 +47,7 @@ import {
 
   // Files & Folders
   FolderOpenIcon, Folder01Icon, Note01Icon, AgreementIcon,
-  Task01Icon, ListViewIcon,
+  Task01Icon, ListViewIcon, NoteEditIcon,
 
   // Settings & Tools
   Settings01Icon, CalculatorIcon, RulerIcon, WrenchIcon,
@@ -59,8 +59,10 @@ import {
   Package01Icon, GridViewIcon,
 
   // Misc / Special
-  HelpCircleIcon, WebhookIcon, Link01Icon, FireIcon,
+  HelpCircleIcon, WebhookIcon, Link01Icon, Unlink01Icon, FireIcon,
   Sun01Icon, Door01Icon, WorkflowCircle01Icon,
+  BatteryFullIcon, SignalFullIcon, CrownIcon, Diamond01Icon,
+  InputCursorTextIcon,
 
   // Room & Furniture types (for measurement/fabric screens)
   BedIcon, DeskIcon, SofaIcon, RestaurantIcon, ConferenceIcon,
@@ -74,6 +76,9 @@ import {
 
   // Baby/Child
   BabyIcon,
+
+  // Sewing/fabric
+  ThreadIcon,
 } from '@hugeicons/core-free-icons';
 
 /**
@@ -115,6 +120,7 @@ const ICON_MAP = {
 
   // ── Navigation & Arrows ───────────────────────────────────────────
   arrow_back:               ArrowLeft01Icon,
+  arrow_back_ios:           ArrowLeft01Icon,
   arrow_forward:            ArrowRight01Icon,
   arrow_downward:           ArrowDown01Icon,
   expand_more:              ArrowDown01Icon,
@@ -169,6 +175,8 @@ const ICON_MAP = {
   call:                     Call02Icon,
   phone:                    Call02Icon,
   mail:                     Mail01Icon,
+  send:                     MailSend01Icon,
+  mark_email_unread:        MailSend01Icon,
 
   // ── Calendar & Time ───────────────────────────────────────────────
   calendar_today:           Calendar01Icon,
@@ -198,6 +206,7 @@ const ICON_MAP = {
   folder_open:              FolderOpenIcon,
   description:              Folder01Icon,
   note:                     Note01Icon,
+  edit_note:                NoteEditIcon,
   inbox:                    Download01Icon,
   assignment:               Task01Icon,
   task:                     Task01Icon,
@@ -269,6 +278,12 @@ const ICON_MAP = {
   webhook:                  WebhookIcon,
   width:                    RulerIcon,
   child_care:               BabyIcon,
+  battery_full:             BatteryFullIcon,
+  signal_cellular_alt:      SignalFullIcon,
+  workspace_premium:        CrownIcon,
+  link_off:                 Unlink01Icon,
+  input:                    InputCursorTextIcon,
+  sewing_kit:               ThreadIcon,
 };
 
 /**
