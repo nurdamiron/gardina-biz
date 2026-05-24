@@ -39,3 +39,4 @@ dev-dist/
 # Stray binaries / one-off files in repo root
 /Лого.png
 /*.png
+.gstack/
