@@ -49,11 +49,10 @@ function RequestModal({ open, onClose }) {
     if (Object.keys(errs).length) { setErrors(errs); return; }
 
     const lines = [
-      '🌿 Новая заявка с сайта Gardina!',
-      `Имя: ${form.name}`,
+      `Здравствуйте! Меня зовут ${form.name}, нашёл вас на сайте Gardina и хочу записаться на консультацию.`,
       `Телефон: ${form.phone}`,
       form.salon ? `Салон: ${form.salon}` : null,
-      form.comment ? `Комментарий: ${form.comment}` : null,
+      form.comment ? form.comment : null,
     ].filter(Boolean).join('\n');
 
     window.open(`https://wa.me/77079429827?text=${encodeURIComponent(lines)}`, '_blank');
