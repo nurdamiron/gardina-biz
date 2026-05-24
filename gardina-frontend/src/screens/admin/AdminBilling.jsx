@@ -243,7 +243,7 @@ const AdminBilling = () => {
             <p className="text-sm font-medium text-text-main">{t.supportMsg}</p>
           </div>
           <a
-            href="https://wa.me/77715373201"
+            href="https://wa.me/77079429827"
             target="_blank"
             rel="noopener noreferrer"
             className="px-4 py-2 bg-green-500 text-white rounded-xl text-xs font-bold"
