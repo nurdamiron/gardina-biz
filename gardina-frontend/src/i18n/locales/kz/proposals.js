@@ -47,7 +47,7 @@ const proposals = {
     button: 'Басып шығару (PDF)',
     salonTagline: 'Перделер салоны',
     addressLine: '📍 Мекен-жайы: Төле би 123',
-    phoneLine: '📞 Тел: +7 (777) 123-45-67',
+    phoneLine: '📞 Тел: +7 707 942 9827',
     instagramLine: '📷 Instagram: @gardina.kz',
     estimate: 'СМЕТА',
     dateLabel: 'Күні',

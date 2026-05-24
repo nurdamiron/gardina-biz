@@ -48,7 +48,7 @@ const proposals = {
     button: 'Печать (PDF)',
     salonTagline: 'Салон штор',
     addressLine: '📍 Адрес: ул. Толе би 123',
-    phoneLine: '📞 Тел: +7 (777) 123-45-67',
+    phoneLine: '📞 Тел: +7 707 942 9827',
     instagramLine: '📷 Instagram: @gardina.kz',
     estimate: 'СМЕТА',
     dateLabel: 'Дата',

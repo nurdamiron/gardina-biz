@@ -224,40 +224,14 @@ function RequestModal({ open, onClose }) {
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: 12 }}
                   transition={{ duration: 0.18 }}
-                  className="px-7 py-10 flex flex-col items-center text-center gap-6"
+                  className="overflow-hidden"
                 >
-                  <div className="size-20 rounded-2xl bg-primary/10 flex items-center justify-center">
-                    <Icon name="calendar_month" size={40} className="text-primary" />
-                  </div>
-                  <div>
-                    <p className="text-lg font-black text-text-main">{t('landing.booking.calTitle')}</p>
-                    <p className="text-sm text-text-secondary mt-2 max-w-xs mx-auto leading-relaxed">
-                      {t('landing.booking.calBody')}
-                    </p>
-                  </div>
-                  <div className="w-full rounded-2xl border border-border-light/80 bg-background-light p-5 text-left space-y-3">
-                    {[
-                      { icon: 'schedule', text: t('landing.booking.calStep1') },
-                      { icon: 'video_call', text: t('landing.booking.calStep2') },
-                      { icon: 'check_circle', text: t('landing.booking.calStep3') },
-                    ].map((s) => (
-                      <div key={s.icon} className="flex items-center gap-3">
-                        <Icon name={s.icon} size={18} className="text-primary shrink-0" />
-                        <span className="text-sm text-text-secondary">{s.text}</span>
-                      </div>
-                    ))}
-                  </div>
-                  <button
-                    onClick={() => window.open(
-                      'https://cal.com/nurdaulet/gardina',
-                      'cal-booking',
-                      'width=900,height=700,scrollbars=yes,resizable=yes'
-                    )}
-                    className="w-full py-3.5 rounded-xl bg-primary text-white font-bold text-sm hover:brightness-110 active:scale-[0.99] transition-all shadow-lg shadow-primary/25 flex items-center justify-center gap-2"
-                  >
-                    <Icon name="open_in_new" size={18} />
-                    {t('landing.booking.calendarBtn')}
-                  </button>
+                  <iframe
+                    src="https://cal.com/nurdaulet/gardina?embed=true&layout=month_view"
+                    title={t('landing.booking.calTitle')}
+                    className="w-full border-0"
+                    style={{ height: '620px' }}
+                  />
                 </motion.div>
               )}
             </AnimatePresence>

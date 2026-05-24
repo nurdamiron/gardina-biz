@@ -48,6 +48,7 @@ const auth = {
   noAccount: 'Нужен новый аккаунт?',
   hasAccount: 'Уже есть аккаунт?',
   forgotPassword: 'Забыли пароль?',
+  contactUs: 'Связаться с нами',
 
   // Consent
   consentText: 'Я прочитал и принимаю',

@@ -131,12 +131,14 @@ const Login = () => {
             <Link to="/forgot-password" className="text-primary hover:underline font-medium">
               {t('auth.forgotPassword')}
             </Link>
-            <span className="text-text-secondary">
-              {t('auth.noAccount')}{' '}
-              <Link to="/register" className="font-bold text-primary hover:underline">
-                {t('auth.register')}
-              </Link>
-            </span>
+            <a
+              href="https://wa.me/77079429827"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-bold text-primary hover:underline"
+            >
+              {t('auth.contactUs')}
+            </a>
           </div>
           </form>
         </div>

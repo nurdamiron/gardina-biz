@@ -43,6 +43,7 @@ const auth = {
   noAccount: 'Жаңа аккаунт керек пе?',
   hasAccount: 'Аккаунтыңыз бар ма?',
   forgotPassword: 'Құпия сөзді ұмыттыңыз ба?',
+  contactUs: 'Бізбен байланысу',
 
   consentText: 'Мен оқыдым және қабылдаймын:',
   consentTerms: 'Қызмет көрсету шарты',
