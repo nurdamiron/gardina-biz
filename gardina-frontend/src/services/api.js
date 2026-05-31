@@ -73,13 +73,37 @@ const processQueue = (error, token = null) => {
   failedQueue = [];
 };
 
+// Endpoints where a 401 means "bad credentials / invalid input", NOT "the
+// session's access token expired". These must reject so the calling form can
+// show the error inline — otherwise the refresh-or-redirect flow below would
+// hard-reload the page (e.g. wrong password on login reloaded the whole app).
+const CREDENTIAL_ENDPOINTS = [
+  '/auth/login',
+  '/auth/register',
+  '/auth/register-salon',
+  '/auth/forgot-password',
+  '/auth/reset-password',
+];
+
 // Response interceptor - handle errors and token refresh
 api.interceptors.response.use(
   (response) => response,
   (error) => {
     const originalRequest = error.config;
+    const reqUrl = originalRequest?.url || '';
+    const isCredentialRequest = CREDENTIAL_ENDPOINTS.some((p) => reqUrl.includes(p));
 
-    if (error.response?.status !== 401 || originalRequest._retry) {
+    // Subscription read-only (trial expired / past_due / canceled): the backend
+    // returns 402 on any write. Broadcast it so the app can show a clear message
+    // and route the admin to the billing screen instead of failing silently.
+    if (error.response?.status === 402 && error.response?.data?.code === 'SUBSCRIPTION_READ_ONLY') {
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('subscription:readonly', { detail: error.response.data }));
+      }
+      return Promise.reject(error);
+    }
+
+    if (error.response?.status !== 401 || originalRequest._retry || isCredentialRequest) {
       return Promise.reject(error);
     }
 
@@ -108,9 +132,12 @@ api.interceptors.response.use(
       axios
         .post(`${API_BASE_URL}/auth/refresh-token`, { refreshToken })
         .then((response) => {
-          const { accessToken, refreshToken: newRefreshToken } = response.data.data;
+          // Backend nests tokens under data.tokens (older builds were flat).
+          const td = response.data.data || {};
+          const accessToken = td.tokens?.accessToken ?? td.accessToken;
+          const newRefreshToken = td.tokens?.refreshToken ?? td.refreshToken;
           localStorage.setItem('accessToken', accessToken);
-          localStorage.setItem('refreshToken', newRefreshToken);
+          if (newRefreshToken) localStorage.setItem('refreshToken', newRefreshToken);
           originalRequest.headers.Authorization = `Bearer ${accessToken}`;
           processQueue(null, accessToken);
           resolve(api(originalRequest));
@@ -133,9 +160,11 @@ export default api;
 
 // Auth API
 export const authAPI = {
-  login: (phone, password, organizationSlug) =>
+  // The backend accepts `login` as phone OR email OR login — send the raw
+  // identifier under `login` so email-based sign-in works (not just phone).
+  login: (identifier, password, organizationSlug) =>
     api.post('/auth/login', {
-      phone,
+      login: identifier,
       password,
       ...(organizationSlug ? { organizationSlug } : {}),
     }),

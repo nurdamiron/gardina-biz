@@ -3,6 +3,16 @@ import { authAPI, getAxiosApiError } from '../services/api';
 
 const AuthContext = createContext(null);
 
+// The backend nests the JWTs under `data.tokens` (newer API) but older builds
+// returned them flat on `data`. Read both shapes so a backend refactor can't
+// silently store `undefined` tokens — which would make every authed request
+// 401 and bounce the user straight back to /login after register/login.
+const extractTokens = (data) => {
+  const accessToken = data?.tokens?.accessToken ?? data?.accessToken;
+  const refreshToken = data?.tokens?.refreshToken ?? data?.refreshToken;
+  return { accessToken, refreshToken };
+};
+
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -33,15 +43,18 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const login = async (phone, password) => {
+  const login = async (identifier, password, organizationSlugOverride) => {
     try {
       setError(null);
-      const organizationSlug = import.meta.env.VITE_ORGANIZATION_SLUG || '';
-      const response = await authAPI.login(phone, password, organizationSlug || undefined);
-      const { user: userData, accessToken, refreshToken } = response.data.data;
+      // Per-login slug (from the multi-org picker) wins over the build-time env default.
+      const organizationSlug = organizationSlugOverride || import.meta.env.VITE_ORGANIZATION_SLUG || '';
+      const response = await authAPI.login(identifier, password, organizationSlug || undefined);
+      const { user: userData } = response.data.data;
+      const { accessToken, refreshToken } = extractTokens(response.data.data);
+      if (!accessToken) throw new Error('Серверден токен келмеді');
 
       localStorage.setItem('accessToken', accessToken);
-      localStorage.setItem('refreshToken', refreshToken);
+      if (refreshToken) localStorage.setItem('refreshToken', refreshToken);
       setUser(userData);
 
       return { success: true, user: userData };
@@ -63,10 +76,12 @@ export const AuthProvider = ({ children }) => {
     try {
       setError(null);
       const response = await authAPI.register(userData);
-      const { user: newUser, accessToken, refreshToken } = response.data.data;
+      const { user: newUser } = response.data.data;
+      const { accessToken, refreshToken } = extractTokens(response.data.data);
+      if (!accessToken) throw new Error('Серверден токен келмеді');
 
       localStorage.setItem('accessToken', accessToken);
-      localStorage.setItem('refreshToken', refreshToken);
+      if (refreshToken) localStorage.setItem('refreshToken', refreshToken);
       setUser(newUser);
 
       return { success: true, user: newUser };
@@ -82,10 +97,12 @@ export const AuthProvider = ({ children }) => {
       setError(null);
       const response = await authAPI.registerSalon(payload);
       const data = response.data.data;
-      const { user: newUser, accessToken, refreshToken, organization: org } = data;
+      const { user: newUser, organization: org } = data;
+      const { accessToken, refreshToken } = extractTokens(data);
+      if (!accessToken) throw new Error('Серверден токен келмеді');
 
       localStorage.setItem('accessToken', accessToken);
-      localStorage.setItem('refreshToken', refreshToken);
+      if (refreshToken) localStorage.setItem('refreshToken', refreshToken);
       setUser({
         ...newUser,
         organization: org ? { slug: org.slug, name: org.name } : null,
