@@ -89,9 +89,13 @@ const AcceptInvite = () => {
     setSaving(true);
     try {
       const r = await api.post(`/auth/invite/${token}/accept`, { name: name.trim(), password });
-      const { user: userData, accessToken, refreshToken } = r.data.data;
+      const data = r.data.data || {};
+      const { user: userData } = data;
+      const accessToken = data.tokens?.accessToken ?? data.accessToken;
+      const refreshToken = data.tokens?.refreshToken ?? data.refreshToken;
+      if (!accessToken) throw new Error('Серверден токен келмеді');
       localStorage.setItem('accessToken', accessToken);
-      localStorage.setItem('refreshToken', refreshToken);
+      if (refreshToken) localStorage.setItem('refreshToken', refreshToken);
       navigate('/', { replace: true });
     } catch (e) {
       setFormError(e.response?.data?.error || t.errors.generic);
