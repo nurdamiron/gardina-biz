@@ -31,6 +31,12 @@ npm-debug.log*
 playwright-report/
 test-results/
 .tmp_i18n_strings.txt
+# Playwright auth storage states — contain live access tokens, never commit
+specs/.auth/
+# Regenerable capture/render artifacts (like build output — keep out of history)
+specs/demos/.videos/
+remotion-demos/out/
+gardina-screens/
 
 # Frontend dev artifacts
 dev-dist/

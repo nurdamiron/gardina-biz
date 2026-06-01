@@ -1,0 +1,11 @@
+import { chromium } from '@playwright/test';
+const b = await chromium.launch();
+const c = await b.newContext({ storageState: 'specs/.auth/demo-admin.json', viewport: { width: 430, height: 932 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true, locale: 'ru-RU' });
+const p = await c.newPage();
+await p.goto('http://localhost:5174/admin/dashboard');
+await p.waitForLoadState('networkidle').catch(() => {});
+await p.waitForTimeout(1800);
+await p.screenshot({ path: 'marketing-assets/screens/admin/mobile/admin-01-dashboard.png' });
+await p.screenshot({ path: '/tmp/gardina-shots/admin-dash-new.png' });
+console.log('done', p.url());
+await b.close();

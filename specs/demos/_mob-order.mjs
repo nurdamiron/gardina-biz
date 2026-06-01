@@ -1,0 +1,10 @@
+import { chromium } from '@playwright/test';
+const b = await chromium.launch();
+const c = await b.newContext({ storageState: 'specs/.auth/demo-manager.json', viewport: { width: 430, height: 932 }, deviceScaleFactor: 2, isMobile: true, locale: 'ru-RU' });
+const p = await c.newPage();
+await p.goto('http://localhost:5174/manager/orders');
+await p.waitForLoadState('networkidle').catch(() => {});
+await p.waitForTimeout(1600);
+await p.screenshot({ path: '/tmp/gardina-shots/card-order-mobile.png' });
+console.log('done', p.url());
+await b.close();
