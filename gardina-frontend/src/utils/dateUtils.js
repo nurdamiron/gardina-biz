@@ -117,6 +117,19 @@ export const formatDateTimeFull = (dateTimeString, lang = 'ru') => {
   return label ? `${day} ${month} (${label}) • ${time}` : `${day} ${month} • ${time}`;
 };
 
+// ── Active UI language (read from the same key I18nContext persists) ────────
+// Lets the legacy aliases below follow the chosen language instead of
+// hard-coding Kazakh, so RU users never see "Бүгін/Кеше".
+function activeLang() {
+  try {
+    const stored = typeof localStorage !== 'undefined' && localStorage.getItem('gardina_lang');
+    return stored === 'kz' ? 'kz' : 'ru';
+  } catch {
+    return 'ru';
+  }
+}
+
 // ── Back-compat aliases (legacy callers used the *KZ suffix) ────────────────
-export const formatDateKZ = (s) => formatDate(s, 'kz');
-export const formatDateTimeKZ = (s) => formatDateTime(s, 'kz');
+// Despite the name, these now respect the active UI language.
+export const formatDateKZ = (s) => formatDate(s, activeLang());
+export const formatDateTimeKZ = (s) => formatDateTime(s, activeLang());

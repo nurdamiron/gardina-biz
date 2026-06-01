@@ -18,7 +18,7 @@ const NAV_BY_ROLE = {
     { icon: 'person',      label: { ru: 'Профиль',  kz: 'Профиль' },     path: '/manager/profile' },
   ],
   sales: [
-    { icon: 'group',       label: { ru: 'Клиенты',  kz: 'Клиенттер' },   path: '/sales/clients' },
+    { icon: 'group',       label: { ru: 'Лиды',     kz: 'Лидтер' },      path: '/sales/clients' },
     { icon: 'add_circle',  label: { ru: 'Замер',    kz: 'Замер' },       path: '/sales/order/new' },
     { icon: 'filter_alt',  label: { ru: 'Воронка',  kz: 'Воронка' },     path: '/sales/funnel' },
     { icon: 'person',      label: { ru: 'Профиль',  kz: 'Профиль' },     path: '/sales/profile' },
@@ -39,7 +39,7 @@ const Sidebar = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { user, logout } = useAuth();
-  const { lang } = useI18n();
+  const { lang, t } = useI18n();
 
   const role = user?.role;
   const tabs = NAV_BY_ROLE[role] || [];
@@ -88,7 +88,7 @@ const Sidebar = () => {
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-xs font-bold text-text-main truncate">{user?.name}</p>
-            <p className="text-[10px] text-text-secondary capitalize">{user?.role}</p>
+            <p className="text-[10px] text-text-secondary">{t(`profile.roles.${user?.role}`, user?.role)}</p>
           </div>
         </div>
         <button

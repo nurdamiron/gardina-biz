@@ -5,10 +5,11 @@ import BottomNav from '../../components/navigation/BottomNav';
 import Icon from '../../components/common/Icon';
 import { useI18n } from '../../contexts/I18nContext';
 
-const ROLE_VALUES = ['designer', 'manager', 'admin'];
+const ROLE_VALUES = ['designer', 'manager', 'sales', 'admin'];
 const ROLE_COLORS = {
   designer: 'bg-primary/10 text-primary',
   manager: 'bg-primary/15 text-primary-dark',
+  sales: 'bg-primary/15 text-primary-dark',
   admin: 'bg-primary/10 text-primary-dark',
 };
 
@@ -180,15 +181,15 @@ const AdminUsers = () => {
           <button onClick={() => navigate(-1)} className="p-2 -ml-2 rounded-full hover:bg-gray-100">
             <Icon name="arrow_back" size={22} />
           </button>
-          <h1 className="text-xl font-bold flex-1">{t('adminUsers.title')}</h1>
-          <div className="flex gap-2">
+          <h1 className="text-xl font-bold flex-1 min-w-0 truncate">{t('adminUsers.title')}</h1>
+          <div className="flex gap-2 shrink-0">
             <button onClick={openInvite} className="flex items-center gap-1.5 bg-primary/10 text-primary px-3 py-2 rounded-xl text-sm font-bold hover:bg-primary/20 transition-all">
               <Icon name="mail" size={18} />
-              {lang === 'kz' ? 'Шақыру' : 'Пригласить'}
+              <span className="hidden sm:inline">{lang === 'kz' ? 'Шақыру' : 'Пригласить'}</span>
             </button>
             <button onClick={openCreate} className="flex items-center gap-1.5 bg-primary text-white px-3 py-2 rounded-xl text-sm font-bold hover:brightness-110 transition-all">
               <Icon name="add" size={18} />
-              {t('adminUsers.create')}
+              <span className="hidden sm:inline">{t('adminUsers.create')}</span>
             </button>
           </div>
         </div>
@@ -205,7 +206,7 @@ const AdminUsers = () => {
               className="w-full pl-9 pr-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none"
             />
           </div>
-          <div className="flex gap-2 overflow-x-auto pb-0.5">
+          <div className="flex gap-2 overflow-x-auto no-scrollbar pb-0.5 -mx-4 px-4">
             <FilterChip active={!filterRole} onClick={() => setFilterRole('')} label={`${t('common.yes')[0] === 'Д' ? 'Все' : 'Барлығы'} (${users.length})`} />
             {counts.map(r => <FilterChip key={r.value} active={filterRole === r.value} onClick={() => setFilterRole(r.value)} label={`${r.label} (${r.count})`} />)}
           </div>
@@ -340,15 +341,15 @@ const AdminUsers = () => {
                 </div>
 
                 {/* Actions menu */}
-                <div className="flex flex-col gap-1">
-                  <button onClick={() => openEdit(u)} className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-500">
-                    <Icon name="edit" size={16} />
+                <div className="flex flex-col gap-1 shrink-0">
+                  <button onClick={() => openEdit(u)} aria-label={t('common.edit')} className="size-10 flex items-center justify-center rounded-lg hover:bg-gray-100 text-gray-500">
+                    <Icon name="edit" size={18} />
                   </button>
-                  <button onClick={() => openPassword(u)} className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-500">
-                    <Icon name="lock" size={16} />
+                  <button onClick={() => openPassword(u)} aria-label={lang === 'kz' ? 'Құпия сөзді өзгерту' : 'Сменить пароль'} className="size-10 flex items-center justify-center rounded-lg hover:bg-gray-100 text-gray-500">
+                    <Icon name="lock" size={18} />
                   </button>
-                  <button onClick={() => handleToggleActive(u)} className={`p-1.5 rounded-lg ${u.is_active ? 'hover:bg-amber-50 text-amber-500' : 'hover:bg-green-50 text-green-500'}`}>
-                    <Icon name={u.is_active ? 'block' : 'check_circle'} size={16} />
+                  <button onClick={() => handleToggleActive(u)} aria-label={u.is_active ? (lang === 'kz' ? 'Өшіру' : 'Деактивировать') : (lang === 'kz' ? 'Қосу' : 'Активировать')} className={`size-10 flex items-center justify-center rounded-lg ${u.is_active ? 'hover:bg-amber-50 text-amber-500' : 'hover:bg-green-50 text-green-500'}`}>
+                    <Icon name={u.is_active ? 'block' : 'check_circle'} size={18} />
                   </button>
                 </div>
               </div>
@@ -465,7 +466,7 @@ const AdminUsers = () => {
 // ─── Shared sub-components ────────────────────────────────────────────────────
 
 const FilterChip = ({ active, onClick, label }) => (
-  <button onClick={onClick} className={`px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-colors ${active ? 'bg-primary text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}>
+  <button onClick={onClick} className={`shrink-0 px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-colors ${active ? 'bg-primary text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}>
     {label}
   </button>
 );

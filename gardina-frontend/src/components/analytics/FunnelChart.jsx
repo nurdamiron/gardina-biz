@@ -1,5 +1,7 @@
 import React from 'react';
 import Icon from '../common/Icon';
+import { useI18n } from '../../contexts/I18nContext';
+import { pluralize, NOUNS } from '../../utils/plural';
 
 /**
  * FunnelChart - Компонент воронки продаж
@@ -20,6 +22,7 @@ const FunnelChart = ({
     valueFormat = 'number',
     loading = false
 }) => {
+    const { t, lang } = useI18n();
     if (loading) {
         return (
             <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
@@ -39,7 +42,7 @@ const FunnelChart = ({
             <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
                 {title && <h3 className="font-bold text-gray-900 mb-4">{title}</h3>}
                 <div className="flex items-center justify-center h-48">
-                    <p className="text-gray-400">Деректер жоқ</p>
+                    <p className="text-gray-400">{t('dashboard.funnelChart.noData')}</p>
                 </div>
             </div>
         );
@@ -53,7 +56,7 @@ const FunnelChart = ({
             case 'currency':
                 return `${value.toLocaleString()} ₸`;
             case 'deals':
-                return `${value} мәміле`;
+                return pluralize(value, NOUNS.deal, lang);
             default:
                 return value.toLocaleString();
         }
@@ -106,7 +109,7 @@ const FunnelChart = ({
                                 {index > 0 && (
                                     <div className="text-right mt-1">
                                         <span className="text-xs text-gray-500">
-                                            Конверсия: {data[index-1].value > 0 ? ((item.value / data[index-1].value) * 100).toFixed(1) : 0}%
+                                            {t('dashboard.funnelChart.conversion')}: {data[index-1].value > 0 ? ((item.value / data[index-1].value) * 100).toFixed(1) : 0}%
                                         </span>
                                     </div>
                                 )}
@@ -178,7 +181,7 @@ const FunnelChart = ({
             {/* Summary */}
             <div className="mt-4 pt-4 border-t border-gray-200">
                 <div className="flex justify-between items-center">
-                    <span className="text-sm text-gray-600">Жалпы конверсия:</span>
+                    <span className="text-sm text-gray-600">{t('dashboard.funnelChart.totalConversion')}</span>
                     <span className="text-lg font-black text-primary">
                         {totalValue > 0 ? ((data[data.length - 1].value / totalValue) * 100).toFixed(1) : 0}%
                     </span>

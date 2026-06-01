@@ -112,6 +112,21 @@ const dashboard = {
     designer: 'Дизайнер',
   },
 
+  // KPICard (designer dashboard)
+  kpiCard: {
+    outOf: '{target} {unit} ішінен',
+    done: 'Орындалды',
+    inProgress: 'Орындалуда',
+    behind: 'Артта қалу',
+  },
+
+  // FunnelChart
+  funnelChart: {
+    noData: 'Деректер жоқ',
+    conversion: 'Конверсия',
+    totalConversion: 'Жалпы конверсия:',
+  },
+
   manager: {
     panelTitle: 'Менеджер панелі',
     hello: 'Сәлем, {name}!',

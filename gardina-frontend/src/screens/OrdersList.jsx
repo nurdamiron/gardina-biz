@@ -7,7 +7,14 @@ import BottomNav from '../components/navigation/BottomNav';
 import OrderDetailModal from '../components/admin/OrderDetailModal';
 import { SkeletonCard } from '../components/common/Skeleton';
 import { formatTime24, formatDate, formatDateTimeFull } from '../utils/dateUtils';
+import { money, formatMoney } from '../utils/money';
 import Icon from '../components/common/Icon';
+import StatusBadge from '../components/common/StatusBadge';
+import Card from '../components/common/Card';
+import Avatar from '../components/common/Avatar';
+
+// Payment status → semantic tone
+const PAYMENT_TONE = { pending: 'neutral', partial: 'warning', paid: 'success', refunded: 'danger' };
 
 // Helper: Calculate time until scheduled measurement (locale-aware)
 const buildGetTimeUntil = (t, lang) => (scheduledAt) => {
@@ -40,7 +47,7 @@ const PROGRESS_STAGES = {
 };
 const getOrderProgress = (status, t) => {
     const stage = PROGRESS_STAGES[status];
-    if (!stage) return { step: 1, total: 6, label: status, icon: 'help', color: 'gray' };
+    if (!stage) return { step: 1, total: 6, label: t(`orders.status.${status}`, status), icon: 'help', color: 'gray' };
     return { ...stage, label: t(`orders.status.${status}`, status) };
 };
 
@@ -160,7 +167,7 @@ const OrdersList = ({ filterByManager = false }) => {
     });
 
     return (
-        <div className="bg-background-light min-h-screen flex flex-col pb-24">
+        <div className="bg-background-light min-h-screen flex flex-col pb-32">
             {/* Header */}
             <header className="sticky top-0 z-30 bg-white border-b border-gray-100 px-4 py-3">
                 <div className="flex items-center justify-between gap-4">
@@ -175,8 +182,8 @@ const OrdersList = ({ filterByManager = false }) => {
                 </div>
 
                 {/* Filters */}
-                <div className="mt-3 flex gap-2 overflow-x-auto no-scrollbar pb-1">
-                    <div className="text-[10px] font-bold uppercase tracking-wide text-primary bg-primary/10 px-2.5 py-1.5 rounded-full whitespace-nowrap">
+                <div className="mt-3 flex gap-2 overflow-x-auto no-scrollbar pb-1 -mx-4 px-4">
+                    <div className="shrink-0 text-[10px] font-bold uppercase tracking-wide text-primary bg-primary/10 px-2.5 py-1.5 rounded-full whitespace-nowrap">
                         {filterByManager
                             ? t('orders.modes.manager')
                             : user?.role === 'sales' ? t('orders.modes.sales') : t('orders.modes.admin')}
@@ -184,7 +191,7 @@ const OrdersList = ({ filterByManager = false }) => {
                     <select
                         value={statusFilter}
                         onChange={(e) => setStatusFilter(e.target.value)}
-                        className="bg-gray-50 border-none text-gray-600 text-xs font-semibold rounded-full py-1.5 px-3 min-w-[120px]"
+                        className="shrink-0 bg-gray-50 border-none text-gray-600 text-xs font-semibold rounded-full py-1.5 px-3 min-w-[120px]"
                     >
                         <option value="all">{t('orders.filters.allStatus')}</option>
                         <option value="scheduled">{t('orders.status.scheduled')}</option>
@@ -201,7 +208,7 @@ const OrdersList = ({ filterByManager = false }) => {
                         <select
                             value={designerFilter}
                             onChange={(e) => setDesignerFilter(e.target.value)}
-                            className="bg-gray-50 border-none text-gray-600 text-xs font-semibold rounded-full py-1.5 px-3 min-w-[120px]"
+                            className="shrink-0 bg-gray-50 border-none text-gray-600 text-xs font-semibold rounded-full py-1.5 px-3 min-w-[120px]"
                         >
                             <option value="all">{t('orders.filters.allDesigners')}</option>
                             {designers.map(d => (
@@ -261,21 +268,21 @@ const OrdersList = ({ filterByManager = false }) => {
                                                 </div>
                                             </td>
                                             <td className="px-4 py-3">
-                                                <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wide ${getStatusColorClass(order.status)}`}>
-                                                    <Icon name={progress.icon} size={12} />
-                                                    {progress.label}
-                                                </span>
+                                                <StatusBadge status={order.status} label={progress.label} size="sm" />
                                             </td>
                                             <td className="px-4 py-3">
-                                                <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-bold ${getPaymentStatusColor(order.paymentStatus || 'pending')}`}>
-                                                    {getPaymentLabel(order.paymentStatus || 'pending')}
-                                                </span>
+                                                <StatusBadge
+                                                    status={order.paymentStatus || 'pending'}
+                                                    tone={PAYMENT_TONE[order.paymentStatus || 'pending']}
+                                                    label={getPaymentLabel(order.paymentStatus || 'pending')}
+                                                    size="sm"
+                                                />
                                             </td>
-                                            <td className="px-4 py-3 text-right font-black text-gray-900">
-                                                {(order.totalAmount || 0).toLocaleString()} ₸
+                                            <td className={`px-4 py-3 text-right font-black ${money(order.totalAmount) > 0 ? 'text-text-main' : 'text-text-secondary/50'}`}>
+                                                {money(order.totalAmount).toLocaleString('ru-RU')} ₸
                                             </td>
-                                            <td className="px-4 py-3 text-xs text-gray-500">
-                                                {measurement?.scheduledAt ? formatDate(measurement.scheduledAt, lang) : '—'}
+                                            <td className="px-4 py-3 text-xs text-text-secondary">
+                                                {measurement?.scheduledAt ? formatDate(measurement.scheduledAt, lang) : <span className="text-text-secondary/40">—</span>}
                                             </td>
                                         </tr>
                                     );
@@ -294,20 +301,21 @@ const OrdersList = ({ filterByManager = false }) => {
                         const timeUntil = measurement?.scheduledAt ? getTimeUntil(measurement.scheduledAt) : null;
 
                         // Financial calculations
-                        const totalAmount = order.totalAmount || 0;
-                        const prepayment = order.prepayment || 0;
+                        const totalAmount = money(order.totalAmount);
+                        const prepayment = money(order.prepayment);
                         const remaining = totalAmount - prepayment;
                         const paymentProgress = totalAmount > 0 ? (prepayment / totalAmount) * 100 : 0;
 
                         return (
-                            <div
+                            <Card
                                 key={order.id}
                                 onClick={() => {
                                     setSelectedOrder(order);
                                     setSelectedMeasurement(measurement);
                                     setShowDetailModal(true);
                                 }}
-                                className="group bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-lg hover:border-primary/25 transition-all cursor-pointer active:scale-[0.99]"
+                                padding="p-0"
+                                className="group overflow-hidden"
                             >
                                 <div className="p-5 space-y-4">
                                     {/* Row 1: Client + Status */}
@@ -359,15 +367,15 @@ const OrdersList = ({ filterByManager = false }) => {
                                                 </p>
                                             </div>
                                         </div>
-                                        <div className="bg-gray-50 border border-gray-100 rounded-xl px-3 py-2.5 flex items-center justify-between">
-                                            <div>
+                                        <div className="bg-gray-50 border border-gray-100 rounded-xl px-3 py-2.5 flex items-center justify-between gap-3">
+                                            <div className="min-w-0">
                                                 <p className="text-[10px] text-gray-500 font-bold uppercase">{t('orders.card.amount')}</p>
-                                                <p className="font-black text-gray-900 text-lg">{(order.totalAmount || 0).toLocaleString(lang === 'kz' ? 'kk-KZ' : 'ru-RU')} ₸</p>
+                                                <p className="font-black text-gray-900 text-lg whitespace-nowrap">{formatMoney(order.totalAmount)}</p>
                                             </div>
                                             {prepayment > 0 && (
-                                                <div className="flex flex-col items-end">
+                                                <div className="flex flex-col items-end shrink-0">
                                                     <span className="text-[10px] text-gray-500 font-bold uppercase">{t('orders.card.paid')}</span>
-                                                    <span className="text-sm font-bold text-green-600">{prepayment.toLocaleString(lang === 'kz' ? 'kk-KZ' : 'ru-RU')} ₸</span>
+                                                    <span className="text-sm font-bold text-green-600 whitespace-nowrap">{formatMoney(prepayment)}</span>
                                                 </div>
                                             )}
                                         </div>
@@ -397,9 +405,7 @@ const OrdersList = ({ filterByManager = false }) => {
                                     {/* Footer: Designer + Windows count */}
                                     <div className="flex items-center justify-between">
                                         <div className="flex items-center gap-2">
-                                            <div className="size-8 rounded-full bg-gradient-to-br from-primary to-primary-dark flex items-center justify-center text-white font-bold text-sm shadow-md">
-                                                {order.designer?.name?.[0] || '?'}
-                                            </div>
+                                            <Avatar name={order.designer?.name || ''} size="sm" />
                                         <div>
                                                 <p className="text-[9px] text-gray-400 font-bold">{t('orders.card.designer')}</p>
                                                 <p className="text-xs font-bold text-gray-700">{order.designer?.name || t('orders.card.unknownDesigner')}</p>
@@ -413,7 +419,7 @@ const OrdersList = ({ filterByManager = false }) => {
                                         )}
                                     </div>
                                 </div>
-                            </div>
+                            </Card>
                         );
                     })}
                     </div>

@@ -122,7 +122,7 @@ const AdminSettings = () => {
   );
 
   return (
-    <div className="bg-background-light min-h-screen pb-24">
+    <div className="bg-background-light min-h-screen pb-32">
       {/* Header */}
       <header className="sticky top-0 z-30 bg-white/80 backdrop-blur-md border-b border-gray-100 px-4 py-4">
         <h1 className="text-xl font-bold text-gray-900">{t('adminSettings.title')}</h1>

@@ -9,22 +9,30 @@ const Login = () => {
   const navigate = useNavigate();
   const { login, error: authError, isAuthenticated, loading: authLoading } = useAuth();
   const { t } = useI18n();
-  const [phone, setPhone] = useState('');
+  const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  // Set when the same login exists in several salons (backend code ORG_SLUG_REQUIRED).
+  const [orgOptions, setOrgOptions] = useState(null);
+  const [selectedSlug, setSelectedSlug] = useState('');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError(null);
     setLoading(true);
 
-    const result = await login(phone, password);
+    const result = await login(identifier, password, selectedSlug || undefined);
 
     if (result.success) {
       navigate('/');
     } else {
+      if (Array.isArray(result.organizations) && result.organizations.length > 0) {
+        // Ambiguous login across orgs — offer a salon picker and let the user retry.
+        setOrgOptions(result.organizations);
+        if (!selectedSlug) setSelectedSlug(result.organizations[0].slug || '');
+      }
       setError(result.error);
     }
 
@@ -50,12 +58,10 @@ const Login = () => {
           <div className="flex justify-center mb-2">
             <LanguageSwitcher compact />
           </div>
-          <h1 className="text-2xl font-bold text-text-main tracking-tight">Gardina</h1>
           <p className="text-text-secondary font-medium text-sm mt-1.5">{t('auth.loginSubtitle')}</p>
         </div>
 
         <div className="rounded-3xl bg-white shadow-xl shadow-primary/5 border border-primary/10 overflow-hidden">
-          <div className="h-1 bg-gradient-to-r from-primary via-primary-light to-accent" />
           <form onSubmit={handleSubmit} className="p-6 sm:p-7">
           <h2 className="text-xl font-bold mb-5">{t('auth.loginTitle')}</h2>
 
@@ -74,8 +80,10 @@ const Login = () => {
               </div>
               <input
                 type="text"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
+                value={identifier}
+                onChange={(e) => setIdentifier(e.target.value)}
+                onInvalid={(e) => e.target.setCustomValidity(t('auth.fieldRequired'))}
+                onInput={(e) => e.target.setCustomValidity('')}
                 className="block w-full pl-10 pr-3 py-3 border border-gray-200 rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none"
                 placeholder={t('auth.loginFieldPlaceholder')}
                 required
@@ -83,6 +91,27 @@ const Login = () => {
               />
             </div>
           </div>
+
+          {orgOptions && (
+            <div className="mb-4">
+              <label className="block text-sm font-bold mb-2">{t('auth.selectOrganization')}</label>
+              <p className="text-xs text-text-secondary mb-2">{t('auth.selectOrganizationHint')}</p>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <Icon name="store" size={20} className="text-text-secondary" />
+                </div>
+                <select
+                  value={selectedSlug}
+                  onChange={(e) => setSelectedSlug(e.target.value)}
+                  className="block w-full pl-10 pr-3 py-3 border border-gray-200 rounded-xl bg-white focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none"
+                >
+                  {orgOptions.map((o) => (
+                    <option key={o.slug} value={o.slug}>{o.name || o.slug}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+          )}
 
           <div className="mb-6">
             <label className="block text-sm font-bold mb-2">{t('auth.password')}</label>
@@ -94,8 +123,10 @@ const Login = () => {
                 type={showPassword ? 'text' : 'password'}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                onInvalid={(e) => e.target.setCustomValidity(t('auth.fieldRequired'))}
+                onInput={(e) => e.target.setCustomValidity('')}
                 className="block w-full pl-10 pr-12 py-3 border border-gray-200 rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none"
-                placeholder="••••••••"
+                placeholder={t('auth.passwordPlaceholder', 'Введите пароль')}
                 required
               />
               <button

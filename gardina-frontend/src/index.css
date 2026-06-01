@@ -26,6 +26,23 @@
   --color-border-light: #d5e3dc;
   --color-border-dark: #2a3d34;
 
+  /* Semantic status colors — saturated text on -soft background for calm, legible pills.
+     One canonical source for success/warning/danger/info so badges stop disagreeing. */
+  --color-success: #15803d;
+  --color-success-soft: #dcfce7;
+  --color-warning: #b45309;
+  --color-warning-soft: #fef3c7;
+  --color-danger: #b91c1c;
+  --color-danger-soft: #fee2e2;
+  --color-info: #1d4ed8;
+  --color-info-soft: #dbeafe;
+  --color-neutral: #475569;
+  --color-neutral-soft: #f1f5f9;
+
+  /* Brand-tinted chart stroke/fill — keeps data viz on the green system, not neon green-500. */
+  --color-chart: #2d6a4f;
+  --color-chart-soft: #b7d8c8;
+
   --font-display: "Inter", "sans-serif";
 
   --radius: 0.5rem;

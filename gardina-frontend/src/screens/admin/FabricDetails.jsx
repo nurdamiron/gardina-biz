@@ -3,11 +3,13 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { catalogAPI } from '../../services/api';
 import Icon from '../../components/common/Icon';
 import { useUI } from '../../contexts/UIContext';
+import { useI18n } from '../../contexts/I18nContext';
 
 const FabricDetails = () => {
     const { id } = useParams();
     const navigate = useNavigate();
     const { showNotification } = useUI();
+    const { t, lang } = useI18n();
     const [fabric, setFabric] = useState(null);
     const [variants, setVariants] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -36,7 +38,7 @@ const FabricDetails = () => {
                 }
             }
         } catch (err) {
-            setError('Тауар табылмады');
+            setError(t('fabrics.detail.notFound', 'Тауар табылмады'));
         } finally {
             setLoading(false);
         }
@@ -46,10 +48,10 @@ const FabricDetails = () => {
         setDeleting(true);
         try {
             await catalogAPI.deleteFabric(id);
-            showNotification?.('Тауар сәтті өшірілді', 'success');
+            showNotification?.(t('fabrics.detail.deleteSuccess', 'Тауар сәтті өшірілді'), 'success');
             navigate('/admin/catalog');
         } catch (err) {
-            showNotification?.('Өшіру мүмкін болмады', 'error');
+            showNotification?.(t('fabrics.detail.deleteError', 'Өшіру мүмкін болмады'), 'error');
         } finally {
             setDeleting(false);
             setShowDeleteConfirm(false);
@@ -58,25 +60,25 @@ const FabricDetails = () => {
 
     const getUnitLabel = (unit) => {
         switch (unit) {
-            case 'pcs': return 'дн';
-            case 'set': return 'жнқ';
-            case 'roll': return 'орам';
-            case 'pack': return 'қап';
-            case 'box': return 'қорап';
-            case 'pair': return 'жұп';
-            default: return 'метр';
+            case 'pcs': return t('fabrics.units.pcs', 'дн');
+            case 'set': return t('fabrics.units.set', 'жнқ');
+            case 'roll': return t('fabrics.units.roll', 'орам');
+            case 'pack': return t('fabrics.units.pack', 'қап');
+            case 'box': return t('fabrics.units.box', 'қорап');
+            case 'pair': return t('fabrics.units.pair', 'жұп');
+            default: return t('fabrics.units.meter', 'метр');
         }
     };
 
     const getTypeLabel = (type) => {
         switch (type) {
-            case 'curtain': return 'Перде';
-            case 'tulle': return 'Тюль';
-            case 'cornice': return 'Карниз';
-            case 'jalousie': return 'Жалюзи';
-            case 'accessory': return 'Аксессуар (Таспа)';
-            case 'ready_made': return 'Дайын өнім';
-            default: return type;
+            case 'curtain': return t('fabrics.typeLabels.curtain', 'Перде');
+            case 'tulle': return t('fabrics.typeLabels.tulle', 'Тюль');
+            case 'cornice': return t('fabrics.typeLabels.cornice', 'Карниз');
+            case 'jalousie': return t('fabrics.typeLabels.jalousie', 'Жалюзи');
+            case 'accessory': return t('fabrics.typeLabels.accessory', 'Аксессуар (Таспа)');
+            case 'ready_made': return t('fabrics.typeLabels.ready_made', 'Дайын өнім');
+            default: return t(`fabrics.typeLabels.${type}`, type);
         }
     };
 
@@ -89,12 +91,12 @@ const FabricDetails = () => {
     if (error || !fabric) return (
         <div className="min-h-screen bg-background-light p-4 flex flex-col items-center justify-center text-center">
             <Icon name="error" size={32} className="text-gray-400" />
-            <p className="text-gray-600 mb-4">{error || 'Тауар табылмады'}</p>
+            <p className="text-gray-600 mb-4">{error || t('fabrics.detail.notFound', 'Тауар табылмады')}</p>
             <button
                 onClick={() => navigate('/admin/catalog')}
                 className="text-primary font-bold hover:underline"
             >
-                Каталогқа оралу
+                {t('fabrics.detail.backToCatalog', 'Каталогқа оралу')}
             </button>
         </div>
     );
@@ -108,7 +110,7 @@ const FabricDetails = () => {
         : 0;
 
     return (
-        <div className="min-h-screen bg-background-light pb-24 relative">
+        <div className="min-h-screen bg-background-light pb-32 relative">
             {/* Header */}
             <header className="sticky top-0 z-30 bg-white/80 backdrop-blur-md border-b border-gray-100 px-4 py-4">
                 <div className="flex items-center justify-between">
@@ -145,7 +147,7 @@ const FabricDetails = () => {
                     ) : (
                         <div className="aspect-video rounded-xl bg-gray-50 flex flex-col items-center justify-center text-gray-400">
                             <Icon name="image_not_supported" size={32} />
-                            <span className="text-sm">Сурет жоқ</span>
+                            <span className="text-sm">{t('fabrics.detail.noImage', 'Сурет жоқ')}</span>
                         </div>
                     )}
                 </div>
@@ -153,7 +155,7 @@ const FabricDetails = () => {
                 {/* Product Code if available */}
                 {fabric.code && (
                     <div className="bg-primary/10 border border-primary/25 rounded-xl p-3 flex items-center justify-center">
-                        <span className="text-xs text-primary font-medium mr-2">АРТИКУЛ:</span>
+                        <span className="text-xs text-primary font-medium mr-2">{t('fabrics.detail.article', 'АРТИКУЛ:')}</span>
                         <span className="text-lg font-bold text-primary-dark">{fabric.code}</span>
                     </div>
                 )}
@@ -161,12 +163,12 @@ const FabricDetails = () => {
                 {/* Main Stats */}
                 <div className="grid grid-cols-2 gap-3">
                     <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100">
-                        <p className="text-xs text-gray-500 uppercase font-bold tracking-wider mb-1">Сату бағасы</p>
+                        <p className="text-xs text-gray-500 uppercase font-bold tracking-wider mb-1">{t('fabrics.detail.sellPrice', 'Сату бағасы')}</p>
                         <p className="text-2xl font-black text-gray-900">{fabric.pricePerMeter?.toLocaleString()} ₸</p>
-                        <p className="text-xs text-gray-400 mt-1">{getUnitLabel(fabric.unit)} үшін</p>
+                        <p className="text-xs text-gray-400 mt-1">{getUnitLabel(fabric.unit)} {t('fabrics.detail.perUnit', 'үшін')}</p>
                     </div>
                     <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100">
-                        <p className="text-xs text-gray-500 uppercase font-bold tracking-wider mb-1">Маржа</p>
+                        <p className="text-xs text-gray-500 uppercase font-bold tracking-wider mb-1">{t('fabrics.detail.margin', 'Маржа')}</p>
                         <p className={`text-2xl font-black ${margin > 0 ? 'text-green-600' : 'text-gray-400'}`}>
                             {marginPercent}%
                         </p>
@@ -179,10 +181,10 @@ const FabricDetails = () => {
                     <div className="bg-primary/5 border border-primary/20 rounded-xl p-3 flex items-center justify-between">
                         <div className="flex items-center gap-2">
                             <Icon name="inventory_2" className="text-primary" />
-                            <span className="text-sm font-medium text-primary-dark">Варианттар бар</span>
+                            <span className="text-sm font-medium text-primary-dark">{t('fabrics.detail.hasVariants', 'Варианттар бар')}</span>
                         </div>
                         <span className="px-3 py-1 bg-primary/10 text-primary-dark rounded-full text-sm font-bold">
-                            {variants.length} түрі
+                            {variants.length} {t('fabrics.detail.variantsCountSuffix', 'түрі')}
                         </span>
                     </div>
                 )}
@@ -190,53 +192,53 @@ const FabricDetails = () => {
                 {/* Details */}
                 <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
                     <div className="p-4 border-b border-gray-100">
-                        <h3 className="font-bold text-gray-900">Толық ақпарат</h3>
+                        <h3 className="font-bold text-gray-900">{t('fabrics.detail.fullInfo', 'Толық ақпарат')}</h3>
                     </div>
                     <div className="divide-y divide-gray-50">
                         <div className="p-4 flex justify-between">
-                            <span className="text-gray-500">Категория</span>
+                            <span className="text-gray-500">{t('fabrics.detail.category', 'Категория')}</span>
                             <span className="font-medium text-gray-900">{getTypeLabel(fabric.type)}</span>
                         </div>
                         <div className="p-4 flex justify-between">
-                            <span className="text-gray-500">Өлшем бірлігі</span>
+                            <span className="text-gray-500">{t('fabrics.detail.unit', 'Өлшем бірлігі')}</span>
                             <span className="font-medium text-gray-900">{getUnitLabel(fabric.unit)}</span>
                         </div>
 
                         {/* Show Dimension only if relevant */}
                         {['curtain', 'tulle'].includes(fabric.type) && (
                             <div className="p-4 flex justify-between">
-                                <span className="text-gray-500">Рулон Биіктігі</span>
-                                <span className="font-medium text-gray-900">{fabric.widthCm} см</span>
+                                <span className="text-gray-500">{t('fabrics.detail.rollHeight', 'Рулон Биіктігі')}</span>
+                                <span className="font-medium text-gray-900">{fabric.widthCm} {t('fabrics.detail.cm', 'см')}</span>
                             </div>
                         )}
                         {!['curtain', 'tulle', 'accessory'].includes(fabric.type) && fabric.widthCm > 0 && (
                             <div className="p-4 flex justify-between">
-                                <span className="text-gray-500">Өлшемі</span>
-                                <span className="font-medium text-gray-900">{fabric.widthCm} см</span>
+                                <span className="text-gray-500">{t('fabrics.detail.dimension', 'Өлшемі')}</span>
+                                <span className="font-medium text-gray-900">{fabric.widthCm} {t('fabrics.detail.cm', 'см')}</span>
                             </div>
                         )}
 
                         <div className="p-4 flex justify-between">
-                            <span className="text-gray-500">Бренд</span>
+                            <span className="text-gray-500">{t('fabrics.detail.brand', 'Бренд')}</span>
                             <span className="font-medium text-gray-900">{fabric.brand || '—'}</span>
                         </div>
                         <div className="p-4 flex justify-between">
-                            <span className="text-gray-500">Закуп бағасы</span>
+                            <span className="text-gray-500">{t('fabrics.detail.costPrice', 'Закуп бағасы')}</span>
                             <span className="font-medium text-gray-900">{fabric.costPrice?.toLocaleString()} ₸</span>
                         </div>
                         {/* Stock quantity if variants exist */}
                         {['curtain', 'tulle'].includes(fabric.type) && variants.length > 0 && (
                             <div className="p-4 flex justify-between">
-                                <span className="text-gray-500">Жалпы қойма</span>
+                                <span className="text-gray-500">{t('fabrics.detail.totalStock', 'Жалпы қойма')}</span>
                                 <span className="font-medium text-gray-900">
                                     {variants.reduce((sum, v) => sum + (v.stockQuantity || v.stock_quantity || 0), 0)} {getUnitLabel(fabric.unit)}
                                 </span>
                             </div>
                         )}
                         <div className="p-4 flex justify-between">
-                            <span className="text-gray-500">Статус</span>
+                            <span className="text-gray-500">{t('fabrics.detail.status', 'Статус')}</span>
                             <span className={`px-2 py-1 rounded text-xs font-bold ${fabric.isAvailable ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
-                                {fabric.isAvailable ? '✅ Белсенді' : '❌ Архив'}
+                                {fabric.isAvailable ? t('fabrics.detail.statusActive', '✅ Белсенді') : t('fabrics.detail.statusArchived', '❌ Архив')}
                             </span>
                         </div>
                     </div>
@@ -248,7 +250,7 @@ const FabricDetails = () => {
                         <div className="p-4 border-b border-gray-100">
                             <h3 className="font-bold text-gray-900 flex items-center gap-2">
                                 <Icon name="palette" className="text-primary" />
-                                Варианттар ({variants.length})
+                                {t('fabrics.detail.variants', 'Варианттар')} ({variants.length})
                             </h3>
                         </div>
                         <div className="p-4 space-y-3">
@@ -288,7 +290,7 @@ const FabricDetails = () => {
                                                 </span>
                                                 {(variant.isDefault || variant.is_default) && (
                                                     <span className="px-2 py-0.5 bg-green-100 text-green-700 text-[10px] rounded-full font-bold">
-                                                        НЕГІЗГІ
+                                                        {t('fabrics.detail.defaultVariant', 'НЕГІЗГІ')}
                                                     </span>
                                                 )}
                                             </div>
@@ -302,16 +304,16 @@ const FabricDetails = () => {
 
                                     {/* Stock info */}
                                     <div className="text-right">
-                                        <p className="text-xs text-gray-500">Қолда</p>
+                                        <p className="text-xs text-gray-500">{t('fabrics.detail.inStockLabel', 'Қолда')}</p>
                                         <p className={`font-bold text-lg ${
                                             (variant.stockQuantity || variant.stock_quantity || 0) > 0
                                                 ? 'text-gray-900'
                                                 : 'text-red-500'
                                         }`}>
-                                            {variant.stockQuantity || variant.stock_quantity || 0} {fabric.unit === 'm' ? 'м' : 'дн'}
+                                            {variant.stockQuantity || variant.stock_quantity || 0} {fabric.unit === 'm' ? t('fabrics.units.meterShort', 'м') : t('fabrics.units.pcs', 'дн')}
                                         </p>
                                         {(variant.stockQuantity || variant.stock_quantity || 0) === 0 && (
-                                            <span className="text-[10px] text-red-500 font-medium">ЖОҚ</span>
+                                            <span className="text-[10px] text-red-500 font-medium">{t('fabrics.detail.outOfStockShort', 'ЖОҚ')}</span>
                                         )}
                                     </div>
                                 </div>
@@ -320,9 +322,9 @@ const FabricDetails = () => {
                             {/* Total stock summary */}
                             <div className="mt-4 pt-4 border-t border-gray-200">
                                 <div className="flex justify-between items-center">
-                                    <span className="text-sm font-medium text-gray-600">Жалпы қолда:</span>
+                                    <span className="text-sm font-medium text-gray-600">{t('fabrics.detail.totalInStock', 'Жалпы қолда:')}</span>
                                     <span className="text-lg font-bold text-primary">
-                                        {variants.reduce((sum, v) => sum + (v.stockQuantity || v.stock_quantity || 0), 0)} {fabric.unit === 'm' ? 'метр' : 'дана'}
+                                        {variants.reduce((sum, v) => sum + (v.stockQuantity || v.stock_quantity || 0), 0)} {fabric.unit === 'm' ? t('fabrics.units.meter', 'метр') : t('fabrics.units.piece', 'дана')}
                                     </span>
                                 </div>
                             </div>
@@ -339,7 +341,7 @@ const FabricDetails = () => {
                             className="w-full py-4 rounded-xl bg-primary/10 text-primary font-bold hover:bg-primary/20 transition-colors flex items-center justify-center gap-2"
                         >
                             <Icon name="inventory" />
-                            Қоймадағы санды өзгерту
+                            {t('fabrics.detail.editStock', 'Қоймадағы санды өзгерту')}
                         </button>
                     )}
 
@@ -349,7 +351,7 @@ const FabricDetails = () => {
                         className="w-full py-4 rounded-xl text-red-500 font-bold hover:bg-red-50 transition-colors flex items-center justify-center gap-2"
                     >
                         <Icon name="delete" />
-                        Тауарды өшіру
+                        {t('fabrics.detail.deleteProduct', 'Тауарды өшіру')}
                     </button>
                 </div>
             </main>
@@ -362,16 +364,16 @@ const FabricDetails = () => {
                             <div className="size-14 rounded-full bg-red-100 flex items-center justify-center mx-auto mb-4">
                                 <Icon name="delete" size={24} className="text-red-500" />
                             </div>
-                            <h3 className="text-lg font-bold mb-2">Тауарды өшіру</h3>
+                            <h3 className="text-lg font-bold mb-2">{t('fabrics.detail.deleteProduct', 'Тауарды өшіру')}</h3>
                             <p className="text-gray-500 text-sm mb-6">
-                                <span className="font-semibold">{fabric?.name}</span> тауарын өшіргіңіз келе ме? Бұл әрекетті болдырмау мүмкін емес.
+                                <span className="font-semibold">{fabric?.name}</span> {t('fabrics.detail.deleteConfirm', 'тауарын өшіргіңіз келе ме? Бұл әрекетті болдырмау мүмкін емес.')}
                             </p>
                             <div className="flex gap-3">
                                 <button onClick={() => setShowDeleteConfirm(false)} className="flex-1 py-3 bg-gray-100 text-gray-700 font-bold rounded-xl hover:bg-gray-200 transition-colors">
-                                    Болдырмау
+                                    {t('fabrics.detail.cancel', 'Болдырмау')}
                                 </button>
                                 <button onClick={handleDelete} disabled={deleting} className="flex-1 py-3 bg-red-500 text-white font-bold rounded-xl hover:bg-red-600 transition-colors disabled:opacity-50">
-                                    {deleting ? 'Өшірілуде...' : 'Өшіру'}
+                                    {deleting ? t('fabrics.detail.deleting', 'Өшірілуде...') : t('fabrics.detail.delete', 'Өшіру')}
                                 </button>
                             </div>
                         </div>

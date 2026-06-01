@@ -7,6 +7,7 @@ import Icon from './components/common/Icon';
 import LanguageSwitcher from './components/common/LanguageSwitcher';
 import Sidebar from './components/navigation/Sidebar';
 import EmailVerificationBanner from './components/common/EmailVerificationBanner';
+import SubscriptionReadOnlyWatcher from './components/common/SubscriptionReadOnlyWatcher';
 
 // ─── Eagerly loaded (needed on first render) ──────────────────────────────────
 import Login from './screens/Login';
@@ -125,6 +126,7 @@ const AppRoutes = () => {
 
   return (
     <Suspense fallback={<PageLoader />}>
+      <SubscriptionReadOnlyWatcher />
       {isAuthenticated && <Sidebar />}
       <div className={isAuthenticated ? 'md:pl-60' : ''}>
       {isAuthenticated && <EmailVerificationBanner />}
@@ -242,8 +244,10 @@ const GlobalLanguageSwitcher = () => {
   // Landing for guests keeps its own static experience.
   if (!isAuthenticated) return null;
 
+  // Desktop only — on mobile this floating control overlapped every screen's
+  // sticky-header right-side actions/badges. Mobile language switch lives in Profile.
   return (
-    <div className="fixed top-3 right-3 z-[1200]">
+    <div className="hidden md:block fixed top-3 right-3 z-[1200]">
       <LanguageSwitcher compact />
     </div>
   );

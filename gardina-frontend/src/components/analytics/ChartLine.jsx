@@ -1,5 +1,7 @@
 import React from 'react';
 import Icon from '../common/Icon';
+import EmptyState from '../common/EmptyState';
+import { useI18n } from '../../contexts/I18nContext';
 
 /**
  * ChartLine - Компонент для отображения линейного графика
@@ -22,22 +24,28 @@ const ChartLine = ({
     valueFormat = 'number',
     loading = false
 }) => {
+    const { t } = useI18n();
     if (loading) {
         return (
-            <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
-                {title && <div className="h-6 w-40 bg-gray-200 rounded mb-4 animate-pulse"></div>}
-                <div style={{ height }} className="bg-gray-50 rounded animate-pulse"></div>
+            <div className="bg-surface-light rounded-2xl p-5 shadow-card border border-border-light">
+                {title && <div className="h-6 w-40 bg-background-light rounded mb-4 animate-pulse"></div>}
+                <div style={{ height }} className="bg-background-light rounded animate-pulse"></div>
             </div>
         );
     }
 
-    if (data.length === 0) {
+    // Меньше 2 ненулевых точек — линия выродится в "спайк". Показываем пустое состояние.
+    const nonZeroCount = data.filter(item => item.value > 0).length;
+    if (data.length === 0 || nonZeroCount < 2) {
         return (
-            <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
-                {title && <h3 className="font-bold text-gray-900 mb-4">{title}</h3>}
-                <div className="flex items-center justify-center" style={{ height }}>
-                    <p className="text-gray-400">Деректер жоқ</p>
-                </div>
+            <div className="bg-surface-light rounded-2xl p-5 shadow-card border border-border-light">
+                {title && (
+                    <h3 className="font-bold text-text-main mb-2 flex items-center gap-2">
+                        <Icon name="show_chart" className="text-primary" />
+                        {title}
+                    </h3>
+                )}
+                <EmptyState size="sm" icon="show_chart" title={t('reports.notEnoughData', 'Недостаточно данных')} subtitle={t('reports.notEnoughDataHint', 'Появится после первых сделок')} />
             </div>
         );
     }
@@ -144,18 +152,22 @@ const ChartLine = ({
 
                 {/* Value labels */}
                 <div className="absolute inset-0 pointer-events-none">
-                    {points.map((point, index) => (
-                        <div
-                            key={index}
-                            className="absolute text-[10px] font-bold text-gray-700 transform -translate-x-1/2 -translate-y-full"
-                            style={{
-                                left: `${point.x}%`,
-                                top: `${point.y}%`
-                            }}
-                        >
-                            {formatValue(point.value)}
-                        </div>
-                    ))}
+                    {points.map((point, index) => {
+                        // Anchor edge labels inside the plot so the ₸ glyph isn't clipped.
+                        const xAnchor = index === 0 ? 'translate-x-0' : index === points.length - 1 ? '-translate-x-full' : '-translate-x-1/2';
+                        return (
+                            <div
+                                key={index}
+                                className={`absolute whitespace-nowrap text-[10px] font-bold text-gray-700 transform ${xAnchor} -translate-y-full`}
+                                style={{
+                                    left: `${point.x}%`,
+                                    top: `${point.y}%`
+                                }}
+                            >
+                                {formatValue(point.value)}
+                            </div>
+                        );
+                    })}
                 </div>
             </div>
 

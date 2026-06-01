@@ -1,5 +1,7 @@
 import React from 'react';
 import Icon from '../common/Icon';
+import EmptyState from '../common/EmptyState';
+import { useI18n } from '../../contexts/I18nContext';
 
 /**
  * ChartBar - Компонент для отображения столбчатой диаграммы
@@ -20,8 +22,11 @@ const ChartBar = ({
     valueFormat = 'number',
     loading = false
 }) => {
+    const { t } = useI18n();
     // Найти максимальное значение для масштабирования
     const maxValue = Math.max(...data.map(item => item.value), 1);
+    // Пустые ИЛИ все нулевые данные → честное пустое состояние, а не нулевые столбики
+    const isEmpty = data.length === 0 || data.every(item => !(item.value > 0));
 
     const formatValue = (value) => {
         switch(valueFormat) {
@@ -48,13 +53,16 @@ const ChartBar = ({
         );
     }
 
-    if (data.length === 0) {
+    if (isEmpty) {
         return (
-            <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
-                {title && <h3 className="font-bold text-gray-900 mb-4">{title}</h3>}
-                <div className="flex items-center justify-center" style={{ height }}>
-                    <p className="text-gray-400">Деректер жоқ</p>
-                </div>
+            <div className="bg-surface-light rounded-2xl p-5 shadow-card border border-border-light">
+                {title && (
+                    <h3 className="font-bold text-text-main mb-2 flex items-center gap-2">
+                        <Icon name="bar_chart" className="text-primary" />
+                        {title}
+                    </h3>
+                )}
+                <EmptyState size="sm" icon="bar_chart" title={t('reports.noDataPeriod', 'Нет данных за период')} />
             </div>
         );
     }

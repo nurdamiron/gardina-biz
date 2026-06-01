@@ -39,7 +39,10 @@ const FabricSelection = () => {
     const installationCost = 5000;
 
     return {
-      fabric: Math.round(fabricCost),
+      // NOTE: keyed `fabricCost` (not `fabric`) so it doesn't overwrite the
+      // variant's `fabric` NAME when spread — that bug made the card title
+      // render the raw cost number instead of the fabric name.
+      fabricCost: Math.round(fabricCost),
       sewing: Math.round(sewingCost),
       curtain: curtainCost,
       installation: installationCost,
@@ -243,11 +246,15 @@ const FabricSelection = () => {
                   </div>
 
                   <div className="p-3 flex gap-4">
-                    <div className="w-24 h-24 shrink-0 rounded-lg bg-gradient-to-br from-gray-200 to-gray-300 shadow-inner flex items-center justify-center">
-                      <Icon name="texture" size={28} className="text-gray-500" />
+                    <div className={`w-24 h-24 shrink-0 rounded-lg bg-gradient-to-br ${
+                      variant.name === 'ОРТАША' ? 'from-emerald-100 to-emerald-200'
+                      : variant.name === 'ПРЕМИУМ' ? 'from-amber-100 to-amber-200'
+                      : 'from-stone-200 to-stone-300'
+                    } shadow-inner flex items-center justify-center`}>
+                      <Icon name="texture" size={28} className="text-text-secondary/60" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <h4 className="font-bold text-base truncate">{variant.fabric}</h4>
+                      <h4 className="font-bold text-base text-text-main truncate">{variant.fabric}</h4>
                       <p className="text-xs text-text-secondary mt-1 line-clamp-2">{variant.description}</p>
                       <div className="mt-2 text-xs font-medium text-text-main">
                         Мата шығыны: <span className="font-bold">{variant.meters} м</span>
@@ -259,7 +266,7 @@ const FabricSelection = () => {
                     <div className="bg-background-light rounded-lg p-3 text-xs space-y-1.5 text-text-secondary">
                       <div className="flex justify-between">
                         <span>Мата:</span>
-                        <span className="font-medium text-text-main">{variant.fabric.toLocaleString()} ₸</span>
+                        <span className="font-medium text-text-main">{variant.fabricCost.toLocaleString()} ₸</span>
                       </div>
                       <div className="flex justify-between">
                         <span>Тігу:</span>

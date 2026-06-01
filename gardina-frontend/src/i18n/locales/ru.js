@@ -27,6 +27,7 @@ import adminReports from './ru/adminReports';
 import adminNotifications from './ru/adminNotifications';
 import adminCatalog from './ru/adminCatalog';
 import adminUsers from './ru/adminUsers';
+import paymentsNs from './ru/payments';
 
 const ru = {
   common,
@@ -58,6 +59,7 @@ const ru = {
   adminNotifications,
   adminCatalog,
   adminUsers,
+  payments: paymentsNs,
 };
 
 export default ru;

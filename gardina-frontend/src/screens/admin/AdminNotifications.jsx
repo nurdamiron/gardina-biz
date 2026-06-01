@@ -135,7 +135,7 @@ const AdminNotifications = () => {
         </div>
 
         {/* Tabs */}
-        <div className="flex px-4 pb-3 gap-2">
+        <div className="flex px-4 pb-3 gap-2 overflow-x-auto no-scrollbar">
           {[
             { key: 'send', label: t('adminNotifications.tabs.send'), icon: 'notifications_active' },
             { key: 'history', label: t('adminNotifications.tabs.history'), icon: 'view_agenda' },
@@ -144,7 +144,7 @@ const AdminNotifications = () => {
             <button
               key={t.key}
               onClick={() => setTab(t.key)}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-semibold transition-colors ${
+              className={`shrink-0 whitespace-nowrap flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-semibold transition-colors ${
                 tab === t.key ? 'bg-primary text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
               }`}
             >
@@ -193,15 +193,15 @@ const AdminNotifications = () => {
                 </div>
 
                 <div>
-                  <label className="text-sm font-semibold text-gray-700 block mb-1.5">—</label>
+                  <label className="text-sm font-semibold text-gray-700 block mb-1.5">{t('adminNotifications.fields.specificUser', 'Конкретный сотрудник')}</label>
                   <select
                     value={form.targetUserId}
                     onChange={e => setForm(f => ({ ...f, targetUserId: e.target.value, targetRole: '' }))}
                     className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none bg-white"
                   >
-                    <option value="">—</option>
+                    <option value="">{t('adminNotifications.fields.anyUser', 'Не выбран')}</option>
                     {users.map(u => (
-                      <option key={u.id} value={u.id}>{u.name} ({u.role})</option>
+                      <option key={u.id} value={u.id}>{u.name} ({t(`profile.roles.${u.role}`, u.role)})</option>
                     ))}
                   </select>
                 </div>
@@ -224,7 +224,7 @@ const AdminNotifications = () => {
                       }`}
                     >
                       <Icon name={cfg.icon} size={18} className={form.type === key ? 'text-primary' : 'text-gray-400'} />
-                      <span className="text-xs font-medium">{t(`adminNotifications.types.${key}`)}</span>
+                      <span className="text-[10px] font-medium leading-tight text-center break-words">{t(`adminNotifications.types.${key}`)}</span>
                     </button>
                   ))}
                 </div>

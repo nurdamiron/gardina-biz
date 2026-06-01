@@ -28,6 +28,27 @@ const adminReports = {
     installation: 'Монтаж',
     delivery: 'Доставка',
   },
+  teamKpiLabels: {
+    avgConversion: 'Сред. конверсия',
+    avgDeal: 'Сред. сумма',
+    closingSpeed: 'Скорость закрытия',
+    active: 'Активные',
+  },
+  clientFunnelStages: {
+    newClient: 'Новый клиент',
+    withMeasurements: 'С замером',
+    withProposals: 'КП отправлено',
+    withContracts: 'Договор заключён',
+    completed: 'Завершено',
+  },
+  commission: 'комиссия',
+  soldTimes: 'продано {count} раз',
+  daysOverdue: 'просрочено {days} дн.',
+  daysShort: '{days} дн.',
+  riskLevels: {
+    high: 'Высокий',
+    medium: 'Средний',
+  },
 };
 
 export default adminReports;

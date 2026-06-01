@@ -4,7 +4,7 @@ import { useForm } from 'react-hook-form';
 import { useAuth } from '../contexts/AuthContext';
 import { useUI } from '../contexts/UIContext';
 import { useI18n } from '../contexts/I18nContext';
-import { clientsAPI, measurementsAPI, usersAPI, ordersAPI } from '../services/api';
+import { clientsAPI, measurementsAPI, usersAPI } from '../services/api';
 import KazakhDatePicker from '../components/common/KazakhDatePicker';
 import Icon from '../components/common/Icon';
 
@@ -181,10 +181,10 @@ const CreateMeasurementTask = () => {
           if (err.response?.data?.existingClient) {
             const existing = err.response.data.existingClient;
             const confirmed = await confirm({
-              title: 'Клиент табылды',
-              message: `Клиент "${existing.name}" (${existing.phone}) базада бар.\n\nОсы клиент үшін тапсырыс құру керек пе?`,
-              confirmText: 'Иә, жалғастыру',
-              cancelText: 'Жоқ',
+              title: t('tasks.create.clientFoundTitle', 'Клиент табылды'),
+              message: `${t('tasks.create.clientFoundMessagePrefix', 'Клиент')} "${existing.name}" (${existing.phone}) ${t('tasks.create.clientFoundMessageSuffix', 'базада бар.')}\n\n${t('tasks.create.clientFoundQuestion', 'Осы клиент үшін тапсырыс құру керек пе?')}`,
+              confirmText: t('tasks.create.clientFoundConfirm', 'Иә, жалғастыру'),
+              cancelText: t('tasks.create.clientFoundCancel', 'Жоқ'),
               type: 'info'
             });
 
@@ -195,7 +195,7 @@ const CreateMeasurementTask = () => {
               return;
             }
           } else {
-            showToast(err.response?.data?.error || 'Клиент құру кезінде қате шықты', 'error');
+            showToast(err.response?.data?.error || t('tasks.create.errorClientCreate', 'Клиент құру кезінде қате шықты'), 'error');
             setSaving(false);
             return;
           }
@@ -225,31 +225,12 @@ const CreateMeasurementTask = () => {
         technicalFeatures: data.technicalFeatures || []
       });
 
-      // 3. Create Deal (Сделка) for this order - only if doesn't exist
-      try {
-        const existingDealsRes = await ordersAPI.getAll({ clientId, designerId: data.designerId, limit: 1 });
-        if (!existingDealsRes.data.success || existingDealsRes.data.data.length === 0) {
-          // No existing deal found - create new one
-          await ordersAPI.create({
-            clientId,
-            designerId: data.designerId
-          });
-        }
-        // If deal exists, just use it (don't create duplicate)
-      } catch (dealError) {
-        // If error checking existing deals, try to create anyway
-        try {
-          await ordersAPI.create({
-            clientId,
-            designerId: data.designerId
-          });
-        } catch (createError) {
-          // Ignore if deal already exists
-        }
-      }
+      // 3. The linked lead deal is now created server-side, atomically inside the
+      //    measurement's transaction (MeasurementController.create → createLeadDeal),
+      //    idempotently. No separate, racy client-side deal call anymore.
 
       setSaving(false);
-      showToast('Тапсырыс сәтті құрылды!', 'success');
+      showToast(t('tasks.create.successCreated', 'Тапсырыс сәтті құрылды!'), 'success');
 
       // Redirect based on role
       if (isAdmin) {
@@ -262,7 +243,7 @@ const CreateMeasurementTask = () => {
         navigate('/designer/measurements');
       }
     } catch (error) {
-      showToast('Қате шықты', 'error');
+      showToast(t('tasks.create.errorGeneric', 'Қате шықты'), 'error');
       setSaving(false);
     }
   };
@@ -281,12 +262,12 @@ const CreateMeasurementTask = () => {
   ].map(r => ({ ...r, label: r.id === 'all' ? (lang === 'kz' ? 'Барлығы' : 'Все') : t(`rooms.${r.id}`) }));
 
   const TECHNICAL_FEATURES = [
-    { id: 'high_ceiling', label: 'Биік төбе (3м+)', icon: 'height' },
-    { id: 'ladder', label: 'Саты қажет', icon: 'stairs' },
-    { id: 'dismantling', label: 'Демонтаж', icon: 'handyman' },
-    { id: 'cornice', label: 'Карниз орнату', icon: 'curtains' },
-    { id: 'niche', label: 'Төбедегі қуыс (Ниша)', icon: 'grid_view' },
-    { id: 'complex', label: 'Күрделі терезе', icon: 'warning' },
+    { id: 'high_ceiling', label: t('tasks.create.feature.highCeiling', 'Биік төбе (3м+)'), icon: 'height' },
+    { id: 'ladder', label: t('tasks.create.feature.ladder', 'Саты қажет'), icon: 'stairs' },
+    { id: 'dismantling', label: t('tasks.create.feature.dismantling', 'Демонтаж'), icon: 'handyman' },
+    { id: 'cornice', label: t('tasks.create.feature.cornice', 'Карниз орнату'), icon: 'curtains' },
+    { id: 'niche', label: t('tasks.create.feature.niche', 'Төбедегі қуыс (Ниша)'), icon: 'grid_view' },
+    { id: 'complex', label: t('tasks.create.feature.complex', 'Күрделі терезе'), icon: 'warning' },
   ];
 
   const getWorkloadColor = (count) => {
@@ -296,10 +277,10 @@ const CreateMeasurementTask = () => {
   };
 
   const getAssigneeRoleLabel = (role) => {
-    if (role === 'admin') return 'Админ';
-    if (role === 'manager') return 'Менеджер';
-    if (role === 'sales') return 'Сатушы';
-    return 'Дизайнер';
+    if (role === 'admin') return t('tasks.create.role.admin', 'Админ');
+    if (role === 'manager') return t('tasks.create.role.manager', 'Менеджер');
+    if (role === 'sales') return t('tasks.create.role.sales', 'Сатушы');
+    return t('tasks.create.role.designer', 'Дизайнер');
   };
 
   return (
@@ -312,8 +293,8 @@ const CreateMeasurementTask = () => {
             <Icon name="arrow_back" className="text-gray-600" />
           </button>
           <div>
-            <h1 className="text-xl font-bold leading-tight">Жаңа Тапсырыс</h1>
-            <p className="text-xs text-text-secondary">Өлшем алуға тапсырыс</p>
+            <h1 className="text-xl font-bold leading-tight">{t('tasks.create.headerTitle', 'Жаңа Тапсырыс')}</h1>
+            <p className="text-xs text-text-secondary">{t('tasks.create.headerSubtitle', 'Өлшем алуға тапсырыс')}</p>
           </div>
         </div>
       </header>
@@ -327,12 +308,12 @@ const CreateMeasurementTask = () => {
               <div className="size-10 rounded-full bg-primary/10 text-primary flex items-center justify-center">
                 <Icon name="person_search" />
               </div>
-              <h2 className="text-lg font-bold">Клиент</h2>
+              <h2 className="text-lg font-bold">{t('tasks.create.clientSection', 'Клиент')}</h2>
             </div>
 
             <div className="space-y-5">
               <div className="relative">
-                <label className="block text-sm font-bold mb-2 text-gray-700">Клиент аты</label>
+                <label className="block text-sm font-bold mb-2 text-gray-700">{t('tasks.create.clientName', 'Клиент аты')}</label>
                 <input
                   {...register('clientName', {
                     required: true,
@@ -343,7 +324,7 @@ const CreateMeasurementTask = () => {
                   })}
                   autoComplete="off"
                   className="w-full h-14 px-4 bg-gray-50 border-2 border-transparent rounded-xl focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all font-bold text-lg"
-                  placeholder="Іздеу немесе жаңа атау..."
+                  placeholder={t('tasks.create.clientNamePlaceholder', 'Іздеу немесе жаңа атау...')}
                   onFocus={() => {
                     if (clientNameValue && filteredClients.length > 0) setShowClientDropdown(true);
                   }}
@@ -369,39 +350,39 @@ const CreateMeasurementTask = () => {
                       onClick={switchToNewClient}
                       className="w-full text-left px-4 py-3 bg-gray-50 hover:bg-gray-100 text-primary font-bold text-sm"
                     >
-                      + Жаңа клиент ретінде қосу
+                      {t('tasks.create.addNewClientOption', '+ Жаңа клиент ретінде қосу')}
                     </button>
                   </div>
                 )}
-                {errors.clientName && <p className="text-xs text-red-500 mt-2 font-medium">Клиент атын жазыңыз</p>}
+                {errors.clientName && <p className="text-xs text-red-500 mt-2 font-medium">{t('tasks.create.errorClientName', 'Клиент атын жазыңыз')}</p>}
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 <div>
-                  <label className="block text-sm font-bold mb-2 text-gray-700">Телефон</label>
+                  <label className="block text-sm font-bold mb-2 text-gray-700">{t('tasks.create.phone', 'Телефон')}</label>
                   <input
                     {...register('clientPhone', { required: true })}
                     className="w-full h-12 px-4 bg-gray-50 border-transparent rounded-xl focus:bg-white focus:border-primary transition-all font-medium"
                     placeholder="+7 777 000 00 00"
                   />
-                  {errors.clientPhone && <p className="text-xs text-red-500 mt-2">Телефон нөмірі қажет</p>}
+                  {errors.clientPhone && <p className="text-xs text-red-500 mt-2">{t('tasks.create.errorPhone', 'Телефон нөмірі қажет')}</p>}
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-bold mb-2 text-gray-700">Мекенжай</label>
+                <label className="block text-sm font-bold mb-2 text-gray-700">{t('tasks.create.address', 'Мекенжай')}</label>
                 <textarea
                   {...register('address', { required: true })}
                   rows="2"
                   className="w-full p-4 bg-gray-50 border-transparent rounded-xl focus:bg-white focus:border-primary transition-all font-medium resize-none shadow-sm"
-                  placeholder="Көше, үй, пәтер..."
+                  placeholder={t('tasks.create.addressPlaceholder', 'Көше, үй, пәтер...')}
                 />
-                {errors.address && <p className="text-xs text-red-500 mt-2">Мекенжай қажет</p>}
+                {errors.address && <p className="text-xs text-red-500 mt-2">{t('tasks.create.errorAddress', 'Мекенжай қажет')}</p>}
               </div>
 
               {/* 2GIS LINK (NEW) */}
               <div>
-                <label className="block text-sm font-bold mb-2 text-gray-700">2GIS сілтемесі</label>
+                <label className="block text-sm font-bold mb-2 text-gray-700">{t('tasks.create.mapLink', '2GIS сілтемесі')}</label>
                 <div className="relative">
                   <input
                     {...register('mapLink')}
@@ -412,7 +393,7 @@ const CreateMeasurementTask = () => {
                     <Icon name="map" size={20} />
                   </div>
                 </div>
-                <p className="text-[10px] text-gray-400 mt-1 ml-1">Дизайнерге картадан ашу үшін</p>
+                <p className="text-[10px] text-gray-400 mt-1 ml-1">{t('tasks.create.mapLinkHint', 'Дизайнерге картадан ашу үшін')}</p>
               </div>
             </div>
           </section>
@@ -423,10 +404,10 @@ const CreateMeasurementTask = () => {
               <div className="size-10 rounded-full bg-primary/5 text-primary flex items-center justify-center">
                 <Icon name="home" />
               </div>
-              <h2 className="text-lg font-bold">Объект</h2>
+              <h2 className="text-lg font-bold">{t('tasks.create.objectSection', 'Объект')}</h2>
             </div>
 
-            <label className="block text-sm font-bold mb-3 text-gray-700">Бөлме түрі (Бірнеше таңдауға болады)</label>
+            <label className="block text-sm font-bold mb-3 text-gray-700">{t('tasks.create.roomType', 'Бөлме түрі (Бірнеше таңдауға болады)')}</label>
             <div className="grid grid-cols-3 gap-3">
               {ROOM_TYPES.map(type => {
                 const isSelected = selectedRooms.includes(type.id);
@@ -452,11 +433,11 @@ const CreateMeasurementTask = () => {
                 );
               })}
             </div>
-            {selectedRooms.length === 0 && <p className="text-xs text-gray-400 mt-2 text-center">Ең болмағанда біреуін таңдаңыз</p>}
+            {selectedRooms.length === 0 && <p className="text-xs text-gray-400 mt-2 text-center">{t('tasks.create.roomTypeHint', 'Ең болмағанда біреуін таңдаңыз')}</p>}
 
             {/* Technical Chips (Multi Select) */}
             <div className="mt-6">
-              <label className="block text-sm font-bold mb-3 text-gray-700">Техникалық ерекшеліктер</label>
+              <label className="block text-sm font-bold mb-3 text-gray-700">{t('tasks.create.technicalFeatures', 'Техникалық ерекшеліктер')}</label>
               <div className="flex flex-wrap gap-2">
                 {TECHNICAL_FEATURES.map(feat => {
                   const isSelected = selectedFeatures.includes(feat.id);
@@ -486,13 +467,13 @@ const CreateMeasurementTask = () => {
               <div className="size-10 rounded-full bg-green-50 text-green-600 flex items-center justify-center">
                 <Icon name="calendar_month" />
               </div>
-              <h2 className="text-lg font-bold">Тағайындау</h2>
+              <h2 className="text-lg font-bold">{t('tasks.create.assignSection', 'Тағайындау')}</h2>
             </div>
 
             <div className="space-y-6">
               {/* Designer Grid */}
               <div>
-                <label className="block text-sm font-bold mb-3 text-gray-700">Дизайнер</label>
+                <label className="block text-sm font-bold mb-3 text-gray-700">{t('tasks.create.designer', 'Дизайнер')}</label>
                 {loadingData ? (
                   <div className="h-20 bg-gray-50 rounded-xl animate-pulse"></div>
                 ) : isDesigner ? (
@@ -502,8 +483,8 @@ const CreateMeasurementTask = () => {
                       {user.name[0]}
                     </div>
                     <div>
-                      <p className="font-bold text-gray-900 text-lg">Мен орындаймын</p>
-                      <p className="text-sm text-gray-500">Тапсырма сізге автоматты түрде бекітіледі</p>
+                      <p className="font-bold text-gray-900 text-lg">{t('tasks.create.meDoIt', 'Мен орындаймын')}</p>
+                      <p className="text-sm text-gray-500">{t('tasks.create.meDoItHint', 'Тапсырма сізге автоматты түрде бекітіледі')}</p>
                     </div>
                     <input type="hidden" {...register('designerId')} value={user.id} />
                   </div>
@@ -528,7 +509,7 @@ const CreateMeasurementTask = () => {
                         {user.name[0]}
                       </div>
                       <div className="leading-tight flex-1">
-                        <p className={`font-bold text-sm ${selectedDesignerId == user.id ? 'text-gray-900' : 'text-gray-500'}`}>{user.name} (Мен)</p>
+                        <p className={`font-bold text-sm ${selectedDesignerId == user.id ? 'text-gray-900' : 'text-gray-500'}`}>{user.name} ({t('tasks.create.meSuffix', 'Мен')})</p>
                         <p className="text-[10px] text-gray-400">{getAssigneeRoleLabel(user.role)}</p>
                       </div>
                     </label>
@@ -559,7 +540,7 @@ const CreateMeasurementTask = () => {
                             <p className="text-[10px] text-gray-400 mt-0.5">{getAssigneeRoleLabel(designer.role)}</p>
                             <div className="flex items-center gap-2 mt-0.5">
                               <span className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${getWorkloadColor(activeTasks)}`}>
-                                {activeTasks} активті тапсырыс
+                                {activeTasks} {t('tasks.create.activeTasks', 'активті тапсырыс')}
                               </span>
                             </div>
                           </div>
@@ -568,12 +549,12 @@ const CreateMeasurementTask = () => {
                     })}
                   </div>
                 )}
-                {errors.designerId && <p className="text-xs text-red-500 mt-2">Дизайнерді таңдаңыз</p>}
+                {errors.designerId && <p className="text-xs text-red-500 mt-2">{t('tasks.create.errorDesigner', 'Дизайнерді таңдаңыз')}</p>}
               </div>
 
               {/* Priority Selector */}
               <div>
-                <label className="block text-sm font-bold mb-3 text-gray-700">Тапсырыс статусы</label>
+                <label className="block text-sm font-bold mb-3 text-gray-700">{t('tasks.create.priorityLabel', 'Тапсырыс статусы')}</label>
                 <div className="flex bg-gray-50 p-1 rounded-xl">
                   <label className="flex-1 cursor-pointer">
                     <input
@@ -585,7 +566,7 @@ const CreateMeasurementTask = () => {
                     />
                     <div className="py-2 text-center rounded-lg text-sm font-bold text-gray-500 peer-checked:bg-green-500 peer-checked:text-white peer-checked:shadow-sm transition-all flex items-center justify-center gap-2">
                       <Icon name="check_circle" size={20} />
-                      Стандартты
+                      {t('tasks.create.priorityStandard', 'Стандартты')}
                     </div>
                   </label>
                   <label className="flex-1 cursor-pointer">
@@ -597,7 +578,7 @@ const CreateMeasurementTask = () => {
                     />
                     <div className="py-2 text-center rounded-lg text-sm font-bold text-gray-500 peer-checked:bg-red-500 peer-checked:text-white peer-checked:shadow-sm transition-all flex items-center justify-center gap-2">
                       <Icon name="local_fire_department" size={20} />
-                      Шұғыл (Срочно)
+                      {t('tasks.create.priorityUrgent', 'Шұғыл (Срочно)')}
                     </div>
                   </label>
                 </div>
@@ -617,12 +598,12 @@ const CreateMeasurementTask = () => {
               )}
 
               <div>
-                <label className="block text-sm font-bold mb-2 text-gray-700">Қосымша ескертпе</label>
+                <label className="block text-sm font-bold mb-2 text-gray-700">{t('tasks.create.note', 'Қосымша ескертпе')}</label>
                 <textarea
                   {...register('notes')}
                   className="w-full p-4 bg-gray-50 border-transparent rounded-xl focus:bg-white focus:border-primary transition-all font-medium resize-none"
                   rows="2"
-                  placeholder="Мысалы: Домафон істемейді, қабырғасы бетон..."
+                  placeholder={t('tasks.create.notePlaceholder', 'Мысалы: Домафон істемейді, қабырғасы бетон...')}
                 />
               </div>
             </div>
@@ -644,11 +625,11 @@ const CreateMeasurementTask = () => {
             {saving ? (
               <>
                 <div className="size-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                <span>Жөнелтуде...</span>
+                <span>{t('tasks.create.submitting', 'Жөнелтуде...')}</span>
               </>
             ) : (
               <>
-                <span>{isDesigner ? 'Бастау (Өлшем алу)' : 'Тапсырысты құру'}</span>
+                <span>{isDesigner ? t('tasks.create.submitStart', 'Бастау (Өлшем алу)') : t('tasks.create.submit', 'Тапсырысты құру')}</span>
                 <Icon name={isDesigner ? 'play_arrow' : 'send'} />
               </>
             )}

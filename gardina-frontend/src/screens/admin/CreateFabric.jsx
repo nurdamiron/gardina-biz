@@ -2,11 +2,13 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import catalogAPI, { uploadAPI } from '../../services/api';
 import Icon from '../../components/common/Icon';
+import { useI18n } from '../../contexts/I18nContext';
 
 const CreateFabric = () => {
     const navigate = useNavigate();
     const { id } = useParams();
     const isEditMode = Boolean(id);
+    const { t, lang } = useI18n();
 
     const [loading, setLoading] = useState(false);
     const [fetching, setFetching] = useState(isEditMode);
@@ -72,7 +74,7 @@ const CreateFabric = () => {
                 setColors(colorsRes.data.data.map(c => c.color_name || c.color_code));
             }
         } catch (error) {
-            setNotification({ type: 'error', message: 'Тауар мәліметін жүктеу мүмкін болмады' });
+            setNotification({ type: 'error', message: t('fabrics.form.loadError', 'Тауар мәліметін жүктеу мүмкін болмады') });
             setTimeout(() => navigate('/admin/catalog'), 2000);
         } finally {
             setFetching(false);
@@ -92,7 +94,7 @@ const CreateFabric = () => {
 
     const addColor = () => {
         if (!newColorName.trim()) {
-            setNotification({ type: 'error', message: 'Түс атауын немесе кодын жазыңыз' });
+            setNotification({ type: 'error', message: t('fabrics.form.colorNameRequired', 'Түс атауын немесе кодын жазыңыз') });
             return;
         }
         setColors([...colors, newColorName.trim()]);
@@ -115,11 +117,11 @@ const CreateFabric = () => {
         if (!file) return;
 
         if (!file.type.startsWith('image/')) {
-            setNotification({ type: 'error', message: 'Тек сурет файлдарын жүктеуге болады' });
+            setNotification({ type: 'error', message: t('fabrics.form.onlyImages', 'Тек сурет файлдарын жүктеуге болады') });
             return;
         }
         if (file.size > 10 * 1024 * 1024) {
-            setNotification({ type: 'error', message: 'Файл өлшемі 10МБ-тан аспауы керек' });
+            setNotification({ type: 'error', message: t('fabrics.form.fileTooLarge', 'Файл өлшемі 10МБ-тан аспауы керек') });
             return;
         }
 
@@ -128,10 +130,10 @@ const CreateFabric = () => {
             const res = await uploadAPI.uploadPhoto(file, { folder: 'products' });
             if (res.data?.success) {
                 setFormData(prev => ({ ...prev, imageUrl: res.data.data.url }));
-                setNotification({ type: 'success', message: 'Сурет сәтті жүктелді' });
+                setNotification({ type: 'success', message: t('fabrics.form.imageUploaded', 'Сурет сәтті жүктелді') });
             }
         } catch (error) {
-            setNotification({ type: 'error', message: 'Суретті жүктеу сәтсіз аяқталды' });
+            setNotification({ type: 'error', message: t('fabrics.form.imageUploadFailed', 'Суретті жүктеу сәтсіз аяқталды') });
         } finally {
             setUploading(false);
         }
@@ -139,9 +141,9 @@ const CreateFabric = () => {
 
     const validate = () => {
         const newErrors = {};
-        if (!formData.name.trim()) newErrors.name = 'Атауын жазу керек';
-        if (!formData.costPrice || parseFloat(formData.costPrice) <= 0) newErrors.costPrice = 'Закуп бағасы дұрыс емес';
-        if (!formData.pricePerMeter || parseFloat(formData.pricePerMeter) <= 0) newErrors.pricePerMeter = 'Сату бағасы дұрыс емес';
+        if (!formData.name.trim()) newErrors.name = t('fabrics.form.errorNameRequired', 'Атауын жазу керек');
+        if (!formData.costPrice || parseFloat(formData.costPrice) <= 0) newErrors.costPrice = t('fabrics.form.errorCostInvalid', 'Закуп бағасы дұрыс емес');
+        if (!formData.pricePerMeter || parseFloat(formData.pricePerMeter) <= 0) newErrors.pricePerMeter = t('fabrics.form.errorSellInvalid', 'Сату бағасы дұрыс емес');
 
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
@@ -157,7 +159,7 @@ const CreateFabric = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (!validate()) {
-            setNotification({ type: 'error', message: 'Қызылмен белгіленген қателерді түзетіңіз' });
+            setNotification({ type: 'error', message: t('fabrics.form.fixErrors', 'Қызылмен белгіленген қателерді түзетіңіз') });
             return;
         }
 
@@ -183,10 +185,10 @@ const CreateFabric = () => {
         try {
             if (isEditMode) {
                 await catalogAPI.updateFabric(id, payload);
-                setNotification({ type: 'success', message: 'Тауар өзгертілді!' });
+                setNotification({ type: 'success', message: t('fabrics.form.updateSuccess', 'Тауар өзгертілді!') });
             } else {
                 await catalogAPI.createFabric(payload);
-                setNotification({ type: 'success', message: 'Тауар каталогқа сәтті қосылды!' });
+                setNotification({ type: 'success', message: t('fabrics.form.createSuccess', 'Тауар каталогқа сәтті қосылды!') });
             }
 
             setTimeout(() => {
@@ -194,12 +196,12 @@ const CreateFabric = () => {
             }, 1000);
 
         } catch (err) {
-            const errorMsg = err.response?.data?.error || 'Серверде қате орын алды';
+            const errorMsg = err.response?.data?.error || t('fabrics.form.serverError', 'Серверде қате орын алды');
             if (errorMsg.includes('already exists')) {
-                setErrors({ code: 'Бұл артикул (код) базада бар!' });
-                setNotification({ type: 'error', message: 'Артикул қайталанып тұр' });
+                setErrors({ code: t('fabrics.form.codeExists', 'Бұл артикул (код) базада бар!') });
+                setNotification({ type: 'error', message: t('fabrics.form.codeDuplicate', 'Артикул қайталанып тұр') });
             } else {
-                setNotification({ type: 'error', message: 'Сақтау кезінде қате шықты: ' + errorMsg });
+                setNotification({ type: 'error', message: t('fabrics.form.saveError', 'Сақтау кезінде қате шықты: ') + errorMsg });
             }
         } finally {
             setLoading(false);
@@ -209,13 +211,13 @@ const CreateFabric = () => {
     const margin = calculateMargin();
     const getUnitLabel = () => {
         switch (formData.unit) {
-            case 'pcs': return 'тг/дн';
-            case 'set': return 'тг/жнқ';
-            case 'roll': return 'тг/орам';
-            case 'pack': return 'тг/қап';
-            case 'box': return 'тг/қорап';
-            case 'pair': return 'тг/жұп';
-            default: return 'тг/м';
+            case 'pcs': return t('fabrics.form.unitPricePcs', 'тг/дн');
+            case 'set': return t('fabrics.form.unitPriceSet', 'тг/жнқ');
+            case 'roll': return t('fabrics.form.unitPriceRoll', 'тг/орам');
+            case 'pack': return t('fabrics.form.unitPricePack', 'тг/қап');
+            case 'box': return t('fabrics.form.unitPriceBox', 'тг/қорап');
+            case 'pair': return t('fabrics.form.unitPricePair', 'тг/жұп');
+            default: return t('fabrics.form.unitPriceMeter', 'тг/м');
         }
     };
 
@@ -228,7 +230,7 @@ const CreateFabric = () => {
     }
 
     return (
-        <div className="bg-background-light min-h-screen pb-24 relative">
+        <div className="bg-background-light min-h-screen pb-32 relative">
             {notification && (
                 <div className={`fixed top-4 left-1/2 -translate-x-1/2 z-50 px-6 py-3 rounded-xl shadow-xl flex items-center gap-3 animate-in fade-in slide-in-from-top-4 duration-300 ${notification.type === 'success' ? 'bg-green-600 text-white' : 'bg-red-500 text-white'}`}>
                     <Icon name={notification.type === 'success' ? 'check_circle' : 'error'} />
@@ -245,7 +247,7 @@ const CreateFabric = () => {
                         <Icon name="arrow_back" className="text-gray-600" />
                     </button>
                     <h1 className="text-xl font-bold text-gray-900">
-                        {isEditMode ? 'Тауарды өзгерту' : 'Жаңа тауар'}
+                        {isEditMode ? t('fabrics.form.titleEdit', 'Тауарды өзгерту') : t('fabrics.form.title', 'Жаңа тауар')}
                     </h1>
                     <div className="size-10"></div>
                 </div>
@@ -256,12 +258,12 @@ const CreateFabric = () => {
                     {/* Main Info */}
                     <div className="bg-white p-5 rounded-2xl shadow-sm space-y-4">
                         <h2 className="font-bold text-lg text-gray-900 border-b border-gray-100 pb-2 mb-4">
-                            Негізгі ақпарат
+                            {t('fabrics.form.mainInfo', 'Негізгі ақпарат')}
                         </h2>
 
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">
-                                Тауар атауы <span className="text-red-500">*</span>
+                                {t('fabrics.form.fieldName', 'Тауар атауы')} <span className="text-red-500">*</span>
                             </label>
                             <input
                                 type="text"
@@ -270,14 +272,14 @@ const CreateFabric = () => {
                                 value={formData.name}
                                 onChange={handleChange}
                                 className={`w-full px-4 py-3 rounded-xl border ${errors.name ? 'border-red-500 bg-red-50 text-gray-900' : 'border-gray-200 text-gray-900'} focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all`}
-                                placeholder="Мысалы: Blackout Royal Blue"
+                                placeholder={t('fabrics.form.fieldNamePlaceholder', 'Мысалы: Blackout Royal Blue')}
                             />
                         </div>
 
                         <div className="grid grid-cols-2 gap-4">
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                                    Артикул
+                                    {t('fabrics.form.fieldCode', 'Артикул')}
                                 </label>
                                 <input
                                     type="text"
@@ -291,7 +293,7 @@ const CreateFabric = () => {
                             </div>
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                                    Өлшем бірлігі
+                                    {t('fabrics.form.fieldUnit', 'Өлшем бірлігі')}
                                 </label>
                                 <select
                                     name="unit"
@@ -299,20 +301,20 @@ const CreateFabric = () => {
                                     onChange={handleChange}
                                     className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all bg-white text-gray-900 font-bold"
                                 >
-                                    <option value="m">Метр</option>
-                                    <option value="pcs">Дана</option>
-                                    <option value="set">Жинақ</option>
-                                    <option value="roll">Орам</option>
-                                    <option value="pack">Қаптама</option>
-                                    <option value="box">Қорап</option>
-                                    <option value="pair">Жұп</option>
+                                    <option value="m">{t('fabrics.form.unitOptions.m', 'Метр')}</option>
+                                    <option value="pcs">{t('fabrics.form.unitOptions.pcs', 'Дана')}</option>
+                                    <option value="set">{t('fabrics.form.unitOptions.set', 'Жинақ')}</option>
+                                    <option value="roll">{t('fabrics.form.unitOptions.roll', 'Орам')}</option>
+                                    <option value="pack">{t('fabrics.form.unitOptions.pack', 'Қаптама')}</option>
+                                    <option value="box">{t('fabrics.form.unitOptions.box', 'Қорап')}</option>
+                                    <option value="pair">{t('fabrics.form.unitOptions.pair', 'Жұп')}</option>
                                 </select>
                             </div>
                         </div>
 
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                                    Категория
+                                    {t('fabrics.form.fieldCategory', 'Категория')}
                                 </label>
                                 <select
                                     name="type"
@@ -320,12 +322,12 @@ const CreateFabric = () => {
                                     onChange={handleChange}
                                     className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all bg-white text-gray-900 font-bold"
                                 >
-                                    <option value="curtain">Перде</option>
-                                    <option value="tulle">Тюль</option>
-                                    <option value="cornice">Карниз</option>
-                                    <option value="jalousie">Жалюзи</option>
-                                    <option value="accessory">Аксессуар (Таспа)</option>
-                                    <option value="ready_made">Дайын өнім</option>
+                                    <option value="curtain">{t('fabrics.typeLabels.curtain', 'Перде')}</option>
+                                    <option value="tulle">{t('fabrics.typeLabels.tulle', 'Тюль')}</option>
+                                    <option value="cornice">{t('fabrics.typeLabels.cornice', 'Карниз')}</option>
+                                    <option value="jalousie">{t('fabrics.typeLabels.jalousie', 'Жалюзи')}</option>
+                                    <option value="accessory">{t('fabrics.typeLabels.accessory', 'Аксессуар (Таспа)')}</option>
+                                    <option value="ready_made">{t('fabrics.typeLabels.ready_made', 'Дайын өнім')}</option>
                                 </select>
                         </div>
 
@@ -333,7 +335,7 @@ const CreateFabric = () => {
                         {['curtain', 'tulle'].includes(formData.type) && (
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                                    Рулон Биіктігі (см)
+                                    {t('fabrics.form.fieldRollHeight', 'Рулон Биіктігі (см)')}
                                 </label>
                                 <input
                                     type="number"
@@ -344,7 +346,7 @@ const CreateFabric = () => {
                                     placeholder="280"
                                 />
                                 <p className="text-[10px] text-gray-400 mt-1">
-                                    * Стандарт: 280-320 см
+                                    {t('fabrics.form.rollHeightHint', '* Стандарт: 280-320 см')}
                                 </p>
                             </div>
                         )}
@@ -353,7 +355,7 @@ const CreateFabric = () => {
                     {/* Color Variants - Simple */}
                     <div className="bg-white p-5 rounded-2xl shadow-sm space-y-4">
                         <h2 className="font-bold text-lg text-gray-900 border-b border-gray-100 pb-2 mb-4">
-                            Түстер (қосымша)
+                            {t('fabrics.form.colorsTitle', 'Түстер (қосымша)')}
                             </h2>
 
                         <div className="flex gap-2">
@@ -362,16 +364,16 @@ const CreateFabric = () => {
                                 value={newColorName}
                                 onChange={(e) => setNewColorName(e.target.value)}
                                 onKeyPress={handleColorKeyPress}
-                                className="flex-1 px-4 py-3 rounded-xl border border-gray-200 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all text-gray-900"
-                                placeholder="Мысалы: Қызыл немесе RED-001"
+                                className="flex-1 min-w-0 px-4 py-3 rounded-xl border border-gray-200 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all text-gray-900"
+                                placeholder={t('fabrics.form.colorPlaceholder', 'Мысалы: Қызыл немесе RED-001')}
                             />
                             <button
                                 type="button"
                                 onClick={addColor}
-                                className="px-6 py-3 rounded-xl bg-primary text-white hover:brightness-110 transition-all flex items-center gap-2 font-semibold"
+                                className="shrink-0 px-4 py-3 rounded-xl bg-primary text-white hover:brightness-110 transition-all flex items-center gap-2 font-semibold"
                             >
                                 <Icon name="add" />
-                                Қосу
+                                {t('fabrics.form.addColor', 'Қосу')}
                             </button>
                         </div>
 
@@ -397,7 +399,7 @@ const CreateFabric = () => {
 
                         {colors.length === 0 && (
                             <p className="text-sm text-gray-400 text-center py-4">
-                                Түстер қосылмаған
+                                {t('fabrics.form.noColors', 'Түстер қосылмаған')}
                             </p>
                         )}
                     </div>
@@ -405,20 +407,20 @@ const CreateFabric = () => {
                     {/* Pricing */}
                     <div className="bg-white p-5 rounded-2xl shadow-sm space-y-4">
                         <h2 className="font-bold text-lg text-gray-900 border-b border-gray-100 pb-2 mb-4 flex items-center gap-2">
-                            Құны және Бағасы
+                            {t('fabrics.form.pricingTitle', 'Құны және Бағасы')}
                         </h2>
 
                         <div className="bg-primary/10/50 rounded-xl p-3 mb-4 flex items-center gap-3 border border-primary/15">
                             <Icon name="info" className="text-primary" />
                             <p className="text-xs text-primary">
-                                Бағаны <b>{formData.unit === 'm' ? '1 метр' : '1 дана'}</b> үшін көрсетіңіз.
+                                {t('fabrics.form.priceHintPrefix', 'Бағаны')} <b>{formData.unit === 'm' ? t('fabrics.form.oneMeter', '1 метр') : t('fabrics.form.onePiece', '1 дана')}</b> {t('fabrics.form.priceHintSuffix', 'үшін көрсетіңіз.')}
                             </p>
                         </div>
 
                         <div className="grid grid-cols-2 gap-4">
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                                    Сатып алу бағасы <span className="text-red-500">*</span>
+                                    {t('fabrics.form.fieldCostPrice', 'Сатып алу бағасы')} <span className="text-red-500">*</span>
                                 </label>
                                 <div className="relative">
                                     <input
@@ -437,7 +439,7 @@ const CreateFabric = () => {
                             </div>
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                                    Сату бағасы ({getUnitLabel()}) <span className="text-red-500">*</span>
+                                    {t('fabrics.form.fieldSellPrice', 'Сату бағасы')} ({getUnitLabel()}) <span className="text-red-500">*</span>
                                 </label>
                                 <div className="relative">
                                     <input
@@ -458,7 +460,7 @@ const CreateFabric = () => {
 
                         {/* Margin Preview */}
                         <div className="bg-primary/10 rounded-xl p-4 flex justify-between items-center">
-                            <span className="text-sm font-bold text-primary">Маржа</span>
+                            <span className="text-sm font-bold text-primary">{t('fabrics.form.margin', 'Маржа')}</span>
                             <div className="text-right">
                                 <span className={`text-xl font-black ${margin > 0 ? 'text-green-600' : 'text-gray-500'}`}>
                                     {margin}%
@@ -470,7 +472,7 @@ const CreateFabric = () => {
                     {/* Main Product Image */}
                     <div className="bg-white p-5 rounded-2xl shadow-sm space-y-4">
                         <h2 className="font-bold text-lg text-gray-900 border-b border-gray-100 pb-2 mb-4">
-                            Негізгі сурет
+                            {t('fabrics.form.imageTitle', 'Негізгі сурет')}
                         </h2>
 
                         <input
@@ -526,7 +528,7 @@ const CreateFabric = () => {
                                         <div className="size-12 rounded-full bg-gray-100 group-hover:bg-primary/10 flex items-center justify-center transition-colors">
                                             <Icon name="add_photo_alternate" size={24} className="text-gray-400" />
                                         </div>
-                                        <p className="text-gray-500 font-medium group-hover:text-primary transition-colors">Сурет жүктеу</p>
+                                        <p className="text-gray-500 font-medium group-hover:text-primary transition-colors">{t('fabrics.form.uploadImage', 'Сурет жүктеу')}</p>
                                         <p className="text-xs text-gray-400">PNG, JPG (max 10MB)</p>
                                     </>
                                 )}
@@ -539,7 +541,7 @@ const CreateFabric = () => {
                         disabled={loading || uploading}
                         className="w-full bg-primary text-white font-bold py-4 rounded-xl shadow-lg hover:brightness-110 active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                        {loading ? 'Сақталуда...' : isEditMode ? 'Өзгерістерді сақтау' : 'Тауарды сақтау'}
+                        {loading ? t('fabrics.form.saving', 'Сақталуда...') : isEditMode ? t('fabrics.form.saveChanges', 'Өзгерістерді сақтау') : t('fabrics.form.saveProduct', 'Тауарды сақтау')}
                     </button>
 
                     <div className="h-10"></div>

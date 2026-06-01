@@ -7,7 +7,7 @@ const Projects = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="bg-background-light min-h-screen pb-24">
+    <div className="bg-background-light min-h-screen pb-32">
       <header className="sticky top-0 z-20 bg-background-light/95 backdrop-blur-sm px-4 pt-4 pb-3 border-b">
         <div className="flex items-center justify-between">
           <h1 className="text-2xl font-bold">Жобалар</h1>

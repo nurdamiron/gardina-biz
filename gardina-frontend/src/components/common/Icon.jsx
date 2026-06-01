@@ -1,5 +1,8 @@
 import { HugeiconsIcon } from '@hugeicons/react';
 import {
+  // Localization
+  TranslateIcon,
+
   // People & Users
   User02Icon, UserGroupIcon, UserSearch01Icon, UserRemove01Icon,
   UserAdd01Icon, IdIcon, CustomerService01Icon,
@@ -267,6 +270,7 @@ const ICON_MAP = {
 
   // ── Misc ──────────────────────────────────────────────────────────
   settings:                 Settings01Icon,
+  language:                 TranslateIcon,
   help:                     HelpCircleIcon,
   calculate:                CalculatorIcon,
   straighten:               RulerIcon,
@@ -284,6 +288,7 @@ const ICON_MAP = {
   link_off:                 Unlink01Icon,
   input:                    InputCursorTextIcon,
   sewing_kit:               ThreadIcon,
+  manage_accounts:          UserGroupIcon,
 };
 
 /**
@@ -306,11 +311,33 @@ const Icon = ({ name, size = 22, className = '', strokeWidth = 1.5, style }) => 
     if (import.meta.env?.DEV) {
       console.warn(`[Icon] Unknown icon: "${name}"`);
     }
+    // Visible fallback glyph so an unmapped name never renders as an empty hole.
+    const box = Math.round(size * 0.72);
     return (
       <span
-        style={{ display: 'inline-block', width: size, height: size, ...style }}
+        role="img"
+        aria-label={name || 'icon'}
+        style={{
+          display: 'inline-flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          width: size,
+          height: size,
+          ...style,
+        }}
         className={className}
-      />
+      >
+        <span
+          style={{
+            display: 'inline-block',
+            width: box,
+            height: box,
+            border: `${Math.max(1, Math.round(size / 16))}px solid currentColor`,
+            borderRadius: Math.max(3, Math.round(size * 0.2)),
+            opacity: 0.45,
+          }}
+        />
+      </span>
     );
   }
 

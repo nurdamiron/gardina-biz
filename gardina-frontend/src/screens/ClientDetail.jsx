@@ -96,7 +96,7 @@ const ClientDetail = () => {
     );
 
     return (
-        <div className="bg-background-light min-h-screen pb-24">
+        <div className="bg-background-light min-h-screen pb-32">
             {/* Header */}
             <header className="sticky top-0 z-20 bg-background-light/95 backdrop-blur-sm border-b">
                 <div className="flex items-center justify-between px-4 py-3">

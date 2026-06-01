@@ -28,6 +28,27 @@ const adminReports = {
     installation: 'Орнату',
     delivery: 'Жеткізу',
   },
+  teamKpiLabels: {
+    avgConversion: 'Орт. конверсия',
+    avgDeal: 'Орт. сома',
+    closingSpeed: 'Жабу жылдамдығы',
+    active: 'Белсенді',
+  },
+  clientFunnelStages: {
+    newClient: 'Жаңа клиент',
+    withMeasurements: 'Өлшем тапсырысы',
+    withProposals: 'Ұсыныс жіберілді',
+    withContracts: 'Шарт жасалды',
+    completed: 'Аяқталды',
+  },
+  commission: 'комиссия',
+  soldTimes: '{count} рет сатылды',
+  daysOverdue: '{days} күн өтті',
+  daysShort: '{days} күн',
+  riskLevels: {
+    high: 'Жоғары',
+    medium: 'Орташа',
+  },
 };
 
 export default adminReports;

@@ -3,18 +3,16 @@ import { useNavigate } from 'react-router-dom';
 import api from '../../services/api';
 import BottomNav from '../../components/navigation/BottomNav';
 import Icon from '../../components/common/Icon';
+import EmptyState from '../../components/common/EmptyState';
 import { useI18n } from '../../contexts/I18nContext';
-
-const fmt = (n, unit = '₸') => {
-  if (!n) return `0 ${unit}`;
-  if (n >= 1000000) return `${(n / 1000000).toFixed(1)}M ${unit}`;
-  if (n >= 1000) return `${(n / 1000).toFixed(0)}K ${unit}`;
-  return `${n} ${unit}`;
-};
+import { formatMoneyShort } from '../../utils/money';
+import { pluralUnit, NOUNS } from '../../utils/plural';
 
 const AdminReports = () => {
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
   const navigate = useNavigate();
+  // Единый форматтер сумм — больше никаких «2252K»/«1254k» вразнобой.
+  const fmt = (n) => formatMoneyShort(n, lang);
   const PERIOD_OPTIONS = [
     { value: '7', label: t('adminReports.periods.d7') },
     { value: '30', label: t('adminReports.periods.d30') },
@@ -68,7 +66,23 @@ const AdminReports = () => {
   useEffect(() => { load(); }, [load]);
 
   const d = data.dashboard;
-  const maxTrend = Math.max(...data.monthlyTrends.map(t => t.revenue || 0), 1);
+  // Normalize trend items: the API returns { label, monthIndex, value }; the chart expects { month, revenue }.
+  const RU_MONTHS = ['Янв','Фев','Мар','Апр','Май','Июн','Июл','Авг','Сен','Окт','Ноя','Дек'];
+  const trends = (data.monthlyTrends || []).map(t => ({
+    revenue: t.revenue ?? t.value ?? 0,
+    month: (typeof t.monthIndex === 'number' ? RU_MONTHS[t.monthIndex] : null) || t.month || t.label || t.period || '',
+  }));
+  const maxTrend = Math.max(...trends.map(t => t.revenue), 1);
+  // Normalize revenue breakdown: API returns { fabric, sewing, installation, accessories, total };
+  // the chart expects { fabricRevenue, sewingRevenue, installationRevenue, deliveryRevenue, totalRevenue }.
+  const rb = data.revenueBreakdown;
+  const breakdown = rb ? {
+    fabricRevenue: rb.fabricRevenue ?? rb.fabric ?? 0,
+    sewingRevenue: rb.sewingRevenue ?? rb.sewing ?? 0,
+    installationRevenue: rb.installationRevenue ?? rb.installation ?? 0,
+    deliveryRevenue: rb.deliveryRevenue ?? rb.delivery ?? rb.accessories ?? 0,
+    totalRevenue: rb.totalRevenue ?? rb.total ?? 0,
+  } : null;
 
   return (
     <div className="bg-background-light min-h-screen pb-28">
@@ -106,9 +120,9 @@ const AdminReports = () => {
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
                 {[
                   { label: t('adminReports.stats.totalRevenue'), value: fmt(d?.totalRevenue), icon: 'payments', color: 'green' },
-                  { label: t('adminReports.stats.completedDeals'), value: d?.completedDeals ?? '—', icon: 'check_circle', color: 'blue' },
-                  { label: t('adminReports.stats.totalDeals'), value: d?.totalDeals ?? '—', icon: 'assignment', color: 'purple' },
-                  { label: t('adminReports.stats.totalClients'), value: d?.totalClients ?? '—', icon: 'group', color: 'amber' },
+                  { label: t('adminReports.stats.completedDeals'), value: d?.completedDeals ?? 0, icon: 'check_circle', color: 'blue' },
+                  { label: t('adminReports.stats.totalDeals'), value: d?.totalDeals ?? 0, icon: 'assignment', color: 'purple' },
+                  { label: t('adminReports.stats.totalClients'), value: d?.totalClients ?? 0, icon: 'group', color: 'amber' },
                 ].map(s => (
                   <StatCard key={s.label} {...s} />
                 ))}
@@ -116,53 +130,65 @@ const AdminReports = () => {
             </Section>
 
             {/* ── Revenue Trend ────────────────────────────────── */}
-            {data.monthlyTrends.length > 0 && (
+            {trends.length > 0 && (
               <Section title={t('adminReports.sections.revenueTrend')} icon="show_chart">
+                {maxTrend <= 1 ? (
+                  <EmptyState size="sm" icon="show_chart" title={t('reports.noDataPeriod', 'Нет данных за период')} />
+                ) : (
                 <div className="space-y-2">
-                  {data.monthlyTrends.slice(0, 6).map((m, i) => {
+                  {trends.slice(0, 6).map((m, i) => {
                     const pct = maxTrend > 0 ? Math.round(((m.revenue || 0) / maxTrend) * 100) : 0;
                     return (
                       <div key={i} className="flex items-center gap-3">
-                        <span className="text-xs text-gray-500 w-16 text-right flex-shrink-0">{m.month || m.period}</span>
-                        <div className="flex-1 bg-gray-100 rounded-full h-5 overflow-hidden">
-                          <div className="h-full bg-primary rounded-full flex items-center justify-end pr-2 transition-all" style={{ width: `${Math.max(pct, 4)}%` }}>
+                        <span className="text-xs text-text-secondary w-16 text-right flex-shrink-0">{m.month || m.period}</span>
+                        <div className="flex-1 bg-background-light rounded-full h-5 overflow-hidden">
+                          <div className="h-full bg-primary rounded-full flex items-center justify-end pr-2 transition-all" style={{ width: `${pct === 0 ? 0 : Math.max(pct, 4)}%` }}>
                             {pct > 15 && <span className="text-white text-xs font-bold">{fmt(m.revenue)}</span>}
                           </div>
                         </div>
-                        {pct <= 15 && <span className="text-xs text-gray-600 font-medium w-20">{fmt(m.revenue)}</span>}
+                        {pct <= 15 && <span className="text-xs text-text-secondary font-medium w-20">{fmt(m.revenue)}</span>}
                       </div>
                     );
                   })}
                 </div>
+                )}
               </Section>
             )}
 
             {/* ── Revenue Breakdown ────────────────────────────── */}
-            {data.revenueBreakdown && (
+            {breakdown && (
               <Section title={t('adminReports.sections.revenueBreakdown')} icon="bar_chart">
-                <div className="space-y-3">
-                  {[
+                {(() => {
+                  const parts = [
                     { label: t('adminReports.revenueParts.fabric'), key: 'fabricRevenue', color: 'bg-primary' },
-                    { label: t('adminReports.revenueParts.sewing'), key: 'sewingRevenue', color: 'bg-green-500' },
-                    { label: t('adminReports.revenueParts.installation'), key: 'installationRevenue', color: 'bg-amber-500' },
-                    { label: t('adminReports.revenueParts.delivery'), key: 'deliveryRevenue', color: 'bg-primary-light' },
-                  ].filter(item => data.revenueBreakdown[item.key]).map(item => {
-                    const val = data.revenueBreakdown[item.key] || 0;
-                    const total = data.revenueBreakdown.totalRevenue || 1;
-                    const pct = Math.round((val / total) * 100);
-                    return (
-                      <div key={item.key}>
-                        <div className="flex justify-between text-sm mb-1">
-                          <span className="text-gray-700">{item.label}</span>
-                          <span className="font-semibold">{fmt(val)} <span className="text-gray-400 font-normal">({pct}%)</span></span>
-                        </div>
-                        <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
-                          <div className={`h-full ${item.color} rounded-full`} style={{ width: `${pct}%` }} />
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
+                    { label: t('adminReports.revenueParts.sewing'), key: 'sewingRevenue', color: 'bg-primary-light' },
+                    { label: t('adminReports.revenueParts.installation'), key: 'installationRevenue', color: 'bg-warning' },
+                    { label: t('adminReports.revenueParts.delivery'), key: 'deliveryRevenue', color: 'bg-accent' },
+                  ].filter(item => breakdown[item.key]);
+                  if (parts.length === 0) {
+                    return <EmptyState size="sm" icon="bar_chart" title={t('reports.noDataPeriod', 'Нет данных за период')} />;
+                  }
+                  return (
+                    <div className="space-y-3">
+                      {parts.map(item => {
+                        const val = breakdown[item.key] || 0;
+                        const total = breakdown.totalRevenue || 1;
+                        const pct = Math.round((val / total) * 100);
+                        return (
+                          <div key={item.key}>
+                            <div className="flex justify-between text-sm mb-1">
+                              <span className="text-text-secondary">{item.label}</span>
+                              <span className="font-semibold text-text-main">{fmt(val)} <span className="text-text-secondary/70 font-normal">({pct}%)</span></span>
+                            </div>
+                            <div className="h-2 bg-background-light rounded-full overflow-hidden">
+                              <div className={`h-full ${item.color} rounded-full`} style={{ width: `${pct}%` }} />
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  );
+                })()}
               </Section>
             )}
 
@@ -177,11 +203,14 @@ const AdminReports = () => {
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="font-semibold text-gray-900 text-sm truncate">{des.name}</p>
-                        <p className="text-xs text-gray-400">{des.completedDeals ?? 0} тапсырыс</p>
+                        {(() => {
+                          const orders = des.completedDeals ?? des.completedMeasurements ?? 0;
+                          return <p className="text-xs text-gray-400">{orders} {pluralUnit(orders, NOUNS.order, lang)}</p>;
+                        })()}
                       </div>
                       <div className="text-right">
                         <p className="font-bold text-primary text-sm">{fmt(des.revenue || des.totalRevenue)}</p>
-                        <p className="text-xs text-gray-400">{fmt(des.commission || des.totalCommission)} комиссия</p>
+                        <p className="text-xs text-gray-400">{fmt(des.commission || des.totalCommission)} {t('adminReports.commission')}</p>
                       </div>
                     </div>
                   ))}
@@ -194,10 +223,10 @@ const AdminReports = () => {
               <Section title={t('adminReports.sections.teamKpi')} icon="groups">
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
                   {[
-                    { label: 'Орт. конверсия', value: `${data.teamKPIs.avgConversionRate ?? 0}%`, icon: 'sync' },
-                    { label: 'Орт. сумма', value: fmt(data.teamKPIs.avgDealValue), icon: 'payments' },
-                    { label: 'Жабу жылдамдығы', value: `${data.teamKPIs.avgClosingDays ?? 0} күн`, icon: 'schedule' },
-                    { label: 'Белсенді', value: data.teamKPIs.activeDesigners ?? '—', icon: 'person' },
+                    { label: t('adminReports.teamKpiLabels.avgConversion'), value: `${data.teamKPIs.avgConversionRate ?? 0}%`, icon: 'sync' },
+                    { label: t('adminReports.teamKpiLabels.avgDeal'), value: fmt(data.teamKPIs.avgDealValue), icon: 'payments' },
+                    { label: t('adminReports.teamKpiLabels.closingSpeed'), value: t('adminReports.daysShort', { days: data.teamKPIs.avgClosingDays ?? 0 }), icon: 'schedule' },
+                    { label: t('adminReports.teamKpiLabels.active'), value: data.teamKPIs.activeDesigners ?? 0, icon: 'person' },
                   ].map(s => (
                     <div key={s.label} className="bg-gray-50 rounded-xl p-3">
                       <Icon name={s.icon} size={18} className="text-primary mb-1" />
@@ -214,11 +243,11 @@ const AdminReports = () => {
               <Section title={t('adminReports.sections.clientFunnel')} icon="filter_alt">
                 <div className="space-y-2">
                   {[
-                    { label: 'Жаңа клиент', key: 'newClients', color: 'bg-primary' },
-                    { label: 'Өлшем тапсырысы', key: 'withMeasurements', color: 'bg-primary/100' },
-                    { label: 'Ұсыныс жіберілді', key: 'withProposals', color: 'bg-primary/50' },
-                    { label: 'Шарт жасалды', key: 'withContracts', color: 'bg-primary-light' },
-                    { label: 'Аяқталды', key: 'completed', color: 'bg-primary' },
+                    { label: t('adminReports.clientFunnelStages.newClient'), key: 'newClients', color: 'bg-primary' },
+                    { label: t('adminReports.clientFunnelStages.withMeasurements'), key: 'withMeasurements', color: 'bg-primary/100' },
+                    { label: t('adminReports.clientFunnelStages.withProposals'), key: 'withProposals', color: 'bg-primary/50' },
+                    { label: t('adminReports.clientFunnelStages.withContracts'), key: 'withContracts', color: 'bg-primary-light' },
+                    { label: t('adminReports.clientFunnelStages.completed'), key: 'completed', color: 'bg-primary' },
                   ].map((stage, i, arr) => {
                     const val = data.clientFunnel[stage.key] || 0;
                     const first = data.clientFunnel[arr[0].key] || 1;
@@ -250,7 +279,7 @@ const AdminReports = () => {
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="font-medium text-sm text-gray-900 truncate">{p.name}</p>
-                        <p className="text-xs text-gray-400">{p.salesCount ?? p.count ?? 0} рет сатылды</p>
+                        <p className="text-xs text-gray-400">{t('adminReports.soldTimes', { count: p.salesCount ?? p.count ?? 0 })}</p>
                       </div>
                       <p className="font-bold text-sm text-primary">{fmt(p.revenue || p.totalRevenue)}</p>
                     </div>
@@ -270,10 +299,10 @@ const AdminReports = () => {
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="font-medium text-sm text-gray-900 truncate">{r.clientName || r.client_name}</p>
-                        <p className="text-xs text-gray-400">{r.daysOverdue ?? 0} күн өтті • {fmt(r.remainingAmount || r.remaining_amount)}</p>
+                        <p className="text-xs text-gray-400">{t('adminReports.daysOverdue', { days: r.daysOverdue ?? 0 })} • {fmt(r.remainingAmount || r.remaining_amount)}</p>
                       </div>
                       <span className={`text-xs px-2 py-1 rounded-full font-semibold flex-shrink-0 ${r.riskLevel === 'high' || r.risk_level === 'high' ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-700'}`}>
-                        {r.riskLevel === 'high' || r.risk_level === 'high' ? 'Жоғары' : 'Орташа'}
+                        {r.riskLevel === 'high' || r.risk_level === 'high' ? t('adminReports.riskLevels.high') : t('adminReports.riskLevels.medium')}
                       </span>
                     </div>
                   ))}

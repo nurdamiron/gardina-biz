@@ -11,6 +11,7 @@ import ChartLine from '../components/analytics/ChartLine';
 import StatsCard from '../components/analytics/StatsCard';
 import KPICard from '../components/analytics/KPICard';
 import Icon from '../components/common/Icon';
+import { NOUNS } from '../utils/plural';
 
 /**
  * Designer Dashboard
@@ -99,11 +100,15 @@ const DesignerDashboard = () => {
     ).length,
   };
 
-  // Date formatting
+  // Date formatting (lang-aware: KZ arrays for kz, RU arrays otherwise)
   const formatDateKZ = (dateString) => {
     const date = new Date(dateString);
-    const months = ['қаңтар', 'ақпан', 'наурыз', 'сәуір', 'мамыр', 'маусым', 'шілде', 'тамыз', 'қыркүйек', 'қазан', 'қараша', 'желтоқсан'];
-    const weekdays = ['Жексенбі', 'Дүйсенбі', 'Сейсенбі', 'Сәрсенбі', 'Бейсенбі', 'Жұма', 'Сенбі'];
+    const monthsKz = ['қаңтар', 'ақпан', 'наурыз', 'сәуір', 'мамыр', 'маусым', 'шілде', 'тамыз', 'қыркүйек', 'қазан', 'қараша', 'желтоқсан'];
+    const weekdaysKz = ['Жексенбі', 'Дүйсенбі', 'Сейсенбі', 'Сәрсенбі', 'Бейсенбі', 'Жұма', 'Сенбі'];
+    const monthsRu = ['января', 'февраля', 'марта', 'апреля', 'мая', 'июня', 'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря'];
+    const weekdaysRu = ['Воскресенье', 'Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота'];
+    const months = lang === 'kz' ? monthsKz : monthsRu;
+    const weekdays = lang === 'kz' ? weekdaysKz : weekdaysRu;
     return {
       day: date.getDate(),
       month: months[date.getMonth()],
@@ -119,14 +124,14 @@ const DesignerDashboard = () => {
       <div className="flex items-center justify-center min-h-screen bg-background-light p-4">
         <div className="text-center p-8 bg-white rounded-2xl shadow-sm max-w-md">
           <Icon name="error" size={48} className="text-red-500" />
-          <h2 className="text-xl font-bold mt-4">Қате</h2>
+          <h2 className="text-xl font-bold mt-4">{t('dashboard.designer.error', 'Қате')}</h2>
           <p className="text-text-secondary mt-2">{error}</p>
           <div className="flex gap-3 mt-6">
             <button onClick={loadDashboardData} className="flex-1 px-6 py-2 bg-primary text-white rounded-lg font-bold">
-              Қайталау
+              {t('dashboard.designer.retry', 'Қайталау')}
             </button>
             <button onClick={logout} className="px-6 py-2 bg-gray-100 rounded-lg font-bold">
-              Шығу
+              {t('dashboard.designer.logout', 'Шығу')}
             </button>
           </div>
         </div>
@@ -157,20 +162,20 @@ const DesignerDashboard = () => {
           {isPriorityHigh && (
             <div className="flex items-center gap-1 bg-red-500 px-2 py-1 rounded-full text-[10px] font-bold text-white animate-pulse">
               <Icon name="local_fire_department" size={12} />
-              ШҰҒЫЛ
+              {t('dashboard.designer.urgentBadge', 'ШҰҒЫЛ')}
             </div>
           )}
         </div>
 
         {/* Client Name */}
         <h3 className="font-bold text-gray-900 text-lg mb-2">
-          {measurement.clientName || 'Клиент'}
+          {measurement.clientName || t('dashboard.fallbacks.client', 'Клиент')}
         </h3>
 
         {/* Address */}
         <div className="flex items-center gap-2 text-sm text-gray-600 mb-4 bg-gray-50 p-2 rounded-lg">
           <Icon name="location_on" size={18} className="text-gray-400" />
-          <span className="line-clamp-1">{measurement.address || 'Мекенжай көрсетілмеген'}</span>
+          <span className="line-clamp-1">{measurement.address || t('dashboard.fallbacks.address', 'Мекенжай көрсетілмеген')}</span>
         </div>
 
         {/* Room Type if available */}
@@ -190,7 +195,7 @@ const DesignerDashboard = () => {
               onClick={(e) => e.stopPropagation()}
             >
               <Icon name="call" size={18} />
-              Қоңырау
+              {t('dashboard.designer.call', 'Қоңырау')}
             </a>
           )}
           <button
@@ -198,7 +203,7 @@ const DesignerDashboard = () => {
             className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-primary text-white rounded-xl font-bold text-sm hover:brightness-110 transition-all shadow-lg shadow-primary/20"
           >
             <Icon name="play_arrow" size={18} />
-            Бастау
+            {t('dashboard.start', 'Бастау')}
           </button>
         </div>
       </div>
@@ -215,7 +220,7 @@ const DesignerDashboard = () => {
   );
 
   return (
-    <div className="bg-background-light min-h-screen pb-20">
+    <div className="bg-background-light min-h-screen pb-32">
       {/* Header */}
       <header className="sticky top-0 z-30 bg-white/80 backdrop-blur-md border-b border-gray-100 px-4 py-4">
         <div className="flex items-center justify-between">
@@ -273,13 +278,19 @@ const DesignerDashboard = () => {
         {/* Earnings Chart */}
         <ChartLine
           title={t('dashboard.sections.revenueDynamics')}
-          data={analytics.designerEarnings?.monthly || monthShort(lang).slice(0, 6).map((label, i) => ({
-            label,
-            value: [320000, 380000, 450000, 420000, 510000, 580000][i],
-          }))}
+          data={(analytics.designerEarnings?.monthly
+            ? analytics.designerEarnings.monthly.map((m) => ({
+                // Localize the month label from monthIndex so the RU axis never shows Kazakh.
+                label: typeof m.monthIndex === 'number' ? monthShort(lang)[m.monthIndex] : m.label,
+                value: m.value,
+              }))
+            : monthShort(lang).slice(0, 6).map((label, i) => ({
+                label,
+                value: [320000, 380000, 450000, 420000, 510000, 580000][i],
+              })))}
           height={180}
           valueFormat="currency"
-          color="stroke-green-500"
+          color="stroke-primary-light"
           loading={analyticsLoading}
         />
 
@@ -293,7 +304,7 @@ const DesignerDashboard = () => {
             icon="attach_money"
             trend={analytics.designerPerformance?.averageCheckTrend || "up"}
             trendValue={analytics.designerPerformance?.averageCheckTrendValue || "+8%"}
-            iconBg="bg-green-500"
+            iconBg="bg-primary-light"
             loading={analyticsLoading}
           />
           <StatsCard
@@ -314,6 +325,7 @@ const DesignerDashboard = () => {
           value={analytics.designerPerformance?.currentMonthMeasurements || stats.month}
           target={analytics.designerPerformance?.monthlyTarget || 20}
           unit={t('dashboard.stats.measurementUnit')}
+          unitForms={NOUNS.measurement}
           period={new Date().toLocaleString(lang === 'kz' ? 'kk-KZ' : 'ru-RU', { month: 'long' })}
           icon="flag"
           loading={analyticsLoading}
@@ -324,7 +336,7 @@ const DesignerDashboard = () => {
           <div className="flex items-center justify-between mb-3">
             <h3 className="font-bold flex items-center gap-2">
               <Icon name="star" />
-              Жеке рейтинг
+              {t('dashboard.designer.personalRating', 'Жеке рейтинг')}
             </h3>
             <span className="text-2xl font-black">
               #{analytics.designersRanking?.findIndex(d => d.id === user.id) + 1 || 3}
@@ -339,7 +351,7 @@ const DesignerDashboard = () => {
               <span className="text-sm opacity-90">{t('dashboard.monthlyMetric')}</span>
               <span className="font-bold">
                 {analytics.designerPerformance?.monthlyRankChange > 0 ? '+' : ''}
-                {analytics.designerPerformance?.monthlyRankChange || '+2'} орын
+                {analytics.designerPerformance?.monthlyRankChange || '+2'} {t('dashboard.designer.rankPositionUnit', 'орын')}
               </span>
             </div>
             <div className="h-2 bg-white/20 rounded-full overflow-hidden mt-3">
@@ -347,7 +359,7 @@ const DesignerDashboard = () => {
                 style={{width: `${analytics.designerPerformance?.kpiProgress || 75}%`}}></div>
             </div>
             <p className="text-xs opacity-75 text-center mt-2">
-              Келесі деңгейге дейін {analytics.designerPerformance?.remainingToNextLevel || 5} өлшем
+              {t('dashboard.designer.nextLevelPrefix', 'Келесі деңгейге дейін')} {analytics.designerPerformance?.remainingToNextLevel || 5} {t('dashboard.designer.nextLevelSuffix', 'өлшем')}
             </p>
           </div>
         </div>
@@ -358,7 +370,7 @@ const DesignerDashboard = () => {
         <div className="flex items-center justify-between mb-3">
           <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
             <Icon name="today" className="text-primary" />
-            Бүгінгі тапсырмалар
+            {t('dashboard.designer.todayTasks', 'Бүгінгі тапсырмалар')}
           </h2>
           <span className="bg-primary/10 text-primary px-2.5 py-1 rounded-full text-sm font-bold">
             {todayMeasurements.length}
@@ -394,7 +406,7 @@ const DesignerDashboard = () => {
           <div className="flex items-center justify-between mb-3">
             <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
               <Icon name="event" className="text-primary" />
-              Ертең
+              {t('dashboard.designer.tomorrow', 'Ертең')}
             </h2>
             <span className="bg-primary/10 text-primary px-2.5 py-1 rounded-full text-sm font-bold">
               {tomorrowMeasurements.length}
@@ -418,13 +430,13 @@ const DesignerDashboard = () => {
           <div className="flex items-center justify-between mb-3">
             <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
               <Icon name="date_range" className="text-gray-400" />
-              Алдағы тапсырмалар
+              {t('dashboard.designer.upcomingTasks', 'Алдағы тапсырмалар')}
             </h2>
             <button 
               onClick={() => navigate('/designer/measurements')}
               className="text-primary text-sm font-bold"
             >
-              Барлығы →
+              {t('dashboard.designer.viewAll', 'Барлығы →')}
             </button>
           </div>
 

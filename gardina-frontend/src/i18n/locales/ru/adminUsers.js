@@ -7,6 +7,7 @@ const adminUsers = {
   roles: {
     designer: 'Дизайнер',
     manager: 'Менеджер',
+    sales: 'Продажи',
     sales_manager: 'Менеджер продаж',
     admin: 'Администратор',
     production: 'Производство',

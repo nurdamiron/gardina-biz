@@ -145,7 +145,7 @@ const ServiceForm = () => {
     }
 
     return (
-        <div className="bg-background-light min-h-screen pb-24 relative">
+        <div className="bg-background-light min-h-screen pb-32 relative">
             {/* Notification Toast */}
             {notification && (
                 <div className={`fixed top-4 left-1/2 -translate-x-1/2 z-50 px-6 py-3 rounded-xl shadow-xl flex items-center justify-center gap-3 animate-in fade-in slide-in-from-top-4 duration-300 ${notification.type === 'success' ? 'bg-green-600 text-white' : 'bg-red-500 text-white'

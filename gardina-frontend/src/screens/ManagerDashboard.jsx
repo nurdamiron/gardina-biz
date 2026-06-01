@@ -73,7 +73,7 @@ const ManagerDashboard = () => {
   ];
 
   return (
-    <div className="bg-background-light min-h-screen pb-24">
+    <div className="bg-background-light min-h-screen pb-32">
       {/* Header */}
       <header className="sticky top-0 z-30 bg-white/80 backdrop-blur-md border-b border-gray-100 px-4 py-3">
         <div>
@@ -144,9 +144,9 @@ const ManagerDashboard = () => {
           data={[
             { label: t('dashboard.funnel.leads'), value: deals.filter(d => d.status === 'new' || d.status === 'proposal_sent').length, color: 'bg-primary' },
             { label: t('dashboard.funnel.proposals'), value: deals.filter(d => d.status === 'proposal_accepted').length, color: 'bg-primary-light' },
-            { label: t('dashboard.funnel.contracts'), value: deals.filter(d => d.status === 'contract_signed').length, color: 'bg-primary-light' },
-            { label: t('dashboard.funnel.inProduction'), value: deals.filter(d => d.status === 'in_production').length, color: 'bg-orange-500' },
-            { label: t('dashboard.funnel.completed'), value: deals.filter(d => d.status === 'completed').length, color: 'bg-green-500' },
+            { label: t('dashboard.funnel.contracts'), value: deals.filter(d => d.status === 'contract_signed').length, color: 'bg-accent' },
+            { label: t('dashboard.funnel.inProduction'), value: deals.filter(d => d.status === 'in_production').length, color: 'bg-warning' },
+            { label: t('dashboard.funnel.completed'), value: deals.filter(d => d.status === 'completed').length, color: 'bg-success' },
           ]}
           orientation="horizontal"
           valueFormat="deals"
@@ -159,7 +159,7 @@ const ManagerDashboard = () => {
             const wd = weekdayShort(lang);
             // Mon..Sun order in our chart
             const order = [1, 2, 3, 4, 5, 6, 0];
-            const colors = ['bg-primary', 'bg-green-500', 'bg-primary-light', 'bg-yellow-500', 'bg-orange-500', 'bg-red-500', 'bg-gray-500'];
+            const colors = ['bg-primary', 'bg-primary', 'bg-primary-light', 'bg-primary', 'bg-primary-light', 'bg-accent', 'bg-accent'];
             const fallback = [12, 18, 15, 22, 25, 8, 5];
             return analytics.weeklyActivity?.days?.map((day, idx) => ({
               label: day.shortName || wd[order[idx]],
@@ -227,7 +227,7 @@ const ManagerDashboard = () => {
 
           {/* Today's Measurements */}
           <div>
-            <h2 className="text-lg font-bold mb-3">Бүгінгі өлшемдер</h2>
+            <h2 className="text-lg font-bold mb-3">{t('dashboard.manager.todayMeasurements', 'Бүгінгі өлшемдер')}</h2>
             {loading ? (
               <div className="space-y-3">
                 <SkeletonCard />
@@ -239,7 +239,7 @@ const ManagerDashboard = () => {
             }).length === 0 ? (
               <div className="bg-white rounded-xl p-6 text-center shadow-sm">
                 <Icon name="event_busy" size={40} className="text-gray-300" />
-                <p className="text-text-secondary mt-2">Бүгін өлшем жоқ</p>
+                <p className="text-text-secondary mt-2">{t('dashboard.manager.noTodayMeasurements', 'Бүгін өлшем жоқ')}</p>
               </div>
             ) : (
               <div className="space-y-3">
@@ -260,7 +260,7 @@ const ManagerDashboard = () => {
                         </div>
                         <span className={`px-2 py-1 rounded text-xs font-bold ${m.status === 'completed' ? 'bg-green-100 text-green-700' : 'bg-primary/15 text-primary-dark'
                           }`}>
-                          {m.status === 'completed' ? 'Аяқталды' : 'Жоспарланған'}
+                          {m.status === 'completed' ? t('dashboard.statuses.completed', 'Аяқталды') : t('dashboard.statuses.scheduled', 'Жоспарланған')}
                         </span>
                       </div>
                     </div>
@@ -273,8 +273,8 @@ const ManagerDashboard = () => {
         {/* Top Designers */}
         <div>
           <h2 className="text-lg font-bold mb-3 flex items-center justify-between">
-            <span>Топ дизайнерлер</span>
-            <span className="text-sm text-gray-500 font-normal">осы ай</span>
+            <span>{t('dashboard.manager.topDesigners', 'Топ дизайнерлер')}</span>
+            <span className="text-sm text-gray-500 font-normal">{t('dashboard.manager.thisMonth', 'осы ай')}</span>
           </h2>
           <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
             <div className="space-y-3">
@@ -294,7 +294,7 @@ const ManagerDashboard = () => {
                     </div>
                     <div>
                       <p className="font-bold text-sm text-gray-900">{designer.name}</p>
-                      <p className="text-xs text-gray-500">{designer.completedMeasurements || designer.sales || 0} сатылым</p>
+                      <p className="text-xs text-gray-500">{designer.completedMeasurements || designer.sales || 0} {t('dashboard.manager.salesUnit', 'сатылым')}</p>
                     </div>
                   </div>
                   <div className="text-right">
@@ -314,7 +314,7 @@ const ManagerDashboard = () => {
             className="w-full bg-primary hover:brightness-110 text-white font-bold py-4 rounded-2xl shadow-lg transition-all flex items-center justify-center gap-3"
           >
             <Icon name="add" size={24} />
-            <span>Жаңа тапсырыс құру</span>
+            <span>{t('dashboard.manager.newOrder', 'Жаңа тапсырыс құру')}</span>
           </button>
 
           <div className="grid grid-cols-2 gap-3">
@@ -323,14 +323,14 @@ const ManagerDashboard = () => {
               className="bg-white hover:bg-gray-50 border border-gray-200 text-gray-700 font-bold py-4 rounded-xl shadow-sm transition-all flex flex-col items-center justify-center gap-2"
             >
               <Icon name="group" size={24} className="text-primary" />
-              <p className="text-sm">Клиенттер</p>
+              <p className="text-sm">{t('dashboard.manager.clients', 'Клиенттер')}</p>
             </button>
             <button
               onClick={() => navigate('/manager/orders')}
               className="bg-white hover:bg-gray-50 border border-gray-200 text-gray-700 font-bold py-4 rounded-xl shadow-sm transition-all flex flex-col items-center justify-center gap-2"
             >
               <Icon name="handshake" size={24} className="text-green-600" />
-              <p className="text-sm">Тапсырыстар</p>
+              <p className="text-sm">{t('dashboard.manager.orders', 'Тапсырыстар')}</p>
             </button>
           </div>
         </div>

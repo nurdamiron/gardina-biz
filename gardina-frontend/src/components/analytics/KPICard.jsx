@@ -1,5 +1,7 @@
 import React from 'react';
 import Icon from '../common/Icon';
+import { useI18n } from '../../contexts/I18nContext';
+import { pluralUnit } from '../../utils/plural';
 
 /**
  * KPICard - Карточка для отображения KPI с прогресс-баром
@@ -17,13 +19,19 @@ const KPICard = ({
     value = 0,
     target = 100,
     unit = '',
+    unitForms = null,
     period = 'месяц',
     status,
     icon = 'flag',
     loading = false
 }) => {
+    const { t, lang } = useI18n();
     // Рассчитать процент выполнения
     const percentage = target > 0 ? Math.min((value / target) * 100, 100) : 0;
+
+    // Если переданы формы склонения — склоняем единицу по числу (RU: 2 замера / 20 замеров).
+    const valueUnit = unitForms ? pluralUnit(value, unitForms, lang) : unit;
+    const targetUnit = unitForms ? pluralUnit(target, unitForms, lang) : unit;
 
     // Определить статус автоматически если не задан
     const getStatus = () => {
@@ -94,10 +102,10 @@ const KPICard = ({
                     <span className="text-3xl font-black text-gray-900">
                         {value.toLocaleString()}
                     </span>
-                    {unit && <span className="text-sm font-medium text-gray-500">{unit}</span>}
+                    {valueUnit && <span className="text-sm font-medium text-gray-500">{valueUnit}</span>}
                 </div>
                 <p className="text-xs text-gray-500 mt-1">
-                    {target.toLocaleString()} {unit} ішінен
+                    {t('dashboard.kpiCard.outOf', { target: target.toLocaleString(), unit: targetUnit })}
                 </p>
             </div>
 
@@ -120,19 +128,19 @@ const KPICard = ({
                     {currentStatus === 'success' && (
                         <>
                             <Icon name="check_circle" size={18} className="text-green-600" />
-                            <span className="text-xs font-bold text-green-600">Орындалды</span>
+                            <span className="text-xs font-bold text-green-600">{t('dashboard.kpiCard.done')}</span>
                         </>
                     )}
                     {currentStatus === 'warning' && (
                         <>
                             <Icon name="warning" size={18} className="text-yellow-600" />
-                            <span className="text-xs font-bold text-yellow-600">Орындалуда</span>
+                            <span className="text-xs font-bold text-yellow-600">{t('dashboard.kpiCard.inProgress')}</span>
                         </>
                     )}
                     {currentStatus === 'danger' && (
                         <>
                             <Icon name="error" size={18} className="text-red-600" />
-                            <span className="text-xs font-bold text-red-600">Артта қалу</span>
+                            <span className="text-xs font-bold text-red-600">{t('dashboard.kpiCard.behind')}</span>
                         </>
                     )}
                 </div>

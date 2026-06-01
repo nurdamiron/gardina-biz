@@ -13,8 +13,12 @@ const adminCatalog = {
 
   categories: {
     all: 'Все',
+    fabric: 'Ткань',
+    blackout: 'Блэкаут',
     curtain: 'Шторы',
     tulle: 'Тюль',
+    roman: 'Римские шторы',
+    zebra: 'Зебра',
     cornice: 'Карниз',
     jalousie: 'Жалюзи',
     accessory: 'Фурнитура',

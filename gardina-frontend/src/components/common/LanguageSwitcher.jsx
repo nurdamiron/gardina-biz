@@ -9,7 +9,7 @@ const LanguageSwitcher = ({ compact = false, className = '' }) => {
       <button
         type="button"
         onClick={() => setLang('kz')}
-        className={`rounded-lg font-bold transition-all ${compact ? 'px-2 py-1 text-xs' : 'px-3 py-1.5 text-sm'} ${
+        className={`rounded-lg font-bold transition-all ${compact ? 'px-3 py-2 text-xs' : 'px-3 py-2 text-sm'} ${
           lang === 'kz' ? 'bg-white text-primary shadow-sm' : 'text-gray-600 hover:text-gray-900'
         }`}
       >
@@ -18,7 +18,7 @@ const LanguageSwitcher = ({ compact = false, className = '' }) => {
       <button
         type="button"
         onClick={() => setLang('ru')}
-        className={`rounded-lg font-bold transition-all ${compact ? 'px-2 py-1 text-xs' : 'px-3 py-1.5 text-sm'} ${
+        className={`rounded-lg font-bold transition-all ${compact ? 'px-3 py-2 text-xs' : 'px-3 py-2 text-sm'} ${
           lang === 'ru' ? 'bg-white text-primary shadow-sm' : 'text-gray-600 hover:text-gray-900'
         }`}
       >

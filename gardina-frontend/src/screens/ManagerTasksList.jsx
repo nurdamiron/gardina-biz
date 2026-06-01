@@ -7,6 +7,8 @@ import { usersAPI } from '../services/api';
 import BottomNav from '../components/navigation/BottomNav';
 import { SkeletonCard } from '../components/common/Skeleton';
 import Icon from '../components/common/Icon';
+import Card from '../components/common/Card';
+import Avatar from '../components/common/Avatar';
 
 const ManagerTasksList = () => {
     const navigate = useNavigate();
@@ -65,7 +67,7 @@ const ManagerTasksList = () => {
     };
 
     return (
-        <div className="bg-background-light min-h-screen flex flex-col pb-24">
+        <div className="bg-background-light min-h-screen flex flex-col pb-32">
             {/* Header */}
             <header className="sticky top-0 z-30 bg-white/80 backdrop-blur-md border-b border-gray-100 px-4 py-3">
                 <div className="flex items-center justify-between">
@@ -116,14 +118,13 @@ const ManagerTasksList = () => {
                 ) : filteredMeasurements.length > 0 ? (
                     <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
                         {filteredMeasurements.map(item => (
-                            <div
+                            <Card
                                 key={item.id}
                                 onClick={() => navigate(`/manager/measurements/${item.id}`)}
-                                className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 active:scale-[0.99] transition-transform cursor-pointer hover:shadow-md"
                             >
                                 <div className="flex justify-between items-start mb-2">
                                     <div>
-                                        <h3 className="font-bold text-gray-900">{item.clientName || t('orders.card.unknownClient')}</h3>
+                                        <h3 className="font-bold text-text-main">{item.clientName || t('orders.card.unknownClient')}</h3>
                                         <p className="text-xs text-gray-500">{item.clientPhone}</p>
                                     </div>
                                     {getStatusBadge(item.status)}
@@ -134,18 +135,28 @@ const ManagerTasksList = () => {
                                     <span className="line-clamp-1">{item.address}</span>
                                 </div>
 
-                                <div className="flex justify-between items-center mt-3 pt-3 border-t border-gray-50">
-                                    <div className="flex items-center gap-2">
-                                        <div className="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center text-xs font-bold text-gray-600">
-                                            {item.designerId ? 'D' : '?'}
-                                        </div>
-                                        <span className="text-xs text-gray-500">{t('tasks.card.designer')}</span>
-                                    </div>
-                                    <span className="text-xs font-medium text-gray-400">
+                                <div className="flex justify-between items-center mt-3 pt-3 border-t border-border-light">
+                                    {(() => {
+                                        const designerName = designers.find(d => d.id === item.designerId)?.name || item.designerName;
+                                        return designerName ? (
+                                            <div className="flex items-center gap-2 min-w-0">
+                                                <Avatar name={designerName} size="sm" />
+                                                <span className="text-xs text-text-secondary truncate">{designerName}</span>
+                                            </div>
+                                        ) : (
+                                            <div className="flex items-center gap-2 min-w-0">
+                                                <div className="size-8 rounded-full border border-dashed border-border-light flex items-center justify-center shrink-0">
+                                                    <Icon name="person" size={14} className="text-text-secondary/60" />
+                                                </div>
+                                                <span className="text-xs text-text-secondary/70">{t('tasks.card.unassigned', 'Не назначен')}</span>
+                                            </div>
+                                        );
+                                    })()}
+                                    <span className="text-xs font-medium text-text-secondary/70 shrink-0">
                                         {new Date(item.scheduledAt).toLocaleDateString(lang === 'kz' ? 'kk-KZ' : 'ru-RU')}
                                     </span>
                                 </div>
-                            </div>
+                            </Card>
                         ))}
                     </div>
                 ) : (

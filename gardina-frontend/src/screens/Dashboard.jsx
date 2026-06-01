@@ -6,12 +6,13 @@ import { useI18n } from '../contexts/I18nContext';
 import BottomNav from '../components/navigation/BottomNav';
 import { SkeletonCard, SkeletonStats } from '../components/common/Skeleton';
 import { formatTime24 } from '../utils/dateUtils';
+import { formatMoneyShort } from '../utils/money';
 import Icon from '../components/common/Icon';
 
 const Dashboard = () => {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
   const { measurements: allMeasurements, deals, loadData, loading: appLoading } = useApp();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -67,7 +68,7 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="bg-background-light min-h-screen pb-24">
+    <div className="bg-background-light min-h-screen pb-32">
       <header className="sticky top-0 z-30 bg-white/80 backdrop-blur-md border-b border-gray-100 px-4 py-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -105,8 +106,7 @@ const Dashboard = () => {
               <div className="flex flex-col">
                 <span className="text-xs font-medium text-text-secondary uppercase">{t('dashboard.sales')}</span>
                 <div className="flex items-baseline gap-2 mt-1">
-                  <span className="text-3xl font-bold">{Math.round(stats.sales / 1000)}k</span>
-                  <span className="text-sm font-medium text-text-secondary">₸</span>
+                  <span className="text-3xl font-bold">{formatMoneyShort(stats.sales, lang)}</span>
                 </div>
               </div>
               <div className="flex gap-2">
@@ -122,7 +122,7 @@ const Dashboard = () => {
             </div>
             <div className="space-y-2">
               <div className="flex justify-between text-xs font-medium">
-                <span className="text-text-secondary">{t('dashboard.goalPrefix')}: {stats.goal / 1000}k ₸</span>
+                <span className="text-text-secondary">{t('dashboard.goalPrefix')}: {formatMoneyShort(stats.goal, lang)}</span>
                 <span className="text-primary">{progress}%</span>
               </div>
               <div className="h-3 w-full bg-gray-100 rounded-full overflow-hidden">

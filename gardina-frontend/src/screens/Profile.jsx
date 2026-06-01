@@ -5,6 +5,7 @@ import { useI18n } from '../contexts/I18nContext';
 import api from '../services/api';
 import BottomNav from '../components/navigation/BottomNav';
 import Icon from '../components/common/Icon';
+import LanguageSwitcher from '../components/common/LanguageSwitcher';
 
 // ─── Edit Profile Modal ────────────────────────────────────────────────────────
 const EditProfileModal = ({ user, onClose, onSaved }) => {
@@ -328,7 +329,7 @@ const Profile = () => {
   ];
 
   return (
-    <div className="bg-background-light min-h-screen pb-24">
+    <div className="bg-background-light min-h-screen pb-32">
       <header className="sticky top-0 z-30 bg-white/80 backdrop-blur-md border-b border-gray-100 px-4 py-4">
         <h1 className="text-xl font-bold text-gray-900">{t('profile.title')}</h1>
       </header>
@@ -367,6 +368,19 @@ const Profile = () => {
               <p className="text-xs text-gray-500">{t('profile.loginLabel')}</p>
               <p className="font-semibold text-gray-900">{user?.phone || t('profile.unknownPhone')}</p>
             </div>
+          </div>
+        </div>
+
+        {/* Language */}
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+          <div className="flex items-center gap-4 p-4">
+            <div className="size-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+              <Icon name="language" className="text-primary" />
+            </div>
+            <div className="flex-1">
+              <p className="font-medium text-gray-900">{t('common.language')}</p>
+            </div>
+            <LanguageSwitcher />
           </div>
         </div>
 

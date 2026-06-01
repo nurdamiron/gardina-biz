@@ -46,7 +46,6 @@ const ForgotPassword = () => {
         </div>
 
         <div className="rounded-3xl bg-white shadow-xl shadow-primary/5 border border-primary/10 overflow-hidden">
-          <div className="h-1 bg-gradient-to-r from-primary via-primary-light to-accent" />
           <div className="p-6 sm:p-7">
             {sent ? (
               <div className="text-center py-2">
@@ -89,7 +88,7 @@ const ForgotPassword = () => {
                 <button
                   type="submit"
                   disabled={loading || !identifier.trim()}
-                  className="w-full bg-primary hover:brightness-110 active:scale-[0.98] text-white font-bold text-base py-3.5 rounded-xl shadow-lg shadow-primary/25 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+                  className="w-full bg-primary hover:brightness-110 active:scale-[0.98] text-white font-bold text-base py-3.5 rounded-xl shadow-lg shadow-primary/25 transition-all flex items-center justify-center gap-2 disabled:bg-neutral-soft disabled:text-text-secondary disabled:shadow-none disabled:cursor-not-allowed disabled:active:scale-100"
                 >
                   {loading ? (
                     <>

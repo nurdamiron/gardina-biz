@@ -27,6 +27,7 @@ import adminReports from './kz/adminReports';
 import adminNotifications from './kz/adminNotifications';
 import adminCatalog from './kz/adminCatalog';
 import adminUsers from './kz/adminUsers';
+import paymentsNs from './kz/payments';
 
 const kz = {
   common,
@@ -58,6 +59,7 @@ const kz = {
   adminNotifications,
   adminCatalog,
   adminUsers,
+  payments: paymentsNs,
 };
 
 export default kz;

@@ -133,7 +133,7 @@ const NotificationsList = () => {
   }, {});
 
   return (
-    <div className="min-h-screen bg-background-light pb-24">
+    <div className="min-h-screen bg-background-light pb-32">
       <div className="bg-white border-b border-gray-100 sticky top-0 z-10">
         <div className="flex items-center justify-between p-4">
           <div className="flex items-center gap-4">

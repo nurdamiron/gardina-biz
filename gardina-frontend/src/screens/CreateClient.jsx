@@ -34,7 +34,7 @@ const CreateClient = () => {
     };
 
     return (
-        <div className="bg-background-light min-h-screen pb-24">
+        <div className="bg-background-light min-h-screen pb-32">
             <header className="sticky top-0 z-30 bg-white border-b border-gray-100 px-4 py-3">
                 <div className="flex items-center gap-3">
                     <button onClick={() => navigate(-1)} className="size-10 rounded-full hover:bg-gray-100 flex items-center justify-center -ml-2" aria-label={t('common.back')}>

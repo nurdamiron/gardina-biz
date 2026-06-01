@@ -4,9 +4,11 @@ import { useAuth } from '../contexts/AuthContext';
 import { useApp } from '../contexts/AppContext';
 import { useUI } from '../contexts/UIContext';
 import { measurementsAPI, catalogAPI } from '../services/api';
+import { useI18n } from '../contexts/I18nContext';
+import { pluralize, NOUNS } from '../utils/plural';
 import PaymentRiskIndicator from '../components/payment/PaymentRiskIndicator';
 import PaymentTracking from '../components/payment/PaymentTracking';
-import { formatTime24, formatDateKZ } from '../utils/dateUtils';
+import { formatTime24, formatDate } from '../utils/dateUtils';
 import Icon from '../components/common/Icon';
 
 // Fallback constants — used only if catalog API is unavailable
@@ -30,6 +32,7 @@ const MeasurementDetails = () => {
   const { user } = useAuth();
   const { refreshData } = useApp();
   const { showToast } = useUI();
+  const { t, lang } = useI18n();
   const [measurement, setMeasurement] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -105,7 +108,7 @@ const MeasurementDetails = () => {
         const meters = Math.ceil(widthM * coef + 0.5);
         const itemTotal = meters * (item.pricePerMeter || 0);
         totalFabricMeters += meters;
-        items.push({ name: item.fabricName || item.fabricCode, qty: meters, unit: 'м', price: item.pricePerMeter || 0, total: itemTotal, type: 'fabric' });
+        items.push({ name: item.fabricName || item.fabricCode, qty: meters, unit: t('measurements.units.meter', 'м'), price: item.pricePerMeter || 0, total: itemTotal, type: 'fabric' });
         total += itemTotal;
       });
 
@@ -113,7 +116,7 @@ const MeasurementDetails = () => {
       const sewRate = pb.sewingRate ?? catalogRates.sewingRate;
       if (totalFabricMeters > 0 && sewRate > 0) {
         const sewTotal = totalFabricMeters * sewRate;
-        items.push({ name: 'Тігу', qty: totalFabricMeters, unit: 'м', price: sewRate, total: sewTotal, type: 'sewing' });
+        items.push({ name: t('measurements.estimate.sewing', 'Тігу'), qty: totalFabricMeters, unit: t('measurements.units.meter', 'м'), price: sewRate, total: sewTotal, type: 'sewing' });
         total += sewTotal;
       }
 
@@ -122,7 +125,7 @@ const MeasurementDetails = () => {
         const tapePrice = catalogRates.tapePrice;
         const rolls = Math.ceil(totalFabricMeters / TAPE_ROLL_METERS);
         const tapeTotal = rolls * tapePrice;
-        items.push({ name: `Таспа (${TAPE_ROLL_METERS}м)`, qty: rolls, unit: 'рулон', price: tapePrice, total: tapeTotal, type: 'tape' });
+        items.push({ name: `${t('measurements.estimate.tape', 'Таспа')} (${TAPE_ROLL_METERS}${t('measurements.units.meter', 'м')})`, qty: rolls, unit: t('measurements.units.roll', 'рулон'), price: tapePrice, total: tapeTotal, type: 'tape' });
         total += tapeTotal;
 
         // 4. Ілгектер — catalog rate → fallback constant
@@ -130,7 +133,7 @@ const MeasurementDetails = () => {
         const hooksQty = totalFabricMeters * 5;
         const packs = Math.ceil(hooksQty / HOOKS_PER_PACK);
         const hooksTotal = packs * hooksPrice;
-        items.push({ name: 'Ілгектер', qty: packs, unit: 'қап', price: hooksPrice, total: hooksTotal, type: 'hooks' });
+        items.push({ name: t('measurements.estimate.hooks', 'Ілгектер'), qty: packs, unit: t('measurements.units.pack', 'қап'), price: hooksPrice, total: hooksTotal, type: 'hooks' });
         total += hooksTotal;
       }
     }
@@ -138,7 +141,7 @@ const MeasurementDetails = () => {
     // 5. Карниз
     if (pb.cornice?.needed && pb.cornice?.pricePerMeter) {
       const corniceTotal = widthM * pb.cornice.pricePerMeter;
-      items.push({ name: pb.cornice.name || 'Карниз', qty: widthM.toFixed(1), unit: 'м', price: pb.cornice.pricePerMeter, total: corniceTotal, type: 'cornice' });
+      items.push({ name: pb.cornice.name || t('measurements.estimate.cornice', 'Карниз'), qty: widthM.toFixed(1), unit: t('measurements.units.meter', 'м'), price: pb.cornice.pricePerMeter, total: corniceTotal, type: 'cornice' });
       total += corniceTotal;
     }
 
@@ -146,14 +149,14 @@ const MeasurementDetails = () => {
     const installRate = pb.installationRate ?? catalogRates.installationRate;
     if (widthM > 0 && installRate > 0) {
       const installTotal = widthM * installRate;
-      items.push({ name: 'Орнату', qty: widthM.toFixed(1), unit: 'м', price: installRate, total: installTotal, type: 'installation' });
+      items.push({ name: t('measurements.estimate.installation', 'Орнату'), qty: widthM.toFixed(1), unit: t('measurements.units.meter', 'м'), price: installRate, total: installTotal, type: 'installation' });
       total += installTotal;
     }
 
     // 7. Аксессуарлар
     if (pb.extras && pb.extras.length > 0) {
       pb.extras.forEach(extra => {
-        items.push({ name: extra.name, qty: extra.quantity || 1, unit: extra.unit || 'дн', price: extra.pricePerUnit || 0, total: extra.total || 0, type: 'accessory' });
+        items.push({ name: extra.name, qty: extra.quantity || 1, unit: extra.unit || t('measurements.units.piece', 'дн'), price: extra.pricePerUnit || 0, total: extra.total || 0, type: 'accessory' });
         total += extra.total || 0;
       });
     }
@@ -174,7 +177,7 @@ const MeasurementDetails = () => {
       setCompleting(true);
       // Call complete API to mark measurement as completed
       await measurementsAPI.complete(measurement.id, {
-        notes: 'Өлшем аяқталды',
+        notes: t('measurements.detail.completedTitle', 'Өлшем аяқталды'),
       });
 
       // Refresh data in AppContext to update cache
@@ -183,7 +186,7 @@ const MeasurementDetails = () => {
       // Navigate back to measurements list
       navigate(user?.role === 'manager' ? '/manager/measurements' : '/designer/measurements');
     } catch (error) {
-      showToast('Қате: ' + (error.response?.data?.error || error.message), 'error');
+      showToast(t('measurements.toast.errorPrefix', 'Қате: ') + (error.response?.data?.error || error.message), 'error');
       setCompleting(false);
     }
   };
@@ -221,12 +224,14 @@ const MeasurementDetails = () => {
   // Финансы по замеру (смета + платежи)
   const calculateMeasurementFinance = (measurementData) => {
     const windows = measurementData?.windows || [];
+    // amounts arrive from the API as numeric strings — coerce before summing,
+    // otherwise `s + p.amount` concatenates strings ("0" + "210000.00" + …) → NaN%.
     const plannedTotal = windows.reduce(
-      (sum, w) => sum + (w.priceBreakdown?.clientCheck?.total || 0),
+      (sum, w) => sum + Number(w.priceBreakdown?.clientCheck?.total || 0),
       0
     );
     const payments = measurementData?.payments || [];
-    const paid = payments.reduce((s, p) => s + (p.amount || 0), 0);
+    const paid = payments.reduce((s, p) => s + Number(p.amount || 0), 0);
     const outstanding = Math.max(plannedTotal - paid, 0);
     const eightyPercent = Math.round(plannedTotal * 0.8);
     return { plannedTotal, paid, outstanding, eightyPercent, payments };
@@ -237,7 +242,7 @@ const MeasurementDetails = () => {
       <div className="bg-background-light min-h-screen flex items-center justify-center">
         <div className="text-center">
           <div className="size-16 border-4 border-primary/30 border-t-primary rounded-full animate-spin mx-auto"></div>
-          <p className="mt-4 text-text-secondary">Жүктелуде...</p>
+          <p className="mt-4 text-text-secondary">{t('measurements.detail.loading', 'Жүктелуде...')}</p>
         </div>
       </div>
     );
@@ -248,10 +253,10 @@ const MeasurementDetails = () => {
       <div className="bg-background-light min-h-screen flex items-center justify-center p-4">
         <div className="bg-white rounded-2xl p-8 shadow-sm text-center max-w-md">
           <Icon name="error" size={48} className="text-red-500" />
-          <h2 className="text-xl font-bold mt-4">Қате</h2>
-          <p className="text-text-secondary mt-2">{error || 'Өлшем табылмады'}</p>
+          <h2 className="text-xl font-bold mt-4">{t('measurements.detail.errorTitle', 'Қате')}</h2>
+          <p className="text-text-secondary mt-2">{error || t('measurements.detail.notFound', 'Өлшем табылмады')}</p>
           <button onClick={() => navigate(-1)} className="mt-6 px-6 py-2 bg-primary text-white rounded-lg font-bold">
-            Артқа
+            {t('measurements.detail.back', 'Артқа')}
           </button>
         </div>
       </div>
@@ -270,11 +275,19 @@ const MeasurementDetails = () => {
   }, 0);
 
   const finance = calculateMeasurementFinance(measurement);
+  // Per-window priceBreakdown can be 0 while the room rows show real prices
+  // (calculateRoomEstimate). Fall back to the room total so the summary tile and
+  // the room list don't contradict each other.
+  if (finance.plannedTotal <= 0 && totalEstimate > 0) {
+    finance.plannedTotal = totalEstimate;
+    finance.outstanding = Math.max(totalEstimate - finance.paid, 0);
+    finance.eightyPercent = Math.round(totalEstimate * 0.8);
+  }
   const payments = finance.payments || [];
 
   const handleAddPayment = async (paymentData) => {
     if (!paymentData.amount || isNaN(paymentData.amount)) {
-      showToast('Соманы енгізіңіз', 'error');
+      showToast(t('measurements.toast.enterAmount', 'Соманы енгізіңіз'), 'error');
       return;
     }
     try {
@@ -284,9 +297,9 @@ const MeasurementDetails = () => {
         note: paymentData.note,
       });
       await loadMeasurement(); // refresh to get payments
-      showToast('Төлем қосылды', 'success');
+      showToast(t('measurements.toast.paymentAdded', 'Төлем қосылды'), 'success');
     } catch (error) {
-      showToast(error.response?.data?.error || 'Қате төлемде', 'error');
+      showToast(error.response?.data?.error || t('measurements.toast.paymentError', 'Қате төлемде'), 'error');
       throw error; // Re-throw for PaymentTracking component to handle
     }
   };
@@ -302,15 +315,15 @@ const MeasurementDetails = () => {
               <Icon name="arrow_back" className="text-gray-600" />
             </button>
             <div>
-              <h1 className="text-lg font-bold leading-tight">Өлшем #{measurement.measurementNumber || id.slice(0,8)}</h1>
-              <p className="text-xs text-text-secondary">{formatDateKZ(measurement.scheduledAt)} • {formatTime24(measurement.scheduledAt)}</p>
+              <h1 className="text-lg font-bold leading-tight">{t('measurements.detail.numberPrefix', 'Өлшем')} #{measurement.measurementNumber || id.slice(0,8)}</h1>
+              <p className="text-xs text-text-secondary">{formatDate(measurement.scheduledAt, lang)} • {formatTime24(measurement.scheduledAt)}</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
             {isPriorityHigh && (
               <div className="px-2 py-1 bg-red-500 text-white rounded-full flex items-center gap-1">
                 <Icon name="priority_high" size={14} />
-                <span className="text-xs font-bold">ШҰҒЫЛ</span>
+                <span className="text-xs font-bold">{t('measurements.detail.urgent', 'ШҰҒЫЛ')}</span>
               </div>
             )}
             <button
@@ -336,7 +349,7 @@ const MeasurementDetails = () => {
                 <Icon name="person" size={24} />
               </div>
             <div className="flex-1">
-              <h3 className="font-bold text-lg">{measurement.clientName || 'Белгісіз'}</h3>
+              <h3 className="font-bold text-lg">{measurement.clientName || t('measurements.detail.unknownClient', 'Белгісіз')}</h3>
                 {measurement.clientPhone && (
                 <a href={`tel:${measurement.clientPhone}`} className="text-sm text-primary font-medium flex items-center gap-1">
                   <Icon name="call" size={14} />
@@ -354,7 +367,7 @@ const MeasurementDetails = () => {
                 {measurement.mapLink && (
                   <button onClick={openMap} className="mt-1 text-xs text-primary font-bold flex items-center gap-1">
                     <Icon name="open_in_new" size={12} />
-                    Картада ашу
+                    {t('measurements.detail.openOnMap', 'Картада ашу')}
                   </button>
                 )}
               </div>
@@ -383,8 +396,8 @@ const MeasurementDetails = () => {
                 measurement.status === 'completed' ? 'text-green-800' :
                 measurement.status === 'in_progress' ? 'text-primary' : 'text-amber-800'
               }`}>
-                {measurement.status === 'completed' ? 'Аяқталды' :
-                 measurement.status === 'in_progress' ? 'Орындалуда' : 'Күтуде'}
+                {measurement.status === 'completed' ? t('measurements.status.completed', 'Аяқталды') :
+                 measurement.status === 'in_progress' ? t('measurements.status.in_progress', 'Орындалуда') : t('measurements.status.pending', 'Күтуде')}
               </p>
             </div>
             {/* Мини индикатор риска платежей */}
@@ -402,8 +415,8 @@ const MeasurementDetails = () => {
         {/* ROOMS LIST */}
         <section className="space-y-3">
           <div className="flex items-center justify-between px-1">
-            <h2 className="font-bold text-gray-900">Бөлмелер</h2>
-            <span className="text-sm text-gray-500">{totalRooms} бөлме</span>
+            <h2 className="font-bold text-gray-900">{t('measurements.rooms.title', 'Бөлмелер')}</h2>
+            <span className="text-sm text-gray-500">{pluralize(totalRooms, NOUNS.room, lang)}</span>
           </div>
 
           {totalRooms === 0 ? (
@@ -411,13 +424,13 @@ const MeasurementDetails = () => {
               <div className="size-16 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-4">
                 <Icon name="add_home" size={28} className="text-gray-400" />
               </div>
-              <p className="text-gray-500 mb-4">Әлі бөлме қосылмаған</p>
+              <p className="text-gray-500 mb-4">{t('measurements.rooms.empty', 'Әлі бөлме қосылмаған')}</p>
               {['designer', 'admin'].includes(user?.role) && (
                 <button
                   onClick={() => navigate(`/designer/measurements/${id}/room`, { state: { measurementId: id, measurement } })}
                   className="px-6 py-3 bg-primary text-white rounded-xl font-bold hover:brightness-110 transition-all"
                 >
-                  Бөлме қосу
+                  {t('measurements.rooms.add', 'Бөлме қосу')}
                 </button>
               )}
             </div>
@@ -444,11 +457,11 @@ const MeasurementDetails = () => {
                       <div className="flex-1 min-w-0">
                         <h3 className="font-bold text-gray-900 truncate">{room.roomName}</h3>
                         <div className="flex items-center gap-2 text-xs text-gray-500">
-                          <span>{widthM}м × {heightM}м</span>
+                          <span>{widthM}{t('measurements.units.meter', 'м')} × {heightM}{t('measurements.units.meter', 'м')}</span>
                           {fabricCount > 0 && (
                             <>
                               <span className="text-gray-300">|</span>
-                              <span>{fabricCount} мата</span>
+                              <span>{fabricCount} {t('measurements.rooms.fabricUnit', 'мата')}</span>
                             </>
                           )}
                         </div>
@@ -470,7 +483,7 @@ const MeasurementDetails = () => {
                               className="flex-1 py-2 bg-primary text-white rounded-lg font-bold text-sm flex items-center justify-center gap-1"
                             >
                               <Icon name="edit" size={18} />
-                              Өзгерту
+                              {t('measurements.rooms.edit', 'Өзгерту')}
                             </button>
                             </div>
                           )}
@@ -478,7 +491,7 @@ const MeasurementDetails = () => {
                         {/* Fabrics */}
                         {pb.fabricItems && pb.fabricItems.length > 0 && (
                           <div className="p-4 border-t border-gray-100">
-                            <p className="text-xs font-bold text-gray-500 uppercase mb-3">Маталар</p>
+                            <p className="text-xs font-bold text-gray-500 uppercase mb-3">{t('measurements.rooms.fabrics', 'Маталар')}</p>
                             <div className="space-y-2">
                               {pb.fabricItems.map((fabric, idx) => {
                                 const coef = fabric.fabricType === 'tulle' ? 3 : 2;
@@ -491,7 +504,7 @@ const MeasurementDetails = () => {
                                     <div className="flex-1">
                                       <p className="font-bold text-sm">{fabric.fabricName || fabric.fabricCode}</p>
                                       <p className="text-xs text-gray-500">
-                                        {fabric.fabricType === 'tulle' ? 'Тюль (x3)' : 'Перде (x2)'} = {meters}м
+                                        {fabric.fabricType === 'tulle' ? t('measurements.rooms.tulle', 'Тюль (x3)') : t('measurements.rooms.curtain', 'Перде (x2)')} = {meters}{t('measurements.units.meter', 'м')}
                               </p>
                             </div>
                                     <p className="font-bold text-sm">{formatPrice(meters * (fabric.pricePerMeter || 0))}</p>
@@ -505,7 +518,7 @@ const MeasurementDetails = () => {
                         {/* Estimate Table */}
                         {items.length > 0 && (
                           <div className="p-4 border-t border-gray-100">
-                            <p className="text-xs font-bold text-gray-500 uppercase mb-3">Смета</p>
+                            <p className="text-xs font-bold text-gray-500 uppercase mb-3">{t('measurements.rooms.estimate', 'Смета')}</p>
                             <div className="space-y-2">
                               {items.map((item, idx) => (
                                 <div key={idx} className="flex items-center justify-between py-2 border-b border-gray-50 last:border-0">
@@ -536,7 +549,7 @@ const MeasurementDetails = () => {
                               ))}
                             </div>
                             <div className="mt-3 pt-3 border-t border-gray-200 flex justify-between items-center">
-                              <span className="font-bold text-gray-700">Барлығы:</span>
+                              <span className="font-bold text-gray-700">{t('measurements.rooms.total', 'Барлығы:')}</span>
                               <span className="text-xl font-black text-green-600">{formatPrice(total)}</span>
                           </div>
                         </div>
@@ -546,7 +559,7 @@ const MeasurementDetails = () => {
                         {room.designPhotos && room.designPhotos.length > 0 && (
                           <div className="p-4 border-t border-gray-100">
                             <p className="text-xs font-bold text-gray-500 uppercase mb-3">
-                              Фото ({room.designPhotos.length})
+                              {t('measurements.rooms.photos', 'Фото')} ({room.designPhotos.length})
                             </p>
                             <div className="grid grid-cols-3 gap-2">
                               {room.designPhotos.map((photo, idx) => (
@@ -565,7 +578,7 @@ const MeasurementDetails = () => {
                         {/* Notes */}
                         {room.notes && (
                           <div className="p-4 border-t border-gray-100 bg-amber-50">
-                            <p className="text-xs font-bold text-amber-700 uppercase mb-1">Ескертпе</p>
+                            <p className="text-xs font-bold text-amber-700 uppercase mb-1">{t('measurements.rooms.note', 'Ескертпе')}</p>
                             <p className="text-sm text-amber-900">{room.notes}</p>
                         </div>
                       )}
@@ -582,7 +595,7 @@ const MeasurementDetails = () => {
                   className="w-full py-4 border-2 border-dashed border-gray-200 rounded-2xl text-gray-500 font-bold hover:border-primary hover:text-primary hover:bg-primary/5 transition-all flex items-center justify-center gap-2"
               >
                   <Icon name="add" />
-                  Бөлме қосу
+                  {t('measurements.rooms.add', 'Бөлме қосу')}
               </button>
               )}
             </>
@@ -592,7 +605,7 @@ const MeasurementDetails = () => {
         {/* Notes */}
         {measurement.notes && (
           <section className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
-            <p className="text-xs font-bold text-gray-500 uppercase mb-2">Жалпы ескертпе</p>
+            <p className="text-xs font-bold text-gray-500 uppercase mb-2">{t('measurements.detail.generalNote', 'Жалпы ескертпе')}</p>
             <p className="text-sm text-gray-700 whitespace-pre-line">{measurement.notes}</p>
           </section>
         )}
@@ -609,33 +622,43 @@ const MeasurementDetails = () => {
               <Icon name="door_sliding" />
             </div>
             <p className="text-2xl font-black text-gray-900">{totalRooms}</p>
-            <p className="text-xs text-gray-500">Бөлме</p>
+            <p className="text-xs text-gray-500">{t('measurements.summary.rooms', 'Бөлме')}</p>
           </div>
-          <div className={`rounded-xl p-4 shadow-sm border text-center ${
+          {finance.plannedTotal <= 0 ? (
+            <div className="rounded-xl p-4 border border-border-light bg-neutral-soft text-center">
+              <div className="size-10 rounded-full bg-surface-light text-text-secondary flex items-center justify-center mx-auto mb-2">
+                <Icon name="request_quote" />
+              </div>
+              <p className="text-xl font-black text-text-main">—</p>
+              <p className="text-xs font-bold text-text-secondary">{t('measurements.summary.noEstimate', 'Сметасыз')}</p>
+            </div>
+          ) : (
+          <div className={`rounded-xl p-4 border text-center ${
             finance.paid >= finance.eightyPercent
-              ? 'bg-white border-gray-100'
+              ? 'bg-surface-light border-border-light'
               : finance.paid >= finance.plannedTotal * 0.5
-              ? 'bg-yellow-50 border-yellow-200'
-              : 'bg-red-50 border-red-200'
+              ? 'bg-warning-soft border-warning/20'
+              : 'bg-danger-soft border-danger/20'
           }`}>
             <div className={`size-10 rounded-full flex items-center justify-center mx-auto mb-2 ${
               finance.paid >= finance.eightyPercent
-                ? 'bg-green-50 text-green-600'
+                ? 'bg-success-soft text-success'
                 : finance.paid >= finance.plannedTotal * 0.5
-                ? 'bg-yellow-100 text-yellow-600'
-                : 'bg-red-100 text-red-600'
+                ? 'bg-warning-soft text-warning'
+                : 'bg-danger-soft text-danger'
             }`}>
               <Icon name={finance.paid >= finance.eightyPercent ? 'check_circle' : 'warning'} />
             </div>
-            <p className="text-xl font-black text-gray-900">{Math.round((finance.paid / finance.plannedTotal) * 100) || 0}%</p>
-            <p className="text-xs font-bold">
+            <p className="text-xl font-black text-text-main">{Math.round((finance.paid / finance.plannedTotal) * 100) || 0}%</p>
+            <p className="text-xs font-bold text-text-main">
               {finance.paid >= finance.eightyPercent
-                ? 'Төлем OK'
+                ? t('measurements.summary.paymentOk', 'Төлем OK')
                 : finance.paid >= finance.plannedTotal * 0.5
-                ? 'Қауіп бар'
-                : 'Қауіпті!'}
+                ? t('measurements.summary.paymentRisk', 'Қауіп бар')
+                : t('measurements.summary.paymentDanger', 'Қауіпті!')}
             </p>
           </div>
+          )}
         </section>
 
         {/* PAYMENT TRACKING */}
@@ -646,12 +669,12 @@ const MeasurementDetails = () => {
               totalAmount: finance.plannedTotal,
               prepaidAmount: finance.payments
                 .filter(p => p.type === 'prepayment')
-                .reduce((sum, p) => sum + (p.amount || 0), 0),
+                .reduce((sum, p) => sum + Number(p.amount || 0), 0),
               finalAmount: finance.payments
                 .filter(p => p.type === 'final')
-                .reduce((sum, p) => sum + (p.amount || 0), 0),
+                .reduce((sum, p) => sum + Number(p.amount || 0), 0),
               payments: finance.payments.map(p => ({
-                amount: p.amount || 0,
+                amount: Number(p.amount || 0),
                 type: p.type || 'prepayment',
                 note: p.note || '',
                 createdAt: p.date || new Date().toISOString()
@@ -675,8 +698,8 @@ const MeasurementDetails = () => {
         {totalRooms > 0 && (
           <section className="bg-gray-900 text-white rounded-2xl p-5">
             <div className="flex items-center justify-between mb-3">
-              <span className="text-gray-400">Жалпы сома</span>
-              <span className="text-sm text-gray-500">{totalRooms} бөлме</span>
+              <span className="text-gray-400">{t('measurements.summary.totalAmount', 'Жалпы сома')}</span>
+              <span className="text-sm text-gray-500">{pluralize(totalRooms, NOUNS.room, lang)}</span>
             </div>
             <p className="text-4xl font-black">{formatPrice(totalEstimate)}</p>
           </section>
@@ -690,13 +713,13 @@ const MeasurementDetails = () => {
                 <Icon name="warning" className="text-orange-600" />
               </div>
               <div className="flex-1">
-                <p className="font-bold text-orange-900">Төлем жеткіліксіз!</p>
+                <p className="font-bold text-orange-900">{t('measurements.warning.title', 'Төлем жеткіліксіз!')}</p>
                 <p className="text-sm text-orange-800 mt-1">
-                  Клиент тек {Math.round((finance.paid / finance.plannedTotal) * 100)}% төледі.
-                  Минимум 80% ({finance.eightyPercent.toLocaleString()} ₸) қажет.
+                  {t('measurements.warning.clientPaidPrefix', 'Клиент тек ')}{Math.round((finance.paid / finance.plannedTotal) * 100)}{t('measurements.warning.clientPaidSuffix', '% төледі.')}
+                  {' '}{t('measurements.warning.minRequiredPrefix', 'Минимум 80% (')}{finance.eightyPercent.toLocaleString()}{t('measurements.warning.minRequiredSuffix', ' ₸) қажет.')}
                 </p>
                 <p className="text-xs text-orange-700 mt-2">
-                  <strong>Ұсыныс:</strong> Өндіріске жібермес бұрын {(finance.eightyPercent - finance.paid).toLocaleString()} ₸ алу керек.
+                  <strong>{t('measurements.warning.adviceLabel', 'Ұсыныс:')}</strong> {t('measurements.warning.advicePrefix', 'Өндіріске жібермес бұрын ')}{(finance.eightyPercent - finance.paid).toLocaleString()}{t('measurements.warning.adviceSuffix', ' ₸ алу керек.')}
                 </p>
                 {user?.role !== 'designer' && (
                   <button
@@ -706,7 +729,7 @@ const MeasurementDetails = () => {
                     className="mt-3 px-4 py-2 bg-orange-600 text-white rounded-lg text-xs font-bold hover:bg-orange-700 transition-colors flex items-center gap-1"
                   >
                     <Icon name="payments" size={16} />
-                    Төлем қосу
+                    {t('measurements.warning.addPayment', 'Төлем қосу')}
                   </button>
                 )}
               </div>
@@ -729,23 +752,23 @@ const MeasurementDetails = () => {
               {completing ? (
                 <>
                   <div className="size-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                  Аяқталуда...
+                  {t('measurements.complete.completing', 'Аяқталуда...')}
                 </>
               ) : finance.paid < finance.eightyPercent ? (
                 <>
                   <Icon name="block" />
-                  80% төлем қажет
+                  {t('measurements.complete.needPayment', '80% төлем қажет')}
                 </>
               ) : (
                 <>
                   <Icon name="done_all" />
-                  Өлшемді аяқтау
+                  {t('measurements.complete.finish', 'Өлшемді аяқтау')}
                 </>
               )}
             </button>
             {finance.paid < finance.eightyPercent && (
               <p className="text-xs text-center text-gray-500 mt-2">
-                Өлшемді аяқтау үшін клиент минимум 80% төлеуі керек
+                {t('measurements.complete.hint', 'Өлшемді аяқтау үшін клиент минимум 80% төлеуі керек')}
               </p>
             )}
           </section>
@@ -759,8 +782,8 @@ const MeasurementDetails = () => {
                 <Icon name="check_circle" size={24} className="text-green-600" />
               </div>
               <div>
-                <p className="font-bold text-green-900">Өлшем аяқталды</p>
-                <p className="text-sm text-green-700">Мәліметтер сәтті сақталды</p>
+                <p className="font-bold text-green-900">{t('measurements.detail.completedTitle', 'Өлшем аяқталды')}</p>
+                <p className="text-sm text-green-700">{t('measurements.detail.completedSubtitle', 'Мәліметтер сәтті сақталды')}</p>
               </div>
             </div>
           </section>

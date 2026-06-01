@@ -80,3 +80,48 @@ export const STATUS_COLORS = {
 export const getStatusColor = (status) => {
   return STATUS_COLORS[status] || 'default';
 };
+
+/**
+ * Canonical status → semantic tone. ONE source of truth so every StatusBadge
+ * across the app agrees on what color a stage is. Tones map to semantic tokens
+ * (success/warning/danger/info/neutral) rendered as soft-bg + saturated-text pills.
+ */
+export const STATUS_TONE = {
+  // Pre-sale / early pipeline → info
+  lead: 'info',
+  new: 'info',
+  scheduled: 'info',
+  measurement_scheduled: 'info',
+  assigned: 'info',
+  measuring: 'info',
+  // Mid pipeline (agreed, not yet producing) → neutral
+  measured: 'neutral',
+  measurement_done: 'neutral',
+  proposal_sent: 'neutral',
+  proposal_accepted: 'neutral',
+  contract_signed: 'neutral',
+  // Active production / scheduled work → warning (amber = "in motion", not alarm)
+  in_production: 'warning',
+  in_sewing: 'warning',
+  corrections: 'warning',
+  ready: 'warning',
+  ready_to_install: 'warning',
+  ready_for_installation: 'warning',
+  installation_scheduled: 'warning',
+  installing: 'warning',
+  payment_pending: 'warning',
+  // Done → success
+  completed: 'success',
+  installed: 'success',
+  paid: 'success',
+  // Terminal-negative → danger
+  cancelled: 'danger',
+  rejected: 'danger',
+};
+
+/**
+ * Semantic tone for a status (success|warning|danger|info|neutral).
+ * @param {string} status
+ * @returns {'success'|'warning'|'danger'|'info'|'neutral'}
+ */
+export const getStatusTone = (status) => STATUS_TONE[status] || 'neutral';

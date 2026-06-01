@@ -4,6 +4,7 @@ import { catalogAPI } from '../../services/api';
 import { useUI } from '../../contexts/UIContext';
 import BottomNav from '../../components/navigation/BottomNav';
 import Icon from '../../components/common/Icon';
+import Card from '../../components/common/Card';
 import { useI18n } from '../../contexts/I18nContext';
 
 /**
@@ -22,13 +23,13 @@ const AdminCatalog = () => {
     const [filterType, setFilterType] = useState('all');
 
     const categories = [
-        { id: 'all', label: 'Барлығы' },
-        { id: 'curtain', label: 'Перде' },
-        { id: 'tulle', label: 'Тюль' },
-        { id: 'cornice', label: 'Карниз' },
-        { id: 'jalousie', label: 'Жалюзи' },
-        { id: 'accessory', label: 'Фурнитура' },
-        { id: 'ready_made', label: 'Дайын өнім' },
+        { id: 'all', label: t('adminCatalog.categories.all', 'Все') },
+        { id: 'curtain', label: t('adminCatalog.categories.curtain', 'Шторы') },
+        { id: 'tulle', label: t('adminCatalog.categories.tulle', 'Тюль') },
+        { id: 'cornice', label: t('adminCatalog.categories.cornice', 'Карниз') },
+        { id: 'jalousie', label: t('adminCatalog.categories.jalousie', 'Жалюзи') },
+        { id: 'accessory', label: t('adminCatalog.categories.accessory', 'Фурнитура') },
+        { id: 'ready_made', label: t('adminCatalog.categories.ready_made', 'Готовые изделия') },
     ];
 
     useEffect(() => {
@@ -87,7 +88,7 @@ const AdminCatalog = () => {
     });
 
     return (
-        <div className="bg-background-light min-h-screen pb-24">
+        <div className="bg-background-light min-h-screen pb-32">
             {/* Header */}
             <header className="sticky top-0 z-30 bg-white/80 backdrop-blur-md border-b border-gray-100 px-4 py-4">
                 <div className="flex justify-between items-center">
@@ -125,13 +126,13 @@ const AdminCatalog = () => {
 
                 {/* Search */}
                 <div className="relative">
-                    <Icon name="search" className="text-gray-400" />
+                    <Icon name="search" size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary/70 pointer-events-none" />
                     <input
                         type="text"
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                         placeholder={t('adminCatalog.searchPlaceholder')}
-                        className="w-full pl-10 pr-4 py-3 bg-white border-2 border-gray-100 rounded-xl focus:border-primary transition-all"
+                        className="w-full pl-10 pr-4 py-3 bg-surface-light border border-border-light rounded-xl focus:border-primary outline-none transition-all"
                     />
                 </div>
 
@@ -168,43 +169,63 @@ const AdminCatalog = () => {
                                 </p>
                             </div>
                         ) : (
-                            filteredFabrics.map(fabric => (
-                                <div
+                            filteredFabrics.map(fabric => {
+                                const price = Number(fabric.pricePerMeter) || 0;
+                                const cost = Number(fabric.costPrice) || 0;
+                                const margin = price > 0 && cost > 0 ? Math.round(((price - cost) / price) * 100) : null;
+                                const marginCls = margin == null ? '' : margin >= 40 ? 'bg-success-soft text-success' : margin >= 20 ? 'bg-warning-soft text-warning' : 'bg-danger-soft text-danger';
+                                const stock = Number(fabric.stockQuantity ?? fabric.stock_quantity);
+                                const unitLabel = t(`adminCatalog.units.${fabric.unit || 'meter'}`);
+                                return (
+                                <Card
                                     key={fabric.id}
                                     onClick={() => navigate(`/admin/catalog/products/${fabric.id}`)}
-                                    className="bg-white rounded-xl p-4 shadow-sm active:scale-[0.98] transition-all cursor-pointer relative overflow-hidden"
                                 >
-                                    <div className="flex justify-between items-start">
-                                        <div className="flex gap-3">
-                                            {/* Thumbnail if exists */}
-                                            {fabric.image_url ? (
-                                                <div className="size-16 rounded-lg bg-gray-100 bg-cover bg-center shrink-0 border border-gray-100" style={{ backgroundImage: `url(${fabric.image_url})` }} />
-                                            ) : (
-                                                <div className="size-16 rounded-lg bg-gray-50 flex items-center justify-center shrink-0 border border-gray-100">
-                                                    <Icon name="image" className="text-gray-300" />
+                                    <div className="flex gap-3">
+                                        {fabric.image_url ? (
+                                            <div className="size-16 rounded-xl bg-gray-100 bg-cover bg-center shrink-0 border border-border-light" style={{ backgroundImage: `url(${fabric.image_url})` }} />
+                                        ) : (
+                                            <div className="size-16 rounded-xl bg-background-light flex items-center justify-center shrink-0 border border-border-light">
+                                                <Icon name="image" className="text-gray-300" />
+                                            </div>
+                                        )}
+                                        <div className="flex-1 min-w-0">
+                                            <div className="flex items-start justify-between gap-2">
+                                                <div className="min-w-0">
+                                                    <p className="font-bold text-text-main leading-tight truncate">{fabric.name}</p>
+                                                    <p className="text-sm text-text-secondary truncate">{fabric.brand || '—'}</p>
                                                 </div>
-                                            )}
-
-                                            <div>
-                                                <p className="font-bold text-gray-900 leading-tight">{fabric.name}</p>
-                                                <p className="text-sm text-gray-500">{fabric.brand || '—'}</p>
-                                                <div className="flex gap-1 mt-1">
-                                                    <span className="px-2 py-0.5 bg-gray-100 text-gray-600 text-xs rounded font-medium">
-                                                        {t(`adminCatalog.categories.${fabric.type}`, fabric.type)}
-                                                    </span>
+                                                <div className="text-right shrink-0">
+                                                    <p className="font-bold text-lg text-text-main whitespace-nowrap">{price.toLocaleString('ru-RU')} ₸</p>
+                                                    <p className="text-[10px] text-gray-400 uppercase font-bold">{unitLabel}</p>
                                                 </div>
                                             </div>
-                                        </div>
-                                        <div className="text-right">
-                                            <p className="font-bold text-lg text-gray-900">{fabric.pricePerMeter?.toLocaleString()} ₸</p>
-                                            <p className="text-[10px] text-gray-400 uppercase font-bold">
-                                                {t(`adminCatalog.units.${fabric.unit || 'meter'}`)}
-                                            </p>
-                                            <p className="text-[10px] text-gray-400 mt-1">{t('adminCatalog.card.cost')}: {fabric.costPrice?.toLocaleString()} ₸</p>
+                                            <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
+                                                <span className="px-2 py-0.5 bg-background-light text-text-secondary text-xs rounded-full font-medium">
+                                                    {t(`adminCatalog.categories.${fabric.type}`, fabric.type)}
+                                                </span>
+                                                {margin != null && (
+                                                    <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold ${marginCls}`}>
+                                                        <Icon name="percent" size={11} /> {t('adminCatalog.card.margin', 'Маржа')} {margin}%
+                                                    </span>
+                                                )}
+                                                {Number.isFinite(stock) && stock > 0 && (
+                                                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-info-soft text-info">
+                                                        <Icon name="inventory_2" size={11} /> {stock} {unitLabel}
+                                                    </span>
+                                                )}
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                            ))
+                                    {cost > 0 && (
+                                        <div className="mt-3 pt-3 border-t border-border-light flex items-center justify-between text-xs text-text-secondary/80">
+                                            <span>{t('adminCatalog.card.cost')}: {cost.toLocaleString('ru-RU')} ₸</span>
+                                            {margin != null && <span>{t('adminCatalog.card.profit', 'Прибыль')}: {(price - cost).toLocaleString('ru-RU')} ₸/{unitLabel}</span>}
+                                        </div>
+                                    )}
+                                </Card>
+                                );
+                            })
                         )}
                     </div>
                 ) : activeTab === 'services' ? (

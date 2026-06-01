@@ -1,11 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { useApp } from '../../contexts/AppContext';
 import { formatDateKZ, formatTime24 } from '../../utils/dateUtils';
 import BottomNav from '../../components/navigation/BottomNav';
 import OnboardingChecklist from '../../components/admin/OnboardingChecklist';
-// Import new analytics components
 import StatsCard from '../../components/analytics/StatsCard';
 import ChartBar from '../../components/analytics/ChartBar';
 import ChartLine from '../../components/analytics/ChartLine';
@@ -13,6 +12,9 @@ import KPICard from '../../components/analytics/KPICard';
 import FunnelChart from '../../components/analytics/FunnelChart';
 import Icon from '../../components/common/Icon';
 import { useI18n } from '../../contexts/I18nContext';
+import api from '../../services/api';
+import { NOUNS } from '../../utils/plural';
+import { formatMoneyShort } from '../../utils/money';
 
 /**
  * Admin Dashboard
@@ -44,9 +46,14 @@ const AdminDashboard = () => {
     });
     const [localLoading, setLocalLoading] = useState(true);
     const [activeTab, setActiveTab] = useState('overview');
+    const [leads, setLeads] = useState([]);
+    const [leadsLoading, setLeadsLoading] = useState(false);
+    const [updatingLead, setUpdatingLead] = useState(null);
 
     useEffect(() => {
         initializeData();
+        // Pre-load leads count for badge on tab button
+        api.get('/leads').then((r) => setLeads(r.data.data || [])).catch(() => {});
     }, []);
 
     const initializeData = async () => {
@@ -66,22 +73,13 @@ const AdminDashboard = () => {
                 return sum + (d.totalAmount?.amount || 0);
             }, 0);
 
-            // Calculate revenue from completed measurements
-            const measurementRevenue = measurementsData.reduce((sum, m) => {
-                if (m.status === 'completed' && m.windows) {
-                    const windowsTotal = m.windows.reduce((wSum, w) => {
-                        return wSum + (w.priceBreakdown?.clientCheck?.total || 0);
-                    }, 0);
-                    return sum + windowsTotal;
-                }
-                return sum;
-            }, 0);
-
             setStats({
                 totalDeals: dealsData.length,
                 totalClients: clientsData.length,
                 totalMeasurements: measurementsData.length,
-                revenue: totalRevenue + measurementRevenue,
+                // Revenue = deals only. Previously deals + measurement-window
+                // estimates were summed — the SAME money — doubling the total.
+                revenue: totalRevenue,
                 completedMeasurements: measurementsData.filter(m => m.status === 'completed').length,
                 pendingMeasurements: measurementsData.filter(m => m.status === 'scheduled').length,
             });
@@ -95,6 +93,34 @@ const AdminDashboard = () => {
     const refreshData = async () => {
         await loadData(null, true);
         await loadAnalytics('admin', user.id, { force: true });
+    };
+
+    const loadLeads = useCallback(async () => {
+        setLeadsLoading(true);
+        try {
+            const res = await api.get('/leads');
+            setLeads(res.data.data || []);
+        } catch (e) {
+            console.error('loadLeads:', e.message);
+        } finally {
+            setLeadsLoading(false);
+        }
+    }, []);
+
+    useEffect(() => {
+        if (activeTab === 'leads') loadLeads();
+    }, [activeTab, loadLeads]);
+
+    const updateLeadStatus = async (id, status) => {
+        setUpdatingLead(id);
+        try {
+            const res = await api.patch(`/leads/${id}/status`, { status });
+            setLeads((prev) => prev.map((l) => (l.id === id ? res.data.data : l)));
+        } catch (e) {
+            console.error('updateLeadStatus:', e.message);
+        } finally {
+            setUpdatingLead(null);
+        }
     };
 
     // Group measurements by date for timeline
@@ -145,11 +171,11 @@ const AdminDashboard = () => {
         { label: t('dashboard.stats.totalMeasurements'), value: stats.totalMeasurements, icon: 'straighten', accent: 'border-primary', iconBg: 'bg-primary/10', iconColor: 'text-primary', subtext: `${stats.completedMeasurements} ${t('dashboard.stats.completedSuffix')}` },
         { label: t('dashboard.stats.totalClients'), value: stats.totalClients, icon: 'group', accent: 'border-emerald-500', iconBg: 'bg-emerald-50', iconColor: 'text-emerald-600', subtext: t('dashboard.stats.clientsSubtext') },
         { label: t('dashboard.stats.totalDeals'), value: stats.totalDeals, icon: 'handshake', accent: 'border-primary-light', iconBg: 'bg-primary/5', iconColor: 'text-primary-light', subtext: t('dashboard.stats.dealsSubtext') },
-        { label: t('dashboard.stats.revenue'), value: `${(stats.revenue / 1000).toFixed(0)}K ₸`, icon: 'payments', accent: 'border-amber-500', iconBg: 'bg-amber-50', iconColor: 'text-amber-600', subtext: t('dashboard.stats.revenueSubtext') },
+        { label: t('dashboard.stats.revenue'), value: formatMoneyShort(stats.revenue, lang), icon: 'payments', accent: 'border-amber-500', iconBg: 'bg-amber-50', iconColor: 'text-amber-600', subtext: t('dashboard.stats.revenueSubtext') },
     ];
 
     return (
-        <div className="bg-background-light min-h-screen pb-24">
+        <div className="bg-background-light min-h-screen pb-32">
             {/* Header */}
             <header className="sticky top-0 z-30 bg-white/80 backdrop-blur-md border-b border-gray-100 px-4 py-4">
                 <div className="flex items-center justify-between mb-3">
@@ -160,7 +186,7 @@ const AdminDashboard = () => {
                 </div>
 
                 {/* Tabs */}
-                <div className="flex gap-2 overflow-x-auto">
+                <div className="flex gap-2 overflow-x-auto no-scrollbar -mx-4 px-4">
                     <button
                         onClick={() => setActiveTab('overview')}
                         className={`px-4 py-2 rounded-lg font-bold text-sm transition-all whitespace-nowrap ${
@@ -209,6 +235,19 @@ const AdminDashboard = () => {
                     >
                         {t('adminDashboard.tabs.clients')}
                     </button>
+                    <button
+                        onClick={() => setActiveTab('leads')}
+                        className={`relative px-4 py-2 rounded-lg font-bold text-sm transition-all whitespace-nowrap ${
+                            activeTab === 'leads' ? 'bg-primary text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                        }`}
+                    >
+                        Заявки с сайта
+                        {leads.filter((l) => l.status === 'new').length > 0 && activeTab !== 'leads' && (
+                            <span className="absolute -top-1 -right-1 size-4 bg-red-500 text-white text-[10px] font-black rounded-full flex items-center justify-center">
+                                {leads.filter((l) => l.status === 'new').length}
+                            </span>
+                        )}
+                    </button>
                 </div>
             </header>
 
@@ -220,17 +259,17 @@ const AdminDashboard = () => {
                     {statCards.map((stat, idx) => (
                         <div
                             key={idx}
-                            className={`bg-white rounded-xl border-l-4 ${stat.accent} shadow-sm px-4 py-3 flex items-center gap-3 hover:shadow-md transition-shadow`}
+                            className="bg-surface-light rounded-xl border border-border-light shadow-card px-4 py-3 flex items-center gap-3 hover:border-primary/30 transition-colors"
                         >
                             <div className={`size-10 rounded-xl ${stat.iconBg} flex items-center justify-center shrink-0`}>
                                 <Icon name={stat.icon} size={20} className={stat.iconColor} />
                             </div>
                             <div className="min-w-0">
-                                <p className="text-2xl font-black text-gray-900 leading-none">
-                                    {localLoading ? <span className="inline-block w-8 h-6 bg-gray-100 rounded animate-pulse" /> : stat.value}
+                                <p className="text-2xl font-black text-text-main leading-none whitespace-nowrap">
+                                    {localLoading ? <span className="inline-block w-8 h-6 bg-background-light rounded animate-pulse" /> : stat.value}
                                 </p>
-                                <p className="text-xs font-semibold text-gray-500 mt-0.5 truncate">{stat.label}</p>
-                                {stat.subtext && <p className="text-[10px] text-gray-400 truncate">{stat.subtext}</p>}
+                                <p className="text-xs font-semibold text-text-secondary mt-0.5 leading-tight">{stat.label}</p>
+                                {stat.subtext && <p className="text-[10px] text-text-secondary/70 truncate">{stat.subtext}</p>}
                             </div>
                         </div>
                     ))}
@@ -244,30 +283,27 @@ const AdminDashboard = () => {
                         <div className="space-y-4">
                             <h2 className="text-sm font-bold text-gray-400 uppercase tracking-wider">{t('adminDashboard.sections.quickActions')}</h2>
 
-                            {/* 5-card uniform grid: catalog + 4 nav */}
-                            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+                            {/* 6-card uniform grid: catalog + nav + AI design studio */}
+                            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 gap-3">
                                 {[
-                                    { path: '/admin/catalog', icon: 'inventory_2', iconBg: 'bg-primary', iconColor: 'text-white', label: lang === 'kz' ? 'Каталог' : 'Каталог', sub: lang === 'kz' ? 'Маталар, бағалар' : 'Ткани, цены', featured: true },
-                                    { path: '/admin/clients', icon: 'groups', iconBg: 'bg-emerald-50', iconColor: 'text-emerald-600', label: t('adminDashboard.tabs.clients'), sub: `${stats.totalClients}` },
+                                    { path: '/admin/catalog', icon: 'inventory_2', iconBg: 'bg-primary/10', iconColor: 'text-primary', label: 'Каталог', sub: lang === 'kz' ? 'Маталар, бағалар' : 'Ткани, цены' },
+                                    { path: '/admin/clients', icon: 'groups', iconBg: 'bg-primary/10', iconColor: 'text-primary', label: t('adminDashboard.tabs.clients'), sub: `${stats.totalClients}` },
                                     { path: '/admin/orders', icon: 'shopping_cart', iconBg: 'bg-primary/10', iconColor: 'text-primary', label: lang === 'kz' ? 'Тапсырыстар' : 'Заказы', sub: `${stats.totalDeals}` },
-                                    { path: '/admin/users', icon: 'manage_accounts', iconBg: 'bg-blue-50', iconColor: 'text-blue-600', label: t('adminDashboard.tabs.team'), sub: lang === 'kz' ? 'Қызметкерлер' : 'Сотрудники' },
-                                    { path: '/admin/reports', icon: 'bar_chart', iconBg: 'bg-amber-50', iconColor: 'text-amber-600', label: lang === 'kz' ? 'Есептер' : 'Отчёты', sub: lang === 'kz' ? 'Аналитика' : 'Аналитика' },
+                                    { path: '/admin/users', icon: 'manage_accounts', iconBg: 'bg-primary/10', iconColor: 'text-primary', label: t('adminDashboard.tabs.team'), sub: lang === 'kz' ? 'Қызметкерлер' : 'Сотрудники' },
+                                    { path: '/admin/reports', icon: 'bar_chart', iconBg: 'bg-primary/10', iconColor: 'text-primary', label: lang === 'kz' ? 'Есептер' : 'Отчёты', sub: lang === 'kz' ? 'Аналитика' : 'Аналитика' },
+                                    { path: '/admin/design-studio', icon: 'palette', iconBg: 'bg-accent/20', iconColor: 'text-primary', label: lang === 'kz' ? 'Дизайн генерациясы' : 'Генерация дизайна', sub: lang === 'kz' ? 'AI визуализация' : 'AI-визуализация' },
                                 ].map((item) => (
                                     <button
                                         key={item.path}
                                         onClick={() => navigate(item.path)}
-                                        className={`group flex flex-col items-start gap-2 p-4 rounded-2xl border-2 transition-all text-left
-                                            ${item.featured
-                                                ? 'bg-primary border-primary text-white hover:brightness-110'
-                                                : 'bg-white border-gray-100 hover:border-primary/30 hover:shadow-md'
-                                            }`}
+                                        className="group flex flex-col items-start gap-3 p-4 rounded-2xl border border-border-light bg-surface-light hover:border-primary/40 hover:shadow-card transition-all text-left"
                                     >
-                                        <div className={`size-10 rounded-xl flex items-center justify-center ${item.featured ? 'bg-white/20' : item.iconBg}`}>
-                                            <Icon name={item.icon} size={22} className={item.featured ? 'text-white' : item.iconColor} />
+                                        <div className={`size-10 rounded-xl flex items-center justify-center ${item.iconBg}`}>
+                                            <Icon name={item.icon} size={22} className={item.iconColor} />
                                         </div>
                                         <div>
-                                            <p className={`text-sm font-bold leading-tight ${item.featured ? 'text-white' : 'text-gray-800'}`}>{item.label}</p>
-                                            <p className={`text-[11px] mt-0.5 ${item.featured ? 'text-white/70' : 'text-gray-400'}`}>{item.sub}</p>
+                                            <p className="text-sm font-bold leading-tight text-text-main">{item.label}</p>
+                                            <p className="text-[11px] mt-0.5 text-text-secondary">{item.sub}</p>
                                         </div>
                                     </button>
                                 ))}
@@ -565,6 +601,7 @@ const AdminDashboard = () => {
                                 value={analytics.teamKPIs?.designers?.completedMeasurements || measurements.filter(m => m.status === 'completed').length}
                                 target={analytics.teamKPIs?.designers?.target || 50}
                                 unit={t('dashboard.stats.measurementUnit')}
+                                unitForms={NOUNS.measurement}
                                 period={t('common.month')}
                                 icon="design_services"
                                 loading={analyticsLoading}
@@ -574,6 +611,7 @@ const AdminDashboard = () => {
                                 value={analytics.teamKPIs?.managers?.closedDeals || deals.filter(d => d.status === 'completed').length}
                                 target={analytics.teamKPIs?.managers?.target || 30}
                                 unit={t('dashboard.stats.dealUnit')}
+                                unitForms={NOUNS.deal}
                                 period={t('common.month')}
                                 icon="support_agent"
                                 loading={analyticsLoading}
@@ -763,6 +801,127 @@ const AdminDashboard = () => {
                                 </div>
                             </div>
                         </div>
+                    </div>
+                )}
+
+                {/* ── LEADS TAB ── */}
+                {activeTab === 'leads' && (
+                    <div className="space-y-4">
+                        <div className="flex items-center justify-between">
+                            <h2 className="text-sm font-bold text-gray-400 uppercase tracking-wider">Заявки с лендинга</h2>
+                            <button
+                                onClick={loadLeads}
+                                className="size-8 rounded-full bg-white border border-gray-200 flex items-center justify-center hover:bg-gray-50 transition-colors"
+                            >
+                                <Icon name="refresh" size={16} className="text-gray-500" />
+                            </button>
+                        </div>
+
+                        {leadsLoading ? (
+                            <div className="space-y-3">
+                                {[1, 2, 3].map((i) => (
+                                    <div key={i} className="bg-white rounded-2xl p-4 animate-pulse">
+                                        <div className="h-4 bg-gray-100 rounded w-1/3 mb-2" />
+                                        <div className="h-3 bg-gray-100 rounded w-1/2" />
+                                    </div>
+                                ))}
+                            </div>
+                        ) : leads.length === 0 ? (
+                            <div className="bg-white rounded-2xl p-10 flex flex-col items-center gap-3 text-center shadow-sm border border-gray-100">
+                                <Icon name="inbox" size={40} className="text-gray-300" />
+                                <p className="text-gray-500 font-medium">Заявок пока нет</p>
+                                <p className="text-xs text-gray-400">Они появятся, когда кто-то заполнит форму на сайте</p>
+                            </div>
+                        ) : (
+                            <div className="space-y-3">
+                                {leads.map((lead) => {
+                                    const statusCfg = {
+                                        new:       { label: 'Новый',        cls: 'bg-blue-100 text-blue-700' },
+                                        contacted: { label: 'Связались',    cls: 'bg-amber-100 text-amber-700' },
+                                        converted: { label: 'Клиент',       cls: 'bg-green-100 text-green-700' },
+                                        rejected:  { label: 'Отказ',        cls: 'bg-gray-100 text-gray-500' },
+                                    };
+                                    const cfg = statusCfg[lead.status] || statusCfg.new;
+                                    const date = new Date(lead.created_at);
+                                    const dateStr = date.toLocaleDateString('ru-RU', { day: '2-digit', month: 'short' });
+                                    const timeStr = date.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+
+                                    return (
+                                        <div key={lead.id} className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
+                                            <div className="flex items-start justify-between gap-3">
+                                                <div className="flex-1 min-w-0">
+                                                    <div className="flex items-center gap-2 mb-1">
+                                                        <p className="font-bold text-gray-900 text-sm">{lead.name}</p>
+                                                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${cfg.cls}`}>{cfg.label}</span>
+                                                    </div>
+                                                    <a
+                                                        href={`tel:${lead.phone}`}
+                                                        className="text-sm text-primary font-medium hover:underline"
+                                                    >
+                                                        {lead.phone}
+                                                    </a>
+                                                    {lead.salon && (
+                                                        <p className="text-xs text-gray-500 mt-0.5">Салон: {lead.salon}</p>
+                                                    )}
+                                                    {lead.comment && (
+                                                        <p className="text-xs text-gray-400 mt-1 italic">"{lead.comment}"</p>
+                                                    )}
+                                                    <p className="text-[10px] text-gray-300 mt-1.5">{dateStr} · {timeStr}</p>
+                                                </div>
+
+                                                <div className="flex flex-col gap-1.5 shrink-0">
+                                                    <a
+                                                        href={`https://wa.me/${lead.phone.replace(/\D/g, '')}`}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="size-8 rounded-xl bg-green-50 flex items-center justify-center hover:bg-green-100 transition-colors"
+                                                        title="WhatsApp"
+                                                    >
+                                                        <Icon name="chat" size={16} className="text-green-600" />
+                                                    </a>
+                                                    <a
+                                                        href={`tel:${lead.phone}`}
+                                                        className="size-8 rounded-xl bg-blue-50 flex items-center justify-center hover:bg-blue-100 transition-colors"
+                                                        title="Позвонить"
+                                                    >
+                                                        <Icon name="call" size={16} className="text-blue-600" />
+                                                    </a>
+                                                </div>
+                                            </div>
+
+                                            {/* Status actions */}
+                                            {lead.status !== 'converted' && lead.status !== 'rejected' && (
+                                                <div className="flex gap-2 mt-3 pt-3 border-t border-gray-100">
+                                                    {lead.status === 'new' && (
+                                                        <button
+                                                            onClick={() => updateLeadStatus(lead.id, 'contacted')}
+                                                            disabled={updatingLead === lead.id}
+                                                            className="flex-1 py-1.5 text-xs font-bold rounded-lg bg-amber-50 text-amber-700 hover:bg-amber-100 transition-colors disabled:opacity-50"
+                                                        >
+                                                            Связались
+                                                        </button>
+                                                    )}
+                                                    <button
+                                                        onClick={() => updateLeadStatus(lead.id, 'converted')}
+                                                        disabled={updatingLead === lead.id}
+                                                        className="flex-1 py-1.5 text-xs font-bold rounded-lg bg-green-50 text-green-700 hover:bg-green-100 transition-colors disabled:opacity-50"
+                                                    >
+                                                        Стал клиентом
+                                                    </button>
+                                                    <button
+                                                        onClick={() => updateLeadStatus(lead.id, 'rejected')}
+                                                        disabled={updatingLead === lead.id}
+                                                        className="flex-1 py-1.5 text-xs font-bold rounded-lg bg-gray-50 text-gray-500 hover:bg-gray-100 transition-colors disabled:opacity-50"
+                                                    >
+                                                        Отказ
+                                                    </button>
+                                                </div>
+                                            )}
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        )}
                     </div>
                 )}
 

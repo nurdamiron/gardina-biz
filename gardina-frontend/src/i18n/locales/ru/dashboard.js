@@ -120,6 +120,21 @@ const dashboard = {
     designer: 'Дизайнер',
   },
 
+  // KPICard (designer dashboard)
+  kpiCard: {
+    outOf: 'из {target} {unit}',
+    done: 'Выполнено',
+    inProgress: 'В процессе',
+    behind: 'Отставание',
+  },
+
+  // FunnelChart
+  funnelChart: {
+    noData: 'Нет данных',
+    conversion: 'Конверсия',
+    totalConversion: 'Общая конверсия:',
+  },
+
   manager: {
     panelTitle: 'Панель менеджера',
     hello: 'Привет, {name}!',
@@ -132,6 +147,37 @@ const dashboard = {
     allDone: 'Все задачи выполнены!',
     paymentPending: '{name} — ждём оплату',
     confirmRequired: '{name} — нужно подтвердить',
+    todayMeasurements: 'Замеры на сегодня',
+    noTodayMeasurements: 'На сегодня замеров нет',
+    topDesigners: 'Топ дизайнеров',
+    thisMonth: 'этот месяц',
+    salesUnit: 'продаж',
+    newOrder: 'Создать новый заказ',
+    clients: 'Клиенты',
+    orders: 'Заказы',
+  },
+
+  // Designer dashboard
+  designer: {
+    error: 'Ошибка',
+    retry: 'Повторить',
+    logout: 'Выйти',
+    urgentBadge: 'СРОЧНО',
+    call: 'Позвонить',
+    personalRating: 'Личный рейтинг',
+    nextLevelPrefix: 'До следующего уровня',
+    nextLevelSuffix: 'замеров',
+    rankPositionUnit: 'позиции',
+    todayTasks: 'Задачи на сегодня',
+    tomorrow: 'Завтра',
+    upcomingTasks: 'Предстоящие задачи',
+    viewAll: 'Все →',
+  },
+
+  // Lang-aware month/weekday arrays for designer date formatting
+  dateNames: {
+    monthsRu: ['января', 'февраля', 'марта', 'апреля', 'мая', 'июня', 'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря'],
+    weekdaysRu: ['Воскресенье', 'Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота'],
   },
 };
 

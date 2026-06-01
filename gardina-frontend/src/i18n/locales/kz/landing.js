@@ -8,6 +8,7 @@ const landing = {
     faq: 'Сұрақтар',
     login: 'Кіру',
     whatsapp: 'WhatsApp',
+    menu: 'Мәзір',
   },
 
   hero: {
@@ -311,6 +312,10 @@ const landing = {
     successBody: 'Өтінімді алдық, жақын арада хабарласамыз.',
     calendarBtn: 'Күнтізбеде уақыт таңдау',
     calTitle: 'Демо-кездесуге жазылыңыз',
+    calFallbackHint: 'Күнтізбе ашылмай тұр ма?',
+    calOpenNewTab: 'Жаңа бетте ашу',
+    calFailedTitle: 'Күнтізбе жүктелмеді',
+    calFailedBody: 'Жазылу бетін жаңа бетте ашыңыз.',
     calBody: 'Ыңғайлы күн мен уақытты таңдаңыз — Gardina қалай жұмыс істейтінін көрсетеміз. 30 минут.',
     calStep1: 'Кез келген бос уақытты таңдаңыз',
     calStep2: 'Zoom немесе Google Meet арқылы онлайн',

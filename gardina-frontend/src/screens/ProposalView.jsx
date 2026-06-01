@@ -34,35 +34,36 @@ const ProposalView = () => {
     const totalCost = measurement.windows.reduce((sum, w) => sum + (w.priceBreakdown?.clientCheck?.total || 0), 0) + (measurement.deliveryCost || 0);
 
     return (
-        <div className="min-h-screen bg-white text-gray-900 font-sans p-8 print:p-0 max-w-4xl mx-auto">
-            <div className="fixed top-4 right-4 print:hidden flex gap-2 z-50">
-                <button
-                    onClick={() => window.print()}
-                    className="px-4 py-2 bg-primary text-white font-bold rounded-lg shadow hover:brightness-110 flex items-center gap-2"
-                >
-                    <Icon name="print" />
-                    {t('proposals.print.button')}
-                </button>
+        <div className="min-h-screen bg-white text-gray-900 font-sans p-4 sm:p-8 print:p-0 max-w-4xl mx-auto">
+            <div className="flex justify-between items-center gap-2 mb-6 print:hidden">
                 <button
                     onClick={() => navigate(-1)}
-                    className="px-4 py-2 bg-gray-100 text-gray-700 font-bold rounded-lg hover:bg-gray-200"
+                    className="inline-flex items-center gap-1.5 px-3 py-2 text-sm font-semibold text-text-secondary hover:bg-background-light rounded-lg transition-colors"
                 >
+                    <Icon name="arrow_back" size={18} />
                     {t('common.back')}
+                </button>
+                <button
+                    onClick={() => window.print()}
+                    className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-content font-semibold rounded-xl shadow-card hover:brightness-110 active:scale-[0.98] transition-all"
+                >
+                    <Icon name="print" size={18} />
+                    {t('proposals.print.button')}
                 </button>
             </div>
 
-            <header className="flex justify-between items-start border-b-2 border-primary pb-6 mb-8">
+            <header className="flex flex-col gap-4 sm:flex-row sm:justify-between sm:items-start border-b-2 border-primary pb-6 mb-8">
                 <div>
                     <h1 className="text-3xl font-black text-primary uppercase tracking-wide">Gardina</h1>
                     <p className="text-sm text-gray-500 mt-1">{t('proposals.print.salonTagline')}</p>
-                    <div className="mt-4 text-sm text-gray-600 space-y-1">
-                        <p>{t('proposals.print.addressLine')}</p>
-                        <p>{t('proposals.print.phoneLine')}</p>
-                        <p>{t('proposals.print.instagramLine')}</p>
+                    <div className="mt-4 text-sm text-gray-600 space-y-1.5">
+                        <p className="flex items-center gap-2"><Icon name="location_on" size={15} className="text-gray-400" />{t('proposals.print.addressLine')}</p>
+                        <p className="flex items-center gap-2"><Icon name="call" size={15} className="text-gray-400" />{t('proposals.print.phoneLine')}</p>
+                        <p className="flex items-center gap-2"><Icon name="photo_camera" size={15} className="text-gray-400" />{t('proposals.print.instagramLine')}</p>
                     </div>
                 </div>
-                <div className="text-right">
-                    <h2 className="text-4xl font-black text-gray-900 mb-2">{t('proposals.print.estimate')}</h2>
+                <div className="text-left sm:text-right shrink-0">
+                    <h2 className="text-2xl sm:text-4xl font-black text-gray-900 mb-2">{t('proposals.print.estimate')}</h2>
                     <p className="text-lg text-gray-600">#{measurement.id.slice(0, 8)}</p>
                     <p className="text-sm text-gray-500 mt-1">{t('proposals.print.dateLabel')}: {formatDate(new Date(), lang)}</p>
                 </div>

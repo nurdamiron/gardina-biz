@@ -2,11 +2,14 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import PaymentRiskIndicator from '../payment/PaymentRiskIndicator';
 import Icon from '../common/Icon';
+import { useI18n } from '../../contexts/I18nContext';
+import { pluralize, pluralUnit, NOUNS } from '../../utils/plural';
 
 /**
  * Секция для отображения заказов с рисками по оплате
  */
 const RiskOrdersSection = ({ orders = [] }) => {
+  const { t, lang } = useI18n();
   const navigate = useNavigate();
   const [expandedSection, setExpandedSection] = useState('high'); // По умолчанию раскрыт высокий риск
 
@@ -112,22 +115,22 @@ const RiskOrdersSection = ({ orders = [] }) => {
                   {/* Детали заказа */}
                   <div className="grid grid-cols-2 gap-2 mb-3 text-xs">
                     <div>
-                      <span className="text-gray-500">Статус:</span>
+                      <span className="text-gray-500">{t('payments.row.status')}</span>
                       <p className="font-bold">
-                        {order.status === 'in_production' ? 'Өндірісте' :
-                         order.status === 'ready' ? 'Дайын' : 'Орнатылуда'}
+                        {order.status === 'in_production' ? t('payments.orderStatus.in_production') :
+                         order.status === 'ready' ? t('payments.orderStatus.ready') : t('payments.orderStatus.installing')}
                       </p>
                     </div>
                     <div>
-                      <span className="text-gray-500">Күндер:</span>
-                      <p className="font-bold">{daysInStatus} күн</p>
+                      <span className="text-gray-500">{t('payments.row.days')}</span>
+                      <p className="font-bold">{pluralize(daysInStatus, NOUNS.day, lang)}</p>
                     </div>
                     <div>
-                      <span className="text-gray-500">Төленген:</span>
+                      <span className="text-gray-500">{t('payments.row.paid')}</span>
                       <p className="font-bold">{order.paidAmount.toLocaleString()} ₸</p>
                     </div>
                     <div>
-                      <span className="text-gray-500">Жетіспейді:</span>
+                      <span className="text-gray-500">{t('payments.row.shortfall')}</span>
                       <p className="font-bold text-red-600">
                         {shortfall > 0 ? `${shortfall.toLocaleString()} ₸` : '—'}
                       </p>
@@ -139,7 +142,7 @@ const RiskOrdersSection = ({ orders = [] }) => {
                     <div className="mb-3 p-2 bg-red-50 rounded-lg">
                       <p className="text-xs text-red-800 flex items-center gap-1">
                         <Icon name="warning" size={14} />
-                        Өндірісте {daysInStatus} күн, төлем тек {paidPercent}%!
+                        {t('payments.warnHigh', { days: daysInStatus, percent: paidPercent })}
                       </p>
                     </div>
                   )}
@@ -148,7 +151,7 @@ const RiskOrdersSection = ({ orders = [] }) => {
                     <div className="mb-3 p-2 bg-yellow-50 rounded-lg">
                       <p className="text-xs text-yellow-800 flex items-center gap-1">
                         <Icon name="info" size={14} />
-                        Орнатпас бұрын доплата алу керек!
+                        {t('payments.warnMedium')}
                       </p>
                     </div>
                   )}
@@ -160,14 +163,14 @@ const RiskOrdersSection = ({ orders = [] }) => {
                       className="flex-1 py-2 bg-green-500 text-white rounded-lg text-xs font-bold hover:bg-green-600 transition-colors flex items-center justify-center gap-1"
                     >
                       <Icon name="call" size={14} />
-                      Қоңырау
+                      {t('payments.rowAction.call')}
                     </button>
                     <button
                       onClick={() => sendReminder(order.id, order.clientPhone)}
                       className="flex-1 py-2 bg-primary text-white rounded-lg text-xs font-bold hover:brightness-110 transition-colors flex items-center justify-center gap-1"
                     >
                       <Icon name="chat" size={14} />
-                      Еске салу
+                      {t('payments.rowAction.remind')}
                     </button>
                     <button
                       onClick={() => navigate(`/deals/${order.id}`)}
@@ -194,8 +197,8 @@ const RiskOrdersSection = ({ orders = [] }) => {
       iconBg: 'bg-red-100',
       iconColor: 'text-red-600',
       icon: 'error',
-      label: 'Жоғары қауіп',
-      description: 'Төлем 50% төмен - шұғыл әрекет қажет'
+      label: t('payments.level.high.label'),
+      description: t('payments.level.high.desc')
     },
     medium: {
       bgColor: 'bg-yellow-50',
@@ -204,8 +207,8 @@ const RiskOrdersSection = ({ orders = [] }) => {
       iconBg: 'bg-yellow-100',
       iconColor: 'text-yellow-600',
       icon: 'warning',
-      label: 'Орташа қауіп',
-      description: 'Төлем 50-79% - бақылау қажет'
+      label: t('payments.level.medium.label'),
+      description: t('payments.level.medium.desc')
     },
     safe: {
       bgColor: 'bg-green-50',
@@ -214,8 +217,8 @@ const RiskOrdersSection = ({ orders = [] }) => {
       iconBg: 'bg-green-100',
       iconColor: 'text-green-600',
       icon: 'check_circle',
-      label: 'Қауіпсіз',
-      description: 'Төлем 80%+ - барлығы жақсы'
+      label: t('payments.level.safe.label'),
+      description: t('payments.level.safe.desc')
     }
   };
 
@@ -229,11 +232,11 @@ const RiskOrdersSection = ({ orders = [] }) => {
   return (
     <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="font-bold text-lg">Төлем қауіптері</h3>
+        <h3 className="font-bold text-lg">{t('payments.section.title')}</h3>
         {totalRiskOrders > 0 && (
           <div className="text-right">
             <p className="text-2xl font-black text-red-600">{totalRiskOrders}</p>
-            <p className="text-xs text-gray-500">тапсырыс</p>
+            <p className="text-xs text-gray-500">{pluralUnit(totalRiskOrders, NOUNS.order, lang)}</p>
           </div>
         )}
       </div>
@@ -241,7 +244,7 @@ const RiskOrdersSection = ({ orders = [] }) => {
       {/* Общая сумма недоплат */}
       {totalRiskAmount > 0 && (
         <div className="mb-4 p-3 bg-gray-50 rounded-xl">
-          <p className="text-xs text-gray-500 mb-1">Жалпы төленбеген сома:</p>
+          <p className="text-xs text-gray-500 mb-1">{t('payments.section.totalUnpaid')}</p>
           <p className="text-xl font-black text-gray-900">{totalRiskAmount.toLocaleString()} ₸</p>
         </div>
       )}
@@ -257,8 +260,8 @@ const RiskOrdersSection = ({ orders = [] }) => {
           <div className="size-16 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-3">
             <Icon name="done_all" size={28} className="text-gray-400" />
           </div>
-          <p className="text-gray-500">Қауіпті төлемдер жоқ</p>
-          <p className="text-xs text-gray-400 mt-1">Барлық тапсырыстар қауіпсіз</p>
+          <p className="text-gray-500">{t('payments.section.empty')}</p>
+          <p className="text-xs text-gray-400 mt-1">{t('payments.section.emptySubtitle')}</p>
         </div>
       )}
     </div>

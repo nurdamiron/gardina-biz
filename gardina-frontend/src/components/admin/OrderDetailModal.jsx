@@ -1,5 +1,6 @@
 import React from 'react';
 import { formatDateKZ, formatTime24, formatDateTimeFull } from '../../utils/dateUtils';
+import { money } from '../../utils/money';
 import Icon from '../common/Icon';
 
 /**
@@ -64,7 +65,7 @@ const OrderDetailModal = ({ order, measurement, onClose }) => {
         color: 'bg-green-500',
         label: 'Келісім-шарт және ДДС',
         date: order.contractSignedAt,
-        description: `Алынды: ${(order.prepayment || 0).toLocaleString()} ₸`,
+        description: `Алынды: ${money(order.prepayment).toLocaleString()} ₸`,
         showDate: false
       });
     }

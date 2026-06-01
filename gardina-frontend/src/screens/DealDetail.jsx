@@ -3,12 +3,18 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { ordersAPI, measurementsAPI } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
 import { useI18n } from '../contexts/I18nContext';
-import { STATUS_LABELS, STATUS_COLORS } from '../utils/statusLabels';
+import { money } from '../utils/money';
 import BottomNav from '../components/navigation/BottomNav';
 import { SkeletonCard } from '../components/common/Skeleton';
-import { formatTime24, monthNames, weekdayNames } from '../utils/dateUtils';
+import { formatTime24, formatDate, monthNames, weekdayNames } from '../utils/dateUtils';
 import AuditLog from '../components/AuditLog/AuditLog';
 import Icon from '../components/common/Icon';
+import StatusBadge from '../components/common/StatusBadge';
+import Button from '../components/common/Button';
+import EmptyState from '../components/common/EmptyState';
+
+// Payment status → semantic tone (pending/partial/paid/refunded)
+const PAYMENT_TONE = { pending: 'neutral', partial: 'warning', paid: 'success', refunded: 'danger' };
 
 const DealDetail = () => {
     const { t, lang } = useI18n();
@@ -69,34 +75,6 @@ const DealDetail = () => {
         }
     };
 
-    const getStatusColor = (status) => {
-        const colors = {
-            'lead': 'bg-primary/10 text-primary-dark border border-primary/25',
-            'proposal_sent': 'bg-primary/10 text-primary border border-primary/25',
-            'proposal_accepted': 'bg-primary/5 text-primary-dark border border-primary/20',
-            'contract_signed': 'bg-primary/5 text-primary-light border border-primary/20',
-            'payment_pending': 'bg-yellow-50 text-yellow-700 border border-yellow-200',
-            'production': 'bg-orange-50 text-orange-700 border border-orange-200',
-            'completed': 'bg-green-50 text-green-700 border border-green-200',
-            'cancelled': 'bg-red-50 text-red-700 border border-red-200'
-        };
-        return colors[status] || 'bg-gray-50 text-gray-700 border border-gray-200';
-    };
-
-    const getStatusLabel = (status) => STATUS_LABELS[status] || status;
-
-    const getPaymentStatusLabel = (status) => t(`orders.payment.${status}`, status);
-
-    const getPaymentStatusColor = (status) => {
-        const colors = {
-            'pending': 'bg-gray-50 text-gray-700',
-            'partial': 'bg-amber-50 text-amber-700',
-            'paid': 'bg-emerald-50 text-emerald-700',
-            'refunded': 'bg-rose-50 text-rose-700'
-        };
-        return colors[status] || 'bg-gray-50 text-gray-700';
-    };
-
     const formatScheduledDate = (dateString) => {
         if (!dateString) return null;
 
@@ -150,42 +128,18 @@ const DealDetail = () => {
         return { dayLabel, time, dayColor, fullDate: date, fullDateKazakh };
     };
 
+    // Next-step CTA per status. One brand-green action (no ad-hoc orange/green);
+    // label localized via t() with the Kazakh original as fallback.
     const getNextStatusAction = (status) => {
         const statusFlow = {
-            'lead': {
-                nextStatus: 'proposal_sent',
-                label: 'Бастау',
-                icon: 'play_arrow',
-                color: 'bg-primary hover:brightness-110'
-            },
-            'proposal_sent': {
-                nextStatus: 'proposal_accepted',
-                label: 'Ұсыныс қабылданды',
-                icon: 'check_circle',
-                color: 'bg-primary hover:brightness-110'
-            },
-            'proposal_accepted': {
-                nextStatus: 'contract_signed',
-                label: 'Келісім-шарт жасау',
-                icon: 'contract_edit',
-                color: 'bg-primary-light hover:brightness-110'
-            },
-            'contract_signed': {
-                nextStatus: 'production',
-                label: 'Өндіріске жіберу',
-                icon: 'precision_manufacturing',
-                color: 'bg-orange-600 hover:bg-orange-700'
-            },
-            'production': {
-                nextStatus: 'completed',
-                label: 'Аяқтау',
-                icon: 'done_all',
-                color: 'bg-green-600 hover:bg-green-700'
-            },
+            'lead':              { nextStatus: 'proposal_sent',     key: 'orders.statusFlow.start',          kz: 'Бастау',               icon: 'play_arrow' },
+            'proposal_sent':     { nextStatus: 'proposal_accepted', key: 'orders.statusFlow.proposalAccept', kz: 'Ұсыныс қабылданды',    icon: 'check_circle' },
+            'proposal_accepted': { nextStatus: 'contract_signed',   key: 'orders.statusFlow.signContract',   kz: 'Келісім-шарт жасау',   icon: 'contract_edit' },
+            'contract_signed':   { nextStatus: 'production',        key: 'orders.statusFlow.toProduction',   kz: 'Өндіріске жіберу',     icon: 'precision_manufacturing' },
+            'production':        { nextStatus: 'completed',         key: 'orders.statusFlow.complete',       kz: 'Аяқтау',               icon: 'done_all' },
             'completed': null,
             'cancelled': null
         };
-
         return statusFlow[status] || null;
     };
 
@@ -204,7 +158,7 @@ const DealDetail = () => {
                 setPendingStatus(null);
             }
         } catch (error) {
-            setStatusError('Статусты өзгерту кезінде қате пайда болды');
+            setStatusError(t('orders.statusModal.error', 'Статусты өзгерту кезінде қате пайда болды'));
         }
     };
 
@@ -229,65 +183,89 @@ const DealDetail = () => {
         }
     };
 
-    if (loading) return <div className="p-4"><SkeletonCard /><SkeletonCard /></div>;
-    if (!deal) return <div className="flex justify-center p-8 text-gray-400">Тапсырыс табылмады</div>;
+    const backToList = () => navigate(user?.role === 'admin' ? '/admin/orders' : '/manager/orders');
 
-    const total = deal.totalAmount || 0;
-    const prepayment = deal.prepayment || 0;
-    const finalPayment = deal.finalPayment || 0;
+    if (loading) return <div className="p-4 max-w-5xl mx-auto"><SkeletonCard /><SkeletonCard /></div>;
+    if (!deal) return (
+        <div className="bg-background-light min-h-screen pb-32">
+            <header className="sticky top-0 z-20 bg-surface-light border-b border-border-light px-4 py-3">
+                <button onClick={() => navigate(-1)} className="size-10 -ml-1 shrink-0 rounded-full bg-background-light hover:bg-border-light flex items-center justify-center" aria-label={t('common.back', 'Назад')}>
+                    <Icon name="arrow_back" />
+                </button>
+            </header>
+            <EmptyState
+                icon="inventory_2"
+                title={t('orders.detail.notFound', 'Заказ не найден')}
+                subtitle={t('orders.detail.notFoundHint', 'Возможно, он был удалён или у вас нет доступа.')}
+                actionLabel={t('orders.detail.backToList', 'К списку сделок')}
+                actionIcon="arrow_back"
+                onAction={backToList}
+            />
+            <BottomNav />
+        </div>
+    );
+
+    const total = money(deal.totalAmount);
+    const prepayment = money(deal.prepayment);
+    const finalPayment = money(deal.finalPayment);
     const paid = prepayment + finalPayment;
     const remaining = total - paid;
     const progress = total > 0 ? (paid / total) * 100 : 0;
+    // Derive the payment badge from the actual numbers so it can't contradict the
+    // amount card (stale deal.paymentStatus showed "partial" while 100% was paid).
+    const derivedPayment = total > 0
+        ? (remaining <= 0 ? 'paid' : paid > 0 ? 'partial' : 'pending')
+        : (deal.paymentStatus || 'pending');
 
     return (
-        <div className="bg-background-light min-h-screen pb-24">
+        <div className="bg-background-light min-h-screen pb-32">
             {/* Header */}
-            <header className="sticky top-0 z-20 bg-white border-b px-4 py-3">
-                <div className="flex items-center gap-3">
-                    <button onClick={() => navigate(-1)} className="p-2 -ml-2 rounded-full hover:bg-gray-100">
+            <header className="sticky top-0 z-20 bg-surface-light border-b border-border-light px-4 py-3">
+                <div className="flex items-center gap-3 max-w-5xl mx-auto">
+                    <button onClick={() => navigate(-1)} className="size-10 -ml-1 shrink-0 rounded-full bg-background-light hover:bg-border-light flex items-center justify-center" aria-label={t('common.back', 'Назад')}>
                         <Icon name="arrow_back" />
                     </button>
-                    <div className="flex-1">
-                        <h1 className="text-lg font-bold">Тапсырыс #{deal.id.slice(0, 8)}</h1>
-                        <p className="text-xs text-gray-500">{new Date(deal.createdAt).toLocaleDateString('kk-KZ')} бастап</p>
+                    <div className="flex-1 min-w-0">
+                        <h1 className="text-lg font-bold text-text-main">{t('orders.detail.title', 'Заказ')} #{deal.id.slice(0, 8)}</h1>
+                        <p className="text-xs text-text-secondary">{t('orders.detail.createdOn', 'Создан')} {formatDate(deal.createdAt, lang)}</p>
                     </div>
-                    <span className={`px-3 py-1.5 rounded-full text-xs font-bold ${getStatusColor(deal.status)}`}>
-                        {getStatusLabel(deal.status)}
-                    </span>
+                    <StatusBadge status={deal.status} />
                 </div>
             </header>
 
             <main className="p-4 max-w-5xl mx-auto space-y-4">
-                {/* Amount Card */}
-                <div className="bg-gradient-to-br from-primary to-primary-dark rounded-2xl p-6 shadow-lg text-white">
-                    <div className="flex items-center justify-between mb-4">
-                        <span className="text-sm opacity-90 font-medium">Жалпы сома</span>
-                        <span className={`px-3 py-1 rounded-full text-xs font-bold ${getPaymentStatusColor(deal.paymentStatus)}`}>
-                            {getPaymentStatusLabel(deal.paymentStatus)}
-                        </span>
+                {/* Amount Card — flat surface, on-brand (no marketing gradient) */}
+                <div className="bg-surface-light rounded-2xl p-6 border border-border-light shadow-card">
+                    <div className="flex items-center justify-between mb-3">
+                        <span className="text-sm font-medium text-text-secondary">{t('orders.detail.totalAmount', 'Общая сумма')}</span>
+                        <StatusBadge
+                            status={derivedPayment}
+                            tone={PAYMENT_TONE[derivedPayment] || 'neutral'}
+                            label={t(`orders.payment.${derivedPayment}`, derivedPayment)}
+                        />
                     </div>
-                    <div className="mb-4">
-                        <span className="text-4xl font-bold">
-                            {total.toLocaleString()} ₸
+                    <div className="mb-5">
+                        <span className="text-4xl font-bold text-text-main tracking-tight">
+                            {total.toLocaleString('ru-RU')} ₸
                         </span>
                     </div>
 
                     {total > 0 && (
                         <>
-                            <div className="h-2 bg-white/20 rounded-full overflow-hidden mb-3">
+                            <div className="h-2 bg-primary/15 rounded-full overflow-hidden mb-3">
                                 <div
-                                    className="h-full bg-white rounded-full transition-all duration-500"
+                                    className="h-full bg-primary rounded-full transition-all duration-500"
                                     style={{ width: `${progress}%` }}
                                 ></div>
                             </div>
                             <div className="grid grid-cols-2 gap-4 text-sm">
                                 <div>
-                                    <p className="opacity-75 text-xs mb-1">Төленді</p>
-                                    <p className="font-bold">{paid.toLocaleString()} ₸</p>
+                                    <p className="text-xs text-text-secondary mb-1">{t('orders.detail.paid', 'Оплачено')}</p>
+                                    <p className="font-bold text-text-main">{paid.toLocaleString('ru-RU')} ₸</p>
                                 </div>
                                 <div>
-                                    <p className="opacity-75 text-xs mb-1">Қалды</p>
-                                    <p className="font-bold">{remaining.toLocaleString()} ₸</p>
+                                    <p className="text-xs text-text-secondary mb-1">{t('orders.detail.remaining', 'Остаток')}</p>
+                                    <p className="font-bold text-text-main">{remaining.toLocaleString('ru-RU')} ₸</p>
                                 </div>
                             </div>
                         </>
@@ -297,20 +275,20 @@ const DealDetail = () => {
                 {/* Info cards — 2-col on desktop */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                 {/* Client Info */}
-                <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
-                    <h3 className="font-bold mb-4 flex items-center gap-2 text-gray-900">
+                <div className="bg-surface-light rounded-2xl p-5 border border-border-light shadow-card">
+                    <h3 className="font-bold mb-4 flex items-center gap-2 text-text-main">
                         <Icon name="person" className="text-primary" />
-                        Клиент туралы мәлімет
+                        {t('orders.detail.clientInfo', 'Клиент туралы мәлімет')}
                     </h3>
                     <div className="space-y-3">
                         <div>
-                            <p className="text-xs text-gray-500 mb-1">Аты-жөні</p>
-                            <p className="font-bold text-gray-900">{deal.client?.name || '---'}</p>
+                            <p className="text-xs text-text-secondary mb-1">{t('orders.detail.fullName', 'Аты-жөні')}</p>
+                            <p className="font-bold text-text-main">{deal.client?.name || '—'}</p>
                         </div>
 
                         {deal.client?.phone && (
                             <div>
-                                <p className="text-xs text-gray-500 mb-1">Телефон</p>
+                                <p className="text-xs text-text-secondary mb-1">{t('orders.detail.phone', 'Телефон')}</p>
                                 <a
                                     href={`tel:${deal.client.phone}`}
                                     className="flex items-center gap-2 text-sm font-semibold text-primary bg-primary/5 px-3 py-2 rounded-lg hover:bg-primary/10 transition-colors w-fit"
@@ -322,11 +300,11 @@ const DealDetail = () => {
                         )}
 
                         <div>
-                            <p className="text-xs text-gray-500 mb-1">Мекенжай</p>
+                            <p className="text-xs text-text-secondary mb-1">{t('orders.detail.address', 'Мекенжай')}</p>
                             {(measurement?.address || deal.client?.address) ? (
                                 <>
-                                    <p className="text-sm text-gray-700 flex items-start gap-2 bg-gray-50 p-3 rounded-lg">
-                                        <Icon name="location_on" size={18} className="text-gray-400" />
+                                    <p className="text-sm text-text-main flex items-start gap-2 bg-background-light p-3 rounded-lg">
+                                        <Icon name="location_on" size={18} className="text-text-secondary/70" />
                                         <span>{measurement?.address || deal.client?.address}</span>
                                     </p>
 
@@ -339,12 +317,12 @@ const DealDetail = () => {
                                             className="mt-3 inline-flex items-center gap-2 px-4 py-2.5 bg-primary/10 text-primary rounded-xl text-sm font-bold hover:bg-primary/15 transition-colors border border-primary/25"
                                         >
                                             <Icon name="map" size={20} />
-                                            2GIS картада көру
+                                            {t('orders.detail.viewOnMap', '2GIS картада көру')}
                                         </a>
                                     )}
                                 </>
                             ) : (
-                                <p className="text-sm text-gray-400">Мекенжай көрсетілмеген</p>
+                                <p className="text-sm text-text-secondary">{t('orders.detail.noAddress', 'Мекенжай көрсетілмеген')}</p>
                             )}
                         </div>
                     </div>
@@ -352,19 +330,19 @@ const DealDetail = () => {
 
                 {/* Designer Info */}
                 {deal.designer?.name && (
-                    <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
-                        <h3 className="font-bold mb-4 flex items-center gap-2 text-gray-900">
+                    <div className="bg-surface-light rounded-2xl p-5 border border-border-light shadow-card">
+                        <h3 className="font-bold mb-4 flex items-center gap-2 text-text-main">
                             <Icon name="design_services" className="text-primary" />
-                            Дизайнер
+                            {t('orders.card.designer', 'Дизайнер')}
                         </h3>
                         <div className="flex items-center gap-3">
-                            <div className="size-12 rounded-full bg-primary flex items-center justify-center text-white font-bold text-lg">
+                            <div className="size-12 rounded-full bg-primary flex items-center justify-center text-primary-content font-bold text-lg">
                                 {deal.designer.name[0]}
                             </div>
                             <div>
-                                <p className="font-bold text-gray-900">{deal.designer.name}</p>
-                                {deal.designerCommission > 0 && (
-                                    <p className="text-xs text-gray-500">Комиссия: {deal.designerCommission.toLocaleString()} ₸</p>
+                                <p className="font-bold text-text-main">{deal.designer.name}</p>
+                                {money(deal.designerCommission) > 0 && (
+                                    <p className="text-xs text-text-secondary">{t('orders.detail.commission', 'Комиссия')}: {money(deal.designerCommission).toLocaleString('ru-RU')} ₸</p>
                                 )}
                             </div>
                         </div>
@@ -373,22 +351,22 @@ const DealDetail = () => {
 
                 {/* Payment Details */}
                 {(prepayment > 0 || finalPayment > 0) && (
-                    <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
-                        <h3 className="font-bold mb-4 flex items-center gap-2 text-gray-900">
+                    <div className="bg-surface-light rounded-2xl p-5 border border-border-light shadow-card">
+                        <h3 className="font-bold mb-4 flex items-center gap-2 text-text-main">
                             <Icon name="payments" className="text-primary" />
-                            Төлем мәліметтері
+                            {t('orders.detail.paymentDetails', 'Төлем мәліметтері')}
                         </h3>
                         <div className="space-y-3">
                             {prepayment > 0 && (
-                                <div className="flex justify-between items-center py-2 border-b border-gray-100">
-                                    <span className="text-sm text-gray-600">Алдын ала төлем</span>
-                                    <span className="font-bold text-gray-900">{prepayment.toLocaleString()} ₸</span>
+                                <div className="flex justify-between items-center py-2 border-b border-border-light">
+                                    <span className="text-sm text-text-secondary">{t('orders.detail.prepayment', 'Алдын ала төлем')}</span>
+                                    <span className="font-bold text-text-main">{prepayment.toLocaleString('ru-RU')} ₸</span>
                                 </div>
                             )}
                             {finalPayment > 0 && (
                                 <div className="flex justify-between items-center py-2">
-                                    <span className="text-sm text-gray-600">Соңғы төлем</span>
-                                    <span className="font-bold text-gray-900">{finalPayment.toLocaleString()} ₸</span>
+                                    <span className="text-sm text-text-secondary">{t('orders.detail.finalPayment', 'Соңғы төлем')}</span>
+                                    <span className="font-bold text-text-main">{finalPayment.toLocaleString('ru-RU')} ₸</span>
                                 </div>
                             )}
                         </div>
@@ -397,23 +375,23 @@ const DealDetail = () => {
 
                 {/* Measurement Info */}
                 {measurement && (
-                    <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
-                        <h3 className="font-bold mb-4 flex items-center gap-2 text-gray-900">
+                    <div className="bg-surface-light rounded-2xl p-5 border border-border-light shadow-card">
+                        <h3 className="font-bold mb-4 flex items-center gap-2 text-text-main">
                             <Icon name="straighten" className="text-primary" />
-                            Өлшем туралы
+                            {t('orders.detail.measurement', 'Өлшем туралы')}
                         </h3>
                         <div className="space-y-3">
                             {measurement.roomType && (
-                                <div className="flex justify-between items-center py-2 border-b border-gray-50">
-                                    <span className="text-sm text-gray-600">Бөлме</span>
-                                    <span className="font-semibold text-gray-900">{measurement.roomType}</span>
+                                <div className="flex justify-between items-center py-2 border-b border-border-light">
+                                    <span className="text-sm text-text-secondary">{t('orders.detail.room', 'Бөлме')}</span>
+                                    <span className="font-semibold text-text-main">{measurement.roomType}</span>
                                 </div>
                             )}
                             {measurement.scheduledAt && (() => {
                                 const scheduled = formatScheduledDate(measurement.scheduledAt);
                                 return scheduled ? (
-                                    <div className="py-3 bg-gradient-to-r from-primary/10 to-primary/5 rounded-xl px-4 border border-primary/15">
-                                        <p className="text-xs text-gray-600 mb-2 font-medium">Жоспарланған уақыт</p>
+                                    <div className="py-3 bg-primary/5 rounded-xl px-4 border border-primary/15">
+                                        <p className="text-xs text-text-secondary mb-2 font-medium">{t('orders.detail.scheduledTime', 'Жоспарланған уақыт')}</p>
                                         <div className="flex items-center justify-between">
                                             <div className="flex items-center gap-3">
                                                 <div className="size-10 rounded-full bg-white flex items-center justify-center">
@@ -440,8 +418,8 @@ const DealDetail = () => {
                             })()}
                             {measurement.notes && (
                                 <div className="pt-2">
-                                    <p className="text-xs text-gray-600 mb-2 font-medium">Ескертпе</p>
-                                    <p className="text-sm text-gray-900 bg-gray-50 p-3 rounded-lg leading-relaxed">{measurement.notes}</p>
+                                    <p className="text-xs text-text-secondary mb-2 font-medium">{t('orders.detail.note', 'Ескертпе')}</p>
+                                    <p className="text-sm text-text-main bg-background-light p-3 rounded-lg leading-relaxed">{measurement.notes}</p>
                                 </div>
                             )}
                         </div>
@@ -450,13 +428,13 @@ const DealDetail = () => {
 
                 {/* Deadline */}
                 {deal.deadline && (
-                    <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4">
+                    <div className="bg-warning-soft border border-warning/20 rounded-2xl p-4">
                         <div className="flex items-center gap-3">
-                            <Icon name="schedule" size={24} className="text-amber-600" />
+                            <Icon name="schedule" size={24} className="text-warning" />
                             <div>
-                                <p className="text-xs text-amber-700 font-medium">Мерзімі</p>
-                                <p className="font-bold text-amber-900">
-                                    {new Date(deal.deadline).toLocaleDateString('kk-KZ')}
+                                <p className="text-xs text-warning font-medium">{t('orders.detail.deadline', 'Мерзімі')}</p>
+                                <p className="font-bold text-text-main">
+                                    {formatDate(deal.deadline, lang)}
                                 </p>
                             </div>
                         </div>
@@ -467,48 +445,41 @@ const DealDetail = () => {
 
                 {/* Actions */}
                 <div className="space-y-3 pt-4">
-                    {/* Next Status Button */}
+                    {/* Next Status Button — single brand-green CTA */}
                     {(() => {
                         const nextAction = getNextStatusAction(deal.status);
                         return nextAction ? (
-                            <button
+                            <Button
+                                size="lg"
+                                fullWidth
                                 onClick={() => openStatusModal(nextAction.nextStatus)}
-                                className={`w-full ${nextAction.color} text-white py-4 rounded-xl font-bold transition-all shadow-lg flex items-center justify-center gap-2`}
+                                icon={<Icon name={nextAction.icon} size={20} />}
                             >
-                                <Icon name={nextAction.icon} size={22} />
-                                {nextAction.label}
-                            </button>
+                                {t(nextAction.key, nextAction.kz)}
+                            </Button>
                         ) : deal.status === 'completed' ? (
-                            <div className="bg-green-50 border-2 border-green-200 rounded-xl p-4 flex items-center justify-center gap-2">
-                                <Icon name="check_circle" size={24} className="text-green-600" />
-                                <span className="font-bold text-green-700">Тапсырыс аяқталды</span>
+                            <div className="bg-success-soft border border-success/25 rounded-xl p-4 flex items-center justify-center gap-2">
+                                <Icon name="check_circle" size={22} className="text-success" />
+                                <span className="font-bold text-success">{t('orders.detail.completed', 'Тапсырыс аяқталды')}</span>
                             </div>
                         ) : null;
                     })()}
 
-                    {/* Additional Actions */}
-                    <div className="grid grid-cols-2 gap-3">
-                        {measurement && (
-                        <button
-                            onClick={handleEdit}
-                            className="bg-white text-gray-700 border-2 border-gray-200 py-3 rounded-xl font-bold hover:bg-gray-50 transition-all flex items-center justify-center gap-2"
-                        >
-                            <Icon name="straighten" />
-                            Өлшем деталі
-                        </button>
-                        )}
-                        <button
-                            onClick={() => setShowDeleteModal(true)}
-                            className="bg-white text-red-600 border-2 border-red-200 py-3 rounded-xl font-bold hover:bg-red-50 transition-all flex items-center justify-center gap-2"
-                        >
-                            <Icon name="delete" />
-                            Жою
-                        </button>
+                    {/* Secondary + destructive actions */}
+                    <div className="flex items-center justify-between gap-3">
+                        {measurement ? (
+                            <Button variant="secondary" onClick={handleEdit} icon={<Icon name="straighten" size={18} />}>
+                                {t('orders.detail.measurementDetails', 'Өлшем деталі')}
+                            </Button>
+                        ) : <span />}
+                        <Button variant="danger" onClick={() => setShowDeleteModal(true)} icon={<Icon name="delete" size={18} />}>
+                            {t('common.delete', 'Жою')}
+                        </Button>
                     </div>
                 </div>
 
                 {/* Audit Log Section */}
-                <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 mt-4">
+                <div className="bg-surface-light rounded-2xl p-5 border border-border-light shadow-card mt-4">
                   <AuditLog entityType="Deal" entityId={deal.id} />
                 </div>
             </main>
@@ -518,54 +489,36 @@ const DealDetail = () => {
             {/* Delete Confirmation Modal */}
             {showDeleteModal && (
                 <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in">
-                    <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full animate-in zoom-in-95 slide-in-from-bottom-4">
+                    <div className="bg-surface-light rounded-2xl shadow-2xl max-w-md w-full animate-in zoom-in-95 slide-in-from-bottom-4">
                         {/* Modal Header */}
-                        <div className="p-6 border-b border-gray-100">
+                        <div className="p-6 border-b border-border-light">
                             <div className="flex items-center gap-3">
-                                <div className="size-12 rounded-full bg-red-50 flex items-center justify-center">
-                                    <Icon name="delete_forever" size={24} className="text-red-600" />
+                                <div className="size-12 rounded-full bg-danger-soft flex items-center justify-center">
+                                    <Icon name="delete_forever" size={24} className="text-danger" />
                                 </div>
                                 <div>
-                                    <h3 className="text-lg font-bold text-gray-900">Тапсырысты жою</h3>
-                                    <p className="text-xs text-gray-500">Бұл әрекетті болдырмау мүмкін емес</p>
+                                    <h3 className="text-lg font-bold text-text-main">{t('orders.delete.title', 'Тапсырысты жою')}</h3>
+                                    <p className="text-xs text-text-secondary">{t('orders.delete.subtitle', 'Бұл әрекетті болдырмау мүмкін емес')}</p>
                                 </div>
                             </div>
                         </div>
 
                         {/* Modal Body */}
                         <div className="p-6">
-                            <div className="bg-red-50 border border-red-200 rounded-xl p-4 mb-4">
-                                <p className="text-sm text-red-800 font-medium text-center">
-                                    Тапсырыс #{deal.id.slice(0, 8)} толығымен жойылады. Растайсыз ба?
+                            <div className="bg-danger-soft border border-danger/20 rounded-xl p-4 mb-4">
+                                <p className="text-sm text-danger font-medium text-center">
+                                    {t('orders.delete.confirmPrefix', 'Тапсырыс')} #{deal.id.slice(0, 8)} {t('orders.delete.confirmSuffix', 'толығымен жойылады. Растайсыз ба?')}
                                 </p>
                             </div>
 
                             {/* Actions */}
                             <div className="grid grid-cols-2 gap-3">
-                                <button
-                                    onClick={() => setShowDeleteModal(false)}
-                                    disabled={deleting}
-                                    className="px-4 py-3 bg-gray-100 text-gray-700 rounded-xl font-bold hover:bg-gray-200 transition-all disabled:opacity-50"
-                                >
-                                    Болдырмау
-                                </button>
-                                <button
-                                    onClick={handleDelete}
-                                    disabled={deleting}
-                                    className="px-4 py-3 bg-red-600 text-white rounded-xl font-bold hover:bg-red-700 transition-all shadow-lg shadow-red-600/20 disabled:opacity-50 flex items-center justify-center gap-2"
-                                >
-                                    {deleting ? (
-                                        <>
-                                            <div className="size-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                                            Жойылуда...
-                                        </>
-                                    ) : (
-                                        <>
-                                            <Icon name="delete" size={20} />
-                                            Жою
-                                        </>
-                                    )}
-                                </button>
+                                <Button variant="secondary" fullWidth disabled={deleting} onClick={() => setShowDeleteModal(false)}>
+                                    {t('common.cancel', 'Болдырмау')}
+                                </Button>
+                                <Button variant="dangerSolid" fullWidth loading={deleting} onClick={handleDelete} icon={<Icon name="delete" size={18} />}>
+                                    {deleting ? t('orders.delete.deleting', 'Жойылуда...') : t('common.delete', 'Жою')}
+                                </Button>
                             </div>
                         </div>
                     </div>
@@ -575,68 +528,54 @@ const DealDetail = () => {
             {/* Status Change Modal */}
             {showStatusModal && (
                 <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in">
-                    <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full animate-in zoom-in-95 slide-in-from-bottom-4">
+                    <div className="bg-surface-light rounded-2xl shadow-2xl max-w-md w-full animate-in zoom-in-95 slide-in-from-bottom-4">
                         {/* Modal Header */}
-                        <div className="p-6 border-b border-gray-100">
+                        <div className="p-6 border-b border-border-light">
                             <div className="flex items-center gap-3">
                                 <div className="size-12 rounded-full bg-primary/10 flex items-center justify-center">
                                     <Icon name="swap_horiz" size={24} className="text-primary" />
                                 </div>
                                 <div>
-                                    <h3 className="text-lg font-bold text-gray-900">Статусты өзгерту</h3>
-                                    <p className="text-xs text-gray-500">Тапсырыс статусын жаңарту</p>
+                                    <h3 className="text-lg font-bold text-text-main">{t('orders.statusModal.title', 'Статусты өзгерту')}</h3>
+                                    <p className="text-xs text-text-secondary">{t('orders.statusModal.subtitle', 'Тапсырыс статусын жаңарту')}</p>
                                 </div>
                             </div>
                         </div>
 
                         {/* Modal Body */}
                         <div className="p-6">
-                            <div className="bg-gray-50 rounded-xl p-4 mb-4">
+                            <div className="bg-background-light rounded-xl p-4 mb-4">
                                 <div className="flex items-center justify-between mb-3">
-                                    <span className="text-sm text-gray-600">Ағымдағы статус:</span>
-                                    <span className={`px-3 py-1 rounded-full text-xs font-bold ${getStatusColor(deal.status)}`}>
-                                        {getStatusLabel(deal.status)}
-                                    </span>
+                                    <span className="text-sm text-text-secondary">{t('orders.statusModal.current', 'Ағымдағы статус')}</span>
+                                    <StatusBadge status={deal.status} />
                                 </div>
                                 <div className="flex items-center justify-center my-2">
-                                    <Icon name="arrow_downward" className="text-gray-400" />
+                                    <Icon name="arrow_downward" className="text-text-secondary/60" />
                                 </div>
                                 <div className="flex items-center justify-between">
-                                    <span className="text-sm text-gray-600">Жаңа статус:</span>
-                                    <span className={`px-3 py-1 rounded-full text-xs font-bold ${getStatusColor(pendingStatus)}`}>
-                                        {getStatusLabel(pendingStatus)}
-                                    </span>
+                                    <span className="text-sm text-text-secondary">{t('orders.statusModal.new', 'Жаңа статус')}</span>
+                                    <StatusBadge status={pendingStatus} />
                                 </div>
                             </div>
 
                             {statusError && (
-                                <div className="bg-red-50 border border-red-200 rounded-xl p-3 mb-4">
-                                    <p className="text-sm text-red-700 font-medium">{statusError}</p>
+                                <div className="bg-danger-soft border border-danger/20 rounded-xl p-3 mb-4">
+                                    <p className="text-sm text-danger font-medium">{statusError}</p>
                                 </div>
                             )}
 
-                            <p className="text-sm text-gray-600 text-center mb-6">
-                                Статусты өзгертуге сенімдісіз бе?
+                            <p className="text-sm text-text-secondary text-center mb-6">
+                                {t('orders.statusModal.confirmText', 'Статусты өзгертуге сенімдісіз бе?')}
                             </p>
 
                             {/* Actions */}
                             <div className="grid grid-cols-2 gap-3">
-                                <button
-                                    onClick={() => {
-                                        setShowStatusModal(false);
-                                        setPendingStatus(null);
-                                        setStatusError(null);
-                                    }}
-                                    className="px-4 py-3 bg-gray-100 text-gray-700 rounded-xl font-bold hover:bg-gray-200 transition-all"
-                                >
-                                    Болдырмау
-                                </button>
-                                <button
-                                    onClick={handleStatusChange}
-                                    className="px-4 py-3 bg-primary text-white rounded-xl font-bold hover:brightness-110 transition-all shadow-lg shadow-primary/20"
-                                >
-                                    Растау
-                                </button>
+                                <Button variant="secondary" fullWidth onClick={() => { setShowStatusModal(false); setPendingStatus(null); setStatusError(null); }}>
+                                    {t('common.cancel', 'Болдырмау')}
+                                </Button>
+                                <Button fullWidth onClick={handleStatusChange}>
+                                    {t('common.confirm', 'Растау')}
+                                </Button>
                             </div>
                         </div>
                     </div>

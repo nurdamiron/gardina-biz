@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, useContext, createContext } from 'react';
 import { Link } from 'react-router-dom';
+import api from '../services/api';
 import {
   motion,
   AnimatePresence,
@@ -24,10 +25,22 @@ function RequestModal({ open, onClose }) {
   const [form, setForm] = useState(EMPTY_FORM);
   const [errors, setErrors] = useState({});
   const [submitted, setSubmitted] = useState(false);
+  const [calLoaded, setCalLoaded] = useState(false);
+  const [calFailed, setCalFailed] = useState(false);
 
   useEffect(() => {
-    if (!open) { setForm(EMPTY_FORM); setErrors({}); setSubmitted(false); setTab('form'); }
+    if (!open) { setForm(EMPTY_FORM); setErrors({}); setSubmitted(false); setTab('form'); setCalLoaded(false); setCalFailed(false); }
   }, [open]);
+
+  // Cal.com may refuse to embed (X-Frame-Options/CSP). If the iframe hasn't
+  // loaded within a few seconds, surface a "open in new tab" fallback instead
+  // of a blank/broken frame.
+  useEffect(() => {
+    if (!open || tab !== 'calendar') return undefined;
+    setCalFailed(false);
+    const id = setTimeout(() => { if (!calLoaded) setCalFailed(true); }, 4500);
+    return () => clearTimeout(id);
+  }, [open, tab, calLoaded]);
 
   useEffect(() => {
     if (!open) return;
@@ -41,12 +54,20 @@ function RequestModal({ open, onClose }) {
     setErrors((er) => ({ ...er, [key]: undefined }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const errs = {};
     if (!form.name.trim()) errs.name = t('landing.booking.required');
     if (!form.phone.trim()) errs.phone = t('landing.booking.required');
     if (Object.keys(errs).length) { setErrors(errs); return; }
+
+    // Save lead to backend (non-blocking — WhatsApp opens regardless)
+    api.post('/leads', {
+      name: form.name.trim(),
+      phone: form.phone.trim(),
+      salon: form.salon.trim() || undefined,
+      comment: form.comment.trim() || undefined,
+    }).catch(() => {});
 
     const lines = [
       `Здравствуйте! Меня зовут ${form.name}, нашёл вас на сайте Gardina и хочу записаться на консультацию.`,
@@ -225,12 +246,54 @@ function RequestModal({ open, onClose }) {
                   transition={{ duration: 0.18 }}
                   className="overflow-hidden"
                 >
-                  <iframe
-                    src="https://cal.com/nurdaulet/gardina?embed=true&layout=month_view"
-                    title={t('landing.booking.calTitle')}
-                    className="w-full border-0"
-                    style={{ height: '620px' }}
-                  />
+                  <div className="relative" style={{ minHeight: '320px' }}>
+                    {!calFailed && (
+                      <iframe
+                        src="https://cal.com/nurdaulet/gardina?embed=true&layout=month_view"
+                        title={t('landing.booking.calTitle')}
+                        className="w-full border-0"
+                        style={{ height: '620px' }}
+                        onLoad={() => setCalLoaded(true)}
+                      />
+                    )}
+                    {!calLoaded && !calFailed && (
+                      <div className="absolute inset-0 flex items-center justify-center bg-white">
+                        <div className="size-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+                      </div>
+                    )}
+                    {calFailed && (
+                      <div className="flex flex-col items-center text-center gap-4 px-7 py-12">
+                        <div className="size-14 rounded-full bg-primary/10 flex items-center justify-center">
+                          <Icon name="calendar_month" size={28} className="text-primary" />
+                        </div>
+                        <div>
+                          <p className="font-bold text-text-main">{t('landing.booking.calFailedTitle')}</p>
+                          <p className="text-sm text-text-secondary mt-1">{t('landing.booking.calFailedBody')}</p>
+                        </div>
+                        <a
+                          href="https://cal.com/nurdaulet/gardina"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary text-white font-bold text-sm hover:brightness-110 transition-all"
+                        >
+                          <Icon name="calendar_month" size={16} />
+                          {t('landing.booking.calOpenNewTab')}
+                        </a>
+                      </div>
+                    )}
+                  </div>
+                  {/* Always-available escape hatch even if the embed renders blank */}
+                  <div className="px-7 py-3 border-t border-border-light flex items-center justify-between gap-3">
+                    <p className="text-xs text-text-secondary">{t('landing.booking.calFallbackHint')}</p>
+                    <a
+                      href="https://cal.com/nurdaulet/gardina"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-xs font-bold text-primary hover:underline whitespace-nowrap"
+                    >
+                      {t('landing.booking.calOpenNewTab')} →
+                    </a>
+                  </div>
                 </motion.div>
               )}
             </AnimatePresence>
@@ -260,6 +323,7 @@ function LandingHeader() {
   const { t } = useI18n();
   const { scrollY } = useScroll();
   const [scrolled, setScrolled] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
     return scrollY.on('change', (v) => setScrolled(v > 24));
@@ -285,7 +349,7 @@ function LandingHeader() {
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
         <a href="/" className="flex items-center gap-2">
-          <img src="/images/logo-header.png" alt="Gardina" className="h-18 sm:h-20 w-auto" />
+          <img src="/images/logo-header.png" alt="Gardina" className="h-8 sm:h-9 w-auto" />
         </a>
 
         <nav className="hidden lg:flex items-center gap-7">
@@ -316,8 +380,57 @@ function LandingHeader() {
           >
             {t('landing.nav.whatsapp')}
           </a>
+          {/* Hamburger — the nav is hidden below lg, so mobile needs a menu fallback */}
+          <button
+            type="button"
+            onClick={() => setMenuOpen((v) => !v)}
+            aria-label={t('landing.nav.menu')}
+            aria-expanded={menuOpen}
+            className="lg:hidden size-9 inline-flex items-center justify-center rounded-lg text-text-main hover:bg-black/5 transition-colors"
+          >
+            {menuOpen ? (
+              <Icon name="close" size={22} />
+            ) : (
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                <path d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            )}
+          </button>
         </div>
       </div>
+
+      {/* Mobile drawer */}
+      <AnimatePresence>
+        {menuOpen && (
+          <motion.nav
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.22, ease: 'easeOut' }}
+            className="lg:hidden overflow-hidden bg-white/95 backdrop-blur-md border-b border-border-light shadow-sm"
+          >
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 py-2 flex flex-col">
+              {links.map((l) => (
+                <a
+                  key={l.href}
+                  href={l.href}
+                  onClick={() => setMenuOpen(false)}
+                  className="py-2.5 text-sm font-medium text-text-secondary hover:text-primary transition-colors border-b border-border-light/50"
+                >
+                  {l.label}
+                </a>
+              ))}
+              <Link
+                to="/login"
+                onClick={() => setMenuOpen(false)}
+                className="mt-3 mb-1 inline-flex items-center justify-center gap-1.5 px-4 py-2.5 text-sm font-bold text-primary border border-primary/30 rounded-lg hover:bg-primary/5 transition-colors"
+              >
+                {t('landing.nav.login')}
+              </Link>
+            </div>
+          </motion.nav>
+        )}
+      </AnimatePresence>
     </motion.header>
   );
 }
@@ -333,18 +446,7 @@ function Hero() {
 
   return (
     <section ref={heroRef} className="relative pt-28 sm:pt-32 pb-16 sm:pb-24 overflow-hidden">
-      <div className="absolute inset-0 -z-10">
-        <motion.div
-          className="absolute top-20 -left-20 size-[420px] rounded-full bg-primary/15 blur-3xl"
-          animate={{ x: [0, 30, 0], y: [0, -20, 0] }}
-          transition={{ duration: 12, repeat: Infinity, ease: 'easeInOut' }}
-        />
-        <motion.div
-          className="absolute -top-10 right-0 size-[480px] rounded-full bg-accent/20 blur-3xl"
-          animate={{ x: [0, -20, 0], y: [0, 30, 0] }}
-          transition={{ duration: 14, repeat: Infinity, ease: 'easeInOut' }}
-        />
-      </div>
+      <div className="absolute inset-0 -z-10 bg-gradient-to-b from-primary/5 to-transparent" />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 grid lg:grid-cols-2 gap-12 items-center">
         <motion.div initial="hidden" animate="visible" variants={stagger} className="text-center lg:text-left">
@@ -354,7 +456,7 @@ function Hero() {
           </motion.div>
           <motion.h1 variants={fadeUp} className="text-4xl sm:text-5xl lg:text-6xl font-black text-text-main leading-[1.05] tracking-tight">
             {t('landing.hero.title1')}{' '}
-            <span className="bg-gradient-to-br from-primary via-primary-light to-accent bg-clip-text text-transparent">
+            <span className="text-primary">
               {t('landing.hero.title2')}
             </span>
           </motion.h1>
@@ -461,7 +563,7 @@ function Hero() {
             initial={{ opacity: 0, x: 40, y: -10 }}
             animate={{ opacity: 1, x: 0, y: 0 }}
             transition={{ delay: 1.4, duration: 0.5, ease: 'easeOut' }}
-            className="absolute -right-4 sm:-right-8 top-12 bg-white rounded-2xl shadow-2xl p-3 border border-border-light max-w-[200px]"
+            className="absolute right-1 sm:-right-8 top-12 bg-white rounded-2xl shadow-2xl p-3 border border-border-light max-w-[150px] sm:max-w-[200px]"
           >
             <div className="flex items-center gap-2 mb-1">
               <span className="size-2 rounded-full bg-green-500" />
@@ -522,7 +624,7 @@ function StatsBand() {
             transition={{ duration: 0.4, delay: i * 0.08 }}
             className="text-center"
           >
-            <div className="text-3xl sm:text-4xl font-black bg-gradient-to-br from-primary to-accent bg-clip-text text-transparent">
+            <div className="text-3xl sm:text-4xl font-black text-primary">
               {s.labelOverride ? (
                 s.labelOverride
               ) : (

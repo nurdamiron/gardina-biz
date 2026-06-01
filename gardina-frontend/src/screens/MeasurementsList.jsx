@@ -7,6 +7,7 @@ import BottomNav from '../components/navigation/BottomNav';
 import { SkeletonCard } from '../components/common/Skeleton';
 import { formatTime24, monthNames, weekdayNames } from '../utils/dateUtils';
 import Icon from '../components/common/Icon';
+import Card from '../components/common/Card';
 
 const MeasurementsList = () => {
   const navigate = useNavigate();
@@ -81,9 +82,10 @@ const MeasurementsList = () => {
     const dateInfo = getDateLabel(measurement.scheduledAt);
 
     return (
-      <div
+      <Card
         onClick={() => handleViewDetails(measurement.id)}
-        className="group bg-white rounded-2xl p-5 shadow-sm border border-gray-100/50 hover:shadow-md hover:border-primary/20 transition-all cursor-pointer active:scale-[0.99]"
+        padding="p-5"
+        className="group"
       >
         <div className="flex justify-between items-start mb-4">
           <div>
@@ -157,12 +159,12 @@ const MeasurementsList = () => {
             </div>
           )}
         </div>
-      </div>
+      </Card>
     );
   };
 
   return (
-    <div className="bg-background-light min-h-screen flex flex-col pb-20">
+    <div className="bg-background-light min-h-screen flex flex-col pb-32">
       <header className="sticky top-0 z-30 bg-white/80 backdrop-blur-md border-b border-gray-100 px-4 py-3">
         <div className="flex items-center justify-between">
           <h1 className="text-xl font-bold text-gray-900 leading-tight">{t('measurements.title')}</h1>

@@ -6,12 +6,17 @@ import { useI18n } from '../contexts/I18nContext';
 import BottomNav from '../components/navigation/BottomNav';
 import { SkeletonCard } from '../components/common/Skeleton';
 import Icon from '../components/common/Icon';
+import StatusBadge from '../components/common/StatusBadge';
+import EmptyState from '../components/common/EmptyState';
+import Card from '../components/common/Card';
+import Avatar from '../components/common/Avatar';
+import { money } from '../utils/money';
 
 const DealsFunnel = ({ filterByManager = false }) => {
     const navigate = useNavigate();
     const { user } = useAuth();
     const { t, lang } = useI18n();
-    const fmt = (n) => (n || 0).toLocaleString(lang === 'kz' ? 'kk-KZ' : 'ru-RU');
+    const fmt = (n) => money(n).toLocaleString(lang === 'kz' ? 'kk-KZ' : 'ru-RU');
     const [loading, setLoading] = useState(true);
     const [stats, setStats] = useState([]);
     const [deals, setDeals] = useState([]);
@@ -96,28 +101,10 @@ const DealsFunnel = ({ filterByManager = false }) => {
         return stats.find(s => s.status === stageId) || { count: 0, totalAmount: 0 };
     };
 
-    // Status colors only — labels through t()
-    const STATUS_COLORS = {
-        new: 'bg-primary',
-        assigned: 'bg-primary/100',
-        measuring: 'bg-primary-light',
-        measurement_done: 'bg-primary-light',
-        in_sewing: 'bg-orange-500',
-        corrections: 'bg-yellow-500',
-        ready_to_install: 'bg-lime-500',
-        installing: 'bg-green-500',
-        completed: 'bg-teal-600',
-        cancelled: 'bg-red-500',
-    };
-    const getStatusInfo = (status) => ({
-        label: t(`orders.funnel.statusLabels.${status}`, status),
-        color: STATUS_COLORS[status] || 'bg-gray-500',
-    });
-
     // Для Manager: показываем список сделок
     if (filterByManager) {
         return (
-            <div className="bg-background-light min-h-screen pb-24">
+            <div className="bg-background-light min-h-screen pb-32">
                 {/* Header */}
                 <header className="sticky top-0 z-20 bg-white/80 backdrop-blur-md px-4 py-4 border-b border-gray-100">
                     <h1 className="text-xl font-bold">{t('orders.funnel.myOrders')}</h1>
@@ -132,47 +119,37 @@ const DealsFunnel = ({ filterByManager = false }) => {
                             <SkeletonCard />
                         </div>
                     ) : deals.length === 0 ? (
-                        <div className="text-center py-12">
-                            <div className="size-16 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-4">
-                                <Icon name="inbox" size={28} className="text-gray-400" />
-                            </div>
-                            <p className="text-gray-500">{t('orders.empty')}</p>
-                            <button
-                                onClick={() => navigate('/manager/order/new')}
-                                className="mt-4 px-6 py-2 bg-primary text-white rounded-xl font-bold"
-                            >
-                                {t('orders.funnel.create')}
-                            </button>
-                        </div>
+                        <EmptyState
+                            icon="inbox"
+                            title={t('orders.empty')}
+                            actionLabel={t('orders.funnel.create')}
+                            onAction={() => navigate('/manager/order/new')}
+                        />
                     ) : (
                         <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
                         {deals.map((deal) => {
-                            const statusInfo = getStatusInfo(deal.status);
                             return (
-                                <div
+                                <Card
                                     key={deal.id}
                                     onClick={() => navigate(`/manager/orders/${deal.id}`)}
-                                    className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 cursor-pointer hover:shadow-md transition-all"
                                 >
-                                    <div className="flex items-start justify-between mb-3">
-                                        <div>
-                                            <h3 className="font-bold">{deal.clientName || t('orders.card.unknownClient')}</h3>
-                                            <p className="text-sm text-gray-500">{deal.address || t('orders.card.unknownAddress')}</p>
+                                    <div className="flex items-start justify-between gap-3 mb-3">
+                                        <div className="min-w-0">
+                                            <h3 className="font-bold text-text-main truncate">{deal.client?.name || deal.clientName || t('orders.card.unknownClient')}</h3>
+                                            <p className="text-sm text-text-secondary truncate">{deal.client?.address || deal.address || t('orders.card.unknownAddress')}</p>
                                         </div>
-                                        <span className={`px-3 py-1 rounded-full text-white text-xs font-bold ${statusInfo.color}`}>
-                                            {statusInfo.label}
-                                        </span>
+                                        <StatusBadge status={deal.status} size="sm" />
                                     </div>
-                                    <div className="flex items-center justify-between">
-                                        <div className="flex items-center gap-2 text-sm text-gray-500">
-                                            <Icon name="person" size={16} />
-                                            {deal.designerName || t('orders.card.designer')}
+                                    <div className="flex items-center justify-between gap-2">
+                                        <div className="flex items-center gap-2 text-sm text-text-secondary min-w-0">
+                                            <Avatar name={deal.designer?.name || deal.designerName || ''} size="sm" />
+                                            <span className="truncate">{deal.designer?.name || deal.designerName || t('orders.card.designer')}</span>
                                         </div>
-                                        {deal.totalAmount > 0 && (
-                                            <span className="font-bold text-green-600">{fmt(deal.totalAmount)} ₸</span>
+                                        {money(deal.totalAmount) > 0 && (
+                                            <span className="font-bold text-text-main whitespace-nowrap">{fmt(deal.totalAmount)} ₸</span>
                                         )}
                                     </div>
-                                </div>
+                                </Card>
                             );
                         })}
                         </div>
@@ -194,7 +171,7 @@ const DealsFunnel = ({ filterByManager = false }) => {
 
     // Для Admin: показываем воронку
     return (
-        <div className="bg-background-light min-h-screen pb-24">
+        <div className="bg-background-light min-h-screen pb-32">
             {/* Header */}
             <header className="sticky top-0 z-20 bg-white/80 backdrop-blur-md px-4 py-3 border-b border-gray-100">
                 <div className="flex items-center gap-3 mb-3">
@@ -257,24 +234,24 @@ const DealsFunnel = ({ filterByManager = false }) => {
                             const widthFormatted = Math.max((stat.count / maxCount) * 100, 5) + "%";
 
                             return (
-                                <div key={stage.id} className="relative">
+                                <div key={stage.id} className={`relative ${stat.count === 0 ? 'opacity-60' : ''}`}>
                                     <div className="flex justify-between items-end mb-1 px-1">
-                                        <span className="text-sm font-medium text-gray-700">{stage.label}</span>
-                                        <span className="text-xs font-bold text-gray-900">{fmt(stat.totalAmount)} ₸</span>
+                                        <span className="text-sm font-medium text-text-secondary">{stage.label}</span>
+                                        <span className="text-xs font-bold text-text-main">{fmt(stat.totalAmount)} ₸</span>
                                     </div>
 
-                                    <div className="h-10 bg-gray-100 rounded-lg overflow-hidden relative flex items-center">
+                                    <div className="h-10 bg-background-light border border-border-light rounded-lg overflow-hidden relative flex items-center">
                                         <div
-                                            className={`h-full ${stage.color} opacity-20 absolute left-0 top-0`}
+                                            className={`h-full ${stage.color} opacity-25 absolute left-0 top-0 transition-all`}
                                             style={{ width: widthFormatted }}
                                         ></div>
                                         <div
-                                            className={`h-full ${stage.color} absolute left-0 top-0 w-1`}
+                                            className={`h-full ${stage.color} absolute left-0 top-0 w-1.5`}
                                         ></div>
 
                                         <div className="w-full flex justify-between items-center px-3 relative z-10">
-                                            <span className="font-bold text-gray-800">{stat.count}</span>
-                                            <span className="text-xs text-gray-500 font-medium">{percentage}%</span>
+                                            <span className="font-bold text-text-main">{stat.count}</span>
+                                            <span className="text-xs text-text-secondary font-medium">{percentage}%</span>
                                         </div>
                                     </div>
                                 </div>

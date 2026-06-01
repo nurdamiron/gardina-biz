@@ -5,11 +5,23 @@ import { useAuth } from '../contexts/AuthContext';
 import { useI18n } from '../contexts/I18nContext';
 import BottomNav from '../components/navigation/BottomNav';
 import Icon from '../components/common/Icon';
+import Card from '../components/common/Card';
+import Avatar from '../components/common/Avatar';
+import { formatDate } from '../utils/dateUtils';
+
+// Lead source → pill style (где пришёл клиент видно сразу).
+const SOURCE_STYLES = {
+  instagram: { label: 'Instagram',     cls: 'bg-pink-50 text-pink-600' },
+  whatsapp:  { label: 'WhatsApp',       cls: 'bg-green-50 text-green-700' },
+  referral:  { label: 'Рекомендация',   cls: 'bg-amber-50 text-amber-700' },
+  website:   { label: 'Сайт',           cls: 'bg-blue-50 text-blue-700' },
+  phone:     { label: 'Звонок',         cls: 'bg-gray-100 text-gray-600' },
+};
 
 const ManagerClientsList = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
   const basePath = user?.role === 'sales' ? '/sales' : user?.role === 'admin' ? '/admin' : '/manager';
   const [clients, setClients] = useState([]);
   const [search, setSearch] = useState('');
@@ -39,7 +51,7 @@ const ManagerClientsList = () => {
   const title = isSales ? t('clients.list.leadsTitle') : t('clients.list.title');
 
   return (
-    <div className="bg-background-light min-h-screen pb-24">
+    <div className="bg-background-light min-h-screen pb-32">
       <header className="sticky top-0 z-30 bg-white/80 backdrop-blur-md border-b border-gray-100 px-4 py-3">
         <div className="flex items-center justify-between">
           <h1 className="text-xl font-bold text-gray-900">{title}</h1>
@@ -78,24 +90,55 @@ const ManagerClientsList = () => {
           </div>
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
-            {filteredClients.map(client => (
-              <div
+            {filteredClients.map(client => {
+              const src = SOURCE_STYLES[client.source];
+              return (
+              <Card
                 key={client.id}
                 onClick={() => navigate(`${basePath}/clients/${client.id}`)}
-                className="bg-white rounded-xl p-4 shadow-sm cursor-pointer hover:shadow-md transition-all"
               >
-                <div className="flex items-center justify-between">
-                  <div className="flex-1">
-                    <p className="font-bold">{client.name}</p>
-                    <p className="text-sm text-text-secondary">{client.phone}</p>
+                <div className="flex items-start gap-3">
+                  <Avatar name={client.name} size="lg" />
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <p className="font-bold text-text-main truncate">{client.name}</p>
+                      {src && (
+                        <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${src.cls}`}>{src.label}</span>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-1.5 text-sm text-text-secondary mt-1">
+                      <Icon name="call" size={14} className="text-text-secondary/70" />
+                      <span className="truncate">{client.phone}</span>
+                    </div>
                     {client.address && (
-                      <p className="text-xs text-gray-400 mt-1">{client.address}</p>
+                      <div className="flex items-center gap-1.5 text-xs text-gray-400 mt-1">
+                        <Icon name="location_on" size={13} />
+                        <span className="truncate">{client.address}</span>
+                      </div>
                     )}
                   </div>
-                  <Icon name="chevron_right" className="text-gray-400" />
+                  <Icon name="chevron_right" className="text-gray-300 shrink-0 mt-1" />
                 </div>
-              </div>
-            ))}
+
+                {(client.notes || client.created_at) && (
+                  <div className="flex items-center justify-between gap-2 mt-3 pt-3 border-t border-border-light">
+                    {client.notes ? (
+                      <div className="flex items-center gap-1.5 text-xs text-text-secondary/80 min-w-0">
+                        <Icon name="note" size={13} className="shrink-0" />
+                        <span className="truncate">{client.notes}</span>
+                      </div>
+                    ) : <span />}
+                    {client.created_at && (
+                      <div className="flex items-center gap-1 text-[11px] text-gray-400 shrink-0">
+                        <Icon name="calendar_today" size={12} />
+                        <span>{formatDate(client.created_at, lang)}</span>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </Card>
+              );
+            })}
           </div>
         )}
       </main>
