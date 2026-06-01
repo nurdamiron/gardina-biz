@@ -169,6 +169,7 @@ import auditRoutes from './presentation/http/routes/audit.routes.js';
 import billingRoutes from './presentation/http/routes/billing.routes.js';
 import onboardingRoutes from './presentation/http/routes/onboarding.routes.js';
 import dealRoutes from './presentation/http/routes/deal.routes.js';
+import leadRoutes from './presentation/http/routes/lead.routes.js';
 
 // Use routes
 app.use('/api/auth', authRoutes);
@@ -187,6 +188,7 @@ app.use('/api/audit', auditRoutes);
 app.use('/api/billing', billingRoutes);
 app.use('/api/onboarding', onboardingRoutes);
 app.use('/api/deals', dealRoutes);
+app.use('/api/leads', leadRoutes);
 
 // ============================================
 // ERROR HANDLING
@@ -240,7 +242,12 @@ async function runAutoMigrations() {
 
     await client.query(`
       ALTER TABLE measurements
-        ADD COLUMN IF NOT EXISTS delivery_cost DECIMAL(10,2) DEFAULT 0;
+        ADD COLUMN IF NOT EXISTS delivery_cost DECIMAL(10,2) DEFAULT 0,
+        ADD COLUMN IF NOT EXISTS map_link TEXT,
+        ADD COLUMN IF NOT EXISTS priority TEXT DEFAULT 'standard',
+        ADD COLUMN IF NOT EXISTS styles TEXT,
+        ADD COLUMN IF NOT EXISTS curtain_types TEXT,
+        ADD COLUMN IF NOT EXISTS technical_features JSONB DEFAULT '[]';
     `);
 
     // fabrics extra columns (001-catalog-system)
@@ -250,6 +257,22 @@ async function runAutoMigrations() {
         ADD COLUMN IF NOT EXISTS width_cm INTEGER DEFAULT 280,
         ADD COLUMN IF NOT EXISTS brand VARCHAR(100);
     `);
+
+    // rooms table (001-catalog-system) — required by the measurement save() sync.
+    // On a fully-migrated DB this is a no-op; it backfills DBs provisioned without 001.
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS rooms (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        measurement_id UUID NOT NULL REFERENCES measurements(id) ON DELETE CASCADE,
+        name VARCHAR(100) NOT NULL,
+        order_number INTEGER NOT NULL DEFAULT 1,
+        window_count INTEGER DEFAULT 1,
+        notes TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+    `);
+    await client.query(`CREATE INDEX IF NOT EXISTS idx_rooms_measurement ON rooms(measurement_id);`);
 
     // service_rates table (001-catalog-system)
     await client.query(`
@@ -262,6 +285,20 @@ async function runAutoMigrations() {
         base_rate DECIMAL(10,2) NOT NULL DEFAULT 0,
         is_active BOOLEAN DEFAULT true,
         organization_id UUID REFERENCES organizations(id) ON DELETE CASCADE,
+        created_at TIMESTAMPTZ DEFAULT NOW(),
+        updated_at TIMESTAMPTZ DEFAULT NOW()
+      );
+    `);
+
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS leads (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        name VARCHAR(255) NOT NULL,
+        phone VARCHAR(50) NOT NULL,
+        salon VARCHAR(255),
+        comment TEXT,
+        status VARCHAR(50) NOT NULL DEFAULT 'new',
+        source VARCHAR(50) NOT NULL DEFAULT 'landing',
         created_at TIMESTAMPTZ DEFAULT NOW(),
         updated_at TIMESTAMPTZ DEFAULT NOW()
       );

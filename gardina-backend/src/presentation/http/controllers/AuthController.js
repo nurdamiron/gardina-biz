@@ -414,7 +414,7 @@ export class AuthController {
           id: user.id,
           name: user.name,
           email: user.email,
-          emailVerified: Boolean(user.email_verified),
+          emailVerified: Boolean(user.email_verified || user.email_verified_at),
           phone: user.phone,
           role: user.role,
           avatarUrl: user.avatar_url,

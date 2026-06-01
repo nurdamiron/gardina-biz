@@ -23,6 +23,7 @@ export class PostgresUserRepository {
     const tid = getTenantId();
     const result = await pool.query(
       `SELECT u.id, u.name, u.email, u.phone, u.role, u.avatar_url, u.is_active, u.created_at,
+              u.email_verified_at,
               u.organization_id, o.name AS organization_name, o.slug AS organization_slug,
               o.current_plan_code, o.billing_cycle, o.subscription_status,
               o.trial_started_at, o.trial_ends_at, o.read_only_since

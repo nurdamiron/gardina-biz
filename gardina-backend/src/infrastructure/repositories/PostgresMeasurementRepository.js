@@ -7,7 +7,7 @@ import { Dimensions } from '../../domain/value-objects/Dimensions.js';
  * PostgreSQL Measurement Repository
  */
 export class PostgresMeasurementRepository {
-  async save(measurement) {
+  async save(measurement, opts = {}) {
     const client = await pool.connect();
     const tid = getTenantId();
     try {
@@ -164,6 +164,23 @@ export class PostgresMeasurementRepository {
         }
       }
       // =========================================================================================
+
+      // Create the linked "lead" deal in the SAME transaction so a new order is
+      // atomic: the measurement is never persisted without its deal, and the deal
+      // is never orphaned. Idempotent — skips if this client+designer already has
+      // a deal (mirrors the old client-side guard, but race-free). Only the create
+      // flow opts in; updates never create deals.
+      if (opts.createLeadDeal) {
+        await client.query(
+          `INSERT INTO deals (organization_id, client_id, designer_id, measurement_id)
+           SELECT $1, $2, $3, $4
+           WHERE NOT EXISTS (
+             SELECT 1 FROM deals
+             WHERE organization_id = $1 AND client_id = $2 AND designer_id = $3
+           )`,
+          [tid, measurement.clientId, measurement.designerId, measurement.id]
+        );
+      }
 
       // Reload saved windows so the returned domain object is accurate
       const savedWindowsResult = await client.query(

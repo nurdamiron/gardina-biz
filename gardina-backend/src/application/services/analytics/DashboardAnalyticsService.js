@@ -217,13 +217,14 @@ export class DashboardAnalyticsService {
     try {
       const months = ['Қаң','Ақп','Нау','Сәу','Мам','Мау','Шіл','Там','Қыр','Қаз','Қар','Жел'];
 
+      const now = new Date();
       const ranges = [];
       for (let i = period - 1; i >= 0; i--) {
-        const date = new Date();
-        date.setMonth(date.getMonth() - i);
-        const start = new Date(date.getFullYear(), date.getMonth(), 1);
-        const end   = new Date(date.getFullYear(), date.getMonth() + 1, 0);
-        ranges.push({ label: months[start.getMonth()], start, end });
+        // Build months from (year, month-i, 1) so day-31 dates don't roll over
+        // into the next month (which produced duplicate/skipped labels).
+        const start = new Date(now.getFullYear(), now.getMonth() - i, 1);
+        const end   = new Date(now.getFullYear(), now.getMonth() - i + 1, 0);
+        ranges.push({ label: months[start.getMonth()], monthIndex: start.getMonth(), start, end });
       }
 
       const tableMap = {
@@ -240,8 +241,9 @@ export class DashboardAnalyticsService {
         ranges.map(({ start, end }) => pool.query(query, [organizationId, start, end]))
       );
 
-      return ranges.map(({ label }, i) => ({
+      return ranges.map(({ label, monthIndex }, i) => ({
         label,
+        monthIndex,
         value: type === 'revenue'
           ? parseFloat(results[i].rows[0].value || 0)
           : parseInt(results[i].rows[0].value || 0),

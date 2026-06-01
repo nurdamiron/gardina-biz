@@ -123,7 +123,9 @@ export class MeasurementController {
       if (budgetMin && budgetMax) measurement.updateBudget(budgetMin, budgetMax);
       if (req.body.deliveryCost) measurement.setDeliveryCost(req.body.deliveryCost);
 
-      const saved = await this.measurementRepository.save(measurement);
+      // createLeadDeal: also create the linked lead deal atomically in the same
+      // transaction, so the client no longer makes a separate (racy, best-effort) call.
+      const saved = await this.measurementRepository.save(measurement, { createLeadDeal: true });
 
       // Send notification to assigned designer
       try {

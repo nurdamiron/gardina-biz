@@ -139,6 +139,7 @@ export class DesignerAnalyticsService {
           u.name,
           COUNT(CASE WHEN m.status = 'completed' THEN 1 END) as completed_measurements,
           COUNT(m.id) as total_measurements,
+          COUNT(DISTINCT d.id) as deals_count,
           SUM(CASE WHEN d.total_amount IS NOT NULL THEN d.total_amount ELSE 0 END) as total_revenue,
           AVG(CASE WHEN d.total_amount IS NOT NULL THEN d.total_amount ELSE 0 END) as average_check
         FROM users u
@@ -160,6 +161,10 @@ export class DesignerAnalyticsService {
           id: row.id,
           name: row.name,
           completedMeasurements: completed,
+          // Real count of linked deals — the ranking shows revenue from deals, so
+          // the order count must come from deals too (not completed measurements,
+          // which can be 0 while deals/revenue exist).
+          completedDeals: parseInt(row.deals_count || 0),
           totalRevenue: parseFloat(row.total_revenue || 0),
           averageCheck: parseFloat(row.average_check || 0),
           conversionRate: total > 0 ? Math.round((completed / total) * 100) : 0,
@@ -175,34 +180,41 @@ export class DesignerAnalyticsService {
   static async getDesignerEarnings(designerId, period = 'month', organizationId) {
     if (!organizationId) throw new Error('organizationId is required');
     try {
+      // Kazakh short month names, kept as a label fallback. The client localizes
+      // the axis from `monthIndex` instead of relying on these strings.
       const months = ['Қаң', 'Ақп', 'Нау', 'Сәу', 'Мам', 'Мау', 'Шіл', 'Там', 'Қыр', 'Қаз', 'Қар', 'Жел'];
+      const now = new Date();
       const queries = [];
 
       for (let i = 5; i >= 0; i--) {
-        const date = new Date();
-        date.setMonth(date.getMonth() - i);
-        const start = new Date(date.getFullYear(), date.getMonth(), 1);
-        const end = new Date(date.getFullYear(), date.getMonth() + 1, 0);
-        queries.push({ label: months[start.getMonth()], start, end });
+        // Build month boundaries directly from year/month so day-31 dates never
+        // overflow into the next month (the old setMonth() approach did).
+        const start = new Date(now.getFullYear(), now.getMonth() - i, 1);
+        const end = new Date(now.getFullYear(), now.getMonth() - i + 1, 0, 23, 59, 59, 999);
+        queries.push({ monthIndex: start.getMonth(), label: months[start.getMonth()], start, end });
       }
 
       const results = await Promise.all(
         queries.map(({ start, end }) =>
+          // Bucket by the DEAL date and sum deal revenue regardless of measurement
+          // status, so the revenue series matches the aggregate totals (average
+          // check / conversion) instead of going empty when measurements aren't
+          // yet flagged 'completed'.
           pool.query(`
             SELECT SUM(d.total_amount) as revenue
-            FROM measurements m
-            LEFT JOIN deals d ON d.measurement_id = m.id AND d.organization_id = $4
-            WHERE m.organization_id = $4
+            FROM deals d
+            JOIN measurements m ON m.id = d.measurement_id AND m.organization_id = $4
+            WHERE d.organization_id = $4
               AND m.designer_id = $1
-              AND m.created_at >= $2
-              AND m.created_at <= $3
-              AND m.status = 'completed'
+              AND d.created_at >= $2
+              AND d.created_at <= $3
           `, [designerId, start, end, organizationId])
         )
       );
 
-      const monthly = queries.map(({ label }, i) => ({
+      const monthly = queries.map(({ label, monthIndex }, i) => ({
         label,
+        monthIndex,
         value: parseFloat(results[i].rows[0].revenue || 0),
       }));
 
