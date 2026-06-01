@@ -58,8 +58,20 @@ BEGIN
   DELETE FROM deals WHERE organization_id=org_id;
   DELETE FROM clients WHERE organization_id=org_id;
 
+  -- Релевантные фото по коду товара (Unsplash CDN, стабильные ссылки).
+  -- ELSE — нейтральная штора у окна для любых неучтённых кодов.
   UPDATE products SET cost_price = ROUND(price_per_meter*0.58),
-                      image_url  = 'https://picsum.photos/seed/'||code||'/600/400'
+                      image_url  = CASE code
+    WHEN 'TL-001' THEN 'https://images.unsplash.com/photo-1528822855841-e8bf3134cdc9?auto=format&fit=crop&w=1200&q=80' -- белый прозрачный тюль
+    WHEN 'TL-002' THEN 'https://images.unsplash.com/photo-1745242395967-c69b5af856a6?auto=format&fit=crop&w=1200&q=80' -- молочная органза
+    WHEN 'BL-001' THEN 'https://images.unsplash.com/photo-1581495009654-777d243766e8?auto=format&fit=crop&w=1200&q=80' -- блэкаут антрацит
+    WHEN 'BL-002' THEN 'https://images.unsplash.com/photo-1771039622237-2725bdf33edf?auto=format&fit=crop&w=1200&q=80' -- блэкаут кремовый
+    WHEN 'PR-001' THEN 'https://images.unsplash.com/photo-1733896967858-40ab7ea3f94f?auto=format&fit=crop&w=1200&q=80' -- бархат изумруд
+    WHEN 'PR-002' THEN 'https://images.unsplash.com/photo-1754611380518-61a923cc47ca?auto=format&fit=crop&w=1200&q=80' -- лён бежевый
+    WHEN 'RM-001' THEN 'https://images.unsplash.com/photo-1715713810564-f31bbcd8e227?auto=format&fit=crop&w=1200&q=80' -- римская штора
+    WHEN 'ZB-001' THEN 'https://images.unsplash.com/photo-1532372092598-facb13a6b2ad?auto=format&fit=crop&w=1200&q=80' -- жалюзи зебра
+    ELSE 'https://images.unsplash.com/photo-1611822506999-793d04b7ddd8?auto=format&fit=crop&w=1200&q=80'              -- штора у окна (fallback)
+  END
   WHERE organization_id=org_id;
 
   FOR r IN SELECT * FROM (VALUES
