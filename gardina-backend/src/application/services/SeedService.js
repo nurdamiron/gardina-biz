@@ -38,35 +38,59 @@ const DEMO_PRODUCTS = [
  * @param {import('pg').PoolClient} client - active transaction client
  * @param {string} organizationId
  */
+// products.type is constrained to a fixed set in some deployments; map the
+// human-facing demo categories onto the allowed values so the seed insert
+// never violates the CHECK constraint.
+const PRODUCT_TYPE_MAP = {
+  blackout: 'fabric',
+  tulle: 'fabric',
+  curtain: 'curtain',
+  cornice: 'accessory',
+  jalousie: 'accessory',
+};
+
+/**
+ * Run a single seed INSERT inside its own SAVEPOINT. A failure (missing
+ * column, CHECK violation, schema drift) rolls back ONLY this statement —
+ * never the surrounding registration transaction. Without the savepoint a
+ * failed insert would poison the whole transaction, turning the caller's
+ * COMMIT into a silent ROLLBACK (Postgres behaviour) and producing an
+ * org+admin that vanish while the API still returns 201 + a token.
+ */
+async function seedInsert(client, label, sql, params) {
+  await client.query('SAVEPOINT seed_item');
+  try {
+    await client.query(sql, params);
+    await client.query('RELEASE SAVEPOINT seed_item');
+  } catch (e) {
+    await client.query('ROLLBACK TO SAVEPOINT seed_item');
+    console.warn(`[seed] ${label} skipped: ${e.message}`);
+  }
+}
+
 export async function seedDemoData(client, organizationId) {
   // 1. Demo clients
   for (const c of DEMO_CLIENTS) {
-    try {
-      await client.query(
-        `INSERT INTO clients (organization_id, name, phone, email, address, notes, source, is_sample)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, true)
-         ON CONFLICT DO NOTHING`,
-        [organizationId, c.name, c.phone, c.email, c.address, c.notes, c.source]
-      );
-    } catch (e) {
-      // Schema may differ across deployments — ignore individual failures
-      // so seed never blocks registration. Log for visibility.
-      console.warn(`[seed] demo client failed: ${e.message}`);
-    }
+    await seedInsert(
+      client,
+      'demo client',
+      `INSERT INTO clients (organization_id, name, phone, email, address, notes, source, is_sample)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, true)
+       ON CONFLICT DO NOTHING`,
+      [organizationId, c.name, c.phone, c.email, c.address, c.notes, c.source]
+    );
   }
 
   // 2. Demo products
   for (const p of DEMO_PRODUCTS) {
-    try {
-      await client.query(
-        `INSERT INTO products (organization_id, name, type, brand, price_per_meter, color, is_sample)
-         VALUES ($1, $2, $3, $4, $5, $6, true)
-         ON CONFLICT DO NOTHING`,
-        [organizationId, p.name, p.type, p.brand, p.price_per_meter, p.color]
-      );
-    } catch (e) {
-      console.warn(`[seed] demo product failed: ${e.message}`);
-    }
+    await seedInsert(
+      client,
+      'demo product',
+      `INSERT INTO products (organization_id, name, type, brand, price_per_meter, color, is_sample)
+       VALUES ($1, $2, $3, $4, $5, $6, true)
+       ON CONFLICT DO NOTHING`,
+      [organizationId, p.name, PRODUCT_TYPE_MAP[p.type] || 'fabric', p.brand, p.price_per_meter, p.color]
+    );
   }
 }
 

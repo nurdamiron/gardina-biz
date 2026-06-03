@@ -11,13 +11,19 @@ export class ClientAnalyticsService {
     try {
       const startDate = getStartDateForPeriod(period);
 
+      // Status literals must match the deal_status enum
+      // (lead, measurement_scheduled, measurement_done, proposal_sent,
+      //  proposal_accepted, contract_signed, in_production,
+      //  ready_for_installation, installation_scheduled, installed,
+      //  completed, cancelled). Comparing against values outside the enum
+      // raises "invalid input value for enum deal_status" and 500s the route.
       const result = await pool.query(`
         SELECT
-          COUNT(DISTINCT CASE WHEN status = 'scheduled'   THEN id END) as leads,
-          COUNT(DISTINCT CASE WHEN status = 'measured'    THEN id END) as meetings,
-          COUNT(DISTINCT CASE WHEN status = 'in_production' THEN id END) as proposals,
-          COUNT(DISTINCT CASE WHEN status IN ('ready','installing') THEN id END) as contracts,
-          COUNT(DISTINCT CASE WHEN status = 'completed'   THEN id END) as completed
+          COUNT(DISTINCT CASE WHEN status = 'lead' THEN id END) as leads,
+          COUNT(DISTINCT CASE WHEN status IN ('measurement_scheduled','measurement_done') THEN id END) as meetings,
+          COUNT(DISTINCT CASE WHEN status IN ('proposal_sent','proposal_accepted') THEN id END) as proposals,
+          COUNT(DISTINCT CASE WHEN status IN ('contract_signed','in_production','ready_for_installation','installation_scheduled','installed') THEN id END) as contracts,
+          COUNT(DISTINCT CASE WHEN status = 'completed' THEN id END) as completed
         FROM deals
         WHERE organization_id = $1 AND created_at >= $2
       `, [organizationId, startDate]);
