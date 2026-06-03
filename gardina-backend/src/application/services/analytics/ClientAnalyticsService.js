@@ -151,7 +151,7 @@ export class ClientAnalyticsService {
           JOIN deals d ON dp.deal_id = d.id
           WHERE d.organization_id = $1
             AND d.created_at >= $2
-            AND d.status IN ('completed','installing','ready')
+            AND d.status IN ('completed','installed','ready_for_installation','installation_scheduled')
         ),
         category_sales AS (
           SELECT
@@ -178,7 +178,7 @@ export class ClientAnalyticsService {
           FROM deals
           WHERE organization_id = $1
             AND created_at >= $2
-            AND status IN ('completed','installing','ready')
+            AND status IN ('completed','installed','ready_for_installation','installation_scheduled')
         `, [organizationId, startDate]);
 
         const total = parseFloat(fallback.rows[0]?.total || 0);
@@ -266,7 +266,7 @@ export class ClientAnalyticsService {
         JOIN deals d ON dp.deal_id = d.id
         WHERE d.organization_id = $1
           AND d.created_at >= $2
-          AND d.status IN ('completed','installing','ready')
+          AND d.status IN ('completed','installed','ready_for_installation','installation_scheduled')
         GROUP BY p.id, p.name, p.type, p.price_per_meter
         ORDER BY total_revenue DESC
         LIMIT $3

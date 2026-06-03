@@ -107,7 +107,7 @@ export class TeamAnalyticsService {
           FROM deals
           WHERE organization_id = $1
             AND created_at >= $2
-            AND status IN ('completed','installing','ready')
+            AND status IN ('completed','installed','ready_for_installation','installation_scheduled')
         `, [organizationId, startDate]),
 
         pool.query(`
