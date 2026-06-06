@@ -8,18 +8,24 @@ import { DealStatusChangedEvent } from '../events/DealStatusChangedEvent.js';
  * Core business entity representing a deal/order in the system
  */
 export class Deal extends BaseEntity {
-  // Deal statuses (matches database ENUM)
+  // Deal statuses — MUST match the Postgres deal_status ENUM exactly, otherwise
+  // any write of an unknown value 500s with "invalid input value for enum
+  // deal_status". DB enum: lead, measurement_scheduled, measurement_done,
+  // proposal_sent, proposal_accepted, contract_signed, in_production,
+  // ready_for_installation, installation_scheduled, installed, completed, cancelled.
   static STATUS = {
-    SCHEDULED: 'scheduled',              // Measurement scheduled
-    MEASURED: 'measured',                 // Measurement completed
+    SCHEDULED: 'measurement_scheduled',     // Measurement scheduled
+    MEASURED: 'measurement_done',           // Measurement completed
+    PROPOSAL_SENT: 'proposal_sent',         // Proposal sent to client
     PROPOSAL_ACCEPTED: 'proposal_accepted', // Client accepted proposal
-    CONTRACT_SIGNED: 'contract_signed',   // Contract signed, prepayment received
-    IN_PRODUCTION: 'in_production',       // Production in progress
-    READY: 'ready',                       // Ready for installation
-    INSTALLING: 'installing',             // Installation in progress
-    COMPLETED: 'completed',               // Deal completed
-    CANCELLED: 'cancelled',               // Deal cancelled
-    REJECTED: 'rejected',                 // Client rejected proposal
+    CONTRACT_SIGNED: 'contract_signed',     // Contract signed, prepayment received
+    IN_PRODUCTION: 'in_production',          // Production in progress
+    READY: 'ready_for_installation',        // Ready for installation
+    INSTALLING: 'installation_scheduled',   // Installation scheduled/in progress
+    INSTALLED: 'installed',                  // Installation done
+    COMPLETED: 'completed',                  // Deal completed
+    CANCELLED: 'cancelled',                  // Deal cancelled
+    REJECTED: 'cancelled',                   // Client rejected proposal -> deal cancelled (no 'rejected' enum value)
   };
 
   // Payment statuses

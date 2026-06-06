@@ -212,12 +212,20 @@ app.use((err, req, res, next) => {
   }
 
   const status = err.status || 500;
-  const message = err.message || 'Internal Server Error';
+  const isProd = process.env.NODE_ENV === 'production';
+
+  // Never leak internal error details (DB messages, schema, library internals)
+  // to clients in production. Client errors (4xx) carry intentional messages;
+  // 5xx get a generic message and the real cause stays in the logs / Sentry.
+  const safeMessage = status < 500
+    ? (err.message || 'Request error')
+    : (isProd ? 'Внутренняя ошибка сервера. Попробуйте позже.' : (err.message || 'Internal Server Error'));
 
   res.status(status).json({
+    success: false,
     error: err.name || 'Error',
-    message,
-    ...(process.env.NODE_ENV === 'development' && { stack: err.stack }),
+    message: safeMessage,
+    ...(!isProd && { stack: err.stack }),
     timestamp: new Date().toISOString()
   });
 });

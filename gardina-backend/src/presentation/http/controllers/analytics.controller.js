@@ -6,7 +6,13 @@ import { assertUserBelongsToOrganization } from '../../../application/services/a
 
 const respondError = (res, error) => {
   const status = error.status || 500;
-  res.status(status).json({ success: false, error: error.message || 'Internal error' });
+  const isProd = process.env.NODE_ENV === 'production';
+  // 4xx carry intentional messages; 5xx must not leak DB/internal details to the
+  // client in production (the real cause is already logged by the caller).
+  const message = status < 500
+    ? (error.message || 'Request error')
+    : (isProd ? 'Не удалось загрузить данные. Попробуйте позже.' : (error.message || 'Internal error'));
+  res.status(status).json({ success: false, error: message });
 };
 
 export class AnalyticsController {
