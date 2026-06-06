@@ -17,20 +17,17 @@ jobs:
             --instance-ids i-03108d97efac1ce59 \
             --document-name "AWS-RunShellScript" \
             --parameters '{"commands":[
-              "echo ===IMAGE_AND_CONTAINER_TIME===",
-              "docker inspect gardina-backend --format \"container_created={{.Created}} image={{.Config.Image}}\" || true",
-              "docker image inspect gardina-stack-backend:new --format \"image_created={{.Created}}\" || true",
-              "echo ===IN_CONTAINER_SERVER_JS_MOUNTS===",
-              "docker exec gardina-backend sh -c \"grep -nE \\\"api/leads|api/notifications|push/apns\\\" src/server.js\" || true",
-              "echo ===IN_CONTAINER_APNS_ROUTE===",
-              "docker exec gardina-backend sh -c \"grep -n push/apns src/presentation/http/routes/notification.routes.js\" || echo NO_APNS_ROUTE",
-              "echo ===IN_CONTAINER_FUNNEL_ENUM===",
-              "docker exec gardina-backend sh -c \"grep -c measurement_scheduled src/application/services/analytics/ClientAnalyticsService.js\" || true",
-              "echo ===IN_CONTAINER_DEAL_ENUM===",
-              "docker exec gardina-backend sh -c \"grep -n SCHEDULED: src/domain/aggregates/Deal.js\" || true",
-              "echo ===DIRECT_LOCALHOST_3002===",
-              "echo -n leads: ; curl -s -o /dev/null -w \"%{http_code}\\n\" localhost:3002/api/leads",
-              "echo -n apns: ; curl -s -o /dev/null -w \"%{http_code}\\n\" -X POST localhost:3002/api/notifications/push/apns -H \"Content-Type: application/json\" -d \"{}\"",
+              "echo ===PORTS_LISTENING===",
+              "ss -tlnp 2>/dev/null | grep -E \":300[0-9]\" || true",
+              "echo ===API_GARDINA_NGINX_BLOCK===",
+              "docker exec hafiza-nginx sh -c \"nginx -T 2>/dev/null\" | grep -n -A35 \"server_name api.gardina\" | head -80 || true",
+              "echo ===THROUGH_NGINX_LOCAL===",
+              "echo -n nginx_leads: ; curl -sk -o /dev/null -w \"%{http_code}\\n\" https://localhost/api/leads -H \"Host: api.gardina.alashed.kz\"",
+              "echo -n nginx_funnel: ; curl -sk -o /dev/null -w \"%{http_code}\\n\" \"https://localhost/api/analytics/client-funnel?period=month\" -H \"Host: api.gardina.alashed.kz\"",
+              "echo ===DIRECT_3002===",
+              "echo -n direct_leads: ; curl -s -o /dev/null -w \"%{http_code}\\n\" localhost:3002/api/leads",
+              "echo ===WHAT_IS_ON_OTHER_PORTS===",
+              "for P in 3001 3003 3004 3005; do echo -n port$P/api/leads: ; curl -s -o /dev/null -w \"%{http_code}\\n\" localhost:$P/api/leads 2>/dev/null || echo down; done",
               "echo ===DONE==="
             ]}' \
             --query 'Command.CommandId' --output text)
