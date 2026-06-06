@@ -41,11 +41,11 @@ const ChartBar = ({
 
     if (loading) {
         return (
-            <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
-                {title && <div className="h-6 w-40 bg-gray-200 rounded mb-4 animate-pulse"></div>}
+            <div className="bg-card rounded-2xl p-5 shadow-sm border border-border">
+                {title && <div className="h-6 w-40 bg-muted rounded mb-4 animate-pulse"></div>}
                 <div className="flex items-end justify-between gap-2" style={{ height }}>
                     {[1,2,3,4,5].map(i => (
-                        <div key={i} className="flex-1 bg-gray-200 rounded-t animate-pulse"
+                        <div key={i} className="flex-1 bg-muted rounded-t animate-pulse"
                              style={{ height: `${Math.random() * 80 + 20}%` }}></div>
                     ))}
                 </div>
@@ -68,9 +68,9 @@ const ChartBar = ({
     }
 
     return (
-        <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+        <div className="bg-card rounded-2xl p-5 shadow-sm border border-border">
             {title && (
-                <h3 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
+                <h3 className="font-bold text-foreground mb-4 flex items-center gap-2">
                     <Icon name="bar_chart" className="text-primary" />
                     {title}
                 </h3>
@@ -84,14 +84,14 @@ const ChartBar = ({
                         return (
                             <div key={index}>
                                 <div className="flex justify-between text-sm mb-1">
-                                    <span className="font-medium text-gray-700">{item.label}</span>
+                                    <span className="font-medium text-foreground">{item.label}</span>
                                     {showValues && (
-                                        <span className="font-bold text-gray-900">
+                                        <span className="font-bold text-foreground">
                                             {formatValue(item.value)}
                                         </span>
                                     )}
                                 </div>
-                                <div className="h-8 bg-gray-100 rounded-lg overflow-hidden">
+                                <div className="h-8 bg-muted rounded-lg overflow-hidden">
                                     <div
                                         className={`h-full ${item.color || 'bg-primary'} transition-all duration-500 rounded-lg`}
                                         style={{ width: `${percentage}%` }}
@@ -110,7 +110,7 @@ const ChartBar = ({
                             return (
                                 <div key={index} className="flex-1 flex flex-col items-center justify-end">
                                     {showValues && (
-                                        <span className="text-xs font-bold text-gray-700 mb-1">
+                                        <span className="text-xs font-bold text-foreground mb-1">
                                             {formatValue(item.value)}
                                         </span>
                                     )}
@@ -124,10 +124,10 @@ const ChartBar = ({
                         })}
                     </div>
                     {/* Labels */}
-                    <div className="flex justify-between gap-2 pt-2 border-t border-gray-200">
+                    <div className="flex justify-between gap-2 pt-2 border-t border-border">
                         {data.map((item, index) => (
                             <div key={index} className="flex-1 text-center">
-                                <span className="text-xs text-gray-600 font-medium">
+                                <span className="text-xs text-muted-foreground font-medium">
                                     {item.label}
                                 </span>
                             </div>

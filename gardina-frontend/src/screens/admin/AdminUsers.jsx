@@ -170,15 +170,15 @@ const AdminUsers = () => {
   }));
   const roleConfig = (role) => ({
     label: t(`adminUsers.roles.${role}`, role),
-    color: ROLE_COLORS[role] || 'bg-gray-100 text-gray-600',
+    color: ROLE_COLORS[role] || 'bg-muted text-muted-foreground',
   });
 
   return (
     <div className="bg-background-light min-h-screen pb-28">
       {/* Header */}
-      <header className="sticky top-0 z-30 bg-white/80 backdrop-blur-md border-b border-gray-100">
+      <header className="sticky top-0 z-30 bg-card/80 backdrop-blur-md border-b border-border">
         <div className="flex items-center gap-3 px-4 py-4">
-          <button onClick={() => navigate(-1)} className="p-2 -ml-2 rounded-full hover:bg-gray-100">
+          <button onClick={() => navigate(-1)} className="p-2 -ml-2 rounded-full hover:bg-muted">
             <Icon name="arrow_back" size={22} />
           </button>
           <h1 className="text-xl font-bold flex-1 min-w-0 truncate">{t('adminUsers.title')}</h1>
@@ -197,13 +197,13 @@ const AdminUsers = () => {
         {/* Search + filter */}
         <div className="px-4 pb-3 space-y-2">
           <div className="relative">
-            <Icon name="search" size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+            <Icon name="search" size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
             <input
               type="text"
               value={search}
               onChange={e => setSearch(e.target.value)}
               placeholder={t('adminUsers.searchPlaceholder')}
-              className="w-full pl-9 pr-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none"
+              className="w-full pl-9 pr-4 py-2.5 border border-border rounded-xl text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none"
             />
           </div>
           <div className="flex gap-2 overflow-x-auto no-scrollbar pb-0.5 -mx-4 px-4">
@@ -247,17 +247,17 @@ const AdminUsers = () => {
         )}
 
         {!loading && filtered.length === 0 && (
-          <div className="text-center py-12 text-gray-400">
+          <div className="text-center py-12 text-muted-foreground">
             <Icon name="person_search" size={40} className="mx-auto mb-3 opacity-40" />
             <p>{t('adminUsers.noUsers')}</p>
           </div>
         )}
 
         {/* Desktop table */}
-        <div className="hidden lg:block bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+        <div className="hidden lg:block bg-card rounded-2xl shadow-sm border border-border overflow-hidden">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-gray-100 text-left text-xs font-bold text-gray-400 uppercase tracking-wide">
+              <tr className="border-b border-border text-left text-xs font-bold text-muted-foreground uppercase tracking-wide">
                 <th className="px-4 py-3">{t('adminUsers.table.user')}</th>
                 <th className="px-4 py-3">{t('adminUsers.table.contact')}</th>
                 <th className="px-4 py-3">{t('adminUsers.table.role')}</th>
@@ -270,18 +270,18 @@ const AdminUsers = () => {
               {filtered.map(u => {
                 const rc = roleConfig(u.role);
                 return (
-                  <tr key={u.id} className={`hover:bg-gray-50 transition-colors ${!u.is_active ? 'opacity-50' : ''}`}>
+                  <tr key={u.id} className={`hover:bg-muted transition-colors ${!u.is_active ? 'opacity-50' : ''}`}>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-3">
-                        <div className={`size-9 rounded-full flex items-center justify-center flex-shrink-0 ${u.is_active ? 'bg-primary/10' : 'bg-gray-100'}`}>
-                          <span className={`text-sm font-bold ${u.is_active ? 'text-primary' : 'text-gray-400'}`}>
+                        <div className={`size-9 rounded-full flex items-center justify-center flex-shrink-0 ${u.is_active ? 'bg-primary/10' : 'bg-muted'}`}>
+                          <span className={`text-sm font-bold ${u.is_active ? 'text-primary' : 'text-muted-foreground'}`}>
                             {u.name?.[0]?.toUpperCase() || '?'}
                           </span>
                         </div>
-                        <p className="font-bold text-gray-900">{u.name}</p>
+                        <p className="font-bold text-foreground">{u.name}</p>
                       </div>
                     </td>
-                    <td className="px-4 py-3 text-gray-500 text-xs">{u.phone || u.email || '—'}</td>
+                    <td className="px-4 py-3 text-muted-foreground text-xs">{u.phone || u.email || '—'}</td>
                     <td className="px-4 py-3">
                       <span className={`text-xs px-2.5 py-1 rounded-full font-semibold ${rc.color}`}>{rc.label}</span>
                     </td>
@@ -291,15 +291,15 @@ const AdminUsers = () => {
                         : <span className="text-xs px-2.5 py-1 rounded-full bg-red-50 text-red-600 font-semibold">{t('adminUsers.statuses.deactivated')}</span>
                       }
                     </td>
-                    <td className="px-4 py-3 text-xs text-gray-400">
+                    <td className="px-4 py-3 text-xs text-muted-foreground">
                       {u.created_at ? new Date(u.created_at).toLocaleDateString('ru-RU') : '—'}
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-1 justify-end">
-                        <button onClick={() => openEdit(u)} className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-500" title={t('common.edit')}>
+                        <button onClick={() => openEdit(u)} className="p-1.5 rounded-lg hover:bg-muted text-muted-foreground" title={t('common.edit')}>
                           <Icon name="edit" size={16} />
                         </button>
-                        <button onClick={() => openPassword(u)} className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-500" title={lang === 'kz' ? 'Құпия сөзді өзгерту' : 'Сменить пароль'}>
+                        <button onClick={() => openPassword(u)} className="p-1.5 rounded-lg hover:bg-muted text-muted-foreground" title={lang === 'kz' ? 'Құпия сөзді өзгерту' : 'Сменить пароль'}>
                           <Icon name="lock" size={16} />
                         </button>
                         <button onClick={() => handleToggleActive(u)} className={`p-1.5 rounded-lg ${u.is_active ? 'hover:bg-amber-50 text-amber-500' : 'hover:bg-green-50 text-green-500'}`}>
@@ -319,33 +319,33 @@ const AdminUsers = () => {
         {filtered.map(u => {
           const rc = roleConfig(u.role);
           return (
-            <div key={u.id} className={`bg-white rounded-2xl shadow-sm border p-4 transition-all ${!u.is_active ? 'opacity-50 border-gray-100' : 'border-gray-100'}`}>
+            <div key={u.id} className={`bg-card rounded-2xl shadow-sm border p-4 transition-all ${!u.is_active ? 'opacity-50 border-border' : 'border-border'}`}>
               <div className="flex items-start gap-3">
                 {/* Avatar */}
-                <div className={`size-12 rounded-full flex items-center justify-center flex-shrink-0 ${u.is_active ? 'bg-primary/10' : 'bg-gray-100'}`}>
-                  <span className={`text-lg font-bold ${u.is_active ? 'text-primary' : 'text-gray-400'}`}>
+                <div className={`size-12 rounded-full flex items-center justify-center flex-shrink-0 ${u.is_active ? 'bg-primary/10' : 'bg-muted'}`}>
+                  <span className={`text-lg font-bold ${u.is_active ? 'text-primary' : 'text-muted-foreground'}`}>
                     {u.name?.[0]?.toUpperCase() || '?'}
                   </span>
                 </div>
 
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <p className="font-bold text-gray-900">{u.name}</p>
+                    <p className="font-bold text-foreground">{u.name}</p>
                     <span className={`text-xs px-2 py-0.5 rounded-full font-semibold ${rc.color}`}>{rc.label}</span>
                     {!u.is_active && <span className="text-xs px-2 py-0.5 rounded-full bg-red-100 text-red-600 font-semibold">{t('adminUsers.statuses.deactivated')}</span>}
                   </div>
-                  <p className="text-sm text-gray-500 mt-0.5">{u.phone || u.email || '—'}</p>
-                  <p className="text-xs text-gray-400 mt-0.5">
+                  <p className="text-sm text-muted-foreground mt-0.5">{u.phone || u.email || '—'}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">
                     {u.created_at ? new Date(u.created_at).toLocaleDateString('ru-RU') : ''}
                   </p>
                 </div>
 
                 {/* Actions menu */}
                 <div className="flex flex-col gap-1 shrink-0">
-                  <button onClick={() => openEdit(u)} aria-label={t('common.edit')} className="size-10 flex items-center justify-center rounded-lg hover:bg-gray-100 text-gray-500">
+                  <button onClick={() => openEdit(u)} aria-label={t('common.edit')} className="size-10 flex items-center justify-center rounded-lg hover:bg-muted text-muted-foreground">
                     <Icon name="edit" size={18} />
                   </button>
-                  <button onClick={() => openPassword(u)} aria-label={lang === 'kz' ? 'Құпия сөзді өзгерту' : 'Сменить пароль'} className="size-10 flex items-center justify-center rounded-lg hover:bg-gray-100 text-gray-500">
+                  <button onClick={() => openPassword(u)} aria-label={lang === 'kz' ? 'Құпия сөзді өзгерту' : 'Сменить пароль'} className="size-10 flex items-center justify-center rounded-lg hover:bg-muted text-muted-foreground">
                     <Icon name="lock" size={18} />
                   </button>
                   <button onClick={() => handleToggleActive(u)} aria-label={u.is_active ? (lang === 'kz' ? 'Өшіру' : 'Деактивировать') : (lang === 'kz' ? 'Қосу' : 'Активировать')} className={`size-10 flex items-center justify-center rounded-lg ${u.is_active ? 'hover:bg-amber-50 text-amber-500' : 'hover:bg-green-50 text-green-500'}`}>
@@ -371,7 +371,7 @@ const AdminUsers = () => {
       {modal === 'edit' && selected && (
         <ModalBase title={`${t('adminUsers.modals.editTitle')}: ${selected.name}`} onClose={closeModal}>
           <UserForm form={form} setForm={setForm} error={formError} t={t} />
-          <div className="flex items-center justify-between py-3 border-t border-gray-100">
+          <div className="flex items-center justify-between py-3 border-t border-border">
             <div>
               <p className="font-medium text-sm">{t('adminUsers.statuses.active')}</p>
             </div>
@@ -379,7 +379,7 @@ const AdminUsers = () => {
               onClick={() => setForm(f => ({ ...f, isActive: !f.isActive }))}
               className={`relative w-12 h-6 rounded-full transition-colors ${form.isActive !== false ? 'bg-green-500' : 'bg-gray-300'}`}
             >
-              <span className={`absolute top-0.5 left-0.5 size-5 bg-white rounded-full shadow transition-transform ${form.isActive !== false ? 'translate-x-6' : 'translate-x-0'}`} />
+              <span className={`absolute top-0.5 left-0.5 size-5 bg-card rounded-full shadow transition-transform ${form.isActive !== false ? 'translate-x-6' : 'translate-x-0'}`} />
             </button>
           </div>
           <ModalFooter onClose={closeModal} onSave={handleEdit} saving={saving} saveLabel={t('adminUsers.modals.saveLabel')} t={t} />
@@ -394,9 +394,9 @@ const AdminUsers = () => {
             { label: t('adminUsers.fields.confirmPassword'), key: 'confirm' },
           ].map(f => (
             <div key={f.key} className="mb-3">
-              <label className="text-sm font-semibold text-gray-700 block mb-1">{f.label}</label>
+              <label className="text-sm font-semibold text-foreground block mb-1">{f.label}</label>
               <input type="password" value={pwForm[f.key]} onChange={e => setPwForm(p => ({ ...p, [f.key]: e.target.value }))}
-                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:border-primary outline-none" />
+                className="w-full px-4 py-3 border border-border rounded-xl focus:border-primary outline-none" />
             </div>
           ))}
           <ModalFooter onClose={closeModal} onSave={handleResetPassword} saving={saving} saveLabel={t('adminUsers.modals.changeLabel')} t={t} />
@@ -409,7 +409,7 @@ const AdminUsers = () => {
             <div className="size-14 rounded-full bg-red-100 flex items-center justify-center mx-auto mb-4">
               <Icon name="person_off" size={24} className="text-red-500" />
             </div>
-            <p className="text-gray-600 text-sm">
+            <p className="text-muted-foreground text-sm">
               <span className="font-bold">{selected.name}</span> — {t('adminUsers.modals.deactivateConfirm')}
             </p>
           </div>
@@ -419,31 +419,31 @@ const AdminUsers = () => {
 
       {modal === 'invite' && (
         <ModalBase title={lang === 'kz' ? 'Email арқылы шақыру' : 'Пригласить по email'} onClose={closeModal}>
-          <p className="text-sm text-gray-500 mb-4">
+          <p className="text-sm text-muted-foreground mb-4">
             {lang === 'kz'
               ? 'Қызметкер сілтеме арқылы тіркеліп, пароль қояды.'
               : 'Сотрудник зарегистрируется по ссылке и сам задаст пароль.'}
           </p>
           {formError && <p className="text-sm text-red-600 bg-red-50 p-3 rounded-xl mb-4">{formError}</p>}
           <div className="mb-3">
-            <label className="text-sm font-semibold text-gray-700 block mb-1">Email</label>
+            <label className="text-sm font-semibold text-foreground block mb-1">Email</label>
             <input
               type="email"
               value={inviteForm.email}
               onChange={(e) => setInviteForm((f) => ({ ...f, email: e.target.value }))}
               placeholder="ivan@example.com"
               autoFocus
-              className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none"
+              className="w-full px-4 py-3 border border-border rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none"
             />
           </div>
           <div className="mb-4">
-            <label className="text-sm font-semibold text-gray-700 block mb-1">{t('adminUsers.fields.role')}</label>
+            <label className="text-sm font-semibold text-foreground block mb-1">{t('adminUsers.fields.role')}</label>
             <div className="grid grid-cols-3 gap-2">
               {ROLE_VALUES.map((value) => (
                 <button
                   key={value}
                   onClick={() => setInviteForm((f) => ({ ...f, role: value }))}
-                  className={`py-2 rounded-xl text-sm font-semibold border-2 transition-all ${inviteForm.role === value ? 'border-primary bg-primary/5 text-primary' : 'border-gray-100 text-gray-600 hover:border-gray-200'}`}
+                  className={`py-2 rounded-xl text-sm font-semibold border-2 transition-all ${inviteForm.role === value ? 'border-primary bg-primary/5 text-primary' : 'border-border text-muted-foreground hover:border-border'}`}
                 >
                   {t(`adminUsers.roles.${value}`)}
                 </button>
@@ -466,14 +466,14 @@ const AdminUsers = () => {
 // ─── Shared sub-components ────────────────────────────────────────────────────
 
 const FilterChip = ({ active, onClick, label }) => (
-  <button onClick={onClick} className={`shrink-0 px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-colors ${active ? 'bg-primary text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}>
+  <button onClick={onClick} className={`shrink-0 px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-colors ${active ? 'bg-primary text-white' : 'bg-muted text-muted-foreground hover:bg-muted'}`}>
     {label}
   </button>
 );
 
 const ModalBase = ({ title, onClose, children }) => (
   <div className="fixed inset-0 bg-black/50 z-50 flex items-end sm:items-center justify-center p-4" onClick={onClose}>
-    <div className="bg-white rounded-2xl p-6 w-full max-w-sm shadow-2xl max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+    <div className="bg-card rounded-2xl p-6 w-full max-w-sm shadow-2xl max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
       <h3 className="text-lg font-bold mb-5">{title}</h3>
       {children}
     </div>
@@ -491,22 +491,22 @@ const UserForm = ({ form, setForm, showPassword = false, error, t }) => {
         ...(showPassword ? [{ label: t('adminUsers.fields.password'), key: 'password', type: 'password', placeholder: t('adminUsers.fields.passwordPlaceholder') }] : []),
       ].map(field => (
         <div key={field.key} className="mb-3">
-          <label className="text-sm font-semibold text-gray-700 block mb-1">{field.label}</label>
+          <label className="text-sm font-semibold text-foreground block mb-1">{field.label}</label>
           <input
             type={field.type}
             value={form[field.key] || ''}
             onChange={e => f(field.key, e.target.value)}
             placeholder={field.placeholder}
-            className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none"
+            className="w-full px-4 py-3 border border-border rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none"
           />
         </div>
       ))}
       <div className="mb-4">
-        <label className="text-sm font-semibold text-gray-700 block mb-1">{t('adminUsers.fields.role')}</label>
+        <label className="text-sm font-semibold text-foreground block mb-1">{t('adminUsers.fields.role')}</label>
         <div className="grid grid-cols-3 gap-2">
           {ROLE_VALUES.map(value => (
             <button key={value} onClick={() => f('role', value)}
-              className={`py-2 rounded-xl text-sm font-semibold border-2 transition-all ${form.role === value ? 'border-primary bg-primary/5 text-primary' : 'border-gray-100 text-gray-600 hover:border-gray-200'}`}>
+              className={`py-2 rounded-xl text-sm font-semibold border-2 transition-all ${form.role === value ? 'border-primary bg-primary/5 text-primary' : 'border-border text-muted-foreground hover:border-border'}`}>
               {t(`adminUsers.roles.${value}`)}
             </button>
           ))}
@@ -518,7 +518,7 @@ const UserForm = ({ form, setForm, showPassword = false, error, t }) => {
 
 const ModalFooter = ({ onClose, onSave, saving, saveLabel, danger = false, t }) => (
   <div className="flex gap-3 mt-2">
-    <button onClick={onClose} className="flex-1 py-3 bg-gray-100 text-gray-700 font-bold rounded-xl hover:bg-gray-200">{t ? t('common.cancel') : 'Cancel'}</button>
+    <button onClick={onClose} className="flex-1 py-3 bg-muted text-foreground font-bold rounded-xl hover:bg-muted">{t ? t('common.cancel') : 'Cancel'}</button>
     <button onClick={onSave} disabled={saving} className={`flex-1 py-3 text-white font-bold rounded-xl disabled:opacity-50 ${danger ? 'bg-red-500 hover:bg-red-600' : 'bg-primary hover:brightness-110'}`}>
       {saving ? (t ? t('adminUsers.modals.saving') : 'Loading…') : saveLabel}
     </button>

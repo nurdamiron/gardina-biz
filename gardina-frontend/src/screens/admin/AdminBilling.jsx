@@ -11,14 +11,14 @@ const STATUS_LABELS = {
     active:          { label: 'Активна',           color: 'bg-green-50 text-green-700 border-green-100' },
     pending_payment: { label: 'Ожидает оплаты',    color: 'bg-yellow-50 text-yellow-700 border-yellow-100' },
     past_due:        { label: 'Просрочено',        color: 'bg-red-50 text-red-700 border-red-100' },
-    canceled:        { label: 'Отменена',          color: 'bg-gray-50 text-gray-600 border-gray-200' },
+    canceled:        { label: 'Отменена',          color: 'bg-muted text-muted-foreground border-border' },
   },
   kz: {
     trial:           { label: 'Сынақ кезеңі',      color: 'bg-blue-50 text-blue-700 border-blue-100' },
     active:          { label: 'Белсенді',           color: 'bg-green-50 text-green-700 border-green-100' },
     pending_payment: { label: 'Төлем күтілуде',    color: 'bg-yellow-50 text-yellow-700 border-yellow-100' },
     past_due:        { label: 'Мерзімі өтті',      color: 'bg-red-50 text-red-700 border-red-100' },
-    canceled:        { label: 'Бас тартылған',     color: 'bg-gray-50 text-gray-600 border-gray-200' },
+    canceled:        { label: 'Бас тартылған',     color: 'bg-muted text-muted-foreground border-border' },
   },
 };
 
@@ -106,7 +106,7 @@ const AdminBilling = () => {
   if (!billing) return null;
 
   const plan = PLAN_LABELS[billing.planCode] || PLAN_LABELS.start;
-  const statusInfo = (STATUS_LABELS[lang === 'kz' ? 'kz' : 'ru'])[billing.subscriptionStatus] || { label: billing.subscriptionStatus, color: 'bg-gray-50 text-gray-600' };
+  const statusInfo = (STATUS_LABELS[lang === 'kz' ? 'kz' : 'ru'])[billing.subscriptionStatus] || { label: billing.subscriptionStatus, color: 'bg-muted text-muted-foreground' };
   const userLimit = billing.limits?.users;
   const activeUsers = billing.usage?.activeUsers || 0;
   const userPct = userLimit ? Math.min(100, Math.round((activeUsers / userLimit) * 100)) : 0;
@@ -115,7 +115,7 @@ const AdminBilling = () => {
   return (
     <div className="min-h-screen bg-background-light pb-32">
       {/* Header */}
-      <div className="sticky top-0 z-20 bg-white/90 backdrop-blur border-b border-border-light px-4 py-3 flex items-center gap-3">
+      <div className="sticky top-0 z-20 bg-card/90 backdrop-blur border-b border-border-light px-4 py-3 flex items-center gap-3">
         <button onClick={() => navigate(-1)} className="p-2 rounded-xl hover:bg-background-light">
           <Icon name="arrow_back" size={20} />
         </button>
@@ -141,7 +141,7 @@ const AdminBilling = () => {
         )}
 
         {/* Plan card */}
-        <div className="bg-white rounded-3xl shadow-sm p-6">
+        <div className="bg-card rounded-3xl shadow-sm p-6">
           <div className="flex items-start justify-between">
             <div>
               <p className="text-xs font-bold text-text-secondary uppercase tracking-wider mb-1">{t.plan}</p>
@@ -171,7 +171,7 @@ const AdminBilling = () => {
         </div>
 
         {/* Usage card */}
-        <div className="bg-white rounded-3xl shadow-sm p-6">
+        <div className="bg-card rounded-3xl shadow-sm p-6">
           <p className="text-xs font-bold text-text-secondary uppercase tracking-wider mb-4">{t.users}</p>
 
           <div className="flex items-center justify-between mb-2">
@@ -206,7 +206,7 @@ const AdminBilling = () => {
         </div>
 
         {/* Features */}
-        <div className="bg-white rounded-3xl shadow-sm p-6">
+        <div className="bg-card rounded-3xl shadow-sm p-6">
           <p className="text-xs font-bold text-text-secondary uppercase tracking-wider mb-4">{t.features}</p>
           <ul className="space-y-3">
             {Object.entries(billing.features || {}).map(([key, enabled]) => (
@@ -234,7 +234,7 @@ const AdminBilling = () => {
         </button>
 
         {/* Support */}
-        <div className="bg-white rounded-3xl shadow-sm p-5 flex items-center gap-4">
+        <div className="bg-card rounded-3xl shadow-sm p-5 flex items-center gap-4">
           <div className="size-10 bg-green-50 rounded-full flex items-center justify-center flex-shrink-0">
             <Icon name="support_agent" size={20} className="text-green-600" />
           </div>

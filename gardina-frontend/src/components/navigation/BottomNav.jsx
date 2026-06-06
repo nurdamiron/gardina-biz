@@ -61,59 +61,30 @@ const BottomNav = () => {
   return (
     <nav
       className="fixed left-1/2 -translate-x-1/2 z-50 md:hidden"
-      style={{ 
-        bottom: 'max(24px, env(safe-area-inset-bottom, 24px))'
-      }}
+      style={{ bottom: 'max(16px, env(safe-area-inset-bottom, 16px))' }}
     >
-      <div 
-        className="flex items-center justify-between rounded-full bg-gray-900"
-        style={{
-          boxShadow: '0 10px 50px rgba(0,0,0,0.35)',
-          padding: isAdmin ? '10px 16px' : '10px 16px',
-          gap: isAdmin ? '8px' : '8px',
-        }}
-      >
-          {tabs.map((tab) => {
-            const active = isActive(tab.path);
-
-            return (
-              <button
-                key={tab.id}
-                onClick={() => navigate(tab.path)}
-              className="relative flex items-center justify-center gap-2 rounded-full active:scale-95"
-              style={{
-                padding: isAdmin 
-                  ? (active ? '14px 16px' : '14px') 
-                  : (active ? '12px 20px' : '12px'),
-                backgroundColor: active ? '#1b5e45' : 'transparent',
-                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-              }}
+      <div className="flex items-center gap-1 rounded-2xl bg-card/95 backdrop-blur border border-border p-1.5 shadow-lg">
+        {tabs.map((tab) => {
+          const active = isActive(tab.path);
+          return (
+            <button
+              key={tab.id}
+              onClick={() => navigate(tab.path)}
+              aria-current={active ? 'page' : undefined}
+              className={`relative flex items-center justify-center gap-2 rounded-xl px-3.5 py-2.5 text-sm font-medium transition-all active:scale-95 outline-none focus-visible:ring-2 focus-visible:ring-ring ${
+                active ? 'bg-primary text-primary-content' : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+              }`}
+            >
+              <Icon name={tab.icon} size={22} />
+              <span
+                className="overflow-hidden whitespace-nowrap transition-all duration-300"
+                style={{ maxWidth: active ? '90px' : '0px', opacity: active ? 1 : 0 }}
               >
-              <Icon
-                name={tab.icon}
-                size={isAdmin ? 26 : 24}
-                style={{
-                  color: active ? '#ffffff' : '#9ca3af',
-                  transition: 'color 0.3s ease',
-                }}
-              />
-
-              {/* Текст только для не-админов */}
-              {!isAdmin && (
-                <span 
-                  className="text-white text-sm font-bold whitespace-nowrap overflow-hidden"
-                  style={{
-                    maxWidth: active ? '80px' : '0px',
-                    opacity: active ? 1 : 0,
-                    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                  }}
-                >
-                  {tab.label}
-                </span>
-                )}
-              </button>
-            );
-          })}
+                {tab.label}
+              </span>
+            </button>
+          );
+        })}
       </div>
     </nav>
   );

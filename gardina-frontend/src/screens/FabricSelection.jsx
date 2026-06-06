@@ -122,11 +122,11 @@ const FabricSelection = () => {
   return (
     <div className="bg-background-light min-h-screen pb-32">
       {/* Header */}
-      <header className="sticky top-0 z-20 bg-background-light/95 backdrop-blur-sm px-4 pt-4 pb-3 border-b border-gray-100">
+      <header className="sticky top-0 z-20 bg-background-light/95 backdrop-blur-sm px-4 pt-4 pb-3 border-b border-border">
         <div className="flex items-center gap-4">
           <button
             onClick={() => navigate(-1)}
-            className="flex items-center justify-center w-10 h-10 -ml-2 rounded-full hover:bg-gray-100 transition-colors"
+            className="flex items-center justify-center w-10 h-10 -ml-2 rounded-full hover:bg-muted transition-colors"
           >
             <Icon name="arrow_back" />
           </button>
@@ -140,7 +140,7 @@ const FabricSelection = () => {
       <div className="max-w-5xl mx-auto">
       {/* Client Budget */}
       <section className="mt-4 px-4">
-        <div className="bg-white rounded-xl p-4 shadow-sm border border-primary/20 flex items-center justify-between">
+        <div className="bg-card rounded-xl p-4 shadow-sm border border-primary/20 flex items-center justify-between">
           <div>
             <span className="text-xs font-medium text-text-secondary uppercase tracking-wider">Клиент бюджеті</span>
             <div className="text-lg font-bold mt-0.5">
@@ -174,7 +174,7 @@ const FabricSelection = () => {
                 className={`flex-shrink-0 px-4 py-2 rounded-lg border text-sm font-medium transition-all whitespace-nowrap ${
                   darknessLevel === option.id
                     ? 'bg-primary text-background-dark border-primary font-bold shadow-sm'
-                    : 'bg-white border-gray-200 hover:border-primary'
+                    : 'bg-card border-border hover:border-primary'
                 }`}
               >
                 {option.label}
@@ -202,7 +202,7 @@ const FabricSelection = () => {
                 className={`px-2 py-2 rounded-lg border text-sm font-medium transition-all ${
                   complexity === option.id
                     ? 'bg-primary text-background-dark border-primary font-bold shadow-sm'
-                    : 'bg-white border-gray-200 hover:border-primary'
+                    : 'bg-card border-border hover:border-primary'
                 }`}
               >
                 {option.label}
@@ -228,10 +228,10 @@ const FabricSelection = () => {
                   onChange={() => setSelectedVariant(variant)}
                   className="peer sr-only"
                 />
-                <div className="relative overflow-hidden rounded-2xl bg-white border-2 border-gray-100 peer-checked:border-primary peer-checked:ring-1 peer-checked:ring-primary transition-all shadow-sm hover:shadow-md">
+                <div className="relative overflow-hidden rounded-2xl bg-card border-2 border-border peer-checked:border-primary peer-checked:ring-1 peer-checked:ring-primary transition-all shadow-sm hover:shadow-md">
                   <div className="flex items-center justify-between p-3 pb-0">
                     <span className={`px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wider ${
-                      variant.name === 'ЭКОНОМ' ? 'bg-gray-100 text-gray-600' :
+                      variant.name === 'ЭКОНОМ' ? 'bg-muted text-muted-foreground' :
                       variant.name === 'ОРТАША' ? 'bg-primary/10 text-primary' :
                       'bg-primary/5 text-primary'
                     }`}>
@@ -280,7 +280,7 @@ const FabricSelection = () => {
                         <span>Орнату:</span>
                         <span className="font-medium text-text-main">{variant.installation.toLocaleString()} ₸</span>
                       </div>
-                      <div className="h-px bg-gray-200 my-1"></div>
+                      <div className="h-px bg-muted my-1"></div>
                       <div className="flex justify-between items-end">
                         <span className="font-bold text-text-main">Барлығы:</span>
                         <span className="text-lg font-bold text-primary leading-none">{variant.total.toLocaleString()} ₸</span>
@@ -304,7 +304,7 @@ const FabricSelection = () => {
         <textarea
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
-          className="w-full rounded-xl border-gray-200 bg-white focus:border-primary focus:ring-primary text-sm p-3 resize-none shadow-sm"
+          className="w-full rounded-xl border-border bg-card focus:border-primary focus:ring-primary text-sm p-3 resize-none shadow-sm"
           placeholder="Мысалы: Клиент ашық түстерді қалайды..."
           rows="3"
         />
@@ -313,7 +313,7 @@ const FabricSelection = () => {
       </div>{/* end max-w-5xl */}
 
       {/* Footer */}
-      <div className="fixed bottom-0 left-0 w-full bg-white border-t border-gray-100 p-4 pb-safe z-30 shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
+      <div className="fixed bottom-0 left-0 w-full bg-card border-t border-border p-4 pb-safe z-30 shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
         <div className="flex items-center justify-between mb-3 text-sm">
           <span className="text-text-secondary">Таңдалған нұсқа:</span>
           <span className="font-bold text-lg">
@@ -324,7 +324,7 @@ const FabricSelection = () => {
           <button
             type="button"
             onClick={() => navigate(-1)}
-            className="h-12 rounded-xl bg-gray-100 text-text-main text-base font-bold flex items-center justify-center gap-2 hover:bg-gray-200 transition-colors"
+            className="h-12 rounded-xl bg-muted text-text-main text-base font-bold flex items-center justify-center gap-2 hover:bg-muted transition-colors"
           >
             <Icon name="arrow_back" />
             Артқа

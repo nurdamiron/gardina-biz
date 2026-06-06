@@ -60,9 +60,9 @@ const PaymentTracking = ({
   };
 
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-gray-100">
+    <div className="bg-card rounded-2xl shadow-sm border border-border">
       {/* Заголовок с индикатором риска */}
-      <div className="p-4 border-b border-gray-100">
+      <div className="p-4 border-b border-border">
         <div className="flex items-center justify-between mb-3">
           <h3 className="font-bold text-lg">{t('payments.title')}</h3>
           <span className={`font-bold text-sm ${riskStatus.color}`}>
@@ -80,21 +80,21 @@ const PaymentTracking = ({
       </div>
 
       {/* Финансовая сводка */}
-      <div className="p-4 bg-gray-50 grid grid-cols-2 gap-3">
+      <div className="p-4 bg-muted grid grid-cols-2 gap-3">
         <div>
-          <p className="text-xs text-gray-500 mb-1">{t('payments.summary.total')}</p>
-          <p className="text-xl font-black text-gray-900">{totalAmount.toLocaleString()} ₸</p>
+          <p className="text-xs text-muted-foreground mb-1">{t('payments.summary.total')}</p>
+          <p className="text-xl font-black text-foreground">{totalAmount.toLocaleString()} ₸</p>
         </div>
         <div>
-          <p className="text-xs text-gray-500 mb-1">{t('payments.summary.required')}</p>
+          <p className="text-xs text-muted-foreground mb-1">{t('payments.summary.required')}</p>
           <p className="text-xl font-black text-primary">{requiredPrepayment.toLocaleString()} ₸</p>
         </div>
         <div>
-          <p className="text-xs text-gray-500 mb-1">{t('payments.summary.paid')}</p>
+          <p className="text-xs text-muted-foreground mb-1">{t('payments.summary.paid')}</p>
           <p className="text-xl font-black text-green-600">{paidAmount.toLocaleString()} ₸</p>
         </div>
         <div>
-          <p className="text-xs text-gray-500 mb-1">{t('payments.summary.remaining')}</p>
+          <p className="text-xs text-muted-foreground mb-1">{t('payments.summary.remaining')}</p>
           <p className="text-xl font-black text-orange-600">{remainingAmount.toLocaleString()} ₸</p>
         </div>
       </div>
@@ -103,13 +103,13 @@ const PaymentTracking = ({
       <div className="p-4">
         <div className="flex items-center justify-between mb-3">
           <h4 className="font-bold text-sm">{t('payments.history.title')}</h4>
-          <span className="text-xs text-gray-500">{pluralize(payments.length, NOUNS.payment, lang)}</span>
+          <span className="text-xs text-muted-foreground">{pluralize(payments.length, NOUNS.payment, lang)}</span>
         </div>
 
         {payments.length === 0 ? (
-          <div className="text-center py-6 border-2 border-dashed border-gray-200 rounded-xl">
-            <Icon name="payments" size={32} className="text-gray-300" />
-            <p className="text-sm text-gray-500 mt-2">{t('payments.history.empty')}</p>
+          <div className="text-center py-6 border-2 border-dashed border-border rounded-xl">
+            <Icon name="payments" size={32} className="text-muted-foreground" />
+            <p className="text-sm text-muted-foreground mt-2">{t('payments.history.empty')}</p>
           </div>
         ) : (
           <div className="space-y-2">
@@ -134,13 +134,13 @@ const PaymentTracking = ({
                           {payment.type === 'prepayment' ? t('payments.type.prepayment') :
                            payment.type === 'final' ? t('payments.type.final') : t('payments.type.extra')}
                         </p>
-                        <p className="text-xs text-gray-500">
+                        <p className="text-xs text-muted-foreground">
                           {formatDateKZ(payment.createdAt)} • {formatTime24(payment.createdAt)}
                         </p>
                       </div>
                     </div>
                     <div className="text-right">
-                      <p className="font-black text-gray-900">{payment.amount.toLocaleString()} ₸</p>
+                      <p className="font-black text-foreground">{payment.amount.toLocaleString()} ₸</p>
                       {isPartial && payment.type === 'prepayment' && (
                         <p className="text-[10px] text-yellow-700 font-bold">
                           {t('payments.partialPercent', { percent: Math.round((payment.amount / totalAmount) * 100) })}
@@ -149,7 +149,7 @@ const PaymentTracking = ({
                     </div>
                   </div>
                   {payment.note && (
-                    <p className="mt-2 text-xs text-gray-600 pl-10">{payment.note}</p>
+                    <p className="mt-2 text-xs text-muted-foreground pl-10">{payment.note}</p>
                   )}
                 </div>
               );
@@ -205,12 +205,12 @@ const PaymentTracking = ({
                     placeholder={t('payments.form.amount')}
                     value={paymentForm.amount}
                     onChange={(e) => setPaymentForm({ ...paymentForm, amount: e.target.value })}
-                    className="px-3 py-2 border border-gray-200 rounded-lg text-sm"
+                    className="px-3 py-2 border border-border rounded-lg text-sm"
                   />
                   <select
                     value={paymentForm.type}
                     onChange={(e) => setPaymentForm({ ...paymentForm, type: e.target.value })}
-                    className="px-3 py-2 border border-gray-200 rounded-lg text-sm bg-white"
+                    className="px-3 py-2 border border-border rounded-lg text-sm bg-card"
                   >
                     <option value="prepayment">{t('payments.form.prepayment')}</option>
                     <option value="final">{t('payments.form.final')}</option>
@@ -222,7 +222,7 @@ const PaymentTracking = ({
                   placeholder={t('payments.form.note')}
                   value={paymentForm.note}
                   onChange={(e) => setPaymentForm({ ...paymentForm, note: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm mb-2"
+                  className="w-full px-3 py-2 border border-border rounded-lg text-sm mb-2"
                 />
                 <div className="flex gap-2">
                   <button
@@ -237,7 +237,7 @@ const PaymentTracking = ({
                       setShowAddForm(false);
                       setPaymentForm({ amount: '', type: 'prepayment', note: '' });
                     }}
-                    className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg font-bold text-sm"
+                    className="px-4 py-2 bg-muted text-foreground rounded-lg font-bold text-sm"
                   >
                     {t('payments.form.cancel')}
                   </button>

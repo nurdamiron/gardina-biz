@@ -70,8 +70,8 @@ const auth = {
   errorConsentRequired: 'Нужно согласиться с условиями и политикой',
   errorLoginFailed: 'Логин или пароль неверны',
   slugChecking: 'Проверяем…',
-  slugAvailable: '✓ Свободен',
-  slugTaken: '✗ Уже занят, выберите другой',
+  slugAvailable: 'Свободен',
+  slugTaken: 'Уже занят, выберите другой',
 
   // Footer
   copyright: '© 2026 Gardina. Все права защищены.',

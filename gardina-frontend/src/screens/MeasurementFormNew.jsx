@@ -371,7 +371,7 @@ const MeasurementFormNew = () => {
   return (
     <div className="bg-background-light min-h-screen pb-32">
       {/* Header */}
-      <header className="sticky top-0 z-30 bg-white/80 backdrop-blur-md border-b border-gray-100 px-4 py-4">
+      <header className="sticky top-0 z-30 bg-card/80 backdrop-blur-md border-b border-border px-4 py-4">
         <div className="flex items-center justify-between">
           <button
             onClick={() => {
@@ -384,18 +384,18 @@ const MeasurementFormNew = () => {
                 navigate(`/designer/measurements/${measurementId}`);
               }
             }}
-            className="size-10 rounded-full bg-gray-50 flex items-center justify-center hover:bg-gray-100 transition-colors"
+            className="size-10 rounded-full bg-muted flex items-center justify-center hover:bg-muted transition-colors"
           >
-            <Icon name="arrow_back" className="text-gray-600" />
+            <Icon name="arrow_back" className="text-muted-foreground" />
           </button>
           
           <div className="text-center">
-            <h1 className="text-lg font-bold text-gray-900">
+            <h1 className="text-lg font-bold text-foreground">
               {step === 'rooms' && 'Бөлмелер'}
               {step === 'room-edit' && (currentRoom?.name || 'Жаңа бөлме')}
               {step === 'summary' && 'Смета'}
             </h1>
-            <p className="text-xs text-gray-500">{measurement?.clientName}</p>
+            <p className="text-xs text-muted-foreground">{measurement?.clientName}</p>
           </div>
           
           <button
@@ -462,7 +462,7 @@ const MeasurementFormNew = () => {
                   return (
                     <div
                       key={room.id}
-                      className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100"
+                      className="bg-card rounded-2xl p-4 shadow-sm border border-border"
                     >
                       <div className="flex items-center gap-4">
                         <div className="size-12 rounded-xl bg-primary/10 flex items-center justify-center">
@@ -470,8 +470,8 @@ const MeasurementFormNew = () => {
                         </div>
                         
                         <div className="flex-1">
-                          <h3 className="font-bold text-gray-900">{room.name}</h3>
-                          <p className="text-xs text-gray-500">
+                          <h3 className="font-bold text-foreground">{room.name}</h3>
+                          <p className="text-xs text-muted-foreground">
                             {solutionType?.name}
                             {room.corniceLength && ` • ${room.corniceLength}м`}
                           </p>
@@ -486,15 +486,15 @@ const MeasurementFormNew = () => {
                         <div className="flex gap-1">
                           <button
                             onClick={() => editRoom(index)}
-                            className="size-10 rounded-full bg-gray-50 flex items-center justify-center hover:bg-gray-100"
+                            className="size-10 rounded-full bg-muted flex items-center justify-center hover:bg-muted"
                           >
-                            <Icon name="edit" size={20} className="text-gray-600" />
+                            <Icon name="edit" size={20} className="text-muted-foreground" />
                           </button>
                           <button
                             onClick={() => deleteRoom(index)}
-                            className="size-10 rounded-full bg-gray-50 flex items-center justify-center hover:bg-red-50"
+                            className="size-10 rounded-full bg-muted flex items-center justify-center hover:bg-red-50"
                           >
-                            <Icon name="delete" size={20} className="text-gray-600" />
+                            <Icon name="delete" size={20} className="text-muted-foreground" />
                           </button>
                         </div>
                       </div>
@@ -505,14 +505,14 @@ const MeasurementFormNew = () => {
             )}
 
             {/* Mobile: add room panel */}
-            <div className="lg:hidden bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
-              <h3 className="font-bold text-gray-900 mb-4">Бөлме қосу</h3>
+            <div className="lg:hidden bg-card rounded-2xl p-5 shadow-sm border border-border">
+              <h3 className="font-bold text-foreground mb-4">Бөлме қосу</h3>
               <div className="grid grid-cols-4 gap-3">
                 {ROOM_TYPES.map(room => (
                   <button
                     key={room.id}
                     onClick={() => addRoom(room.id)}
-                    className="flex flex-col items-center justify-center p-3 rounded-xl bg-gray-50 hover:bg-primary/10 hover:text-primary transition-colors"
+                    className="flex flex-col items-center justify-center p-3 rounded-xl bg-muted hover:bg-primary/10 hover:text-primary transition-colors"
                   >
                     <Icon name={room.icon} size={24} className="mb-1" />
                     <span className="text-[10px] font-medium text-center leading-tight">{room.label}</span>
@@ -536,14 +536,14 @@ const MeasurementFormNew = () => {
 
             {/* RIGHT (desktop only): add-room panel + total */}
             <div className="hidden lg:flex flex-col gap-4 sticky top-20">
-              <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
-                <h3 className="font-bold text-gray-900 mb-4">Бөлме қосу</h3>
+              <div className="bg-card rounded-2xl p-5 shadow-sm border border-border">
+                <h3 className="font-bold text-foreground mb-4">Бөлме қосу</h3>
                 <div className="grid grid-cols-3 gap-3">
                   {ROOM_TYPES.map(room => (
                     <button
                       key={room.id}
                       onClick={() => addRoom(room.id)}
-                      className="flex flex-col items-center justify-center p-3 rounded-xl bg-gray-50 hover:bg-primary/10 hover:text-primary transition-colors"
+                      className="flex flex-col items-center justify-center p-3 rounded-xl bg-muted hover:bg-primary/10 hover:text-primary transition-colors"
                     >
                       <Icon name={room.icon} size={22} className="mb-1" />
                       <span className="text-[10px] font-medium text-center leading-tight">{room.label}</span>
@@ -554,7 +554,7 @@ const MeasurementFormNew = () => {
 
               {rooms.length > 0 && (
                 <div className="bg-gray-900 text-white rounded-2xl p-4">
-                  <p className="text-xs text-gray-400 mb-1">{rooms.length} бөлме</p>
+                  <p className="text-xs text-muted-foreground mb-1">{rooms.length} бөлме</p>
                   <p className="text-2xl font-black">
                     {new Intl.NumberFormat('ru-RU').format(
                       rooms.reduce((sum, room) => {
@@ -598,20 +598,20 @@ const MeasurementFormNew = () => {
         {step === 'room-edit' && currentRoom && (
           <>
             {/* Название комнаты */}
-            <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
-              <label className="block text-sm font-bold text-gray-700 mb-2">Бөлме атауы</label>
+            <div className="bg-card rounded-2xl p-5 shadow-sm border border-border">
+              <label className="block text-sm font-bold text-foreground mb-2">Бөлме атауы</label>
               <input
                 type="text"
                 value={currentRoom.name}
                 onChange={(e) => setCurrentRoom({ ...currentRoom, name: e.target.value })}
-                className="w-full h-12 px-4 bg-gray-50 border-2 border-transparent rounded-xl 
-                  focus:bg-white focus:border-primary transition-all font-bold"
+                className="w-full h-12 px-4 bg-muted border-2 border-transparent rounded-xl 
+                  focus:bg-card focus:border-primary transition-all font-bold"
                 placeholder="Бөлме атауы..."
               />
             </div>
 
             {/* Тип решения */}
-            <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+            <div className="bg-card rounded-2xl p-5 shadow-sm border border-border">
               <SolutionTypePicker
                 value={currentRoom.solutionType}
                 onChange={(type) => setCurrentRoom({ ...currentRoom, solutionType: type })}
@@ -644,7 +644,7 @@ const MeasurementFormNew = () => {
             )}
 
             {/* Фото */}
-            <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+            <div className="bg-card rounded-2xl p-5 shadow-sm border border-border">
               <input
                 ref={photoInputRef}
                 type="file"
@@ -658,8 +658,8 @@ const MeasurementFormNew = () => {
                 <>
                   <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center gap-2">
-                      <Icon name="photo_camera" className="text-gray-600" />
-                      <h3 className="font-bold text-gray-900">Фото ({currentRoom.photos.length})</h3>
+                      <Icon name="photo_camera" className="text-muted-foreground" />
+                      <h3 className="font-bold text-foreground">Фото ({currentRoom.photos.length})</h3>
                     </div>
                     <button
                       type="button"
@@ -688,7 +688,7 @@ const MeasurementFormNew = () => {
                 <button
                   type="button"
                   onClick={() => photoInputRef.current?.click()}
-                  className="w-full py-10 border-2 border-dashed border-gray-200 rounded-xl 
+                  className="w-full py-10 border-2 border-dashed border-border rounded-xl 
                     flex flex-col items-center justify-center gap-3 
                     hover:border-primary hover:bg-primary/5 transition-all group"
                 >
@@ -696,8 +696,8 @@ const MeasurementFormNew = () => {
                     <Icon name="add_a_photo" size={28} className="text-primary" />
                   </div>
                   <div className="text-center">
-                    <p className="font-bold text-gray-900">Фото қосу</p>
-                    <p className="text-xs text-gray-400 mt-1">Терезе, бөлме немесе өлшем</p>
+                    <p className="font-bold text-foreground">Фото қосу</p>
+                    <p className="text-xs text-muted-foreground mt-1">Терезе, бөлме немесе өлшем</p>
                   </div>
                 </button>
               )}
@@ -718,7 +718,7 @@ const MeasurementFormNew = () => {
 
       {/* Фиксированная кнопка сохранения для редактирования комнаты */}
       {step === 'room-edit' && (
-        <div className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t border-gray-100">
+        <div className="fixed bottom-0 left-0 right-0 p-4 bg-card border-t border-border">
           <button
             onClick={saveRoom}
             className="w-full py-4 bg-primary text-white font-bold rounded-2xl shadow-lg shadow-primary/30 flex items-center justify-center gap-2"
@@ -736,10 +736,10 @@ const MeasurementFormNew = () => {
           onClick={() => setShowCustomRoomModal(false)}
         >
           <div 
-            className="bg-white rounded-2xl w-full max-w-sm shadow-2xl"
+            className="bg-card rounded-2xl w-full max-w-sm shadow-2xl"
             onClick={e => e.stopPropagation()}
           >
-            <div className="p-5 border-b border-gray-100">
+            <div className="p-5 border-b border-border">
               <h3 className="text-lg font-bold text-center">Бөлме атауы</h3>
             </div>
             
@@ -749,8 +749,8 @@ const MeasurementFormNew = () => {
                 value={customRoomName}
                 onChange={(e) => setCustomRoomName(e.target.value)}
                 placeholder="Мысалы: Балкон, Ванна..."
-                className="w-full h-14 px-4 bg-gray-50 border-2 border-transparent rounded-xl 
-                  focus:bg-white focus:border-primary transition-all text-lg font-bold text-center"
+                className="w-full h-14 px-4 bg-muted border-2 border-transparent rounded-xl 
+                  focus:bg-card focus:border-primary transition-all text-lg font-bold text-center"
                 autoFocus
               />
             </div>
@@ -761,7 +761,7 @@ const MeasurementFormNew = () => {
                   setShowCustomRoomModal(false);
                   setCustomRoomName('');
                 }}
-                className="flex-1 py-3 bg-gray-100 text-gray-700 font-bold rounded-xl"
+                className="flex-1 py-3 bg-muted text-foreground font-bold rounded-xl"
               >
                 Болдырмау
               </button>

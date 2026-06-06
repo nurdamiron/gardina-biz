@@ -21,7 +21,7 @@ const StatsCard = ({
     icon = 'trending_up',
     trend,
     trendValue,
-    color = 'bg-white',
+    color = 'bg-card',
     iconBg = 'bg-primary',
     onClick,
     loading = false
@@ -38,26 +38,26 @@ const StatsCard = ({
         switch(trend) {
             case 'up': return 'text-green-600';
             case 'down': return 'text-red-600';
-            default: return 'text-gray-500';
+            default: return 'text-muted-foreground';
         }
     };
 
     if (loading) {
         return (
-            <div className={`${color} rounded-2xl p-5 shadow-sm border border-gray-100 animate-pulse`}>
+            <div className={`${color} rounded-2xl p-5 shadow-sm border border-border animate-pulse`}>
                 <div className="flex items-start justify-between mb-3">
-                    <div className="size-12 rounded-full bg-gray-200"></div>
-                    <div className="h-4 w-20 bg-gray-200 rounded"></div>
+                    <div className="size-12 rounded-full bg-muted"></div>
+                    <div className="h-4 w-20 bg-muted rounded"></div>
                 </div>
-                <div className="h-8 w-24 bg-gray-200 rounded mb-2"></div>
-                <div className="h-4 w-32 bg-gray-200 rounded"></div>
+                <div className="h-8 w-24 bg-muted rounded mb-2"></div>
+                <div className="h-4 w-32 bg-muted rounded"></div>
             </div>
         );
     }
 
     return (
         <div
-            className={`${color} rounded-2xl p-5 shadow-sm border border-gray-100 hover:shadow-md transition-all ${onClick ? 'cursor-pointer' : ''}`}
+            className={`${color} rounded-2xl p-5 shadow-sm border border-border hover:shadow-md transition-all ${onClick ? 'cursor-pointer' : ''}`}
             onClick={onClick}
         >
             {/* Header */}
@@ -77,14 +77,14 @@ const StatsCard = ({
 
             {/* Value */}
             <div className="mb-2">
-                <p className="text-3xl font-black text-gray-900">{value}</p>
+                <p className="text-3xl font-black text-foreground">{value}</p>
             </div>
 
             {/* Title and subtitle */}
             <div>
-                <p className="text-sm font-bold text-gray-700">{title}</p>
+                <p className="text-sm font-bold text-foreground">{title}</p>
                 {subtitle && (
-                    <p className="text-xs text-gray-500 mt-0.5">{subtitle}</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">{subtitle}</p>
                 )}
             </div>
         </div>

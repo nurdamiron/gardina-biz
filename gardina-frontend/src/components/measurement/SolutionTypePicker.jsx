@@ -8,7 +8,7 @@ import Icon from '../common/Icon';
 const SolutionTypePicker = ({ value, onChange }) => {
   return (
     <div className="space-y-3">
-      <h3 className="text-sm font-bold text-gray-700">Не орнатамыз?</h3>
+      <h3 className="text-sm font-bold text-foreground">Не орнатамыз?</h3>
       
       <div className="grid grid-cols-3 gap-3">
         {SOLUTION_TYPES.map(type => {
@@ -24,7 +24,7 @@ const SolutionTypePicker = ({ value, onChange }) => {
                 transition-all duration-200 active:scale-95
                 ${isSelected 
                   ? 'border-primary bg-primary/5 text-primary shadow-sm' 
-                  : 'border-gray-100 bg-white text-gray-500 hover:bg-gray-50'}
+                  : 'border-border bg-card text-muted-foreground hover:bg-muted'}
               `}
             >
               {isSelected && (
@@ -33,7 +33,7 @@ const SolutionTypePicker = ({ value, onChange }) => {
                 </div>
               )}
               
-              <Icon name={type.icon} size={28} className={isSelected ? 'text-primary' : 'text-gray-400'} />
+              <Icon name={type.icon} size={28} className={isSelected ? 'text-primary' : 'text-muted-foreground'} />
               <span className="text-xs font-bold text-center leading-tight">
                 {type.name}
               </span>

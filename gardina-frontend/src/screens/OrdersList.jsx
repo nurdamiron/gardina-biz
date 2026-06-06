@@ -30,8 +30,8 @@ const buildGetTimeUntil = (t, lang) => (scheduledAt) => {
     if (diffHours < 3)     return { label: t('orders.time.inHours', { hours: diffHours }), color: 'text-orange-600', isPast: false };
     if (diffDays < 1)      return { label: t('orders.time.today'), color: 'text-green-600', isPast: false };
     if (diffDays === 1)    return { label: t('orders.time.tomorrow'), color: 'text-primary', isPast: false };
-    if (diffDays < 7)      return { label: t('orders.time.inDays', { days: diffDays }), color: 'text-gray-600', isPast: false };
-    return { label: formatDate(scheduledAt, lang), color: 'text-gray-500', isPast: false };
+    if (diffDays < 7)      return { label: t('orders.time.inDays', { days: diffDays }), color: 'text-muted-foreground', isPast: false };
+    return { label: formatDate(scheduledAt, lang), color: 'text-muted-foreground', isPast: false };
 };
 
 // Helper: Get order progress (icons & step counts only — labels via t())
@@ -140,17 +140,17 @@ const OrdersList = ({ filterByManager = false }) => {
             'payment_pending': 'bg-yellow-50 text-yellow-700 border border-yellow-200',
             'production': 'bg-orange-50 text-orange-700 border border-orange-200',
         };
-        return colors[status] || 'bg-gray-50 text-gray-600 border border-gray-200';
+        return colors[status] || 'bg-muted text-muted-foreground border border-border';
     };
 
     const getPaymentStatusColor = (status) => {
         const colors = {
-            'pending': 'bg-gray-50 text-gray-700 border border-gray-200',
+            'pending': 'bg-muted text-foreground border border-border',
             'partial': 'bg-amber-50 text-amber-700 border border-amber-200',
             'paid': 'bg-emerald-50 text-emerald-700 border border-emerald-200',
             'refunded': 'bg-rose-50 text-rose-700 border border-rose-200'
         };
-        return colors[status] || 'bg-gray-50 text-gray-600 border border-gray-200';
+        return colors[status] || 'bg-muted text-muted-foreground border border-border';
     };
 
     const getPaymentLabel = (status) => t(`orders.payment.${status}`, status);
@@ -169,9 +169,9 @@ const OrdersList = ({ filterByManager = false }) => {
     return (
         <div className="bg-background-light min-h-screen flex flex-col pb-32">
             {/* Header */}
-            <header className="sticky top-0 z-30 bg-white border-b border-gray-100 px-4 py-3">
+            <header className="sticky top-0 z-30 bg-card border-b border-border px-4 py-3">
                 <div className="flex items-center justify-between gap-4">
-                    <h1 className="text-xl font-bold text-gray-900">{t('orders.title')}</h1>
+                    <h1 className="text-xl font-bold text-foreground">{t('orders.title')}</h1>
                     <button
                         onClick={() => navigate(user?.role === 'admin' ? '/admin/order/new' : user?.role === 'sales' ? '/sales/order/new' : '/manager/order/new')}
                         className="bg-primary text-white px-5 py-2.5 rounded-xl font-bold text-sm shadow-lg shadow-primary/20 hover:brightness-110 active:scale-95 transition-all flex items-center gap-2"
@@ -191,7 +191,7 @@ const OrdersList = ({ filterByManager = false }) => {
                     <select
                         value={statusFilter}
                         onChange={(e) => setStatusFilter(e.target.value)}
-                        className="shrink-0 bg-gray-50 border-none text-gray-600 text-xs font-semibold rounded-full py-1.5 px-3 min-w-[120px]"
+                        className="shrink-0 bg-muted border-none text-muted-foreground text-xs font-semibold rounded-full py-1.5 px-3 min-w-[120px]"
                     >
                         <option value="all">{t('orders.filters.allStatus')}</option>
                         <option value="scheduled">{t('orders.status.scheduled')}</option>
@@ -208,7 +208,7 @@ const OrdersList = ({ filterByManager = false }) => {
                         <select
                             value={designerFilter}
                             onChange={(e) => setDesignerFilter(e.target.value)}
-                            className="shrink-0 bg-gray-50 border-none text-gray-600 text-xs font-semibold rounded-full py-1.5 px-3 min-w-[120px]"
+                            className="shrink-0 bg-muted border-none text-muted-foreground text-xs font-semibold rounded-full py-1.5 px-3 min-w-[120px]"
                         >
                             <option value="all">{t('orders.filters.allDesigners')}</option>
                             {designers.map(d => (
@@ -230,10 +230,10 @@ const OrdersList = ({ filterByManager = false }) => {
                 ) : filteredOrders.length > 0 ? (
                     <>
                     {/* Desktop table */}
-                    <div className="hidden lg:block bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden mb-4">
+                    <div className="hidden lg:block bg-card rounded-2xl shadow-sm border border-border overflow-hidden mb-4">
                         <table className="w-full text-sm">
                             <thead>
-                                <tr className="border-b border-gray-100 text-left text-xs font-bold text-gray-400 uppercase tracking-wide">
+                                <tr className="border-b border-border text-left text-xs font-bold text-muted-foreground uppercase tracking-wide">
                                     <th className="px-4 py-3 w-24">{t('orders.table.id')}</th>
                                     <th className="px-4 py-3">{t('orders.table.client')}</th>
                                     <th className="px-4 py-3">{t('orders.card.designer')}</th>
@@ -252,19 +252,19 @@ const OrdersList = ({ filterByManager = false }) => {
                                         <tr
                                             key={order.id}
                                             onClick={() => { setSelectedOrder(order); setSelectedMeasurement(measurement); setShowDetailModal(true); }}
-                                            className="hover:bg-gray-50 cursor-pointer transition-colors"
+                                            className="hover:bg-muted cursor-pointer transition-colors"
                                         >
-                                            <td className="px-4 py-3 text-xs text-gray-400 font-mono">#{order.id.slice(0, 6)}</td>
+                                            <td className="px-4 py-3 text-xs text-muted-foreground font-mono">#{order.id.slice(0, 6)}</td>
                                             <td className="px-4 py-3">
-                                                <p className="font-bold text-gray-900 truncate max-w-[180px]">{order.client?.name || '—'}</p>
-                                                <p className="text-xs text-gray-400 truncate max-w-[180px]">{measurement?.address || order.client?.address || '—'}</p>
+                                                <p className="font-bold text-foreground truncate max-w-[180px]">{order.client?.name || '—'}</p>
+                                                <p className="text-xs text-muted-foreground truncate max-w-[180px]">{measurement?.address || order.client?.address || '—'}</p>
                                             </td>
                                             <td className="px-4 py-3">
                                                 <div className="flex items-center gap-2">
                                                     <div className="size-7 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-xs">
                                                         {order.designer?.name?.[0] || '?'}
                                                     </div>
-                                                    <span className="text-xs font-medium text-gray-700 truncate max-w-[120px]">{order.designer?.name || '—'}</span>
+                                                    <span className="text-xs font-medium text-foreground truncate max-w-[120px]">{order.designer?.name || '—'}</span>
                                                 </div>
                                             </td>
                                             <td className="px-4 py-3">
@@ -322,7 +322,7 @@ const OrdersList = ({ filterByManager = false }) => {
                                     <div className="flex items-start justify-between gap-3">
                                         <div className="flex-1 min-w-0">
                                             <div className="flex items-center gap-2 mb-1">
-                                                <span className="text-[10px] font-black text-gray-300 uppercase tracking-wider">#{order.id.slice(0, 6)}</span>
+                                                <span className="text-[10px] font-black text-muted-foreground uppercase tracking-wider">#{order.id.slice(0, 6)}</span>
                                                 {isPriorityHigh && (
                                                     <div className="flex items-center gap-1 bg-red-50 text-red-600 px-2 py-0.5 rounded-full text-[9px] font-bold border border-red-100">
                                                         <Icon name="local_fire_department" size={11} />
@@ -330,11 +330,11 @@ const OrdersList = ({ filterByManager = false }) => {
                                                     </div>
                                                 )}
                                             </div>
-                                            <h3 className="font-bold text-gray-900 text-lg leading-tight line-clamp-1 group-hover:text-primary transition-colors">
+                                            <h3 className="font-bold text-foreground text-lg leading-tight line-clamp-1 group-hover:text-primary transition-colors">
                                                 {order.client?.name || t('orders.card.unknownClient')}
                                             </h3>
-                                            <div className="flex items-center gap-1 text-xs text-gray-500">
-                                                <Icon name="location_on" size={14} className="text-gray-400" />
+                                            <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                                                <Icon name="location_on" size={14} className="text-muted-foreground" />
                                                 <span className="line-clamp-1">{measurement?.address || order.client?.address || t('orders.card.unknownAddress')}</span>
                                             </div>
                                         </div>
@@ -348,7 +348,7 @@ const OrdersList = ({ filterByManager = false }) => {
                                                 <span className="text-[10px] font-bold">{getPaymentLabel(order.paymentStatus || 'pending')}</span>
                                             </div>
                                             {timeUntil && (order.status === 'scheduled' || order.status === 'lead') && (
-                                                <div className={`flex items-center gap-1 px-2 py-1 rounded-lg ${timeUntil.color} bg-gray-50/70`}>
+                                                <div className={`flex items-center gap-1 px-2 py-1 rounded-lg ${timeUntil.color} bg-muted/70`}>
                                                     <Icon name="alarm" size={12} />
                                                     <span className="text-[9px] font-bold">{timeUntil.label}</span>
                                                 </div>
@@ -358,23 +358,23 @@ const OrdersList = ({ filterByManager = false }) => {
 
                                     {/* Row 2: Date + Amounts */}
                                     <div className="grid grid-cols-2 gap-3">
-                                        <div className="bg-gray-50 border border-gray-100 rounded-xl px-3 py-2.5 flex items-center gap-2">
+                                        <div className="bg-muted border border-border rounded-xl px-3 py-2.5 flex items-center gap-2">
                                             <Icon name="event" size={18} className="text-primary" />
                                             <div className="text-sm">
-                                                <p className="text-[10px] text-gray-500 font-bold uppercase">{t('orders.card.label')}</p>
-                                                <p className="font-bold text-gray-900">
+                                                <p className="text-[10px] text-muted-foreground font-bold uppercase">{t('orders.card.label')}</p>
+                                                <p className="font-bold text-foreground">
                                                     {measurement?.scheduledAt ? formatDateTimeFull(measurement.scheduledAt, lang) : '—'}
                                                 </p>
                                             </div>
                                         </div>
-                                        <div className="bg-gray-50 border border-gray-100 rounded-xl px-3 py-2.5 flex items-center justify-between gap-3">
+                                        <div className="bg-muted border border-border rounded-xl px-3 py-2.5 flex items-center justify-between gap-3">
                                             <div className="min-w-0">
-                                                <p className="text-[10px] text-gray-500 font-bold uppercase">{t('orders.card.amount')}</p>
-                                                <p className="font-black text-gray-900 text-lg whitespace-nowrap">{formatMoney(order.totalAmount)}</p>
+                                                <p className="text-[10px] text-muted-foreground font-bold uppercase">{t('orders.card.amount')}</p>
+                                                <p className="font-black text-foreground text-lg whitespace-nowrap">{formatMoney(order.totalAmount)}</p>
                                             </div>
                                             {prepayment > 0 && (
                                                 <div className="flex flex-col items-end shrink-0">
-                                                    <span className="text-[10px] text-gray-500 font-bold uppercase">{t('orders.card.paid')}</span>
+                                                    <span className="text-[10px] text-muted-foreground font-bold uppercase">{t('orders.card.paid')}</span>
                                                     <span className="text-sm font-bold text-green-600 whitespace-nowrap">{formatMoney(prepayment)}</span>
                                                 </div>
                                             )}
@@ -395,7 +395,7 @@ const OrdersList = ({ filterByManager = false }) => {
                                                               progress.color === 'green' ? 'bg-green-500' :
                                                               progress.color === 'lime' ? 'bg-lime-500' :
                                                               'bg-gray-500'
-                                                            : 'bg-gray-200'
+                                                            : 'bg-muted'
                                                     }`}
                                                 />
                                             ))}
@@ -407,14 +407,14 @@ const OrdersList = ({ filterByManager = false }) => {
                                         <div className="flex items-center gap-2">
                                             <Avatar name={order.designer?.name || ''} size="sm" />
                                         <div>
-                                                <p className="text-[9px] text-gray-400 font-bold">{t('orders.card.designer')}</p>
-                                                <p className="text-xs font-bold text-gray-700">{order.designer?.name || t('orders.card.unknownDesigner')}</p>
+                                                <p className="text-[9px] text-muted-foreground font-bold">{t('orders.card.designer')}</p>
+                                                <p className="text-xs font-bold text-foreground">{order.designer?.name || t('orders.card.unknownDesigner')}</p>
                                             </div>
                                         </div>
                                         {measurement?.windows?.length > 0 && (
-                                            <div className="flex items-center gap-1.5 bg-gray-50 px-2.5 py-1.5 rounded-lg">
-                                                <Icon name="window" size={16} className="text-gray-600" />
-                                                <span className="text-xs font-bold text-gray-700">{t('orders.card.windows', { count: measurement.windows.length })}</span>
+                                            <div className="flex items-center gap-1.5 bg-muted px-2.5 py-1.5 rounded-lg">
+                                                <Icon name="window" size={16} className="text-muted-foreground" />
+                                                <span className="text-xs font-bold text-foreground">{t('orders.card.windows', { count: measurement.windows.length })}</span>
                                             </div>
                                         )}
                                     </div>
@@ -425,9 +425,9 @@ const OrdersList = ({ filterByManager = false }) => {
                     </div>
                     </>
                 ) : (
-                    <div className="flex flex-col items-center justify-center py-16 text-gray-400">
-                        <div className="size-20 bg-gray-50 rounded-full flex items-center justify-center mb-4">
-                            <Icon name="inbox" size={32} className="text-gray-300" />
+                    <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
+                        <div className="size-20 bg-muted rounded-full flex items-center justify-center mb-4">
+                            <Icon name="inbox" size={32} className="text-muted-foreground" />
                         </div>
                         <p className="font-medium">{t('orders.empty')}</p>
                         <button onClick={() => navigate(user?.role === 'admin' ? '/admin/order/new' : user?.role === 'sales' ? '/sales/order/new' : '/manager/order/new')} className="text-primary text-sm font-bold mt-2">

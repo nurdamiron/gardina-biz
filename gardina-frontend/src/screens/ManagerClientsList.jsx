@@ -6,6 +6,7 @@ import { useI18n } from '../contexts/I18nContext';
 import BottomNav from '../components/navigation/BottomNav';
 import Icon from '../components/common/Icon';
 import Card from '../components/common/Card';
+import { Stagger, StaggerItem } from '../components/common/Motion';
 import Avatar from '../components/common/Avatar';
 import { formatDate } from '../utils/dateUtils';
 
@@ -15,7 +16,7 @@ const SOURCE_STYLES = {
   whatsapp:  { label: 'WhatsApp',       cls: 'bg-green-50 text-green-700' },
   referral:  { label: 'Рекомендация',   cls: 'bg-amber-50 text-amber-700' },
   website:   { label: 'Сайт',           cls: 'bg-blue-50 text-blue-700' },
-  phone:     { label: 'Звонок',         cls: 'bg-gray-100 text-gray-600' },
+  phone:     { label: 'Звонок',         cls: 'bg-muted text-muted-foreground' },
 };
 
 const ManagerClientsList = () => {
@@ -51,50 +52,51 @@ const ManagerClientsList = () => {
   const title = isSales ? t('clients.list.leadsTitle') : t('clients.list.title');
 
   return (
-    <div className="bg-background-light min-h-screen pb-32">
-      <header className="sticky top-0 z-30 bg-white/80 backdrop-blur-md border-b border-gray-100 px-4 py-3">
-        <div className="flex items-center justify-between">
-          <h1 className="text-xl font-bold text-gray-900">{title}</h1>
+    <div className="bg-background min-h-screen pb-32">
+      <header className="sticky top-0 z-30 bg-card/80 backdrop-blur border-b border-border px-4 py-3">
+        <div className="flex items-center justify-between gap-3">
+          <h1 className="text-lg font-semibold tracking-tight text-foreground">{title}</h1>
           <button
             onClick={() => navigate(`${basePath}/client/new`)}
-            className="bg-primary text-white px-5 py-2.5 rounded-xl font-bold text-sm shadow-lg shadow-primary/20 hover:brightness-110 active:scale-95 transition-all flex items-center gap-2"
+            className="inline-flex items-center gap-1.5 h-10 px-4 bg-primary text-primary-content rounded-md font-medium text-sm shadow-sm hover:bg-primary/90 active:scale-[0.98] transition-all outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
           >
-            <Icon name="add_circle" size={20} />
+            <Icon name="add_circle" size={18} />
             {t('clients.list.add')}
           </button>
         </div>
-        <div className="mt-3">
-          <div className="relative">
-            <Icon name="search" size={20} className="text-gray-400" />
-            <input
-              type="text"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder={t('clients.list.searchPlaceholder')}
-              className="w-full pl-10 pr-4 py-2 bg-gray-50 border-none rounded-xl text-sm focus:ring-2 focus:ring-primary/20 transition-all"
-            />
+        <div className="mt-3 relative">
+          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <Icon name="search" size={18} className="text-muted-foreground" />
           </div>
+          <input
+            type="text"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder={t('clients.list.searchPlaceholder')}
+            className="w-full h-10 pl-9 pr-4 text-sm bg-transparent border border-input rounded-md transition-colors placeholder:text-muted-foreground focus:border-primary focus:ring-2 focus:ring-ring/30 outline-none"
+          />
         </div>
       </header>
 
       <main className="p-4 max-w-7xl mx-auto">
         {loading ? (
           <div className="text-center py-8">
-            <div className="size-12 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto"></div>
+            <div className="size-10 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto"></div>
           </div>
         ) : filteredClients.length === 0 ? (
-          <div className="bg-white rounded-xl p-8 text-center">
-            <Icon name="person_off" size={48} className="text-gray-300" />
-            <p className="text-text-secondary mt-4">{t('clients.list.empty')}</p>
-            <p className="text-xs text-gray-400 mt-1">{t('clients.list.emptyHint')}</p>
+          <div className="bg-card border border-border rounded-xl p-10 text-center">
+            <Icon name="person_off" size={44} className="text-muted-foreground/40 mx-auto" />
+            <p className="text-foreground font-medium mt-4">{t('clients.list.empty')}</p>
+            <p className="text-sm text-muted-foreground mt-1">{t('clients.list.emptyHint')}</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
+          <Stagger className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
             {filteredClients.map(client => {
               const src = SOURCE_STYLES[client.source];
               return (
+              <StaggerItem key={client.id}>
               <Card
-                key={client.id}
+                className="h-full"
                 onClick={() => navigate(`${basePath}/clients/${client.id}`)}
               >
                 <div className="flex items-start gap-3">
@@ -111,13 +113,13 @@ const ManagerClientsList = () => {
                       <span className="truncate">{client.phone}</span>
                     </div>
                     {client.address && (
-                      <div className="flex items-center gap-1.5 text-xs text-gray-400 mt-1">
+                      <div className="flex items-center gap-1.5 text-xs text-muted-foreground mt-1">
                         <Icon name="location_on" size={13} />
                         <span className="truncate">{client.address}</span>
                       </div>
                     )}
                   </div>
-                  <Icon name="chevron_right" className="text-gray-300 shrink-0 mt-1" />
+                  <Icon name="chevron_right" className="text-muted-foreground shrink-0 mt-1" />
                 </div>
 
                 {(client.notes || client.created_at) && (
@@ -129,7 +131,7 @@ const ManagerClientsList = () => {
                       </div>
                     ) : <span />}
                     {client.created_at && (
-                      <div className="flex items-center gap-1 text-[11px] text-gray-400 shrink-0">
+                      <div className="flex items-center gap-1 text-[11px] text-muted-foreground shrink-0">
                         <Icon name="calendar_today" size={12} />
                         <span>{formatDate(client.created_at, lang)}</span>
                       </div>
@@ -137,9 +139,10 @@ const ManagerClientsList = () => {
                   </div>
                 )}
               </Card>
+              </StaggerItem>
               );
             })}
-          </div>
+          </Stagger>
         )}
       </main>
 

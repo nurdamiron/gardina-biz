@@ -5,29 +5,52 @@
 @variant dark (&:where(.dark, .dark *));
 
 @theme {
-  --color-primary: #1b5e45;
-  --color-primary-light: #2d6a4f;
-  --color-primary-dark: #0f2919;
+  /* ─── Brand — refreshed vivid emerald. Kept green identity, pushed it brighter
+     and added mint/lime accents so gradients read modern-SaaS, not flat corporate. */
+  --color-primary: #0c7a52;
+  --color-primary-light: #14a06b;
+  --color-primary-dark: #06291c;
   --color-primary-content: #ffffff;
-  --color-accent: #74c69d;
+  --color-accent: #4fe3a8;        /* bright mint — gradient pop + highlights */
+  --color-accent-2: #9ef01a;      /* energetic lime — sparing micro-accents */
+  --color-accent-soft: #d9fbe9;
 
-  --color-background-light: #f1f6f3;
-  --color-background-dark: #0c1814;
+  /* ─── Neutral surfaces — retuned to shadcn/ui neutrals (zinc) so the whole app
+     reads as a clean, calm shadcn workspace. Green lives only in `primary`. */
+  --color-background-light: #f7f7f8;
+  --color-background-dark: #09090b;
   --color-surface-light: #ffffff;
-  --color-surface-dark: #152922;
+  --color-surface-dark: #18181b;
 
-  --color-text-main: #101916;
-  --color-text-main-light: #101916;
-  --color-text-main-dark: #e8f0ec;
-  --color-text-secondary: #4d5c54;
-  --color-text-secondary-light: #4d5c54;
-  --color-text-secondary-dark: #9cb0a4;
+  --color-text-main: #09090b;
+  --color-text-main-light: #09090b;
+  --color-text-main-dark: #fafafa;
+  --color-text-secondary: #71717a;
+  --color-text-secondary-light: #71717a;
+  --color-text-secondary-dark: #a1a1aa;
 
-  --color-border-light: #d5e3dc;
-  --color-border-dark: #2a3d34;
+  --color-border-light: #e4e4e7;
+  --color-border-dark: #27272a;
 
-  /* Semantic status colors — saturated text on -soft background for calm, legible pills.
-     One canonical source for success/warning/danger/info so badges stop disagreeing. */
+  /* ─── shadcn/ui semantic tokens — enables bg-card / text-muted-foreground /
+     border-border / ring-ring / bg-secondary / bg-destructive conventions. */
+  --color-background: #f7f7f8;
+  --color-foreground: #09090b;
+  --color-card: #ffffff;
+  --color-card-foreground: #09090b;
+  --color-popover: #ffffff;
+  --color-popover-foreground: #09090b;
+  --color-muted: #f4f4f5;
+  --color-muted-foreground: #71717a;
+  --color-secondary: #f4f4f5;
+  --color-secondary-foreground: #18181b;
+  --color-border: #e4e4e7;
+  --color-input: #e4e4e7;
+  --color-ring: #0c7a52;
+  --color-destructive: #dc2626;
+  --color-destructive-foreground: #ffffff;
+
+  /* Semantic status colors — saturated text on -soft background for calm, legible pills. */
   --color-success: #15803d;
   --color-success-soft: #dcfce7;
   --color-warning: #b45309;
@@ -39,30 +62,106 @@
   --color-neutral: #475569;
   --color-neutral-soft: #f1f5f9;
 
-  /* Brand-tinted chart stroke/fill — keeps data viz on the green system, not neon green-500. */
-  --color-chart: #2d6a4f;
-  --color-chart-soft: #b7d8c8;
+  /* Brand-tinted chart stroke/fill */
+  --color-chart: #0c7a52;
+  --color-chart-soft: #b7e8d2;
 
-  --font-display: "Inter", "sans-serif";
+  /* Display font drives the new bold headings; Inter stays for body/UI. */
+  --font-display: "Plus Jakarta Sans", "Inter", sans-serif;
+  --font-sans: "Inter", sans-serif;
 
-  --radius: 0.5rem;
-  --radius-lg: 0.75rem;
-  --radius-xl: 1rem;
+  --radius: 0.625rem;
+  --radius-lg: 0.875rem;
+  --radius-xl: 1.125rem;
   --radius-2xl: 1.5rem;
+  --radius-3xl: 2rem;
   --radius-full: 9999px;
 
-  --shadow-card: 0 4px 12px -2px rgba(27, 94, 69, 0.1), 0 2px 6px -1px rgba(0, 0, 0, 0.04);
-  --shadow-lg: 0 10px 25px -5px rgba(27, 94, 69, 0.14), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
+  /* Softer, larger, brand-tinted shadows for the depth-y modern-SaaS feel. */
+  --shadow-card: 0 1px 2px rgba(6, 41, 28, 0.04), 0 10px 30px -12px rgba(12, 122, 82, 0.16);
+  --shadow-lg: 0 24px 60px -18px rgba(12, 122, 82, 0.24), 0 8px 24px -14px rgba(6, 41, 28, 0.12);
+  --shadow-glow: 0 0 0 1px rgba(12, 122, 82, 0.06), 0 28px 64px -16px rgba(12, 122, 82, 0.40);
+
+  --animate-aurora: aurora 18s ease-in-out infinite;
+  --animate-aurora-slow: aurora 26s ease-in-out infinite;
+  --animate-float: float 7s ease-in-out infinite;
+  --animate-shimmer: shimmer 2.4s linear infinite;
 }
 
-/* Wrap reset/base inside Tailwind's @layer base so it doesn't override
-   utility classes. Unlayered rules in CSS Cascade Layers always win
-   against any @layer, which means a top-level `* { padding: 0 }` would
-   silently nuke every Tailwind p-* class on the page. */
+@keyframes aurora {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+  33% { transform: translate3d(4%, -6%, 0) scale(1.12); }
+  66% { transform: translate3d(-5%, 4%, 0) scale(0.94); }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-14px); }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+/* Wrap reset/base inside Tailwind's @layer base so it doesn't override utilities. */
 @layer base {
   body {
     font-family: 'Inter', sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
+}
+
+/* ─── Modern-SaaS visual primitives ──────────────────────────────────────────
+   Custom utilities consumed by the landing redesign (glass, gradient text,
+   mesh/aurora backgrounds, grid texture). Defined as @utility so they slot into
+   Tailwind v4's utility layer and can be overridden by later utilities. */
+
+@utility font-display {
+  font-family: var(--font-display);
+  letter-spacing: -0.02em;
+}
+
+/* Gradient-clipped text for headline highlights. */
+@utility text-gradient {
+  background-image: linear-gradient(105deg, var(--color-primary-light) 0%, var(--color-primary) 45%, var(--color-accent) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Frosted-glass surface (light). */
+@utility glass {
+  background-color: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(18px) saturate(160%);
+  -webkit-backdrop-filter: blur(18px) saturate(160%);
+  border: 1px solid rgba(255, 255, 255, 0.65);
+}
+
+/* Frosted-glass surface (dark, for use over the deep-green hero/CTA). */
+@utility glass-dark {
+  background-color: rgba(6, 41, 28, 0.45);
+  backdrop-filter: blur(16px) saturate(140%);
+  -webkit-backdrop-filter: blur(16px) saturate(140%);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+/* Subtle line grid texture for section backgrounds. */
+@utility bg-grid {
+  background-image:
+    linear-gradient(to right, rgba(12, 122, 82, 0.06) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(12, 122, 82, 0.06) 1px, transparent 1px);
+  background-size: 56px 56px;
+}
+
+@utility bg-dots {
+  background-image: radial-gradient(rgba(12, 122, 82, 0.12) 1px, transparent 1px);
+  background-size: 22px 22px;
+}
+
+/* Animated gradient surface — for gradient borders/rings. */
+@utility gradient-ring {
+  background-image: linear-gradient(135deg, var(--color-primary), var(--color-accent), var(--color-accent-2));
+  background-size: 200% 200%;
 }

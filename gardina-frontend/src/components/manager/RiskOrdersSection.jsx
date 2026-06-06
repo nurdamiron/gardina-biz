@@ -95,7 +95,7 @@ const RiskOrdersSection = ({ orders = [] }) => {
               return (
                 <div
                   key={order.id}
-                  className="bg-white rounded-xl p-4 shadow-sm border border-gray-100"
+                  className="bg-card rounded-xl p-4 shadow-sm border border-border"
                 >
                   <div className="flex items-start justify-between mb-3">
                     <div
@@ -103,7 +103,7 @@ const RiskOrdersSection = ({ orders = [] }) => {
                       onClick={() => navigate(`/deals/${order.id}`)}
                     >
                       <h4 className="font-bold text-sm">{order.clientName}</h4>
-                      <p className="text-xs text-gray-500">{order.clientPhone}</p>
+                      <p className="text-xs text-muted-foreground">{order.clientPhone}</p>
                     </div>
                     <PaymentRiskIndicator
                       totalAmount={order.totalAmount}
@@ -115,22 +115,22 @@ const RiskOrdersSection = ({ orders = [] }) => {
                   {/* Детали заказа */}
                   <div className="grid grid-cols-2 gap-2 mb-3 text-xs">
                     <div>
-                      <span className="text-gray-500">{t('payments.row.status')}</span>
+                      <span className="text-muted-foreground">{t('payments.row.status')}</span>
                       <p className="font-bold">
                         {order.status === 'in_production' ? t('payments.orderStatus.in_production') :
                          order.status === 'ready' ? t('payments.orderStatus.ready') : t('payments.orderStatus.installing')}
                       </p>
                     </div>
                     <div>
-                      <span className="text-gray-500">{t('payments.row.days')}</span>
+                      <span className="text-muted-foreground">{t('payments.row.days')}</span>
                       <p className="font-bold">{pluralize(daysInStatus, NOUNS.day, lang)}</p>
                     </div>
                     <div>
-                      <span className="text-gray-500">{t('payments.row.paid')}</span>
+                      <span className="text-muted-foreground">{t('payments.row.paid')}</span>
                       <p className="font-bold">{order.paidAmount.toLocaleString()} ₸</p>
                     </div>
                     <div>
-                      <span className="text-gray-500">{t('payments.row.shortfall')}</span>
+                      <span className="text-muted-foreground">{t('payments.row.shortfall')}</span>
                       <p className="font-bold text-red-600">
                         {shortfall > 0 ? `${shortfall.toLocaleString()} ₸` : '—'}
                       </p>
@@ -174,7 +174,7 @@ const RiskOrdersSection = ({ orders = [] }) => {
                     </button>
                     <button
                       onClick={() => navigate(`/deals/${order.id}`)}
-                      className="px-3 py-2 bg-gray-100 text-gray-700 rounded-lg text-xs font-bold hover:bg-gray-200 transition-colors"
+                      className="px-3 py-2 bg-muted text-foreground rounded-lg text-xs font-bold hover:bg-muted transition-colors"
                     >
                       <Icon name="arrow_forward" size={14} />
                     </button>
@@ -230,22 +230,22 @@ const RiskOrdersSection = ({ orders = [] }) => {
   );
 
   return (
-    <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
+    <div className="bg-card rounded-2xl p-4 shadow-sm border border-border">
       <div className="flex items-center justify-between mb-4">
         <h3 className="font-bold text-lg">{t('payments.section.title')}</h3>
         {totalRiskOrders > 0 && (
           <div className="text-right">
             <p className="text-2xl font-black text-red-600">{totalRiskOrders}</p>
-            <p className="text-xs text-gray-500">{pluralUnit(totalRiskOrders, NOUNS.order, lang)}</p>
+            <p className="text-xs text-muted-foreground">{pluralUnit(totalRiskOrders, NOUNS.order, lang)}</p>
           </div>
         )}
       </div>
 
       {/* Общая сумма недоплат */}
       {totalRiskAmount > 0 && (
-        <div className="mb-4 p-3 bg-gray-50 rounded-xl">
-          <p className="text-xs text-gray-500 mb-1">{t('payments.section.totalUnpaid')}</p>
-          <p className="text-xl font-black text-gray-900">{totalRiskAmount.toLocaleString()} ₸</p>
+        <div className="mb-4 p-3 bg-muted rounded-xl">
+          <p className="text-xs text-muted-foreground mb-1">{t('payments.section.totalUnpaid')}</p>
+          <p className="text-xl font-black text-foreground">{totalRiskAmount.toLocaleString()} ₸</p>
         </div>
       )}
 
@@ -257,11 +257,11 @@ const RiskOrdersSection = ({ orders = [] }) => {
       {/* Если нет заказов с рисками */}
       {totalRiskOrders === 0 && riskGroups.safe.length === 0 && (
         <div className="text-center py-8">
-          <div className="size-16 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-3">
-            <Icon name="done_all" size={28} className="text-gray-400" />
+          <div className="size-16 rounded-full bg-muted flex items-center justify-center mx-auto mb-3">
+            <Icon name="done_all" size={28} className="text-muted-foreground" />
           </div>
-          <p className="text-gray-500">{t('payments.section.empty')}</p>
-          <p className="text-xs text-gray-400 mt-1">{t('payments.section.emptySubtitle')}</p>
+          <p className="text-muted-foreground">{t('payments.section.empty')}</p>
+          <p className="text-xs text-muted-foreground mt-1">{t('payments.section.emptySubtitle')}</p>
         </div>
       )}
     </div>

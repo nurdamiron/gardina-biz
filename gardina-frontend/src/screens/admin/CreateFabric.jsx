@@ -238,15 +238,15 @@ const CreateFabric = () => {
                 </div>
             )}
 
-            <header className="sticky top-0 z-30 bg-white/80 backdrop-blur-md border-b border-gray-100 px-4 py-4">
+            <header className="sticky top-0 z-30 bg-card/80 backdrop-blur-md border-b border-border px-4 py-4">
                 <div className="flex items-center justify-between">
                     <button
                         onClick={() => navigate('/admin/catalog')}
-                        className="size-10 flex items-center justify-center rounded-full bg-gray-50 hover:bg-gray-100 transition-colors"
+                        className="size-10 flex items-center justify-center rounded-full bg-muted hover:bg-muted transition-colors"
                     >
-                        <Icon name="arrow_back" className="text-gray-600" />
+                        <Icon name="arrow_back" className="text-muted-foreground" />
                     </button>
-                    <h1 className="text-xl font-bold text-gray-900">
+                    <h1 className="text-xl font-bold text-foreground">
                         {isEditMode ? t('fabrics.form.titleEdit', 'Тауарды өзгерту') : t('fabrics.form.title', 'Жаңа тауар')}
                     </h1>
                     <div className="size-10"></div>
@@ -256,13 +256,13 @@ const CreateFabric = () => {
             <main className="p-4">
                 <form onSubmit={handleSubmit} className="space-y-6 max-w-2xl mx-auto">
                     {/* Main Info */}
-                    <div className="bg-white p-5 rounded-2xl shadow-sm space-y-4">
-                        <h2 className="font-bold text-lg text-gray-900 border-b border-gray-100 pb-2 mb-4">
+                    <div className="bg-card p-5 rounded-2xl shadow-sm space-y-4">
+                        <h2 className="font-bold text-lg text-foreground border-b border-border pb-2 mb-4">
                             {t('fabrics.form.mainInfo', 'Негізгі ақпарат')}
                         </h2>
 
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                            <label className="block text-sm font-medium text-foreground mb-1">
                                 {t('fabrics.form.fieldName', 'Тауар атауы')} <span className="text-red-500">*</span>
                             </label>
                             <input
@@ -271,14 +271,14 @@ const CreateFabric = () => {
                                 required
                                 value={formData.name}
                                 onChange={handleChange}
-                                className={`w-full px-4 py-3 rounded-xl border ${errors.name ? 'border-red-500 bg-red-50 text-gray-900' : 'border-gray-200 text-gray-900'} focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all`}
+                                className={`w-full px-4 py-3 rounded-xl border ${errors.name ? 'border-red-500 bg-red-50 text-foreground' : 'border-border text-foreground'} focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all`}
                                 placeholder={t('fabrics.form.fieldNamePlaceholder', 'Мысалы: Blackout Royal Blue')}
                             />
                         </div>
 
                         <div className="grid grid-cols-2 gap-4">
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                <label className="block text-sm font-medium text-foreground mb-1">
                                     {t('fabrics.form.fieldCode', 'Артикул')}
                                 </label>
                                 <input
@@ -286,20 +286,20 @@ const CreateFabric = () => {
                                     name="code"
                                     value={formData.code}
                                     onChange={handleChange}
-                                    className={`w-full px-4 py-3 rounded-xl border ${errors.code ? 'border-red-500 bg-red-50 text-gray-900' : 'border-gray-200 text-gray-900'} focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all font-mono uppercase`}
+                                    className={`w-full px-4 py-3 rounded-xl border ${errors.code ? 'border-red-500 bg-red-50 text-foreground' : 'border-border text-foreground'} focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all font-mono uppercase`}
                                     placeholder="ITEM-001"
                                 />
                                 {errors.code && <p className="text-red-500 text-xs mt-1 font-medium">{errors.code}</p>}
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                <label className="block text-sm font-medium text-foreground mb-1">
                                     {t('fabrics.form.fieldUnit', 'Өлшем бірлігі')}
                                 </label>
                                 <select
                                     name="unit"
                                     value={formData.unit}
                                     onChange={handleChange}
-                                    className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all bg-white text-gray-900 font-bold"
+                                    className="w-full px-4 py-3 rounded-xl border border-border focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all bg-card text-foreground font-bold"
                                 >
                                     <option value="m">{t('fabrics.form.unitOptions.m', 'Метр')}</option>
                                     <option value="pcs">{t('fabrics.form.unitOptions.pcs', 'Дана')}</option>
@@ -313,14 +313,14 @@ const CreateFabric = () => {
                         </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                <label className="block text-sm font-medium text-foreground mb-1">
                                     {t('fabrics.form.fieldCategory', 'Категория')}
                                 </label>
                                 <select
                                     name="type"
                                     value={formData.type}
                                     onChange={handleChange}
-                                    className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all bg-white text-gray-900 font-bold"
+                                    className="w-full px-4 py-3 rounded-xl border border-border focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all bg-card text-foreground font-bold"
                                 >
                                     <option value="curtain">{t('fabrics.typeLabels.curtain', 'Перде')}</option>
                                     <option value="tulle">{t('fabrics.typeLabels.tulle', 'Тюль')}</option>
@@ -334,7 +334,7 @@ const CreateFabric = () => {
                         {/* Dimension Field - Only for Curtain/Tulle */}
                         {['curtain', 'tulle'].includes(formData.type) && (
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                <label className="block text-sm font-medium text-foreground mb-1">
                                     {t('fabrics.form.fieldRollHeight', 'Рулон Биіктігі (см)')}
                                 </label>
                                 <input
@@ -342,10 +342,10 @@ const CreateFabric = () => {
                                     name="widthCm"
                                     value={formData.widthCm}
                                     onChange={handleChange}
-                                    className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all text-gray-900"
+                                    className="w-full px-4 py-3 rounded-xl border border-border focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all text-foreground"
                                     placeholder="280"
                                 />
-                                <p className="text-[10px] text-gray-400 mt-1">
+                                <p className="text-[10px] text-muted-foreground mt-1">
                                     {t('fabrics.form.rollHeightHint', '* Стандарт: 280-320 см')}
                                 </p>
                             </div>
@@ -353,8 +353,8 @@ const CreateFabric = () => {
                     </div>
 
                     {/* Color Variants - Simple */}
-                    <div className="bg-white p-5 rounded-2xl shadow-sm space-y-4">
-                        <h2 className="font-bold text-lg text-gray-900 border-b border-gray-100 pb-2 mb-4">
+                    <div className="bg-card p-5 rounded-2xl shadow-sm space-y-4">
+                        <h2 className="font-bold text-lg text-foreground border-b border-border pb-2 mb-4">
                             {t('fabrics.form.colorsTitle', 'Түстер (қосымша)')}
                             </h2>
 
@@ -364,7 +364,7 @@ const CreateFabric = () => {
                                 value={newColorName}
                                 onChange={(e) => setNewColorName(e.target.value)}
                                 onKeyPress={handleColorKeyPress}
-                                className="flex-1 min-w-0 px-4 py-3 rounded-xl border border-gray-200 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all text-gray-900"
+                                className="flex-1 min-w-0 px-4 py-3 rounded-xl border border-border focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all text-foreground"
                                 placeholder={t('fabrics.form.colorPlaceholder', 'Мысалы: Қызыл немесе RED-001')}
                             />
                             <button
@@ -382,9 +382,9 @@ const CreateFabric = () => {
                         {colors.map((color, index) => (
                                     <div
                                         key={index}
-                                        className="flex items-center gap-2 px-3 py-2 bg-gray-100 rounded-lg group hover:bg-gray-200 transition-colors"
+                                        className="flex items-center gap-2 px-3 py-2 bg-muted rounded-lg group hover:bg-muted transition-colors"
                                     >
-                                        <span className="text-sm text-gray-700 font-medium">{color}</span>
+                                        <span className="text-sm text-foreground font-medium">{color}</span>
                                         <button
                                             type="button"
                                             onClick={() => removeColor(index)}
@@ -398,15 +398,15 @@ const CreateFabric = () => {
                         )}
 
                         {colors.length === 0 && (
-                            <p className="text-sm text-gray-400 text-center py-4">
+                            <p className="text-sm text-muted-foreground text-center py-4">
                                 {t('fabrics.form.noColors', 'Түстер қосылмаған')}
                             </p>
                         )}
                     </div>
 
                     {/* Pricing */}
-                    <div className="bg-white p-5 rounded-2xl shadow-sm space-y-4">
-                        <h2 className="font-bold text-lg text-gray-900 border-b border-gray-100 pb-2 mb-4 flex items-center gap-2">
+                    <div className="bg-card p-5 rounded-2xl shadow-sm space-y-4">
+                        <h2 className="font-bold text-lg text-foreground border-b border-border pb-2 mb-4 flex items-center gap-2">
                             {t('fabrics.form.pricingTitle', 'Құны және Бағасы')}
                         </h2>
 
@@ -419,7 +419,7 @@ const CreateFabric = () => {
 
                         <div className="grid grid-cols-2 gap-4">
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                <label className="block text-sm font-medium text-foreground mb-1">
                                     {t('fabrics.form.fieldCostPrice', 'Сатып алу бағасы')} <span className="text-red-500">*</span>
                                 </label>
                                 <div className="relative">
@@ -430,15 +430,15 @@ const CreateFabric = () => {
                                         min="0"
                                         value={formData.costPrice}
                                         onChange={handleChange}
-                                        className={`w-full pl-4 pr-8 py-3 rounded-xl border ${errors.costPrice ? 'border-red-500 bg-red-50 text-gray-900' : 'border-gray-200 text-gray-900'} focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all`}
+                                        className={`w-full pl-4 pr-8 py-3 rounded-xl border ${errors.costPrice ? 'border-red-500 bg-red-50 text-foreground' : 'border-border text-foreground'} focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all`}
                                         placeholder="0"
                                     />
-                                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 font-bold">₸</span>
+                                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground font-bold">₸</span>
                                 </div>
                                 {errors.costPrice && <p className="text-red-500 text-xs mt-1 font-medium">{errors.costPrice}</p>}
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                <label className="block text-sm font-medium text-foreground mb-1">
                                     {t('fabrics.form.fieldSellPrice', 'Сату бағасы')} ({getUnitLabel()}) <span className="text-red-500">*</span>
                                 </label>
                                 <div className="relative">
@@ -449,10 +449,10 @@ const CreateFabric = () => {
                                         min="0"
                                         value={formData.pricePerMeter}
                                         onChange={handleChange}
-                                        className={`w-full pl-4 pr-8 py-3 rounded-xl border ${errors.pricePerMeter ? 'border-red-500 bg-red-50 text-gray-900' : 'border-gray-200 text-gray-900'} focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all`}
+                                        className={`w-full pl-4 pr-8 py-3 rounded-xl border ${errors.pricePerMeter ? 'border-red-500 bg-red-50 text-foreground' : 'border-border text-foreground'} focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all`}
                                         placeholder="0"
                                     />
-                                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 font-bold">₸</span>
+                                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground font-bold">₸</span>
                                 </div>
                                 {errors.pricePerMeter && <p className="text-red-500 text-xs mt-1 font-medium">{errors.pricePerMeter}</p>}
                             </div>
@@ -462,7 +462,7 @@ const CreateFabric = () => {
                         <div className="bg-primary/10 rounded-xl p-4 flex justify-between items-center">
                             <span className="text-sm font-bold text-primary">{t('fabrics.form.margin', 'Маржа')}</span>
                             <div className="text-right">
-                                <span className={`text-xl font-black ${margin > 0 ? 'text-green-600' : 'text-gray-500'}`}>
+                                <span className={`text-xl font-black ${margin > 0 ? 'text-green-600' : 'text-muted-foreground'}`}>
                                     {margin}%
                                 </span>
                             </div>
@@ -470,8 +470,8 @@ const CreateFabric = () => {
                     </div>
 
                     {/* Main Product Image */}
-                    <div className="bg-white p-5 rounded-2xl shadow-sm space-y-4">
-                        <h2 className="font-bold text-lg text-gray-900 border-b border-gray-100 pb-2 mb-4">
+                    <div className="bg-card p-5 rounded-2xl shadow-sm space-y-4">
+                        <h2 className="font-bold text-lg text-foreground border-b border-border pb-2 mb-4">
                             {t('fabrics.form.imageTitle', 'Негізгі сурет')}
                         </h2>
 
@@ -484,7 +484,7 @@ const CreateFabric = () => {
                         />
 
                         {formData.imageUrl ? (
-                            <div className="relative rounded-2xl overflow-hidden aspect-video border border-gray-100 group">
+                            <div className="relative rounded-2xl overflow-hidden aspect-video border border-border group">
                                 <img
                                     src={formData.imageUrl}
                                     alt="Preview"
@@ -494,14 +494,14 @@ const CreateFabric = () => {
                                     <button
                                         type="button"
                                         onClick={() => window.open(formData.imageUrl, '_blank')}
-                                        className="p-2 bg-white/20 hover:bg-white/40 rounded-full text-white backdrop-blur-sm transition-colors"
+                                        className="p-2 bg-card/20 hover:bg-card/40 rounded-full text-white backdrop-blur-sm transition-colors"
                                     >
                                         <Icon name="visibility" />
                                     </button>
                                     <button
                                         type="button"
                                         onClick={() => fileInputRef.current?.click()}
-                                        className="p-2 bg-white/20 hover:bg-white/40 rounded-full text-white backdrop-blur-sm transition-colors"
+                                        className="p-2 bg-card/20 hover:bg-card/40 rounded-full text-white backdrop-blur-sm transition-colors"
                                     >
                                         <Icon name="edit" />
                                     </button>
@@ -519,17 +519,17 @@ const CreateFabric = () => {
                                 type="button"
                                 onClick={() => fileInputRef.current?.click()}
                                 disabled={uploading}
-                                className="w-full aspect-video rounded-2xl border-2 border-dashed border-gray-300 hover:border-primary hover:bg-primary/5 transition-all flex flex-col items-center justify-center gap-2 group"
+                                className="w-full aspect-video rounded-2xl border-2 border-dashed border-input hover:border-primary hover:bg-primary/5 transition-all flex flex-col items-center justify-center gap-2 group"
                             >
                                 {uploading ? (
                                     <div className="size-8 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
                                 ) : (
                                     <>
-                                        <div className="size-12 rounded-full bg-gray-100 group-hover:bg-primary/10 flex items-center justify-center transition-colors">
-                                            <Icon name="add_photo_alternate" size={24} className="text-gray-400" />
+                                        <div className="size-12 rounded-full bg-muted group-hover:bg-primary/10 flex items-center justify-center transition-colors">
+                                            <Icon name="add_photo_alternate" size={24} className="text-muted-foreground" />
                                         </div>
-                                        <p className="text-gray-500 font-medium group-hover:text-primary transition-colors">{t('fabrics.form.uploadImage', 'Сурет жүктеу')}</p>
-                                        <p className="text-xs text-gray-400">PNG, JPG (max 10MB)</p>
+                                        <p className="text-muted-foreground font-medium group-hover:text-primary transition-colors">{t('fabrics.form.uploadImage', 'Сурет жүктеу')}</p>
+                                        <p className="text-xs text-muted-foreground">PNG, JPG (max 10MB)</p>
                                     </>
                                 )}
                             </button>

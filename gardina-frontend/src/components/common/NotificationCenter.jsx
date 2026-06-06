@@ -100,7 +100,7 @@ const NotificationCenter = () => {
       info: 'text-primary',
       success: 'text-green-500'
     };
-    return colors[type] || 'text-gray-500';
+    return colors[type] || 'text-muted-foreground';
   };
 
   const formatTime = (dateString) => {
@@ -123,9 +123,9 @@ const NotificationCenter = () => {
       {/* Bell Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="relative p-2 rounded-full hover:bg-gray-100 transition-colors"
+        className="relative p-2 rounded-full hover:bg-muted transition-colors"
       >
-        <Icon name={unreadCount > 0 ? 'notifications_active' : 'notifications'} size={24} className="text-gray-600" />
+        <Icon name={unreadCount > 0 ? 'notifications_active' : 'notifications'} size={24} className="text-muted-foreground" />
 
         {/* Badge */}
         {unreadCount > 0 && (
@@ -137,9 +137,9 @@ const NotificationCenter = () => {
 
       {/* Dropdown */}
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-80 sm:w-96 bg-white rounded-xl shadow-2xl border border-gray-100 z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
+        <div className="absolute right-0 mt-2 w-80 sm:w-96 bg-card rounded-xl shadow-2xl border border-border z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
           {/* Header */}
-          <div className="flex items-center justify-between p-4 border-b border-gray-100">
+          <div className="flex items-center justify-between p-4 border-b border-border">
             <h3 className="font-bold text-lg">Хабарламалар</h3>
             {unreadCount > 0 && (
               <button
@@ -158,7 +158,7 @@ const NotificationCenter = () => {
                 <div className="w-8 h-8 border-3 border-primary/30 border-t-primary rounded-full animate-spin" />
               </div>
             ) : notifications.length === 0 ? (
-              <div className="flex flex-col items-center justify-center p-8 text-gray-400">
+              <div className="flex flex-col items-center justify-center p-8 text-muted-foreground">
                 <Icon name="notifications_off" size={40} />
                 <p>Хабарламалар жоқ</p>
               </div>
@@ -168,7 +168,7 @@ const NotificationCenter = () => {
                   <div
                     key={notification.id}
                     onClick={() => handleNotificationClick(notification)}
-                    className={`p-4 cursor-pointer hover:bg-gray-50 transition-colors ${
+                    className={`p-4 cursor-pointer hover:bg-muted transition-colors ${
                       !notification.is_read ? 'bg-primary/10/50' : ''
                     }`}
                   >
@@ -181,14 +181,14 @@ const NotificationCenter = () => {
                       {/* Content */}
                       <div className="flex-1 min-w-0">
                         <div className="flex items-start justify-between gap-2">
-                          <h4 className={`font-medium truncate ${!notification.is_read ? 'text-gray-900' : 'text-gray-600'}`}>
+                          <h4 className={`font-medium truncate ${!notification.is_read ? 'text-foreground' : 'text-muted-foreground'}`}>
                             {notification.title}
                           </h4>
-                          <span className="text-xs text-gray-400 flex-shrink-0">
+                          <span className="text-xs text-muted-foreground flex-shrink-0">
                             {formatTime(notification.created_at)}
                           </span>
                         </div>
-                        <p className="text-sm text-gray-500 mt-1 line-clamp-2">
+                        <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
                           {notification.message}
                         </p>
                       </div>
@@ -206,7 +206,7 @@ const NotificationCenter = () => {
 
           {/* Footer */}
           {notifications.length > 0 && (
-            <div className="p-3 border-t border-gray-100 bg-gray-50">
+            <div className="p-3 border-t border-border bg-muted">
               <button
                 onClick={() => {
                   navigate('/notifications');

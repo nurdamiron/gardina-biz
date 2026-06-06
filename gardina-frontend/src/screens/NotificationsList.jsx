@@ -24,8 +24,11 @@ const NotificationsList = () => {
   const loadNotifications = async () => {
     setIsLoading(true);
     try {
-      const params = filter === 'unread' ? '?isRead=false' : '';
-      const response = await api.get(`/notifications${params}&limit=100`);
+      // Build query safely — previously `/notifications${params}&limit=100` produced
+      // a malformed `/notifications&limit=100` (no `?`) on the "all" filter → 404.
+      const qs = new URLSearchParams({ limit: '100' });
+      if (filter === 'unread') qs.set('isRead', 'false');
+      const response = await api.get(`/notifications?${qs.toString()}`);
       if (response.data?.success) {
         setNotifications(response.data.data || []);
         setUnreadCount(response.data.unreadCount || 0);
@@ -84,7 +87,7 @@ const NotificationsList = () => {
       info: 'bg-primary/15 text-primary',
       success: 'bg-green-100 text-green-600',
     };
-    return colors[type] || 'bg-gray-100 text-gray-600';
+    return colors[type] || 'bg-muted text-muted-foreground';
   };
 
   const formatRelative = (dateString) => {
@@ -134,7 +137,7 @@ const NotificationsList = () => {
 
   return (
     <div className="min-h-screen bg-background-light pb-32">
-      <div className="bg-white border-b border-gray-100 sticky top-0 z-10">
+      <div className="bg-card border-b border-border sticky top-0 z-10">
         <div className="flex items-center justify-between p-4">
           <div className="flex items-center gap-4">
             <button onClick={() => navigate(-1)} className="p-2 -ml-2" aria-label={t('common.back')}>
@@ -143,7 +146,7 @@ const NotificationsList = () => {
             <div>
               <h1 className="text-xl font-bold">{t('notifications.title')}</h1>
               {unreadCount > 0 && (
-                <p className="text-sm text-gray-500">{unreadCount} {t('notifications.unread')}</p>
+                <p className="text-sm text-muted-foreground">{unreadCount} {t('notifications.unread')}</p>
               )}
             </div>
           </div>
@@ -157,7 +160,7 @@ const NotificationsList = () => {
           <button
             onClick={() => setFilter('all')}
             className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-              filter === 'all' ? 'bg-primary text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+              filter === 'all' ? 'bg-primary text-white' : 'bg-muted text-muted-foreground hover:bg-muted'
             }`}
           >
             {t('notifications.filters.all')}
@@ -165,7 +168,7 @@ const NotificationsList = () => {
           <button
             onClick={() => setFilter('unread')}
             className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-              filter === 'unread' ? 'bg-primary text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+              filter === 'unread' ? 'bg-primary text-white' : 'bg-muted text-muted-foreground hover:bg-muted'
             }`}
           >
             {t('notifications.filters.unread')}
@@ -189,7 +192,7 @@ const NotificationsList = () => {
           <div className="w-10 h-10 border-4 border-primary/30 border-t-primary rounded-full animate-spin" />
         </div>
       ) : notifications.length === 0 ? (
-        <div className="flex flex-col items-center justify-center p-12 text-gray-400">
+        <div className="flex flex-col items-center justify-center p-12 text-muted-foreground">
           <Icon name="notifications_off" size={48} />
           <p className="text-lg font-medium">{t('notifications.empty')}</p>
           <p className="text-sm mt-1">
@@ -200,13 +203,13 @@ const NotificationsList = () => {
         <div className="p-4 space-y-6 max-w-3xl mx-auto">
           {Object.entries(groupedNotifications).map(([date, items]) => (
             <div key={date}>
-              <h3 className="text-sm font-medium text-gray-500 mb-3">{date}</h3>
-              <div className="bg-white rounded-xl shadow-sm overflow-hidden">
+              <h3 className="text-sm font-medium text-muted-foreground mb-3">{date}</h3>
+              <div className="bg-card rounded-xl shadow-sm overflow-hidden">
                 {items.map((notification, index) => (
                   <div
                     key={notification.id}
                     onClick={() => handleClick(notification)}
-                    className={`p-4 cursor-pointer hover:bg-gray-50 transition-colors ${
+                    className={`p-4 cursor-pointer hover:bg-muted transition-colors ${
                       index > 0 ? 'border-t border-gray-50' : ''
                     } ${!notification.is_read ? 'bg-primary/10/30' : ''}`}
                   >
@@ -217,15 +220,15 @@ const NotificationsList = () => {
 
                       <div className="flex-1 min-w-0">
                         <div className="flex items-start justify-between gap-2">
-                          <h4 className={`font-medium ${!notification.is_read ? 'text-gray-900' : 'text-gray-700'}`}>
+                          <h4 className={`font-medium ${!notification.is_read ? 'text-foreground' : 'text-foreground'}`}>
                             {notification.title}
                           </h4>
                           {!notification.is_read && (
                             <div className="w-2 h-2 bg-primary rounded-full flex-shrink-0 mt-2" />
                           )}
                         </div>
-                        <p className="text-sm text-gray-500 mt-1">{notification.message}</p>
-                        <p className="text-xs text-gray-400 mt-2">{formatRelative(notification.created_at)}</p>
+                        <p className="text-sm text-muted-foreground mt-1">{notification.message}</p>
+                        <p className="text-xs text-muted-foreground mt-2">{formatRelative(notification.created_at)}</p>
                       </div>
                     </div>
                   </div>

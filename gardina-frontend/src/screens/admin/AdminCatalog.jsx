@@ -90,9 +90,9 @@ const AdminCatalog = () => {
     return (
         <div className="bg-background-light min-h-screen pb-32">
             {/* Header */}
-            <header className="sticky top-0 z-30 bg-white/80 backdrop-blur-md border-b border-gray-100 px-4 py-4">
+            <header className="sticky top-0 z-30 bg-card/80 backdrop-blur-md border-b border-border px-4 py-4">
                 <div className="flex justify-between items-center">
-                    <h1 className="text-xl font-bold text-gray-900">{t('adminCatalog.title')}</h1>
+                    <h1 className="text-xl font-bold text-foreground">{t('adminCatalog.title')}</h1>
                     <button
                         onClick={() => navigate(activeTab === 'fabrics' ? '/admin/catalog/products/new' : '/admin/catalog/services/new')}
                         className="size-10 bg-primary rounded-xl flex items-center justify-center shadow-lg hover:brightness-110 transition-all"
@@ -111,12 +111,12 @@ const AdminCatalog = () => {
                             onClick={() => setActiveTab(tab.id)}
                             className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl font-bold transition-all ${activeTab === tab.id
                                 ? 'bg-primary text-white shadow-lg'
-                                : 'bg-white text-gray-600 border-2 border-gray-100'
+                                : 'bg-card text-muted-foreground border-2 border-border'
                                 }`}
                         >
                             <Icon name={tab.icon} size={22} />
                             {tab.label}
-                            <span className={`px-2 py-0.5 rounded-full text-xs ${activeTab === tab.id ? 'bg-white/20' : 'bg-gray-100'
+                            <span className={`px-2 py-0.5 rounded-full text-xs ${activeTab === tab.id ? 'bg-card/20' : 'bg-muted'
                                 }`}>
                                 {tab.count}
                             </span>
@@ -145,7 +145,7 @@ const AdminCatalog = () => {
                                 onClick={() => setFilterType(cat.id)}
                                 className={`px-4 py-2 rounded-full text-sm font-bold whitespace-nowrap transition-all border ${filterType === cat.id
                                         ? 'bg-primary text-white border-primary shadow-md'
-                                        : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'
+                                        : 'bg-card text-muted-foreground border-border hover:bg-muted'
                                     }`}
                             >
                                 {cat.label}
@@ -162,9 +162,9 @@ const AdminCatalog = () => {
                 ) : activeTab === 'fabrics' ? (
                     <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
                         {filteredFabrics.length === 0 ? (
-                            <div className="bg-white rounded-xl p-8 text-center">
-                                <Icon name="inventory_2" size={40} className="text-gray-300" />
-                                <p className="text-gray-500 mt-2">
+                            <div className="bg-card rounded-xl p-8 text-center">
+                                <Icon name="inventory_2" size={40} className="text-muted-foreground" />
+                                <p className="text-muted-foreground mt-2">
                                     {searchQuery ? t('adminCatalog.empty.notFound') : t('adminCatalog.empty.catalogEmpty')}
                                 </p>
                             </div>
@@ -183,10 +183,10 @@ const AdminCatalog = () => {
                                 >
                                     <div className="flex gap-3">
                                         {fabric.image_url ? (
-                                            <div className="size-16 rounded-xl bg-gray-100 bg-cover bg-center shrink-0 border border-border-light" style={{ backgroundImage: `url(${fabric.image_url})` }} />
+                                            <div className="size-16 rounded-xl bg-muted bg-cover bg-center shrink-0 border border-border-light" style={{ backgroundImage: `url(${fabric.image_url})` }} />
                                         ) : (
                                             <div className="size-16 rounded-xl bg-background-light flex items-center justify-center shrink-0 border border-border-light">
-                                                <Icon name="image" className="text-gray-300" />
+                                                <Icon name="image" className="text-muted-foreground" />
                                             </div>
                                         )}
                                         <div className="flex-1 min-w-0">
@@ -197,7 +197,7 @@ const AdminCatalog = () => {
                                                 </div>
                                                 <div className="text-right shrink-0">
                                                     <p className="font-bold text-lg text-text-main whitespace-nowrap">{price.toLocaleString('ru-RU')} ₸</p>
-                                                    <p className="text-[10px] text-gray-400 uppercase font-bold">{unitLabel}</p>
+                                                    <p className="text-[10px] text-muted-foreground uppercase font-bold">{unitLabel}</p>
                                                 </div>
                                             </div>
                                             <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
@@ -231,17 +231,17 @@ const AdminCatalog = () => {
                 ) : activeTab === 'services' ? (
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                         {services.length === 0 ? (
-                            <div className="bg-white rounded-xl p-8 text-center">
-                                <Icon name="build" size={40} className="text-gray-300" />
-                                <p className="text-gray-500 mt-2">{t('adminCatalog.empty.servicesEmpty')}</p>
+                            <div className="bg-card rounded-xl p-8 text-center">
+                                <Icon name="build" size={40} className="text-muted-foreground" />
+                                <p className="text-muted-foreground mt-2">{t('adminCatalog.empty.servicesEmpty')}</p>
                             </div>
                         ) : (
                             services.map(service => (
-                                <div key={service.id} className="bg-white rounded-xl p-4 shadow-sm group">
+                                <div key={service.id} className="bg-card rounded-xl p-4 shadow-sm group">
                                     <div className="flex justify-between items-center">
                                         <div className="flex-1">
-                                            <p className="font-bold text-gray-900">{service.name}</p>
-                                            <p className="text-sm text-gray-500">{service.description}</p>
+                                            <p className="font-bold text-foreground">{service.name}</p>
+                                            <p className="text-sm text-muted-foreground">{service.description}</p>
                                             <span className="inline-block mt-1 px-2 py-0.5 bg-primary/15 text-primary-dark rounded text-xs font-medium">
                                                 {service.serviceType} • {service.calcMethod}
                                             </span>
@@ -250,13 +250,13 @@ const AdminCatalog = () => {
                                             <p className="font-bold text-lg text-primary">{service.baseRate?.toLocaleString()} ₸</p>
 
                                             {/* Actions */}
-                                            <div className="flex items-center gap-1 pl-2 border-l border-gray-100">
+                                            <div className="flex items-center gap-1 pl-2 border-l border-border">
                                                 <button
                                                     onClick={(e) => {
                                                         e.stopPropagation();
                                                         navigate(`/admin/catalog/services/${service.id}`);
                                                     }}
-                                                    className="size-8 rounded-lg bg-gray-50 text-primary flex items-center justify-center hover:bg-primary/10 transition-colors"
+                                                    className="size-8 rounded-lg bg-muted text-primary flex items-center justify-center hover:bg-primary/10 transition-colors"
                                                 >
                                                     <Icon name="edit" size={18} />
                                                 </button>
@@ -265,7 +265,7 @@ const AdminCatalog = () => {
                                                         e.stopPropagation();
                                                         handleDeleteService(service.id, service.name);
                                                     }}
-                                                    className="size-8 rounded-lg bg-gray-50 text-red-500 flex items-center justify-center hover:bg-red-50 transition-colors"
+                                                    className="size-8 rounded-lg bg-muted text-red-500 flex items-center justify-center hover:bg-red-50 transition-colors"
                                                 >
                                                     <Icon name="delete" size={18} />
                                                 </button>

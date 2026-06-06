@@ -106,9 +106,9 @@ const DealsFunnel = ({ filterByManager = false }) => {
         return (
             <div className="bg-background-light min-h-screen pb-32">
                 {/* Header */}
-                <header className="sticky top-0 z-20 bg-white/80 backdrop-blur-md px-4 py-4 border-b border-gray-100">
+                <header className="sticky top-0 z-20 bg-card/80 backdrop-blur-md px-4 py-4 border-b border-border">
                     <h1 className="text-xl font-bold">{t('orders.funnel.myOrders')}</h1>
-                    <p className="text-sm text-gray-500">{t('orders.funnel.countSuffix', { count: deals.length })}</p>
+                    <p className="text-sm text-muted-foreground">{t('orders.funnel.countSuffix', { count: deals.length })}</p>
                 </header>
 
                 <main className="p-4 max-w-7xl mx-auto">
@@ -173,10 +173,10 @@ const DealsFunnel = ({ filterByManager = false }) => {
     return (
         <div className="bg-background-light min-h-screen pb-32">
             {/* Header */}
-            <header className="sticky top-0 z-20 bg-white/80 backdrop-blur-md px-4 py-3 border-b border-gray-100">
+            <header className="sticky top-0 z-20 bg-card/80 backdrop-blur-md px-4 py-3 border-b border-border">
                 <div className="flex items-center gap-3 mb-3">
-                    <button onClick={() => navigate(-1)} className="size-10 rounded-full bg-gray-50 flex items-center justify-center" aria-label={t('common.back')}>
-                        <Icon name="arrow_back" className="text-gray-600" />
+                    <button onClick={() => navigate(-1)} className="size-10 rounded-full bg-muted flex items-center justify-center" aria-label={t('common.back')}>
+                        <Icon name="arrow_back" className="text-muted-foreground" />
                     </button>
                     <h1 className="text-xl font-bold">{t('orders.funnel.title')}</h1>
                 </div>
@@ -187,7 +187,7 @@ const DealsFunnel = ({ filterByManager = false }) => {
                     <select
                         value={filters.designerId}
                         onChange={(e) => handleFilterChange('designerId', e.target.value)}
-                        className="bg-white border border-gray-200 text-sm rounded-lg px-3 py-2 min-w-[150px]"
+                        className="bg-card border border-border text-sm rounded-lg px-3 py-2 min-w-[150px]"
                     >
                         <option value="">{t('orders.filters.allDesigners')}</option>
                         {designers.map(d => (
@@ -198,7 +198,7 @@ const DealsFunnel = ({ filterByManager = false }) => {
                         type="date"
                         value={filters.startDate}
                         onChange={(e) => handleFilterChange('startDate', e.target.value)}
-                        className="bg-white border border-gray-200 text-sm rounded-lg px-3 py-2"
+                        className="bg-card border border-border text-sm rounded-lg px-3 py-2"
                     />
                 </div>
                 )}
@@ -207,13 +207,13 @@ const DealsFunnel = ({ filterByManager = false }) => {
             <main className="p-4 max-w-3xl mx-auto">
                 {/* Summary Card */}
                 <div className="bg-gray-900 text-white rounded-2xl p-5 shadow-lg mb-6">
-                    <p className="text-gray-400 text-sm mb-1">{t('orders.funnel.totalResult')}</p>
+                    <p className="text-muted-foreground text-sm mb-1">{t('orders.funnel.totalResult')}</p>
                     <div className="flex justify-between items-end">
                         <div>
                             <h2 className="text-3xl font-bold">{fmt(totalAmount)} ₸</h2>
-                            <p className="text-sm mt-1 text-gray-400">{t('orders.funnel.totalDeals', { count: totalDeals })}</p>
+                            <p className="text-sm mt-1 text-muted-foreground">{t('orders.funnel.totalDeals', { count: totalDeals })}</p>
                         </div>
-                        <div className="size-12 rounded-full bg-white/10 flex items-center justify-center">
+                        <div className="size-12 rounded-full bg-card/10 flex items-center justify-center">
                             <Icon name="monitoring" size={24} />
                         </div>
                     </div>

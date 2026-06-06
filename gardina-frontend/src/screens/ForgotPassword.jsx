@@ -32,67 +32,68 @@ const ForgotPassword = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background-light via-white to-primary/10 flex flex-col items-center justify-center p-4 py-10">
-      <div className="w-full max-w-md">
+    <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4 py-10">
+      <div className="w-full max-w-sm">
         <div className="text-center mb-6">
-          <img src="/images/logo-header.png" alt="Gardina" className="w-40 h-auto mx-auto mb-3 drop-shadow-sm" />
-          <div className="flex justify-center mb-2">
+          <img src="/images/logo-header.png" alt="Gardina" className="w-72 h-auto mx-auto mb-4" />
+          <div className="flex justify-center">
             <LanguageSwitcher compact />
           </div>
-          <h1 className="text-2xl font-bold text-text-main tracking-tight">
-            {t('forgotPassword.title')}
-          </h1>
-          <p className="text-text-secondary font-medium text-sm mt-1.5">{t('forgotPassword.subtitle')}</p>
         </div>
 
-        <div className="rounded-3xl bg-white shadow-xl shadow-primary/5 border border-primary/10 overflow-hidden">
+        <div className="rounded-xl bg-card border border-border shadow-sm">
           <div className="p-6 sm:p-7">
             {sent ? (
               <div className="text-center py-2">
-                <div className="size-14 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-4">
-                  <Icon name="check_circle" size={28} className="text-green-600" />
+                <div className="size-12 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
+                  <Icon name="check_circle" size={26} className="text-primary" />
                 </div>
-                <h2 className="font-bold text-lg text-text-main mb-2">{t('forgotPassword.sentTitle')}</h2>
-                <p className="text-sm text-text-secondary leading-relaxed">{t('forgotPassword.sentBody')}</p>
-                <Link to="/login" className="inline-block mt-6 text-primary font-bold text-sm hover:underline">
+                <h2 className="font-semibold text-lg text-foreground mb-2">{t('forgotPassword.sentTitle')}</h2>
+                <p className="text-sm text-muted-foreground leading-relaxed">{t('forgotPassword.sentBody')}</p>
+                <Link to="/login" className="inline-block mt-6 text-primary font-medium text-sm hover:underline">
                   ← {t('auth.loginCta')}
                 </Link>
               </div>
             ) : (
-              <form onSubmit={handleSubmit}>
-                <p className="text-sm text-text-secondary mb-5 leading-relaxed">{t('forgotPassword.lead')}</p>
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div>
+                  <h2 className="text-2xl font-semibold tracking-tight text-foreground">{t('forgotPassword.title')}</h2>
+                  <p className="text-sm text-muted-foreground mt-1.5 leading-relaxed">{t('forgotPassword.lead')}</p>
+                </div>
 
                 {error && (
-                  <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg flex items-start gap-3">
-                    <Icon name="error" className="text-red-500 shrink-0 mt-0.5" />
-                    <p className="text-sm font-medium text-red-700">{error}</p>
+                  <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-md flex items-start gap-2.5">
+                    <Icon name="error" size={18} className="text-destructive shrink-0 mt-0.5" />
+                    <p className="text-sm font-medium text-destructive">{error}</p>
                   </div>
                 )}
 
-                <label className="block text-sm font-bold mb-2">{t('forgotPassword.fieldLabel')}</label>
-                <div className="relative mb-5">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <Icon name="mail" size={20} className="text-text-secondary" />
+                <div className="space-y-1.5">
+                  <label className="block text-sm font-medium text-foreground">{t('forgotPassword.fieldLabel')}</label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <Icon name="mail" size={18} className="text-muted-foreground" />
+                    </div>
+                    <input
+                      type="text"
+                      value={identifier}
+                      onChange={(e) => setIdentifier(e.target.value)}
+                      className="block w-full h-10 pl-9 pr-3 text-sm bg-transparent border border-input rounded-md transition-colors placeholder:text-muted-foreground focus:border-primary focus:ring-2 focus:ring-ring/30 outline-none"
+                      placeholder={t('forgotPassword.fieldPlaceholder')}
+                      autoComplete="email"
+                      autoFocus
+                    />
                   </div>
-                  <input
-                    type="text"
-                    value={identifier}
-                    onChange={(e) => setIdentifier(e.target.value)}
-                    className="block w-full pl-10 pr-3 py-3 border border-gray-200 rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none"
-                    placeholder={t('forgotPassword.fieldPlaceholder')}
-                    autoComplete="email"
-                    autoFocus
-                  />
                 </div>
 
                 <button
                   type="submit"
                   disabled={loading || !identifier.trim()}
-                  className="w-full bg-primary hover:brightness-110 active:scale-[0.98] text-white font-bold text-base py-3.5 rounded-xl shadow-lg shadow-primary/25 transition-all flex items-center justify-center gap-2 disabled:bg-neutral-soft disabled:text-text-secondary disabled:shadow-none disabled:cursor-not-allowed disabled:active:scale-100"
+                  className="w-full h-11 bg-primary hover:bg-primary/90 active:scale-[0.99] text-primary-content font-medium text-sm rounded-md shadow-sm transition-all flex items-center justify-center gap-2 outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100"
                 >
                   {loading ? (
                     <>
-                      <div className="size-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      <div className="size-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
                       {t('common.loading')}
                     </>
                   ) : (
@@ -100,8 +101,8 @@ const ForgotPassword = () => {
                   )}
                 </button>
 
-                <p className="text-center text-sm text-text-secondary mt-5">
-                  <Link to="/login" className="font-bold text-primary hover:underline">
+                <p className="text-center text-sm text-muted-foreground">
+                  <Link to="/login" className="font-medium text-primary hover:underline">
                     ← {t('auth.loginCta')}
                   </Link>
                 </p>

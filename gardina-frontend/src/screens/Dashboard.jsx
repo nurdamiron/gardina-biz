@@ -50,7 +50,7 @@ const Dashboard = () => {
   if (error) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-background-light p-4">
-        <div className="text-center p-8 bg-white rounded-2xl shadow-sm max-w-md">
+        <div className="text-center p-8 bg-card rounded-2xl shadow-sm max-w-md">
           <Icon name="error" size={48} className="text-red-500" />
           <h2 className="text-xl font-bold mt-4">{t('common.error')}</h2>
           <p className="text-text-secondary mt-2">{error}</p>
@@ -58,7 +58,7 @@ const Dashboard = () => {
             <button onClick={loadDashboardData} className="flex-1 px-6 py-2 bg-primary text-white rounded-lg font-bold">
               {t('common.retry')}
             </button>
-            <button onClick={logout} className="px-6 py-2 bg-gray-100 rounded-lg font-bold">
+            <button onClick={logout} className="px-6 py-2 bg-muted rounded-lg font-bold">
               {t('common.logout')}
             </button>
           </div>
@@ -69,24 +69,24 @@ const Dashboard = () => {
 
   return (
     <div className="bg-background-light min-h-screen pb-32">
-      <header className="sticky top-0 z-30 bg-white/80 backdrop-blur-md border-b border-gray-100 px-4 py-3">
+      <header className="sticky top-0 z-30 bg-card/80 backdrop-blur-md border-b border-border px-4 py-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="relative">
-              <div className="rounded-full size-10 border border-gray-100 bg-primary/10 flex items-center justify-center">
+              <div className="rounded-full size-10 border border-border bg-primary/10 flex items-center justify-center">
                 <Icon name="person" size={20} className="text-primary" />
               </div>
               <div className="absolute bottom-0 right-0 size-2.5 bg-primary rounded-full border-2 border-white"></div>
             </div>
             <div>
-              <h2 className="text-base font-bold text-gray-900 leading-tight">{t('dashboard.designerHello').replace('{name}', user?.name || '')}</h2>
-              <p className="text-gray-500 text-[11px] font-medium uppercase tracking-wide">
+              <h2 className="text-base font-bold text-foreground leading-tight">{t('dashboard.designerHello').replace('{name}', user?.name || '')}</h2>
+              <p className="text-muted-foreground text-[11px] font-medium uppercase tracking-wide">
                 {new Date().toLocaleDateString('kk-KZ', { weekday: 'long', day: 'numeric', month: 'long' })}
               </p>
             </div>
           </div>
-          <button onClick={() => navigate('/measurements')} className="size-10 rounded-full bg-gray-50 hover:bg-gray-100 flex items-center justify-center relative transition-colors">
-            <Icon name="notifications" className="text-gray-600" />
+          <button onClick={() => navigate('/measurements')} className="size-10 rounded-full bg-muted hover:bg-muted flex items-center justify-center relative transition-colors">
+            <Icon name="notifications" className="text-muted-foreground" />
             {urgentActions.length > 0 && <span className="absolute top-2.5 right-2.5 size-2 bg-red-500 rounded-full ring-2 ring-white"></span>}
           </button>
         </div>
@@ -101,7 +101,7 @@ const Dashboard = () => {
         {loading ? (
           <div className="mx-4"><SkeletonStats /></div>
         ) : (
-          <div className="mx-4 bg-white rounded-2xl p-5 shadow-sm border">
+          <div className="mx-4 bg-card rounded-2xl p-5 shadow-sm border">
             <div className="flex items-start justify-between mb-6">
               <div className="flex flex-col">
                 <span className="text-xs font-medium text-text-secondary uppercase">{t('dashboard.sales')}</span>
@@ -114,7 +114,7 @@ const Dashboard = () => {
                   <span className="text-lg font-bold text-primary">{stats.measurements}</span>
                   <span className="text-[10px] font-medium text-text-secondary">{t('dashboard.stats.measurementUnit')}</span>
                 </div>
-                <div className="bg-gray-100 rounded-lg p-2 flex flex-col items-center min-w-[70px]">
+                <div className="bg-muted rounded-lg p-2 flex flex-col items-center min-w-[70px]">
                   <span className="text-lg font-bold">{stats.deals}</span>
                   <span className="text-[10px] font-medium text-text-secondary">{t('dashboard.stats.dealUnit')}</span>
                 </div>
@@ -125,7 +125,7 @@ const Dashboard = () => {
                 <span className="text-text-secondary">{t('dashboard.goalPrefix')}: {formatMoneyShort(stats.goal, lang)}</span>
                 <span className="text-primary">{progress}%</span>
               </div>
-              <div className="h-3 w-full bg-gray-100 rounded-full overflow-hidden">
+              <div className="h-3 w-full bg-muted rounded-full overflow-hidden">
                 <div className="h-full bg-primary rounded-full transition-all duration-500" style={{ width: `${Math.min(progress, 100)}%` }}></div>
               </div>
             </div>
@@ -138,13 +138,13 @@ const Dashboard = () => {
         <h2 className="text-xl font-bold px-4 pb-3">{t('dashboard.sections.needsAction')}</h2>
         <div className="px-4 grid grid-cols-1 lg:grid-cols-2 gap-3">
           {urgentActions.length === 0 ? (
-            <div className="bg-white p-6 rounded-xl shadow-sm text-center">
+            <div className="bg-card p-6 rounded-xl shadow-sm text-center">
               <Icon name="check_circle" size={32} className="text-green-500" />
               <p className="text-text-secondary mt-2 text-sm">{t('dashboard.manager.allDone')}</p>
             </div>
           ) : (
             urgentActions.map(deal => (
-              <div key={deal.id} onClick={() => navigate(`/deals/${deal.id}`)} className="flex items-center gap-4 bg-white p-3 rounded-xl shadow-sm border-l-4 border-red-500 cursor-pointer">
+              <div key={deal.id} onClick={() => navigate(`/deals/${deal.id}`)} className="flex items-center gap-4 bg-card p-3 rounded-xl shadow-sm border-l-4 border-red-500 cursor-pointer">
                 <div className="size-10 rounded-full bg-red-100 flex items-center justify-center text-red-600">
                   <Icon name="attach_money" size={20} />
                 </div>
@@ -177,8 +177,8 @@ const Dashboard = () => {
               <SkeletonCard />
             </>
           ) : meetings.length === 0 ? (
-            <div className="bg-white rounded-2xl p-8 shadow-sm text-center">
-              <Icon name="event_busy" size={48} className="text-gray-300" />
+            <div className="bg-card rounded-2xl p-8 shadow-sm text-center">
+              <Icon name="event_busy" size={48} className="text-muted-foreground" />
               <p className="text-text-secondary mt-4">{t('dashboard.sections.noUpcoming')}</p>
               <button onClick={() => navigate('/measurements/new')} className="mt-4 px-6 py-2 bg-primary text-white rounded-lg font-bold">
                 {t('dashboard.scheduleMeeting')}
@@ -193,7 +193,7 @@ const Dashboard = () => {
               return (
                 <div
                   key={meeting.id}
-                  className="group bg-white rounded-2xl p-5 shadow-sm border-2 border-primary/20 hover:shadow-md hover:border-primary/40 transition-all cursor-pointer active:scale-[0.99]"
+                  className="group bg-card rounded-2xl p-5 shadow-sm border-2 border-primary/20 hover:shadow-md hover:border-primary/40 transition-all cursor-pointer active:scale-[0.99]"
                 >
                   <div className="flex justify-between items-start mb-4">
                     <div>
@@ -209,7 +209,7 @@ const Dashboard = () => {
                           </div>
                         )}
                       </div>
-                      <h3 className="font-bold text-gray-900 text-lg leading-tight group-hover:text-primary transition-colors">
+                      <h3 className="font-bold text-foreground text-lg leading-tight group-hover:text-primary transition-colors">
                         {meeting.clientName || t('dashboard.fallbacks.client')}
                       </h3>
                     </div>
@@ -235,7 +235,7 @@ const Dashboard = () => {
                   </div>
 
                   {/* Address */}
-                  <div className="flex items-center gap-2 text-sm text-gray-500 mb-4 bg-gray-50/50 p-2 rounded-lg">
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground mb-4 bg-muted/50 p-2 rounded-lg">
                     <Icon name="location_on" size={18} />
                     <span className="line-clamp-1 font-medium">{meeting.address}</span>
                   </div>
@@ -243,8 +243,8 @@ const Dashboard = () => {
                   {/* Room Type & Button */}
                   <div className="flex items-center justify-between pt-3 border-t border-gray-50">
                     <div>
-                      <p className="text-[10px] text-gray-400 uppercase font-bold mb-0.5">Бөлме</p>
-                      <p className="text-sm font-semibold text-gray-700 line-clamp-1">
+                      <p className="text-[10px] text-muted-foreground uppercase font-bold mb-0.5">Бөлме</p>
+                      <p className="text-sm font-semibold text-foreground line-clamp-1">
                         {meeting.roomType || '---'}
                       </p>
                     </div>

@@ -63,8 +63,8 @@ const auth = {
   errorConsentRequired: 'Шарттар мен саясатты қабылдау қажет',
   errorLoginFailed: 'Логин немесе құпия сөз қате',
   slugChecking: 'Тексерілуде…',
-  slugAvailable: '✓ Бос',
-  slugTaken: '✗ Бос емес, басқасын таңдаңыз',
+  slugAvailable: 'Бос',
+  slugTaken: 'Бос емес, басқасын таңдаңыз',
 
   copyright: '© 2026 Gardina. Барлық құқықтар қорғалған.',
 };

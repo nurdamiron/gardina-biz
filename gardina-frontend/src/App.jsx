@@ -1,5 +1,6 @@
 import React, { useState, lazy, Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { AppProvider } from './contexts/AppContext';
 import { UIProvider } from './contexts/UIContext';
@@ -123,6 +124,7 @@ const RoleDashboard = () => {
 const AppRoutes = () => {
   const [currentMeasurement, setCurrentMeasurement] = useState(null);
   const { isAuthenticated } = useAuth();
+  const location = useLocation();
 
   return (
     <Suspense fallback={<PageLoader />}>
@@ -130,7 +132,13 @@ const AppRoutes = () => {
       {isAuthenticated && <Sidebar />}
       <div className={isAuthenticated ? 'md:pl-60' : ''}>
       {isAuthenticated && <EmailVerificationBanner />}
-      <Routes>
+      <motion.div
+        key={location.pathname}
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
+      >
+      <Routes location={location}>
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
@@ -204,6 +212,7 @@ const AppRoutes = () => {
 
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
+      </motion.div>
       </div>
     </Suspense>
   );

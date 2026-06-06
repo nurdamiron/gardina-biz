@@ -87,21 +87,21 @@ const AdminReports = () => {
   return (
     <div className="bg-background-light min-h-screen pb-28">
       {/* Header */}
-      <header className="sticky top-0 z-30 bg-white/80 backdrop-blur-md border-b border-gray-100">
+      <header className="sticky top-0 z-30 bg-card/80 backdrop-blur-md border-b border-border">
         <div className="flex items-center gap-3 px-4 py-4">
-          <button onClick={() => navigate(-1)} className="p-2 -ml-2 rounded-full hover:bg-gray-100">
+          <button onClick={() => navigate(-1)} className="p-2 -ml-2 rounded-full hover:bg-muted">
             <Icon name="arrow_back" size={22} />
           </button>
           <h1 className="text-xl font-bold flex-1">{t('adminReports.title')}</h1>
-          <button onClick={load} className="p-2 rounded-full hover:bg-gray-100">
-            <Icon name="refresh" size={20} className="text-gray-500" />
+          <button onClick={load} className="p-2 rounded-full hover:bg-muted">
+            <Icon name="refresh" size={20} className="text-muted-foreground" />
           </button>
         </div>
         {/* Period selector */}
         <div className="flex gap-2 px-4 pb-3 overflow-x-auto">
           {PERIOD_OPTIONS.map(p => (
             <button key={p.value} onClick={() => setPeriod(p.value)}
-              className={`px-3 py-1.5 rounded-full text-sm font-semibold whitespace-nowrap transition-colors ${period === p.value ? 'bg-primary text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}>
+              className={`px-3 py-1.5 rounded-full text-sm font-semibold whitespace-nowrap transition-colors ${period === p.value ? 'bg-primary text-white' : 'bg-muted text-muted-foreground hover:bg-muted'}`}>
               {p.label}
             </button>
           ))}
@@ -198,19 +198,19 @@ const AdminReports = () => {
                 <div className="space-y-3">
                   {data.designersRanking.map((des, i) => (
                     <div key={des.id || i} className="flex items-center gap-3">
-                      <div className={`size-8 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0 ${i === 0 ? 'bg-amber-100 text-amber-700' : i === 1 ? 'bg-gray-100 text-gray-600' : i === 2 ? 'bg-orange-100 text-orange-700' : 'bg-gray-50 text-gray-500'}`}>
+                      <div className={`size-8 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0 ${i === 0 ? 'bg-amber-100 text-amber-700' : i === 1 ? 'bg-muted text-muted-foreground' : i === 2 ? 'bg-orange-100 text-orange-700' : 'bg-muted text-muted-foreground'}`}>
                         {i + 1}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="font-semibold text-gray-900 text-sm truncate">{des.name}</p>
+                        <p className="font-semibold text-foreground text-sm truncate">{des.name}</p>
                         {(() => {
                           const orders = des.completedDeals ?? des.completedMeasurements ?? 0;
-                          return <p className="text-xs text-gray-400">{orders} {pluralUnit(orders, NOUNS.order, lang)}</p>;
+                          return <p className="text-xs text-muted-foreground">{orders} {pluralUnit(orders, NOUNS.order, lang)}</p>;
                         })()}
                       </div>
                       <div className="text-right">
                         <p className="font-bold text-primary text-sm">{fmt(des.revenue || des.totalRevenue)}</p>
-                        <p className="text-xs text-gray-400">{fmt(des.commission || des.totalCommission)} {t('adminReports.commission')}</p>
+                        <p className="text-xs text-muted-foreground">{fmt(des.commission || des.totalCommission)} {t('adminReports.commission')}</p>
                       </div>
                     </div>
                   ))}
@@ -228,10 +228,10 @@ const AdminReports = () => {
                     { label: t('adminReports.teamKpiLabels.closingSpeed'), value: t('adminReports.daysShort', { days: data.teamKPIs.avgClosingDays ?? 0 }), icon: 'schedule' },
                     { label: t('adminReports.teamKpiLabels.active'), value: data.teamKPIs.activeDesigners ?? 0, icon: 'person' },
                   ].map(s => (
-                    <div key={s.label} className="bg-gray-50 rounded-xl p-3">
+                    <div key={s.label} className="bg-muted rounded-xl p-3">
                       <Icon name={s.icon} size={18} className="text-primary mb-1" />
-                      <p className="text-lg font-bold text-gray-900">{s.value}</p>
-                      <p className="text-xs text-gray-500">{s.label}</p>
+                      <p className="text-lg font-bold text-foreground">{s.value}</p>
+                      <p className="text-xs text-muted-foreground">{s.label}</p>
                     </div>
                   ))}
                 </div>
@@ -254,13 +254,13 @@ const AdminReports = () => {
                     const pct = Math.round((val / first) * 100);
                     return (
                       <div key={stage.key} className="flex items-center gap-3">
-                        <span className="text-xs text-gray-500 w-28 truncate">{stage.label}</span>
-                        <div className="flex-1 bg-gray-100 rounded-full h-4 overflow-hidden">
+                        <span className="text-xs text-muted-foreground w-28 truncate">{stage.label}</span>
+                        <div className="flex-1 bg-muted rounded-full h-4 overflow-hidden">
                           <div className={`h-full ${stage.color} rounded-full flex items-center justify-end pr-2`} style={{ width: `${Math.max(pct, 5)}%` }}>
                             {pct > 20 && <span className="text-white text-[10px] font-bold">{val}</span>}
                           </div>
                         </div>
-                        {pct <= 20 && <span className="text-xs font-bold text-gray-700 w-6">{val}</span>}
+                        {pct <= 20 && <span className="text-xs font-bold text-foreground w-6">{val}</span>}
                       </div>
                     );
                   })}
@@ -278,8 +278,8 @@ const AdminReports = () => {
                         <Icon name="texture" size={16} className="text-primary" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="font-medium text-sm text-gray-900 truncate">{p.name}</p>
-                        <p className="text-xs text-gray-400">{t('adminReports.soldTimes', { count: p.salesCount ?? p.count ?? 0 })}</p>
+                        <p className="font-medium text-sm text-foreground truncate">{p.name}</p>
+                        <p className="text-xs text-muted-foreground">{t('adminReports.soldTimes', { count: p.salesCount ?? p.count ?? 0 })}</p>
                       </div>
                       <p className="font-bold text-sm text-primary">{fmt(p.revenue || p.totalRevenue)}</p>
                     </div>
@@ -298,8 +298,8 @@ const AdminReports = () => {
                         <Icon name="warning" size={16} className="text-red-500" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="font-medium text-sm text-gray-900 truncate">{r.clientName || r.client_name}</p>
-                        <p className="text-xs text-gray-400">{t('adminReports.daysOverdue', { days: r.daysOverdue ?? 0 })} • {fmt(r.remainingAmount || r.remaining_amount)}</p>
+                        <p className="font-medium text-sm text-foreground truncate">{r.clientName || r.client_name}</p>
+                        <p className="text-xs text-muted-foreground">{t('adminReports.daysOverdue', { days: r.daysOverdue ?? 0 })} • {fmt(r.remainingAmount || r.remaining_amount)}</p>
                       </div>
                       <span className={`text-xs px-2 py-1 rounded-full font-semibold flex-shrink-0 ${r.riskLevel === 'high' || r.risk_level === 'high' ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-700'}`}>
                         {r.riskLevel === 'high' || r.risk_level === 'high' ? t('adminReports.riskLevels.high') : t('adminReports.riskLevels.medium')}
@@ -319,10 +319,10 @@ const AdminReports = () => {
 };
 
 const Section = ({ title, icon, children }) => (
-  <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+  <div className="bg-card rounded-2xl shadow-sm border border-border overflow-hidden">
     <div className="flex items-center gap-2 px-4 py-3 border-b border-gray-50">
       <Icon name={icon} size={18} className="text-primary" />
-      <h2 className="font-bold text-gray-800">{title}</h2>
+      <h2 className="font-bold text-foreground">{title}</h2>
     </div>
     <div className="p-4">{children}</div>
   </div>
@@ -336,12 +336,12 @@ const StatCard = ({ label, value, icon, color }) => {
     amber: 'bg-amber-50 text-amber-600',
   };
   return (
-    <div className="bg-gray-50 rounded-2xl p-4">
+    <div className="bg-muted rounded-2xl p-4">
       <div className={`size-10 rounded-full ${colors[color] || colors.blue} flex items-center justify-center mb-3`}>
         <Icon name={icon} size={20} />
       </div>
-      <p className="text-xl font-bold text-gray-900">{value}</p>
-      <p className="text-xs text-gray-500 mt-0.5">{label}</p>
+      <p className="text-xl font-bold text-foreground">{value}</p>
+      <p className="text-xs text-muted-foreground mt-0.5">{label}</p>
     </div>
   );
 };

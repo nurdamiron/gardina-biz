@@ -74,7 +74,7 @@ const MeasurementsList = () => {
       return { label: weekdays[date.getDay()], subLabel: fullDate, color: 'text-primary' };
     }
 
-    return { label: fullDate, subLabel: weekdays[date.getDay()], color: 'text-gray-700' };
+    return { label: fullDate, subLabel: weekdays[date.getDay()], color: 'text-foreground' };
   };
 
   const MeasurementCard = ({ measurement }) => {
@@ -90,7 +90,7 @@ const MeasurementsList = () => {
         <div className="flex justify-between items-start mb-4">
           <div>
             <div className="flex items-center gap-2 mb-1">
-              <span className="text-[10px] font-black text-gray-300 uppercase tracking-wider">#{measurement.id.slice(0, 6)}</span>
+              <span className="text-[10px] font-black text-muted-foreground uppercase tracking-wider">#{measurement.id.slice(0, 6)}</span>
               {isPriorityHigh && (
                 <div className="flex items-center gap-1 bg-red-500 px-1.5 py-0.5 rounded text-[10px] font-bold text-white animate-pulse">
                   <Icon name="local_fire_department" size={12} />
@@ -98,7 +98,7 @@ const MeasurementsList = () => {
                 </div>
               )}
             </div>
-            <h3 className="font-bold text-gray-900 text-lg leading-tight group-hover:text-primary transition-colors">
+            <h3 className="font-bold text-foreground text-lg leading-tight group-hover:text-primary transition-colors">
               {measurement.clientName || t('measurements.card.unknownClient')}
             </h3>
           </div>
@@ -121,7 +121,7 @@ const MeasurementsList = () => {
             <div className="flex flex-col">
               <span className={`font-bold text-sm ${dateInfo.color}`}>{dateInfo.label}</span>
               {dateInfo.subLabel && (
-                <span className="text-[10px] text-gray-500">{dateInfo.subLabel}</span>
+                <span className="text-[10px] text-muted-foreground">{dateInfo.subLabel}</span>
               )}
             </div>
           </div>
@@ -131,15 +131,15 @@ const MeasurementsList = () => {
           </div>
         </div>
 
-        <div className="flex items-center gap-2 text-sm text-gray-500 mb-4 bg-gray-50/50 p-2 rounded-lg">
+        <div className="flex items-center gap-2 text-sm text-muted-foreground mb-4 bg-muted/50 p-2 rounded-lg">
           <Icon name="location_on" size={18} />
           <span className="line-clamp-1 font-medium">{measurement.address}</span>
         </div>
 
         <div className="flex items-center justify-between pt-3 border-t border-gray-50">
           <div>
-            <p className="text-[10px] text-gray-400 uppercase font-bold mb-0.5">{t('measurements.card.room')}</p>
-            <p className="text-sm font-semibold text-gray-700 line-clamp-1">
+            <p className="text-[10px] text-muted-foreground uppercase font-bold mb-0.5">{t('measurements.card.room')}</p>
+            <p className="text-sm font-semibold text-foreground line-clamp-1">
               {measurement.roomType || t('measurements.card.unknownRoom')}
             </p>
           </div>
@@ -165,25 +165,25 @@ const MeasurementsList = () => {
 
   return (
     <div className="bg-background-light min-h-screen flex flex-col pb-32">
-      <header className="sticky top-0 z-30 bg-white/80 backdrop-blur-md border-b border-gray-100 px-4 py-3">
+      <header className="sticky top-0 z-30 bg-card/80 backdrop-blur-md border-b border-border px-4 py-3">
         <div className="flex items-center justify-between">
-          <h1 className="text-xl font-bold text-gray-900 leading-tight">{t('measurements.title')}</h1>
-          <button onClick={loadMeasurements} className="size-10 flex items-center justify-center rounded-full bg-gray-50 hover:bg-gray-100 transition-colors" aria-label={t('common.retry')}>
-            <Icon name="refresh" className="text-gray-600" />
+          <h1 className="text-xl font-bold text-foreground leading-tight">{t('measurements.title')}</h1>
+          <button onClick={loadMeasurements} className="size-10 flex items-center justify-center rounded-full bg-muted hover:bg-muted transition-colors" aria-label={t('common.retry')}>
+            <Icon name="refresh" className="text-muted-foreground" />
           </button>
         </div>
 
         <div className="mt-3">
-          <div className="flex p-1 bg-gray-200 rounded-lg">
+          <div className="flex p-1 bg-muted rounded-lg">
             <button
               onClick={() => setActiveTab('planned')}
-              className={`flex-1 py-1.5 px-3 rounded-md text-sm font-semibold ${activeTab === 'planned' ? 'bg-white shadow-sm' : 'text-gray-500'}`}
+              className={`flex-1 py-1.5 px-3 rounded-md text-sm font-semibold ${activeTab === 'planned' ? 'bg-card shadow-sm' : 'text-muted-foreground'}`}
             >
               {t('measurements.tabs.planned')}
             </button>
             <button
               onClick={() => setActiveTab('completed')}
-              className={`flex-1 py-1.5 px-3 rounded-md text-sm font-medium ${activeTab === 'completed' ? 'bg-white shadow-sm' : 'text-gray-500'}`}
+              className={`flex-1 py-1.5 px-3 rounded-md text-sm font-medium ${activeTab === 'completed' ? 'bg-card shadow-sm' : 'text-muted-foreground'}`}
             >
               {t('measurements.tabs.completed')}
             </button>
@@ -200,7 +200,7 @@ const MeasurementsList = () => {
           </div>
         ) : measurements.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16">
-            <Icon name="event_busy" className="text-gray-300 text-8xl" />
+            <Icon name="event_busy" className="text-muted-foreground text-8xl" />
             <h3 className="text-xl font-bold mt-4">{t('measurements.empty')}</h3>
             <p className="text-text-secondary mt-2 text-center px-4">{t('measurements.emptyHint')}</p>
           </div>

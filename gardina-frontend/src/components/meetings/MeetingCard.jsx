@@ -5,8 +5,8 @@ const MeetingCard = ({ meeting, isActive = false }) => {
   const { time, type, client, address, notes, timeUntil } = meeting;
 
   return (
-    <div className={`group relative overflow-hidden rounded-2xl bg-white p-4 shadow-sm border ${
-      isActive ? 'border-primary/20 ring-1 ring-primary/10' : 'border-gray-100 opacity-90'
+    <div className={`group relative overflow-hidden rounded-2xl bg-card p-4 shadow-sm border ${
+      isActive ? 'border-primary/20 ring-1 ring-primary/10' : 'border-border opacity-90'
     }`}>
       <div className={`absolute top-0 left-0 w-1 h-full ${isActive ? 'bg-primary' : 'bg-gray-300'}`}></div>
 
@@ -22,8 +22,8 @@ const MeetingCard = ({ meeting, isActive = false }) => {
             )}
             <h3 className="text-lg font-bold leading-tight">{time} - {type}</h3>
             <p className="text-text-secondary text-sm mt-1">{address}</p>
-            {client && <p className="text-xs text-gray-400 mt-1">Клиент: {client}</p>}
-            {notes && <p className="text-xs text-gray-400 mt-1">{notes}</p>}
+            {client && <p className="text-xs text-muted-foreground mt-1">Клиент: {client}</p>}
+            {notes && <p className="text-xs text-muted-foreground mt-1">{notes}</p>}
           </div>
 
           <div className="flex gap-2 mt-2">
@@ -33,12 +33,12 @@ const MeetingCard = ({ meeting, isActive = false }) => {
                   <Icon name="near_me" size={18} />
                   Навигация
                 </button>
-                <button className="size-9 rounded-lg bg-gray-100 text-text-main flex items-center justify-center hover:bg-gray-200 transition-all">
+                <button className="size-9 rounded-lg bg-muted text-text-main flex items-center justify-center hover:bg-muted transition-all">
                   <Icon name="call" size={20} />
                 </button>
               </>
             ) : (
-              <button className="h-8 px-3 rounded-lg bg-gray-100 text-text-main text-xs font-bold flex items-center gap-1.5">
+              <button className="h-8 px-3 rounded-lg bg-muted text-text-main text-xs font-bold flex items-center gap-1.5">
                 <Icon name="call" size={16} />
                 Позвонить
               </button>
@@ -46,7 +46,7 @@ const MeetingCard = ({ meeting, isActive = false }) => {
           </div>
         </div>
 
-        <div className={`${isActive ? 'w-1/3 min-w-[100px]' : 'w-24'} rounded-xl bg-gray-100 bg-cover bg-center overflow-hidden relative`}>
+        <div className={`${isActive ? 'w-1/3 min-w-[100px]' : 'w-24'} rounded-xl bg-muted bg-cover bg-center overflow-hidden relative`}>
           {isActive && <div className="absolute inset-0 bg-black/10"></div>}
         </div>
       </div>

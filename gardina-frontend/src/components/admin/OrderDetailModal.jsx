@@ -189,7 +189,7 @@ const OrderDetailModal = ({ order, measurement, onClose }) => {
   return (
     <div className="fixed inset-0 bg-black/50 z-[9999] flex items-end md:items-center justify-center p-0 md:p-4" onClick={onClose}>
       <div
-        className="bg-white w-full md:max-w-3xl md:rounded-2xl max-h-[90vh] overflow-y-auto rounded-t-3xl"
+        className="bg-card w-full md:max-w-3xl md:rounded-2xl max-h-[90vh] overflow-y-auto rounded-t-3xl"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
@@ -200,7 +200,7 @@ const OrderDetailModal = ({ order, measurement, onClose }) => {
           </div>
           <button
             onClick={onClose}
-            className="size-10 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center transition-all"
+            className="size-10 rounded-full bg-card/20 hover:bg-card/30 flex items-center justify-center transition-all"
           >
             <Icon name="close" />
           </button>
@@ -288,7 +288,7 @@ const OrderDetailModal = ({ order, measurement, onClose }) => {
               </div>
               <div className="space-y-2 text-sm">
                 {measurement.scheduledAt && (
-                  <div className="flex justify-between items-center bg-white/50 px-3 py-2 rounded-lg mb-2">
+                  <div className="flex justify-between items-center bg-card/50 px-3 py-2 rounded-lg mb-2">
                     <span className="text-primary-dark">Уақыты:</span>
                     <div className="flex items-center gap-2">
                       <span className="font-bold text-primary-dark">{formatDateKZ(measurement.scheduledAt)}</span>
@@ -329,10 +329,10 @@ const OrderDetailModal = ({ order, measurement, onClose }) => {
           )}
 
           {/* TIMELINE */}
-          <div className="bg-white border-2 border-gray-200 rounded-xl p-5">
+          <div className="bg-card border-2 border-border rounded-xl p-5">
             <div className="flex items-center gap-2 mb-4">
               <Icon name="timeline" className="text-primary" />
-              <h3 className="font-bold text-gray-900">Тапсырыс тарихы</h3>
+              <h3 className="font-bold text-foreground">Тапсырыс тарихы</h3>
             </div>
 
             <div className="relative pl-8 space-y-4">
@@ -348,14 +348,14 @@ const OrderDetailModal = ({ order, measurement, onClose }) => {
                   <div>
                     <div className="flex items-center gap-2 mb-1">
                       <Icon name={event.icon} size={20} className={event.color.replace('bg-', 'text-')} />
-                      <p className="font-bold text-gray-900 text-base">{event.label}</p>
+                      <p className="font-bold text-foreground text-base">{event.label}</p>
                     </div>
-                    <p className="text-sm text-gray-600">{event.description}</p>
+                    <p className="text-sm text-muted-foreground">{event.description}</p>
                     {event.subdescription && (
                       <p className="text-sm text-primary font-bold mt-1">{event.subdescription}</p>
                     )}
                     {event.timestamp && (
-                      <p className="text-xs text-gray-400 mt-1.5">
+                      <p className="text-xs text-muted-foreground mt-1.5">
                         {formatDateTimeFull(event.timestamp)}
                       </p>
                     )}
@@ -379,7 +379,7 @@ const OrderDetailModal = ({ order, measurement, onClose }) => {
                   const items = window.priceBreakdown?.clientCheck?.items || [];
 
                   return (
-                    <div key={idx} className="bg-white rounded-lg p-3 border border-amber-200">
+                    <div key={idx} className="bg-card rounded-lg p-3 border border-amber-200">
                       <div className="flex items-center justify-between mb-2">
                         <p className="font-bold text-amber-900">{idx + 1}. {window.roomName}</p>
                         <p className="font-black text-green-600">{price.toLocaleString()} ₸</p>
@@ -416,12 +416,12 @@ const OrderDetailModal = ({ order, measurement, onClose }) => {
 
           {/* NOTES */}
           {order.notes && (
-            <div className="bg-gray-50 border border-gray-200 rounded-xl p-4">
+            <div className="bg-muted border border-border rounded-xl p-4">
               <div className="flex items-center gap-2 mb-2">
-                <Icon name="note" className="text-gray-600" />
-                <h3 className="font-bold text-gray-900">Коментарийлер</h3>
+                <Icon name="note" className="text-muted-foreground" />
+                <h3 className="font-bold text-foreground">Коментарийлер</h3>
               </div>
-              <p className="text-sm text-gray-700 whitespace-pre-line">{order.notes}</p>
+              <p className="text-sm text-foreground whitespace-pre-line">{order.notes}</p>
             </div>
           )}
 
@@ -437,7 +437,7 @@ const OrderDetailModal = ({ order, measurement, onClose }) => {
             </button>
             <button
               onClick={onClose}
-              className="px-6 bg-gray-200 text-gray-700 font-bold py-3 rounded-xl hover:bg-gray-300 transition-all"
+              className="px-6 bg-muted text-foreground font-bold py-3 rounded-xl hover:bg-gray-300 transition-all"
             >
               Жабу
             </button>

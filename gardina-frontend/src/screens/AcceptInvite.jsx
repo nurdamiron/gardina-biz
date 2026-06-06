@@ -121,7 +121,7 @@ const AcceptInvite = () => {
         )}
 
         {loadStatus === 'invalid' && (
-          <div className="bg-white rounded-3xl shadow-sm p-8 text-center">
+          <div className="bg-card rounded-3xl shadow-sm p-8 text-center">
             <div className="size-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4">
               <Icon name="link_off" size={36} className="text-red-500" />
             </div>
@@ -133,7 +133,7 @@ const AcceptInvite = () => {
         )}
 
         {loadStatus === 'ready' && invite && (
-          <div className="bg-white rounded-3xl shadow-sm p-8">
+          <div className="bg-card rounded-3xl shadow-sm p-8">
             {/* Invitation info */}
             <div className="text-center mb-8">
               <div className="size-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">

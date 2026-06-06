@@ -20,14 +20,14 @@ const ResetPassword = () => {
 
   if (!token) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-6 bg-background-light">
+      <div className="min-h-screen flex items-center justify-center p-6 bg-background">
         <div className="text-center max-w-sm">
-          <div className="size-14 rounded-full bg-red-100 flex items-center justify-center mx-auto mb-4">
-            <Icon name="error" size={28} className="text-red-600" />
+          <div className="size-12 rounded-full bg-destructive/10 flex items-center justify-center mx-auto mb-4">
+            <Icon name="error" size={26} className="text-destructive" />
           </div>
-          <h1 className="text-xl font-bold mb-2">{t('resetPassword.invalidLink')}</h1>
-          <p className="text-text-secondary text-sm mb-6">{t('resetPassword.invalidBody')}</p>
-          <Link to="/forgot-password" className="inline-flex px-5 py-3 rounded-xl bg-primary text-white font-bold text-sm hover:brightness-110">
+          <h1 className="text-xl font-semibold tracking-tight mb-2 text-foreground">{t('resetPassword.invalidLink')}</h1>
+          <p className="text-muted-foreground text-sm mb-6">{t('resetPassword.invalidBody')}</p>
+          <Link to="/forgot-password" className="inline-flex h-10 items-center px-5 rounded-md bg-primary text-primary-content font-medium text-sm hover:bg-primary/90 transition-colors">
             {t('resetPassword.requestNew')}
           </Link>
         </div>
@@ -61,86 +61,90 @@ const ResetPassword = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background-light via-white to-primary/10 flex flex-col items-center justify-center p-4 py-10">
-      <div className="w-full max-w-md">
+    <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4 py-10">
+      <div className="w-full max-w-sm">
         <div className="text-center mb-6">
-          <img src="/images/logo-header.png" alt="Gardina" className="w-40 h-auto mx-auto mb-3 drop-shadow-sm" />
-          <div className="flex justify-center mb-2">
+          <img src="/images/logo-header.png" alt="Gardina" className="w-72 h-auto mx-auto mb-4" />
+          <div className="flex justify-center">
             <LanguageSwitcher compact />
           </div>
-          <h1 className="text-2xl font-bold text-text-main tracking-tight">
-            {t('resetPassword.title')}
-          </h1>
-          <p className="text-text-secondary font-medium text-sm mt-1.5">{t('resetPassword.subtitle')}</p>
         </div>
 
-        <div className="rounded-3xl bg-white shadow-xl shadow-primary/5 border border-primary/10 overflow-hidden">
-          <div className="h-1 bg-gradient-to-r from-primary via-primary-light to-accent" />
+        <div className="rounded-xl bg-card border border-border shadow-sm">
           <div className="p-6 sm:p-7">
             {done ? (
               <div className="text-center py-2">
-                <div className="size-14 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-4">
-                  <Icon name="check_circle" size={28} className="text-green-600" />
+                <div className="size-12 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
+                  <Icon name="check_circle" size={26} className="text-primary" />
                 </div>
-                <h2 className="font-bold text-lg text-text-main mb-2">{t('resetPassword.successTitle')}</h2>
-                <p className="text-sm text-text-secondary">{t('resetPassword.successBody')}</p>
+                <h2 className="font-semibold text-lg text-foreground mb-2">{t('resetPassword.successTitle')}</h2>
+                <p className="text-sm text-muted-foreground">{t('resetPassword.successBody')}</p>
               </div>
             ) : (
-              <form onSubmit={handleSubmit}>
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div>
+                  <h2 className="text-2xl font-semibold tracking-tight text-foreground">{t('resetPassword.title')}</h2>
+                  <p className="text-sm text-muted-foreground mt-1.5">{t('resetPassword.subtitle')}</p>
+                </div>
+
                 {error && (
-                  <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg flex items-start gap-3">
-                    <Icon name="error" className="text-red-500 shrink-0 mt-0.5" />
-                    <p className="text-sm font-medium text-red-700">{error}</p>
+                  <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-md flex items-start gap-2.5">
+                    <Icon name="error" size={18} className="text-destructive shrink-0 mt-0.5" />
+                    <p className="text-sm font-medium text-destructive">{error}</p>
                   </div>
                 )}
 
-                <label className="block text-sm font-bold mb-2">{t('resetPassword.newPassword')}</label>
-                <div className="relative mb-4">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <Icon name="lock" size={20} className="text-text-secondary" />
+                <div className="space-y-1.5">
+                  <label className="block text-sm font-medium text-foreground">{t('resetPassword.newPassword')}</label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <Icon name="lock" size={18} className="text-muted-foreground" />
+                    </div>
+                    <input
+                      type={showPassword ? 'text' : 'password'}
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      className="block w-full h-10 pl-9 pr-11 text-sm bg-transparent border border-input rounded-md transition-colors placeholder:text-muted-foreground focus:border-primary focus:ring-2 focus:ring-ring/30 outline-none"
+                      placeholder={t('auth.passwordPlaceholderMin')}
+                      autoComplete="new-password"
+                      autoFocus
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword((v) => !v)}
+                      className="absolute inset-y-0 right-0 pr-3 flex items-center text-muted-foreground hover:text-foreground transition-colors"
+                      aria-label={showPassword ? t('auth.hidePassword') : t('auth.showPassword')}
+                    >
+                      <Icon name={showPassword ? 'visibility_off' : 'visibility'} size={18} />
+                    </button>
                   </div>
-                  <input
-                    type={showPassword ? 'text' : 'password'}
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="block w-full pl-10 pr-12 py-3 border border-gray-200 rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none"
-                    placeholder={t('auth.passwordPlaceholderMin')}
-                    autoComplete="new-password"
-                    autoFocus
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword((v) => !v)}
-                    className="absolute inset-y-0 right-0 pr-3 flex items-center"
-                    aria-label={showPassword ? t('auth.hidePassword') : t('auth.showPassword')}
-                  >
-                    <Icon name={showPassword ? 'visibility_off' : 'visibility'} size={20} className="text-text-secondary hover:text-primary" />
-                  </button>
                 </div>
 
-                <label className="block text-sm font-bold mb-2">{t('auth.passwordConfirm')}</label>
-                <div className="relative mb-5">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <Icon name="verified_user" size={20} className="text-text-secondary" />
+                <div className="space-y-1.5">
+                  <label className="block text-sm font-medium text-foreground">{t('auth.passwordConfirm')}</label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <Icon name="verified_user" size={18} className="text-muted-foreground" />
+                    </div>
+                    <input
+                      type={showPassword ? 'text' : 'password'}
+                      value={confirm}
+                      onChange={(e) => setConfirm(e.target.value)}
+                      className="block w-full h-10 pl-9 pr-3 text-sm bg-transparent border border-input rounded-md transition-colors placeholder:text-muted-foreground focus:border-primary focus:ring-2 focus:ring-ring/30 outline-none"
+                      placeholder={t('auth.passwordConfirmPlaceholder')}
+                      autoComplete="new-password"
+                    />
                   </div>
-                  <input
-                    type={showPassword ? 'text' : 'password'}
-                    value={confirm}
-                    onChange={(e) => setConfirm(e.target.value)}
-                    className="block w-full pl-10 pr-3 py-3 border border-gray-200 rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none"
-                    placeholder={t('auth.passwordConfirmPlaceholder')}
-                    autoComplete="new-password"
-                  />
                 </div>
 
                 <button
                   type="submit"
                   disabled={loading || !password || !confirm}
-                  className="w-full bg-primary hover:brightness-110 active:scale-[0.98] text-white font-bold text-base py-3.5 rounded-xl shadow-lg shadow-primary/25 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+                  className="w-full h-11 bg-primary hover:bg-primary/90 active:scale-[0.99] text-primary-content font-medium text-sm rounded-md shadow-sm transition-all flex items-center justify-center gap-2 outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:opacity-50"
                 >
                   {loading ? (
                     <>
-                      <div className="size-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      <div className="size-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
                       {t('common.saving')}
                     </>
                   ) : (

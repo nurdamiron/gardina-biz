@@ -318,6 +318,39 @@ const stagger = {
   },
 };
 
+// ─── Aurora background ───────────────────────────────────────────────────────
+// Soft animated mesh-gradient blobs + grid texture. The signature look of the
+// redesign — drop it behind any section for that modern-SaaS depth.
+function Aurora({ className = '', variant = 'light' }) {
+  const blobs =
+    variant === 'dark'
+      ? ['bg-accent/30', 'bg-primary-light/40', 'bg-accent-2/20']
+      : ['bg-primary/20', 'bg-accent/25', 'bg-accent-2/15'];
+  return (
+    <div className={`pointer-events-none absolute inset-0 -z-10 overflow-hidden ${className}`} aria-hidden="true">
+      <div className={`absolute -top-1/4 -left-[10%] size-[42rem] rounded-full blur-[120px] animate-aurora ${blobs[0]}`} />
+      <div className={`absolute top-1/3 -right-[12%] size-[38rem] rounded-full blur-[120px] animate-aurora-slow ${blobs[1]}`} />
+      <div className={`absolute -bottom-1/4 left-1/4 size-[34rem] rounded-full blur-[120px] animate-aurora ${blobs[2]}`} />
+    </div>
+  );
+}
+
+// ─── Pill: small gradient/glass eyebrow badge reused across sections ──────────
+function Pill({ icon, children, tone = 'glass' }) {
+  const cls =
+    tone === 'glass'
+      ? 'glass text-primary shadow-card'
+      : tone === 'solid'
+      ? 'bg-primary/10 text-primary border border-primary/15'
+      : 'glass-dark text-white';
+  return (
+    <span className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-bold uppercase tracking-wide ${cls}`}>
+      {icon && <Icon name={icon} size={14} />}
+      {children}
+    </span>
+  );
+}
+
 // ─── Header with scroll-triggered styling ───────────────────────────────────
 function LandingHeader() {
   const { t } = useI18n();
@@ -343,21 +376,27 @@ function LandingHeader() {
       initial={{ y: -80 }}
       animate={{ y: 0 }}
       transition={{ duration: 0.4, ease: 'easeOut' }}
-      className={`fixed top-0 inset-x-0 z-50 transition-all duration-300 ${
-        scrolled ? 'bg-white/85 backdrop-blur-md shadow-sm border-b border-border-light/60' : 'bg-transparent'
+      className={`fixed inset-x-0 z-50 transition-all duration-300 ${
+        scrolled ? 'top-2 sm:top-3' : 'top-0'
       }`}
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
-        <a href="/" className="flex items-center gap-2">
+      <div
+        className={`mx-auto flex items-center justify-between transition-all duration-300 ${
+          scrolled
+            ? 'max-w-6xl glass shadow-card rounded-full px-3 sm:px-4 h-14 mt-0 mx-3 sm:mx-auto'
+            : 'max-w-7xl px-4 sm:px-6 h-16'
+        }`}
+      >
+        <a href="/" className="flex items-center gap-2 shrink-0">
           <img src="/images/logo-header.png" alt="Gardina" className="h-8 sm:h-9 w-auto" />
         </a>
 
-        <nav className="hidden lg:flex items-center gap-7">
+        <nav className="hidden lg:flex items-center gap-1">
           {links.map((l) => (
             <a
               key={l.href}
               href={l.href}
-              className="text-sm font-medium text-text-secondary hover:text-primary transition-colors"
+              className="font-display relative px-3 py-2 text-sm font-medium text-text-secondary hover:text-primary transition-colors after:absolute after:left-3 after:right-3 after:-bottom-0.5 after:h-0.5 after:rounded-full after:bg-gradient-to-r after:from-primary after:to-accent after:origin-left after:scale-x-0 hover:after:scale-x-100 after:transition-transform after:duration-300"
             >
               {l.label}
             </a>
@@ -368,7 +407,7 @@ function LandingHeader() {
           <LanguageSwitcher compact />
           <Link
             to="/login"
-            className="hidden sm:inline-flex items-center gap-1.5 px-4 py-2 text-sm font-bold text-primary hover:bg-primary/5 rounded-lg transition-colors"
+            className="hidden sm:inline-flex items-center gap-1.5 px-4 py-2 text-sm font-bold text-primary hover:bg-primary/8 rounded-full transition-colors"
           >
             {t('landing.nav.login')}
           </Link>
@@ -376,9 +415,10 @@ function LandingHeader() {
             href="https://wa.me/77079429827"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-bold text-white bg-primary hover:bg-primary-light rounded-lg transition-colors shadow-lg shadow-primary/20"
+            className="group inline-flex items-center gap-1.5 px-4 py-2 text-sm font-bold text-white bg-gradient-to-r from-primary to-primary-light hover:to-primary rounded-full transition-all shadow-lg shadow-primary/25 active:scale-95"
           >
             {t('landing.nav.whatsapp')}
+            <Icon name="arrow_forward" size={15} className="transition-transform group-hover:translate-x-0.5" />
           </a>
           {/* Hamburger — the nav is hidden below lg, so mobile needs a menu fallback */}
           <button
@@ -445,29 +485,36 @@ function Hero() {
   const mockOpacity = useTransform(scrollYProgress, [0, 0.7], [1, 0.4]);
 
   return (
-    <section ref={heroRef} className="relative pt-28 sm:pt-32 pb-16 sm:pb-24 overflow-hidden">
-      <div className="absolute inset-0 -z-10 bg-gradient-to-b from-primary/5 to-transparent" />
+    <section ref={heroRef} className="relative pt-32 sm:pt-40 pb-16 sm:pb-28 overflow-hidden">
+      <Aurora />
+      <div className="absolute inset-0 -z-10 bg-grid [mask-image:radial-gradient(ellipse_70%_60%_at_50%_0%,#000_30%,transparent_75%)]" />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 grid lg:grid-cols-2 gap-12 items-center">
         <motion.div initial="hidden" animate="visible" variants={stagger} className="text-center lg:text-left">
-          <motion.div variants={fadeUp} className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-bold mb-6">
-            <Icon name="install_mobile" size={16} />
-            {t('landing.hero.badge')}
+          <motion.div variants={fadeUp} className="mb-6 flex justify-center lg:justify-start">
+            <span className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full glass text-primary text-xs font-bold shadow-card">
+              <span className="relative flex size-2">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-accent opacity-75" />
+                <span className="relative inline-flex size-2 rounded-full bg-primary" />
+              </span>
+              {t('landing.hero.badge')}
+            </span>
           </motion.div>
-          <motion.h1 variants={fadeUp} className="text-4xl sm:text-5xl lg:text-6xl font-black text-text-main leading-[1.05] tracking-tight">
+          <motion.h1 variants={fadeUp} className="font-display text-[2.75rem] leading-[1.02] sm:text-6xl lg:text-[4.25rem] font-extrabold text-text-main tracking-tight">
             {t('landing.hero.title1')}{' '}
-            <span className="text-primary">
+            <span className="text-gradient">
               {t('landing.hero.title2')}
             </span>
           </motion.h1>
-          <motion.p variants={fadeUp} className="mt-5 text-base sm:text-lg text-text-secondary leading-relaxed max-w-xl mx-auto lg:mx-0">
+          <motion.p variants={fadeUp} className="mt-6 text-base sm:text-lg text-text-secondary leading-relaxed max-w-xl mx-auto lg:mx-0">
             {t('landing.hero.description')}
           </motion.p>
-          <motion.div variants={fadeUp} className="mt-7 flex flex-col sm:flex-row gap-3 justify-center lg:justify-start">
+          <motion.div variants={fadeUp} className="mt-8 flex flex-col sm:flex-row gap-3 justify-center lg:justify-start">
             <button
               onClick={openBooking}
-              className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-primary text-white font-bold text-base hover:brightness-110 active:scale-[0.99] shadow-xl shadow-primary/25 transition-all"
+              className="group relative inline-flex items-center justify-center gap-2 px-7 py-4 rounded-2xl bg-gradient-to-r from-primary-dark via-primary to-primary-light text-white font-bold text-base hover:shadow-glow active:scale-[0.98] shadow-xl shadow-primary/30 transition-all overflow-hidden"
             >
+              <span className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 bg-gradient-to-r from-transparent via-white/25 to-transparent" />
               <Icon name="edit_note" size={20} />
               {t('landing.hero.ctaPrimary')}
             </button>
@@ -475,21 +522,21 @@ function Hero() {
               href="https://wa.me/77079429827"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl border-2 border-primary/20 text-primary font-bold text-base hover:bg-primary/5 transition-all"
+              className="inline-flex items-center justify-center gap-2 px-7 py-4 rounded-2xl glass text-primary font-bold text-base hover:bg-white shadow-card transition-all active:scale-[0.98]"
             >
               <Icon name="chat" size={20} />
               {t('landing.hero.ctaSecondary')}
             </a>
           </motion.div>
 
-          <motion.div variants={fadeUp} className="mt-10 grid grid-cols-3 gap-4 max-w-md mx-auto lg:mx-0">
+          <motion.div variants={fadeUp} className="mt-12 grid grid-cols-3 gap-3 max-w-md mx-auto lg:mx-0">
             {[
               { value: t('landing.hero.statsClients'), label: t('landing.hero.statsClientsHint') },
               { value: t('landing.hero.statsProposals'), label: t('landing.hero.statsProposalsHint') },
               { value: t('landing.hero.statsControl'), label: t('landing.hero.statsControlHint') },
             ].map((s) => (
-              <div key={s.value} className="text-center lg:text-left">
-                <div className="text-sm font-bold text-primary">{s.value}</div>
+              <div key={s.value} className="text-center lg:text-left rounded-2xl glass px-3 py-3 shadow-card">
+                <div className="text-sm font-extrabold text-gradient font-display">{s.value}</div>
                 <div className="text-xs text-text-secondary mt-1 leading-snug">{s.label}</div>
               </div>
             ))}
@@ -503,7 +550,8 @@ function Hero() {
           transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
           className="relative mx-auto w-full max-w-md"
         >
-          <div className="relative rounded-3xl bg-gradient-to-br from-primary-dark via-primary to-primary-light p-2 shadow-2xl shadow-primary/30">
+          <div className="absolute -inset-6 -z-10 rounded-[2.5rem] gradient-ring opacity-30 blur-2xl animate-aurora-slow" />
+          <div className="relative rounded-[2rem] gradient-ring p-[3px] shadow-glow">
             <div className="rounded-2xl bg-white p-5">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex gap-1.5">
@@ -563,10 +611,13 @@ function Hero() {
             initial={{ opacity: 0, x: 40, y: -10 }}
             animate={{ opacity: 1, x: 0, y: 0 }}
             transition={{ delay: 1.4, duration: 0.5, ease: 'easeOut' }}
-            className="absolute right-1 sm:-right-8 top-12 bg-white rounded-2xl shadow-2xl p-3 border border-border-light max-w-[150px] sm:max-w-[200px]"
+            className="absolute right-1 sm:-right-8 top-12 glass rounded-2xl shadow-glow p-3.5 max-w-[150px] sm:max-w-[200px] animate-float"
           >
             <div className="flex items-center gap-2 mb-1">
-              <span className="size-2 rounded-full bg-green-500" />
+              <span className="relative flex size-2">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-accent opacity-75" />
+                <span className="relative inline-flex size-2 rounded-full bg-primary" />
+              </span>
               <span className="text-[10px] font-bold text-text-secondary">{t('landing.hero.pushTag')}</span>
             </div>
             <div className="text-xs font-bold text-text-main">{t('landing.hero.pushTitle')}</div>
@@ -613,27 +664,29 @@ function StatsBand() {
   ];
 
   return (
-    <section className="py-12 sm:py-16 border-y border-border-light/60 bg-white">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 grid grid-cols-2 lg:grid-cols-4 gap-8">
-        {stats.map((s, i) => (
-          <motion.div
-            key={i}
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, amount: 0.05 }}
-            transition={{ duration: 0.4, delay: i * 0.08 }}
-            className="text-center"
-          >
-            <div className="text-3xl sm:text-4xl font-black text-primary">
-              {s.labelOverride ? (
-                s.labelOverride
-              ) : (
-                <StatNumber to={s.value} suffix={s.suffix} />
-              )}
-            </div>
-            <div className="text-xs sm:text-sm text-text-secondary mt-1.5 font-medium leading-snug">{s.label}</div>
-          </motion.div>
-        ))}
+    <section className="relative py-14 sm:py-18">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 rounded-3xl glass shadow-card p-3 sm:p-5">
+          {stats.map((s, i) => (
+            <motion.div
+              key={i}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.05 }}
+              transition={{ duration: 0.4, delay: i * 0.08 }}
+              className="text-center rounded-2xl px-4 py-5 hover:bg-primary/5 transition-colors"
+            >
+              <div className="font-display text-4xl sm:text-5xl font-extrabold text-gradient">
+                {s.labelOverride ? (
+                  s.labelOverride
+                ) : (
+                  <StatNumber to={s.value} suffix={s.suffix} />
+                )}
+              </div>
+              <div className="text-xs sm:text-sm text-text-secondary mt-2 font-medium leading-snug">{s.label}</div>
+            </motion.div>
+          ))}
+        </div>
       </div>
     </section>
   );
@@ -648,11 +701,10 @@ function SectionHeading({ badge, badgeIcon, title, subtitle }) {
       variants={stagger}
       className="text-center max-w-2xl mx-auto mb-12 sm:mb-16"
     >
-      <motion.div variants={fadeUp} className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 text-primary text-xs font-bold uppercase tracking-wide mb-4">
-        {badgeIcon && <Icon name={badgeIcon} size={14} />}
-        {badge}
+      <motion.div variants={fadeUp} className="mb-5 flex justify-center">
+        <Pill icon={badgeIcon}>{badge}</Pill>
       </motion.div>
-      <motion.h2 variants={fadeUp} className="text-3xl sm:text-4xl lg:text-5xl font-black text-text-main tracking-tight">
+      <motion.h2 variants={fadeUp} className="font-display text-3xl sm:text-4xl lg:text-[2.75rem] font-extrabold text-text-main tracking-tight leading-[1.08]">
         {title}
       </motion.h2>
       {subtitle && (
@@ -665,14 +717,18 @@ function SectionHeading({ badge, badgeIcon, title, subtitle }) {
 }
 
 function Problems() {
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
+  const kz = lang === 'kz';
 
   const problemDemos = [
     // item1 — leads getting lost
     <div key="d1" className="mt-5 space-y-2">
       <div className="rounded-xl bg-red-50 border border-red-100 p-3">
-        <p className="text-[9px] font-black uppercase text-red-400 mb-2 tracking-wider">Сейчас</p>
-        {['Алмас — звонил, не записан', 'Айгуль — что-то хотела...', 'Неизвестный клиент ❓'].map((l, i) => (
+        <p className="text-[9px] font-black uppercase text-red-400 mb-2 tracking-wider">{kz ? 'Қазір' : 'Сейчас'}</p>
+        {(kz
+          ? ['Алмас — қоңырау шалды, жазылмаған', 'Айгүл — бірдеңе сұрады...', 'Белгісіз клиент']
+          : ['Алмас — звонил, не записан', 'Айгуль — что-то хотела...', 'Неизвестный клиент']
+        ).map((l, i) => (
           <p key={i} className="text-[10px] text-red-600 flex items-center gap-1.5 mb-1">
             <span className="size-3.5 rounded bg-red-200 flex items-center justify-center shrink-0 text-[8px] text-red-500 font-bold">?</span>
             {l}
@@ -680,11 +736,11 @@ function Problems() {
         ))}
       </div>
       <div className="rounded-xl bg-green-50 border border-green-100 p-3">
-        <p className="text-[9px] font-black uppercase text-green-600 mb-2 tracking-wider">С Gardina</p>
+        <p className="text-[9px] font-black uppercase text-green-600 mb-2 tracking-wider">{kz ? 'Gardina-мен' : 'С Gardina'}</p>
         {[
-          { init: 'АК', name: 'Айгуль К.', status: 'Замер', cls: 'bg-amber-100 text-amber-700' },
-          { init: 'ДО', name: 'Дамир О.', status: 'В пошиве', cls: 'bg-blue-100 text-blue-700' },
-          { init: 'АС', name: 'Аружан С.', status: 'Монтаж', cls: 'bg-orange-100 text-orange-700' },
+          { init: 'АК', name: kz ? 'Айгүл К.' : 'Айгуль К.', status: kz ? 'Өлшем' : 'Замер', cls: 'bg-amber-100 text-amber-700' },
+          { init: 'ДО', name: kz ? 'Дәмир О.' : 'Дамир О.', status: kz ? 'Тігілуде' : 'В пошиве', cls: 'bg-blue-100 text-blue-700' },
+          { init: 'АС', name: kz ? 'Аружан С.' : 'Аружан С.', status: kz ? 'Орнату' : 'Монтаж', cls: 'bg-orange-100 text-orange-700' },
         ].map((c) => (
           <div key={c.init} className="flex items-center gap-1.5 mb-1">
             <div className="size-5 rounded bg-primary/15 text-primary text-[8px] font-black flex items-center justify-center shrink-0">{c.init}</div>
@@ -698,26 +754,26 @@ function Problems() {
     // item2 — information scattered
     <div key="d2" className="mt-5 space-y-2">
       <div className="rounded-xl bg-red-50 border border-red-100 p-3">
-        <p className="text-[9px] font-black uppercase text-red-400 mb-2 tracking-wider">Сейчас</p>
+        <p className="text-[9px] font-black uppercase text-red-400 mb-2 tracking-wider">{kz ? 'Қазір' : 'Сейчас'}</p>
         <div className="flex gap-1.5">
           <div className="flex-1 bg-amber-50 border border-amber-200 rounded-lg p-2">
             <p className="text-[8px] font-bold text-amber-700 mb-0.5">WhatsApp</p>
-            <p className="text-[9px] text-amber-600">"2.4м × 3 окна"</p>
+            <p className="text-[9px] text-amber-600">{kz ? '"2.4м × 3 терезе"' : '"2.4м × 3 окна"'}</p>
           </div>
           <div className="flex-1 bg-blue-50 border border-blue-200 rounded-lg p-2">
-            <p className="text-[8px] font-bold text-blue-700 mb-0.5">Блокнот</p>
+            <p className="text-[8px] font-bold text-blue-700 mb-0.5">{kz ? 'Дәптер' : 'Блокнот'}</p>
             <p className="text-[9px] text-blue-600">"Портьера"</p>
           </div>
         </div>
       </div>
       <div className="rounded-xl bg-green-50 border border-green-100 p-3">
-        <p className="text-[9px] font-black uppercase text-green-600 mb-2 tracking-wider">С Gardina</p>
-        <div className="bg-white rounded-lg p-2.5 border border-green-100 shadow-sm">
-          <p className="text-[10px] font-bold text-text-main mb-1.5">Заказ #142 · Айгуль К.</p>
+        <p className="text-[9px] font-black uppercase text-green-600 mb-2 tracking-wider">{kz ? 'Gardina-мен' : 'С Gardina'}</p>
+        <div className="bg-card rounded-lg p-2.5 border border-green-100 shadow-sm">
+          <p className="text-[10px] font-bold text-text-main mb-1.5">{kz ? 'Тапсырыс' : 'Заказ'} #142 · {kz ? 'Айгүл К.' : 'Айгуль К.'}</p>
           <div className="flex gap-2 text-[9px] text-text-secondary">
             <span className="flex items-center gap-0.5"><Icon name="straighten" size={9} />2.4м × 3</span>
             <span className="flex items-center gap-0.5"><Icon name="texture" size={9} />Портьера</span>
-            <span className="flex items-center gap-0.5"><Icon name="photo_camera" size={9} />2 фото</span>
+            <span className="flex items-center gap-0.5"><Icon name="photo_camera" size={9} />{kz ? '2 сурет' : '2 фото'}</span>
           </div>
         </div>
       </div>
@@ -726,29 +782,29 @@ function Problems() {
     // item3 — payments unclear
     <div key="d3" className="mt-5 space-y-2">
       <div className="rounded-xl bg-red-50 border border-red-100 p-3">
-        <p className="text-[9px] font-black uppercase text-red-400 mb-2 tracking-wider">Сейчас</p>
+        <p className="text-[9px] font-black uppercase text-red-400 mb-2 tracking-wider">{kz ? 'Қазір' : 'Сейчас'}</p>
         <p className="text-[10px] text-red-600 flex items-center gap-1.5 mb-1">
-          <Icon name="help" size={11} className="text-red-400 shrink-0" />Кто оплатил полностью?
+          <Icon name="help" size={11} className="text-red-400 shrink-0" />{kz ? 'Кім толық төледі?' : 'Кто оплатил полностью?'}
         </p>
         <p className="text-[10px] text-red-500 flex items-center gap-1.5">
-          <Icon name="help" size={11} className="text-red-300 shrink-0" />Кто задолжал аванс?
+          <Icon name="help" size={11} className="text-red-300 shrink-0" />{kz ? 'Кімде аванс қарыз?' : 'Кто задолжал аванс?'}
         </p>
       </div>
       <div className="rounded-xl bg-green-50 border border-green-100 p-3">
-        <p className="text-[9px] font-black uppercase text-green-600 mb-2 tracking-wider">С Gardina</p>
+        <p className="text-[9px] font-black uppercase text-green-600 mb-2 tracking-wider">{kz ? 'Gardina-мен' : 'С Gardina'}</p>
         <div className="space-y-1">
           <div className="flex justify-between text-[10px]">
-            <span className="text-text-secondary">Итого</span><span className="font-bold text-text-main">75 000 ₸</span>
+            <span className="text-text-secondary">{kz ? 'Барлығы' : 'Итого'}</span><span className="font-bold text-text-main">75 000 ₸</span>
           </div>
           <div className="flex justify-between text-[10px]">
-            <span className="text-text-secondary">Оплачено</span>
+            <span className="text-text-secondary">{kz ? 'Төленді' : 'Оплачено'}</span>
             <span className="font-bold text-green-600 flex items-center gap-0.5"><Icon name="check" size={9} />45 000 ₸</span>
           </div>
           <div className="h-1 rounded-full bg-gray-200 overflow-hidden mt-1">
             <motion.div initial={{ width: 0 }} whileInView={{ width: '60%' }} transition={{ duration: 0.8, delay: 0.3 }} viewport={{ once: true }} className="h-full bg-green-500 rounded-full" />
           </div>
           <div className="flex justify-between text-[10px]">
-            <span className="text-text-secondary">Остаток</span><span className="font-bold text-amber-600">30 000 ₸</span>
+            <span className="text-text-secondary">{kz ? 'Қалдық' : 'Остаток'}</span><span className="font-bold text-amber-600">30 000 ₸</span>
           </div>
         </div>
       </div>
@@ -762,7 +818,7 @@ function Problems() {
   ];
 
   return (
-    <section id="problems" className="py-20 sm:py-28">
+    <section id="problems" className="relative py-20 sm:py-28 overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
         <SectionHeading
           badge={t('landing.problems.badge')}
@@ -782,10 +838,10 @@ function Problems() {
             <motion.article
               key={it.keyId}
               variants={fadeUp}
-              whileHover={{ y: -6, transition: { duration: 0.25 } }}
-              className="rounded-3xl bg-white p-7 border border-border-light/80 shadow-card hover:shadow-lg"
+              whileHover={{ y: -8, transition: { duration: 0.25 } }}
+              className="group relative rounded-3xl bg-surface-light p-7 border border-border-light/70 shadow-card hover:shadow-glow transition-shadow"
             >
-              <div className="size-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary mb-5">
+              <div className="size-13 rounded-2xl bg-gradient-to-br from-primary to-primary-light flex items-center justify-center text-white mb-5 shadow-lg shadow-primary/25 group-hover:scale-110 transition-transform">
                 <Icon name={it.icon} size={24} />
               </div>
               <div className="text-[10px] font-black uppercase tracking-wider text-red-500 mb-1.5">
@@ -807,7 +863,8 @@ function Problems() {
 }
 
 function PhoneDemo() {
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
+  const kz = lang === 'kz';
   const [active, setActive] = useState(0);
 
   const steps = [
@@ -821,7 +878,9 @@ function PhoneDemo() {
     return () => clearInterval(id);
   }, [steps.length]);
 
-  const PIPELINE = ['Заявка', 'Замер', 'КП', 'Пошив', 'Монтаж'];
+  const PIPELINE = kz
+    ? ['Өтінім', 'Өлшем', 'КП', 'Тігу', 'Орнату']
+    : ['Заявка', 'Замер', 'КП', 'Пошив', 'Монтаж'];
 
   const StatusBar = ({ time }) => (
     <div className="flex justify-between px-5 pt-3 pb-1">
@@ -860,15 +919,15 @@ function PhoneDemo() {
                       <StatusBar time="09:42" />
                       <div className="flex items-center gap-2 px-4 pb-3">
                         <Icon name="arrow_back_ios" size={14} className="text-primary" />
-                        <span className="text-sm font-bold text-text-main">Новая заявка</span>
-                        <span className="ml-auto text-[10px] bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-bold">Новый</span>
+                        <span className="text-sm font-bold text-text-main">{kz ? 'Жаңа өтінім' : 'Новая заявка'}</span>
+                        <span className="ml-auto text-[10px] bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-bold">{kz ? 'Жаңа' : 'Новый'}</span>
                       </div>
                       <div className="px-4 space-y-2.5">
                         <div className="bg-white rounded-2xl border border-border-light/80 p-3 shadow-sm">
                           <div className="flex items-center gap-3">
                             <div className="size-10 rounded-xl bg-primary/10 flex items-center justify-center text-sm font-black text-primary">АК</div>
                             <div>
-                              <p className="text-sm font-bold text-text-main">Айгуль К.</p>
+                              <p className="text-sm font-bold text-text-main">{kz ? 'Айгүл К.' : 'Айгуль К.'}</p>
                               <p className="text-xs text-text-secondary">+7 701 234 56 78</p>
                             </div>
                             <div className="size-8 rounded-xl bg-green-100 flex items-center justify-center ml-auto">
@@ -879,18 +938,18 @@ function PhoneDemo() {
                         <div className="bg-primary/5 rounded-xl p-3 border border-primary/10">
                           <p className="text-[11px] text-primary font-bold flex items-center gap-1.5">
                             <Icon name="input" size={12} />
-                            Источник: WhatsApp
+                            {kz ? 'Дереккөз: WhatsApp' : 'Источник: WhatsApp'}
                           </p>
-                          <p className="text-[11px] text-text-secondary mt-0.5">"Интересует портьера для гостиной"</p>
+                          <p className="text-[11px] text-text-secondary mt-0.5">{kz ? '"Қонақ бөлмеге портьера қызықтырады"' : '"Интересует портьера для гостиной"'}</p>
                         </div>
                         <div className="grid grid-cols-2 gap-2">
                           <button className="py-2.5 rounded-xl bg-primary text-white text-[11px] font-bold flex items-center justify-center gap-1">
                             <Icon name="calendar_month" size={12} />
-                            Назначить замер
+                            {kz ? 'Өлшемге жазу' : 'Назначить замер'}
                           </button>
                           <button className="py-2.5 rounded-xl bg-gray-100 text-text-secondary text-[11px] font-bold flex items-center justify-center gap-1">
                             <Icon name="call" size={12} />
-                            Позвонить
+                            {kz ? 'Қоңырау шалу' : 'Позвонить'}
                           </button>
                         </div>
                       </div>
@@ -903,13 +962,13 @@ function PhoneDemo() {
                       <div className="flex items-center gap-2 px-4 pb-2">
                         <Icon name="arrow_back_ios" size={14} className="text-primary" />
                         <div>
-                          <p className="text-sm font-bold text-text-main">Заказ #142</p>
-                          <p className="text-[10px] text-text-secondary">Айгуль К. · Замер</p>
+                          <p className="text-sm font-bold text-text-main">{kz ? 'Тапсырыс #142' : 'Заказ #142'}</p>
+                          <p className="text-[10px] text-text-secondary">{kz ? 'Айгүл К. · Өлшем' : 'Айгуль К. · Замер'}</p>
                         </div>
                       </div>
                       <div className="px-4 space-y-2.5">
                         <div className="bg-white rounded-2xl border border-border-light/80 p-3 shadow-sm">
-                          <p className="text-[10px] font-bold text-text-secondary mb-2">Этапы заказа</p>
+                          <p className="text-[10px] font-bold text-text-secondary mb-2">{kz ? 'Тапсырыс кезеңдері' : 'Этапы заказа'}</p>
                           <div className="flex items-center">
                             {PIPELINE.map((s, i) => (
                               <React.Fragment key={s}>
@@ -927,25 +986,25 @@ function PhoneDemo() {
                           </div>
                         </div>
                         <div className="bg-white rounded-2xl border border-border-light/80 p-3 shadow-sm">
-                          <p className="text-[10px] font-bold text-text-secondary mb-2">Замер</p>
+                          <p className="text-[10px] font-bold text-text-secondary mb-2">{kz ? 'Өлшем' : 'Замер'}</p>
                           <div className="space-y-1.5">
                             <div className="flex justify-between text-xs">
-                              <span className="text-text-secondary">Комната 1</span>
-                              <span className="font-bold text-text-main">2 окна</span>
+                              <span className="text-text-secondary">{kz ? 'Бөлме 1' : 'Комната 1'}</span>
+                              <span className="font-bold text-text-main">{kz ? '2 терезе' : '2 окна'}</span>
                             </div>
                             <div className="flex justify-between text-xs">
-                              <span className="text-text-secondary">Ткань</span>
-                              <span className="font-bold text-text-main">Портьера 12м</span>
+                              <span className="text-text-secondary">{kz ? 'Мата' : 'Ткань'}</span>
+                              <span className="font-bold text-text-main">{kz ? 'Портьера 12м' : 'Портьера 12м'}</span>
                             </div>
                           </div>
                         </div>
                         <div className="bg-blue-50 rounded-xl p-2.5 border border-blue-100 flex items-center gap-2">
                           <Icon name="photo_camera" size={14} className="text-blue-500 shrink-0" />
-                          <span className="text-[11px] text-blue-700 font-bold">3 фото прикреплено</span>
+                          <span className="text-[11px] text-blue-700 font-bold">{kz ? '3 сурет тіркелді' : '3 фото прикреплено'}</span>
                         </div>
                         <button className="w-full py-2.5 rounded-xl bg-primary text-white text-[11px] font-bold flex items-center justify-center gap-1.5">
                           <Icon name="description" size={13} />
-                          Отправить КП клиенту
+                          {kz ? 'Клиентке КП жіберу' : 'Отправить КП клиенту'}
                         </button>
                       </div>
                     </motion.div>
@@ -957,23 +1016,23 @@ function PhoneDemo() {
                       <div className="flex items-center gap-2 px-4 pb-2">
                         <Icon name="arrow_back_ios" size={14} className="text-primary" />
                         <div>
-                          <p className="text-sm font-bold text-text-main">Заказ #142</p>
-                          <p className="text-[10px] text-text-secondary">Айгуль К. · Финал</p>
+                          <p className="text-sm font-bold text-text-main">{kz ? 'Тапсырыс #142' : 'Заказ #142'}</p>
+                          <p className="text-[10px] text-text-secondary">{kz ? 'Айгүл К. · Қорытынды' : 'Айгуль К. · Финал'}</p>
                         </div>
                       </div>
                       <div className="px-4 space-y-2.5">
                         <div className="bg-green-50 rounded-xl p-2.5 border border-green-100 flex items-center gap-2">
                           <Icon name="check_circle" size={16} className="text-green-500 shrink-0" />
-                          <span className="text-[11px] text-green-700 font-bold">Пошив готов · монтаж назначен</span>
+                          <span className="text-[11px] text-green-700 font-bold">{kz ? 'Тігу дайын · орнату жоспарланды' : 'Пошив готов · монтаж назначен'}</span>
                         </div>
                         <div className="bg-white rounded-2xl border border-border-light/80 p-3.5 shadow-sm space-y-2">
-                          <p className="text-[10px] font-bold text-text-secondary">Оплата</p>
+                          <p className="text-[10px] font-bold text-text-secondary">{kz ? 'Төлем' : 'Оплата'}</p>
                           <div className="flex justify-between items-center">
-                            <span className="text-xs text-text-secondary">Итого</span>
+                            <span className="text-xs text-text-secondary">{kz ? 'Барлығы' : 'Итого'}</span>
                             <span className="text-sm font-black text-text-main">75 000 ₸</span>
                           </div>
                           <div className="flex justify-between items-center">
-                            <span className="text-xs text-text-secondary">Аванс оплачен</span>
+                            <span className="text-xs text-text-secondary">{kz ? 'Аванс төленді' : 'Аванс оплачен'}</span>
                             <span className="text-xs font-bold text-green-600 flex items-center gap-1">
                               <Icon name="check" size={10} />
                               45 000 ₸
@@ -981,7 +1040,7 @@ function PhoneDemo() {
                           </div>
                           <div className="h-px bg-border-light" />
                           <div className="flex justify-between items-center">
-                            <span className="text-xs font-bold text-text-main">Остаток</span>
+                            <span className="text-xs font-bold text-text-main">{kz ? 'Қалдық' : 'Остаток'}</span>
                             <span className="text-sm font-black text-amber-600">30 000 ₸</span>
                           </div>
                           <div className="h-1.5 rounded-full bg-gray-100 overflow-hidden">
@@ -995,7 +1054,7 @@ function PhoneDemo() {
                         </div>
                         <button className="w-full py-2.5 rounded-xl bg-green-500 text-white text-[11px] font-bold flex items-center justify-center gap-1.5">
                           <Icon name="chat" size={13} />
-                          Напомнить об остатке
+                          {kz ? 'Қалдық туралы еске салу' : 'Напомнить об остатке'}
                         </button>
                       </div>
                     </motion.div>
@@ -1015,7 +1074,7 @@ function PhoneDemo() {
                 viewport={{ once: true, amount: 0.05 }}
                 transition={{ duration: 0.4, delay: 0.1 + i * 0.1 }}
                 className={`w-full text-left p-5 rounded-2xl border transition-all ${
-                  active === i ? 'bg-primary text-white border-primary shadow-xl shadow-primary/25' : 'bg-white border-border-light/80 hover:border-primary/30'
+                  active === i ? 'bg-gradient-to-br from-primary-dark via-primary to-primary-light text-white border-primary/40 shadow-glow' : 'glass border-border-light/70 hover:border-primary/30 hover:shadow-card'
                 }`}
               >
                 <div className="flex items-baseline gap-3">
@@ -1038,7 +1097,8 @@ function PhoneDemo() {
 
 // ─── Dashboard Demo ──────────────────────────────────────────────────────────
 function DashboardDemo() {
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
+  const kz = lang === 'kz';
   const [activeTab, setActiveTab] = useState(0);
   const timerRef = useRef(null);
   const sectionRef = useRef(null);
@@ -1062,30 +1122,29 @@ function DashboardDemo() {
   ];
 
   const ORDERS = [
-    { id: 142, client: 'Айгуль К.', addr: 'ул. Абая, 45', fabric: 'Портьера 12м', status: 'В пошиве', sc: 'blue', pct: 75, paid: 45000, total: 75000 },
-    { id: 141, client: 'Дамир О.', addr: 'ул. Тауелсіздік, 8', fabric: 'Тюль 8м', status: 'Замер', sc: 'amber', pct: 20, paid: 10000, total: 32000 },
-    { id: 140, client: 'Аружан С.', addr: 'пр. Достык, 112', fabric: 'Рим. шторы', status: 'Монтаж', sc: 'orange', pct: 95, paid: 85000, total: 85000 },
-    { id: 139, client: 'Ерлан М.', addr: 'мкр. Алатау, 23', fabric: 'Затемняющие', status: 'Новый', sc: 'gray', pct: 5, paid: 0, total: 0 },
+    { id: 142, client: kz ? 'Айгүл К.' : 'Айгуль К.', addr: kz ? 'Абай к-сі, 45' : 'ул. Абая, 45', fabric: kz ? 'Портьера 12м' : 'Портьера 12м', status: kz ? 'Тігілуде' : 'В пошиве', sc: 'blue', pct: 75, paid: 45000, total: 75000 },
+    { id: 141, client: kz ? 'Дәмир О.' : 'Дамир О.', addr: kz ? 'Тәуелсіздік к-сі, 8' : 'ул. Тауелсіздік, 8', fabric: kz ? 'Түл 8м' : 'Тюль 8м', status: kz ? 'Өлшем' : 'Замер', sc: 'amber', pct: 20, paid: 10000, total: 32000 },
+    { id: 140, client: kz ? 'Аружан С.' : 'Аружан С.', addr: kz ? 'Достық д-лы, 112' : 'пр. Достык, 112', fabric: kz ? 'Рим. перде' : 'Рим. шторы', status: kz ? 'Орнату' : 'Монтаж', sc: 'orange', pct: 95, paid: 85000, total: 85000 },
+    { id: 139, client: kz ? 'Ерлан М.' : 'Ерлан М.', addr: kz ? 'Алатау ы-ны, 23' : 'мкр. Алатау, 23', fabric: kz ? 'Қараңғылатқыш' : 'Затемняющие', status: kz ? 'Жаңа' : 'Новый', sc: 'gray', pct: 5, paid: 0, total: 0 },
   ];
 
   const CLIENTS = [
-    { initials: 'АК', name: 'Айгуль К.', city: 'Алматы', orders: 3, last: '2 дня назад', tag: 'Постоянный', tc: 'green' },
-    { initials: 'ДО', name: 'Дамир О.', city: 'Астана', orders: 1, last: 'Сегодня', tag: 'Новый', tc: 'gray' },
-    { initials: 'АС', name: 'Аружан С.', city: 'Алматы', orders: 5, last: 'Неделю назад', tag: 'VIP', tc: 'yellow' },
-    { initials: 'ЕМ', name: 'Ерлан М.', city: 'Шымкент', orders: 2, last: '3 дня назад', tag: 'Активен', tc: 'blue' },
+    { initials: 'АК', name: kz ? 'Айгүл К.' : 'Айгуль К.', city: kz ? 'Алматы' : 'Алматы', orders: 3, last: kz ? '2 күн бұрын' : '2 дня назад', tag: kz ? 'Тұрақты' : 'Постоянный', tc: 'green' },
+    { initials: 'ДО', name: kz ? 'Дәмир О.' : 'Дамир О.', city: kz ? 'Астана' : 'Астана', orders: 1, last: kz ? 'Бүгін' : 'Сегодня', tag: kz ? 'Жаңа' : 'Новый', tc: 'gray' },
+    { initials: 'АС', name: kz ? 'Аружан С.' : 'Аружан С.', city: kz ? 'Алматы' : 'Алматы', orders: 5, last: kz ? 'Бір апта бұрын' : 'Неделю назад', tag: 'VIP', tc: 'yellow' },
+    { initials: 'ЕМ', name: kz ? 'Ерлан М.' : 'Ерлан М.', city: kz ? 'Шымкент' : 'Шымкент', orders: 2, last: kz ? '3 күн бұрын' : '3 дня назад', tag: kz ? 'Белсенді' : 'Активен', tc: 'blue' },
   ];
 
-  const BARS = [
-    { month: 'Янв', val: 420 }, { month: 'Фев', val: 580 }, { month: 'Мар', val: 510 },
-    { month: 'Апр', val: 720 }, { month: 'Май', val: 650 }, { month: 'Июн', val: 890 },
-    { month: 'Июл', val: 1050 },
-  ];
+  const BARS = (kz
+    ? ['Қаң', 'Ақп', 'Нау', 'Сәу', 'Мам', 'Мау', 'Шіл']
+    : ['Янв', 'Фев', 'Мар', 'Апр', 'Май', 'Июн', 'Июл']
+  ).map((month, i) => ({ month, val: [420, 580, 510, 720, 650, 890, 1050][i] }));
 
   const STATS = [
-    { icon: 'payments', label: 'Выручка (июль)', value: '1 050 000 ₸', up: true },
-    { icon: 'receipt_long', label: 'Заказов', value: '47', up: true },
-    { icon: 'trending_up', label: 'Средний чек', value: '22 340 ₸', up: false },
-    { icon: 'percent', label: 'Конверсия', value: '68%', up: true },
+    { icon: 'payments', label: kz ? 'Түсім (шілде)' : 'Выручка (июль)', value: '1 050 000 ₸', up: true },
+    { icon: 'receipt_long', label: kz ? 'Тапсырыстар' : 'Заказов', value: '47', up: true },
+    { icon: 'trending_up', label: kz ? 'Орташа чек' : 'Средний чек', value: '22 340 ₸', up: false },
+    { icon: 'percent', label: kz ? 'Конверсия' : 'Конверсия', value: '68%', up: true },
   ];
 
   const statusCls = {
@@ -1100,12 +1159,12 @@ function DashboardDemo() {
   };
 
   const sideNav = [
-    { icon: 'receipt_long', label: 'Заказы', idx: 0 },
-    { icon: 'people', label: 'Клиенты', idx: 1 },
-    { icon: 'straighten', label: 'Замеры', idx: -1 },
-    { icon: 'texture', label: 'Ткани', idx: -1 },
-    { icon: 'bar_chart', label: 'Аналитика', idx: 2 },
-    { icon: 'settings', label: 'Настройки', idx: -1 },
+    { icon: 'receipt_long', label: kz ? 'Тапсырыстар' : 'Заказы', idx: 0 },
+    { icon: 'people', label: kz ? 'Клиенттер' : 'Клиенты', idx: 1 },
+    { icon: 'straighten', label: kz ? 'Өлшемдер' : 'Замеры', idx: -1 },
+    { icon: 'texture', label: kz ? 'Маталар' : 'Ткани', idx: -1 },
+    { icon: 'bar_chart', label: kz ? 'Аналитика' : 'Аналитика', idx: 2 },
+    { icon: 'settings', label: kz ? 'Баптаулар' : 'Настройки', idx: -1 },
   ];
 
   return (
@@ -1128,10 +1187,10 @@ function DashboardDemo() {
             <button
               key={i}
               onClick={() => { setActiveTab(i); resetTimer(); }}
-              className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold transition-all ${
+              className={`flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-bold transition-all ${
                 activeTab === i
-                  ? 'bg-primary text-white shadow-lg shadow-primary/25'
-                  : 'bg-white border border-border-light text-text-secondary hover:border-primary/30 hover:text-primary'
+                  ? 'bg-gradient-to-r from-primary to-primary-light text-white shadow-lg shadow-primary/30'
+                  : 'glass border border-border-light text-text-secondary hover:border-primary/30 hover:text-primary'
               }`}
             >
               <Icon name={tab.icon} size={16} />
@@ -1158,7 +1217,7 @@ function DashboardDemo() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.05 }}
           transition={{ duration: 0.6 }}
-          className="rounded-2xl overflow-hidden shadow-2xl shadow-primary/10 border border-border-light/60 ring-1 ring-black/5"
+          className="rounded-3xl overflow-hidden shadow-glow border border-border-light/60 ring-1 ring-black/5"
         >
           {/* Browser chrome */}
           <div className="bg-gray-100 px-4 py-2.5 flex items-center gap-3 border-b border-gray-200">
@@ -1178,7 +1237,7 @@ function DashboardDemo() {
             {/* Sidebar */}
             <div className="w-36 bg-primary-dark flex flex-col py-4 shrink-0">
               <div className="px-4 mb-5">
-                <span className="text-white font-black text-base tracking-tight">🌿 Gardina</span>
+                <span className="text-white font-black text-base tracking-tight">Gardina</span>
               </div>
               {sideNav.map((item) => (
                 <div
@@ -1204,7 +1263,7 @@ function DashboardDemo() {
                 <div className="flex items-center gap-2 bg-gray-50 border border-border-light rounded-lg px-3 py-1.5 w-56">
                   <Icon name="search" size={14} className="text-gray-400" />
                   <span className="text-xs text-gray-400">
-                    {activeTab === 0 ? 'Поиск заказов...' : activeTab === 1 ? 'Поиск клиентов...' : 'Аналитика за июль'}
+                    {activeTab === 0 ? (kz ? 'Тапсырыстарды іздеу...' : 'Поиск заказов...') : activeTab === 1 ? (kz ? 'Клиенттерді іздеу...' : 'Поиск клиентов...') : (kz ? 'Шілде аналитикасы' : 'Аналитика за июль')}
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
@@ -1214,7 +1273,7 @@ function DashboardDemo() {
                   </div>
                   <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary text-white text-xs font-bold">
                     <Icon name="add" size={14} />
-                    {activeTab === 0 ? 'Новый заказ' : activeTab === 1 ? 'Добавить' : 'Экспорт'}
+                    {activeTab === 0 ? (kz ? 'Жаңа тапсырыс' : 'Новый заказ') : activeTab === 1 ? (kz ? 'Қосу' : 'Добавить') : (kz ? 'Экспорт' : 'Экспорт')}
                   </button>
                 </div>
               </div>
@@ -1269,7 +1328,7 @@ function DashboardDemo() {
                   {activeTab === 2 && (
                     <motion.div key="analytics" initial={{ opacity: 0, x: -16 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 16 }} transition={{ duration: 0.25 }} className="absolute inset-0 overflow-y-auto p-4">
                       <div className="bg-white rounded-xl border border-border-light/80 p-4 shadow-sm mb-3">
-                        <p className="text-xs font-bold text-text-secondary mb-4">Выручка, тыс. ₸ · 2026</p>
+                        <p className="text-xs font-bold text-text-secondary mb-4">{kz ? 'Түсім, мың ₸ · 2026' : 'Выручка, тыс. ₸ · 2026'}</p>
                         <div className="flex items-end gap-3 h-28">
                           {BARS.map((b, i) => (
                             <div key={b.month} className="flex-1 flex flex-col items-center gap-1">
@@ -1338,9 +1397,9 @@ function Features() {
     // f2 — Measurements
     <div className="mt-4">
       <div className="grid grid-cols-3 gap-1.5 mb-3">
-        {['🪟', '📐', '🖼️'].map((em, i) => (
+        {['straighten', 'photo_camera', 'texture'].map((ic, i) => (
           <motion.div key={i} initial={{ opacity: 0, scale: 0.8 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }} transition={{ delay: i * 0.1 }}
-            className="aspect-square bg-background-light rounded-xl flex items-center justify-center text-xl">{em}</motion.div>
+            className="aspect-square bg-background-light rounded-xl flex items-center justify-center text-primary"><Icon name={ic} size={22} /></motion.div>
         ))}
       </div>
       <div className="bg-background-light rounded-xl px-3 py-2 flex items-center justify-between">
@@ -1462,14 +1521,14 @@ function Features() {
             <motion.div
               key={f.keyId}
               variants={fadeUp}
-              whileHover={{ y: -4, transition: { duration: 0.2 } }}
-              className="rounded-2xl bg-white p-6 border border-border-light/80 shadow-card hover:shadow-lg transition-shadow flex flex-col"
+              whileHover={{ y: -6, transition: { duration: 0.2 } }}
+              className="group rounded-3xl bg-surface-light p-6 border border-border-light/70 shadow-card hover:shadow-glow hover:border-primary/20 transition-all flex flex-col"
             >
-              <div className="flex items-center gap-3 mb-1">
-                <div className="size-9 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center text-white shrink-0">
-                  <Icon name={f.icon} size={18} />
+              <div className="flex items-center gap-3 mb-1.5">
+                <div className="size-11 rounded-2xl bg-gradient-to-br from-primary via-primary-light to-accent flex items-center justify-center text-white shrink-0 shadow-lg shadow-primary/25 group-hover:scale-110 transition-transform">
+                  <Icon name={f.icon} size={20} />
                 </div>
-                <h3 className="font-bold text-text-main">{t(`landing.features.${f.keyId}Title`)}</h3>
+                <h3 className="font-display font-bold text-text-main text-[1.05rem]">{t(`landing.features.${f.keyId}Title`)}</h3>
               </div>
               <p className="text-xs text-text-secondary leading-relaxed">{t(`landing.features.${f.keyId}Body`)}</p>
               {featureDemos[idx]}
@@ -1512,14 +1571,14 @@ function Modules() {
             <motion.div
               key={m.keyId}
               variants={fadeUp}
-              whileHover={{ scale: 1.02, transition: { duration: 0.2 } }}
-              className="rounded-2xl bg-white p-6 border border-border-light/80 flex gap-4 items-start"
+              whileHover={{ y: -4, transition: { duration: 0.2 } }}
+              className="group rounded-3xl bg-surface-light p-6 border border-border-light/70 shadow-card hover:shadow-glow transition-all flex gap-4 items-start"
             >
-              <div className="size-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary shrink-0">
-                <Icon name={m.icon} size={20} />
+              <div className="size-12 rounded-2xl bg-primary/10 text-primary flex items-center justify-center shrink-0 group-hover:bg-gradient-to-br group-hover:from-primary group-hover:to-primary-light group-hover:text-white group-hover:shadow-lg group-hover:shadow-primary/25 transition-all">
+                <Icon name={m.icon} size={22} />
               </div>
               <div>
-                <h3 className="font-bold text-text-main mb-1">{t(`landing.modules.${m.keyId}Title`)}</h3>
+                <h3 className="font-display font-bold text-text-main mb-1">{t(`landing.modules.${m.keyId}Title`)}</h3>
                 <p className="text-sm text-text-secondary leading-relaxed">{t(`landing.modules.${m.keyId}Body`)}</p>
               </div>
             </motion.div>
@@ -1565,17 +1624,17 @@ function Comparison() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.05 }}
           transition={{ duration: 0.5 }}
-          className="rounded-3xl bg-white border border-border-light/70 overflow-hidden shadow-card"
+          className="rounded-3xl glass border border-border-light/70 overflow-hidden shadow-glow"
         >
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="border-b border-border-light/70 bg-background-light">
+                <tr className="border-b border-border-light/70 bg-background-light/60">
                   <th className="text-left px-5 py-4 text-xs font-black uppercase tracking-wider text-text-secondary">
                     {t('landing.compare.colFeature')}
                   </th>
-                  <th className="px-5 py-4 text-xs font-black uppercase tracking-wider">
-                    <span className="text-primary">Gardina</span>
+                  <th className="px-5 py-4 text-xs font-black uppercase tracking-wider bg-gradient-to-b from-primary/12 to-transparent">
+                    <span className="text-gradient font-display text-sm">Gardina</span>
                   </th>
                   <th className="px-5 py-4 text-xs font-black uppercase tracking-wider text-text-secondary">AmoCRM</th>
                   <th className="px-5 py-4 text-xs font-black uppercase tracking-wider text-text-secondary">Битрикс24</th>
@@ -1636,7 +1695,7 @@ function Testimonials() {
         {doubled.map((tItem, i) => (
           <article
             key={i}
-            className="shrink-0 w-[320px] sm:w-[380px] rounded-2xl bg-white p-6 border border-border-light/70 shadow-card"
+            className="shrink-0 w-[320px] sm:w-[380px] rounded-3xl bg-surface-light p-6 border border-border-light/70 shadow-card"
           >
             <div className="flex items-center gap-1 mb-3 text-amber-400">
               {[...Array(5)].map((_, k) => (
@@ -1756,19 +1815,19 @@ function Pricing() {
             <motion.article
               key={p.keyId}
               variants={fadeUp}
-              whileHover={{ y: -6, transition: { duration: 0.2 } }}
+              whileHover={{ y: -8, transition: { duration: 0.2 } }}
               className={`relative rounded-3xl p-7 border ${
                 p.highlighted
-                  ? 'bg-gradient-to-br from-primary to-primary-light text-white border-primary shadow-2xl shadow-primary/30 md:-mt-3 md:mb-3'
-                  : 'bg-white border-border-light/80 shadow-card'
+                  ? 'bg-gradient-to-br from-primary-dark via-primary to-primary-light text-white border-primary/40 shadow-glow md:-mt-4 md:mb-4 overflow-hidden'
+                  : 'glass border-border-light/70 shadow-card hover:shadow-glow transition-shadow'
               }`}
             >
               {p.highlighted && (
-                <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-accent text-primary-dark text-[10px] font-black uppercase tracking-wider">
+                <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-10 px-3.5 py-1 rounded-full bg-gradient-to-r from-accent to-accent-2 text-primary-dark text-[10px] font-black uppercase tracking-wider shadow-lg">
                   {t('landing.pricing.recommended')}
                 </div>
               )}
-              <h3 className={`text-xl font-bold ${p.highlighted ? 'text-white' : 'text-text-main'}`}>
+              <h3 className={`font-display text-xl font-bold ${p.highlighted ? 'text-white' : 'text-text-main'}`}>
                 {t(`landing.pricing.plans.${p.keyId}.name`)}
               </h3>
               <p className={`text-sm mt-1 ${p.highlighted ? 'text-white/80' : 'text-text-secondary'}`}>
@@ -1832,10 +1891,10 @@ function Pricing() {
 
               <button
                 onClick={openBooking}
-                className={`mt-7 block w-full text-center py-3 rounded-xl font-bold text-sm transition-all ${
+                className={`mt-7 block w-full text-center py-3.5 rounded-2xl font-bold text-sm transition-all active:scale-[0.98] ${
                   p.highlighted
-                    ? 'bg-white text-primary hover:bg-accent'
-                    : 'border-2 border-primary text-primary hover:bg-primary hover:text-white'
+                    ? 'bg-white text-primary hover:bg-accent shadow-lg'
+                    : 'bg-gradient-to-r from-primary to-primary-light text-white hover:shadow-glow shadow-lg shadow-primary/25'
                 }`}
               >
                 {t(`landing.pricing.plans.${p.keyId}.cta`)}
@@ -1874,17 +1933,17 @@ function FAQ() {
             <motion.div
               key={i}
               variants={fadeUp}
-              className="rounded-2xl bg-white border border-border-light/70 overflow-hidden"
+              className={`rounded-2xl glass border overflow-hidden transition-colors ${open === i ? 'border-primary/30 shadow-card' : 'border-border-light/70'}`}
             >
               <button
                 onClick={() => setOpen(open === i ? -1 : i)}
-                className="w-full flex items-center justify-between gap-4 px-5 sm:px-6 py-5 text-left hover:bg-background-light transition-colors"
+                className="w-full flex items-center justify-between gap-4 px-5 sm:px-6 py-5 text-left hover:bg-primary/5 transition-colors"
               >
-                <span className="font-bold text-text-main">{t(`landing.faq.items.${i}.q`)}</span>
+                <span className="font-display font-bold text-text-main">{t(`landing.faq.items.${i}.q`)}</span>
                 <motion.span
                   animate={{ rotate: open === i ? 45 : 0 }}
                   transition={{ duration: 0.2 }}
-                  className={`size-8 rounded-full flex items-center justify-center ${open === i ? 'bg-primary text-white' : 'bg-primary/10 text-primary'}`}
+                  className={`size-8 shrink-0 rounded-full flex items-center justify-center transition-colors ${open === i ? 'bg-gradient-to-br from-primary to-primary-light text-white shadow-lg shadow-primary/25' : 'bg-primary/10 text-primary'}`}
                 >
                   <Icon name="add" size={18} />
                 </motion.span>
@@ -2011,8 +2070,9 @@ function CTA() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.05 }}
           transition={{ duration: 0.5 }}
-          className="relative rounded-3xl bg-gradient-to-br from-primary-dark via-primary to-primary-light p-10 sm:p-14 text-center overflow-hidden"
+          className="relative rounded-[2.5rem] bg-gradient-to-br from-primary-dark via-primary to-primary-light p-10 sm:p-16 text-center overflow-hidden shadow-glow"
         >
+          <div className="absolute inset-0 bg-grid opacity-[0.15] [mask-image:radial-gradient(ellipse_at_center,#000,transparent_75%)]" />
           <motion.div
             animate={{ rotate: 360 }}
             transition={{ duration: 60, repeat: Infinity, ease: 'linear' }}
@@ -2025,7 +2085,7 @@ function CTA() {
           />
 
           <div className="relative">
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-white tracking-tight">
+            <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white tracking-tight">
               {t('landing.cta.title')}
             </h2>
             <p className="mt-4 text-base sm:text-lg text-white/85 leading-relaxed max-w-xl mx-auto">
@@ -2035,7 +2095,7 @@ function CTA() {
             <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center">
               <button
                 onClick={openBooking}
-                className="inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl bg-white text-primary font-bold hover:bg-accent transition-all"
+                className="inline-flex items-center justify-center gap-2 px-7 py-4 rounded-2xl bg-white text-primary font-bold hover:bg-accent shadow-lg transition-all active:scale-[0.98]"
               >
                 <Icon name="edit_note" size={20} />
                 {t('landing.cta.primary')}
@@ -2044,7 +2104,7 @@ function CTA() {
                 href="https://wa.me/77079429827"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl border-2 border-white/30 text-white font-bold hover:bg-white/10 transition-all"
+                className="inline-flex items-center justify-center gap-2 px-7 py-4 rounded-2xl glass-dark text-white font-bold hover:bg-white/10 transition-all active:scale-[0.98]"
               >
                 <Icon name="chat" size={20} />
                 {t('landing.cta.whatsapp')}
@@ -2067,8 +2127,10 @@ function CTA() {
 function LandingFooter() {
   const { t } = useI18n();
   return (
-    <footer className="bg-primary-dark text-white/85 py-14">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
+    <footer className="relative bg-primary-dark text-white/85 py-16 overflow-hidden">
+      <div className="absolute inset-0 bg-grid opacity-[0.08]" />
+      <div className="pointer-events-none absolute -top-24 left-1/3 size-96 rounded-full bg-primary/40 blur-[120px]" />
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
         <div>
           <img src="/images/logo-header.png" alt="Gardina" className="h-30 w-auto mb-4 brightness-0 invert" />
           <p className="text-sm leading-relaxed text-white/70">{t('landing.footer.description')}</p>
@@ -2102,7 +2164,7 @@ function LandingFooter() {
           </ul>
         </div>
       </div>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 mt-10 pt-6 border-t border-white/10 flex flex-col sm:flex-row justify-between text-xs text-white/60 gap-2">
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 mt-10 pt-6 border-t border-white/10 flex flex-col sm:flex-row justify-between text-xs text-white/60 gap-2">
         <span>{t('landing.footer.copy')}</span>
         <span>{t('landing.footer.by')}<a href="https://aqulas.me" className="hover:text-white">Aqulas</a></span>
       </div>

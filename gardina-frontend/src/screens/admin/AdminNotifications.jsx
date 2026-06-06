@@ -92,7 +92,7 @@ const AdminNotifications = () => {
 
       const res = await api.post('/notifications/admin/broadcast', payload);
       const { sent, pushSent } = res.data.data;
-      showToast(`✓ ${sent} пайдаланушыға жіберілді${pushSent ? `, push: ${pushSent}` : ''}`);
+      showToast(`${sent} пайдаланушыға жіберілді${pushSent ? `, push: ${pushSent}` : ''}`);
       setForm({ title: '', body: '', type: 'info', targetRole: '', targetUserId: '', sendPush: true, actionUrl: '' });
       loadStats();
     } catch (e) {
@@ -121,9 +121,9 @@ const AdminNotifications = () => {
   return (
     <div className="bg-background-light min-h-screen pb-28">
       {/* Header */}
-      <header className="sticky top-0 z-30 bg-white/80 backdrop-blur-md border-b border-gray-100">
+      <header className="sticky top-0 z-30 bg-card/80 backdrop-blur-md border-b border-border">
         <div className="flex items-center gap-3 px-4 py-4">
-          <button onClick={() => navigate(-1)} className="p-2 -ml-2 rounded-full hover:bg-gray-100">
+          <button onClick={() => navigate(-1)} className="p-2 -ml-2 rounded-full hover:bg-muted">
             <Icon name="arrow_back" size={22} />
           </button>
           <h1 className="text-xl font-bold flex-1">{t('adminNotifications.title')}</h1>
@@ -145,7 +145,7 @@ const AdminNotifications = () => {
               key={t.key}
               onClick={() => setTab(t.key)}
               className={`shrink-0 whitespace-nowrap flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-semibold transition-colors ${
-                tab === t.key ? 'bg-primary text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                tab === t.key ? 'bg-primary text-white' : 'bg-muted text-muted-foreground hover:bg-muted'
               }`}
             >
               <Icon name={t.icon} size={16} />
@@ -171,18 +171,18 @@ const AdminNotifications = () => {
             {/* LEFT: compose form */}
             <div className="space-y-4">
               {/* Recipient */}
-              <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 space-y-4">
-                <h2 className="font-bold text-gray-800 flex items-center gap-2">
+              <div className="bg-card rounded-2xl shadow-sm border border-border p-4 space-y-4">
+                <h2 className="font-bold text-foreground flex items-center gap-2">
                   <Icon name="group" className="text-primary" size={20} />
                   {t('adminNotifications.sections.recipients')}
                 </h2>
 
                 <div>
-                  <label className="text-sm font-semibold text-gray-700 block mb-1.5">{t('adminNotifications.sections.recipients')}</label>
+                  <label className="text-sm font-semibold text-foreground block mb-1.5">{t('adminNotifications.sections.recipients')}</label>
                   <select
                     value={form.targetRole}
                     onChange={e => setForm(f => ({ ...f, targetRole: e.target.value, targetUserId: '' }))}
-                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none bg-white"
+                    className="w-full px-4 py-3 border border-border rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none bg-card"
                   >
                     {ROLE_VALUES.map(value => (
                       <option key={value || 'all'} value={value}>
@@ -193,11 +193,11 @@ const AdminNotifications = () => {
                 </div>
 
                 <div>
-                  <label className="text-sm font-semibold text-gray-700 block mb-1.5">{t('adminNotifications.fields.specificUser', 'Конкретный сотрудник')}</label>
+                  <label className="text-sm font-semibold text-foreground block mb-1.5">{t('adminNotifications.fields.specificUser', 'Конкретный сотрудник')}</label>
                   <select
                     value={form.targetUserId}
                     onChange={e => setForm(f => ({ ...f, targetUserId: e.target.value, targetRole: '' }))}
-                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none bg-white"
+                    className="w-full px-4 py-3 border border-border rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none bg-card"
                   >
                     <option value="">{t('adminNotifications.fields.anyUser', 'Не выбран')}</option>
                     {users.map(u => (
@@ -208,8 +208,8 @@ const AdminNotifications = () => {
               </div>
 
               {/* Message */}
-              <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 space-y-4">
-                <h2 className="font-bold text-gray-800 flex items-center gap-2">
+              <div className="bg-card rounded-2xl shadow-sm border border-border p-4 space-y-4">
+                <h2 className="font-bold text-foreground flex items-center gap-2">
                   <Icon name="edit" className="text-primary" size={20} />
                   {t('adminNotifications.sections.message')}
                 </h2>
@@ -220,71 +220,71 @@ const AdminNotifications = () => {
                       key={key}
                       onClick={() => setForm(f => ({ ...f, type: key }))}
                       className={`flex flex-col items-center gap-1 py-2 px-1 rounded-xl border-2 transition-all ${
-                        form.type === key ? 'border-primary bg-primary/5' : 'border-gray-100 hover:border-gray-200'
+                        form.type === key ? 'border-primary bg-primary/5' : 'border-border hover:border-border'
                       }`}
                     >
-                      <Icon name={cfg.icon} size={18} className={form.type === key ? 'text-primary' : 'text-gray-400'} />
+                      <Icon name={cfg.icon} size={18} className={form.type === key ? 'text-primary' : 'text-muted-foreground'} />
                       <span className="text-[10px] font-medium leading-tight text-center break-words">{t(`adminNotifications.types.${key}`)}</span>
                     </button>
                   ))}
                 </div>
 
                 <div>
-                  <label className="text-sm font-semibold text-gray-700 block mb-1.5">{t('adminNotifications.fields.title')} *</label>
+                  <label className="text-sm font-semibold text-foreground block mb-1.5">{t('adminNotifications.fields.title')} *</label>
                   <input
                     type="text"
                     value={form.title}
                     onChange={e => setForm(f => ({ ...f, title: e.target.value }))}
                     placeholder={t('adminNotifications.fields.titlePlaceholder')}
-                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none"
+                    className="w-full px-4 py-3 border border-border rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none"
                   />
                 </div>
 
                 <div>
-                  <label className="text-sm font-semibold text-gray-700 block mb-1.5">{t('adminNotifications.fields.body')} *</label>
+                  <label className="text-sm font-semibold text-foreground block mb-1.5">{t('adminNotifications.fields.body')} *</label>
                   <textarea
                     value={form.body}
                     onChange={e => setForm(f => ({ ...f, body: e.target.value }))}
                     placeholder={t('adminNotifications.fields.bodyPlaceholder')}
                     rows={4}
-                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none resize-none"
+                    className="w-full px-4 py-3 border border-border rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none resize-none"
                   />
                 </div>
 
                 <div>
-                  <label className="text-sm font-semibold text-gray-700 block mb-1.5">{t('adminNotifications.fields.actionUrl')}</label>
+                  <label className="text-sm font-semibold text-foreground block mb-1.5">{t('adminNotifications.fields.actionUrl')}</label>
                   <input
                     type="text"
                     value={form.actionUrl}
                     onChange={e => setForm(f => ({ ...f, actionUrl: e.target.value }))}
                     placeholder="/manager/orders"
-                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none"
+                    className="w-full px-4 py-3 border border-border rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none"
                   />
                 </div>
 
-                <div className="flex items-center justify-between py-2 border-t border-gray-100">
+                <div className="flex items-center justify-between py-2 border-t border-border">
                   <div className="flex items-center gap-2">
-                    <Icon name="notifications" size={20} className="text-gray-500" />
+                    <Icon name="notifications" size={20} className="text-muted-foreground" />
                     <p className="font-medium text-sm">{t('adminNotifications.fields.sendPush')}</p>
                   </div>
                   <button
                     onClick={() => setForm(f => ({ ...f, sendPush: !f.sendPush }))}
                     className={`relative w-12 h-6 rounded-full transition-colors duration-300 ${form.sendPush ? 'bg-primary' : 'bg-gray-300'}`}
                   >
-                    <span className={`absolute top-0.5 left-0.5 size-5 bg-white rounded-full shadow transition-transform duration-300 ${form.sendPush ? 'translate-x-6' : 'translate-x-0'}`} />
+                    <span className={`absolute top-0.5 left-0.5 size-5 bg-card rounded-full shadow transition-transform duration-300 ${form.sendPush ? 'translate-x-6' : 'translate-x-0'}`} />
                   </button>
                 </div>
               </div>
 
               {/* Mobile-only preview */}
               {(form.title || form.body) && (
-                <div className={`lg:hidden rounded-2xl p-4 border-2 ${TYPE_STYLES[form.type]?.color?.split(' ')[0] || 'bg-gray-50'} border-gray-100`}>
-                  <p className="text-xs font-bold uppercase tracking-wide text-gray-400 mb-2">{t('adminNotifications.sections.preview')}</p>
+                <div className={`lg:hidden rounded-2xl p-4 border-2 ${TYPE_STYLES[form.type]?.color?.split(' ')[0] || 'bg-muted'} border-border`}>
+                  <p className="text-xs font-bold uppercase tracking-wide text-muted-foreground mb-2">{t('adminNotifications.sections.preview')}</p>
                   <div className="flex items-start gap-3">
                     <Icon name={TYPE_STYLES[form.type]?.icon || 'notifications'} size={20} className={TYPE_STYLES[form.type]?.color?.split(' ')[1] || ''} />
                     <div>
-                      <p className="font-bold text-gray-900">{form.title || '—'}</p>
-                      <p className="text-sm text-gray-600 mt-0.5">{form.body || '—'}</p>
+                      <p className="font-bold text-foreground">{form.title || '—'}</p>
+                      <p className="text-sm text-muted-foreground mt-0.5">{form.body || '—'}</p>
                     </div>
                   </div>
                 </div>
@@ -304,21 +304,21 @@ const AdminNotifications = () => {
             {/* RIGHT: preview + stats (desktop only) */}
             <div className="hidden lg:flex flex-col gap-4 sticky top-20">
               {/* Live preview */}
-              <div className={`rounded-2xl p-4 border-2 ${TYPE_STYLES[form.type]?.color?.split(' ')[0] || 'bg-gray-50'} border-gray-100`}>
-                <p className="text-xs font-bold uppercase tracking-wide text-gray-400 mb-3">{t('adminNotifications.sections.preview')}</p>
+              <div className={`rounded-2xl p-4 border-2 ${TYPE_STYLES[form.type]?.color?.split(' ')[0] || 'bg-muted'} border-border`}>
+                <p className="text-xs font-bold uppercase tracking-wide text-muted-foreground mb-3">{t('adminNotifications.sections.preview')}</p>
                 <div className="flex items-start gap-3">
-                  <div className={`size-9 rounded-full ${TYPE_STYLES[form.type]?.color?.split(' ')[0] || 'bg-gray-100'} flex items-center justify-center flex-shrink-0`}>
-                    <Icon name={TYPE_STYLES[form.type]?.icon || 'notifications'} size={18} className={TYPE_STYLES[form.type]?.color?.split(' ')[1] || 'text-gray-400'} />
+                  <div className={`size-9 rounded-full ${TYPE_STYLES[form.type]?.color?.split(' ')[0] || 'bg-muted'} flex items-center justify-center flex-shrink-0`}>
+                    <Icon name={TYPE_STYLES[form.type]?.icon || 'notifications'} size={18} className={TYPE_STYLES[form.type]?.color?.split(' ')[1] || 'text-muted-foreground'} />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="font-bold text-gray-900 text-sm">{form.title || <span className="text-gray-300">Тақырып...</span>}</p>
-                    <p className="text-sm text-gray-600 mt-0.5 line-clamp-3">{form.body || <span className="text-gray-300">Мәтін...</span>}</p>
+                    <p className="font-bold text-foreground text-sm">{form.title || <span className="text-muted-foreground">Тақырып...</span>}</p>
+                    <p className="text-sm text-muted-foreground mt-0.5 line-clamp-3">{form.body || <span className="text-muted-foreground">Мәтін...</span>}</p>
                     {form.actionUrl && (
                       <p className="text-xs text-primary mt-1 font-medium">{form.actionUrl}</p>
                     )}
                   </div>
                 </div>
-                <div className="mt-3 pt-3 border-t border-black/5 flex items-center gap-2 text-xs text-gray-400">
+                <div className="mt-3 pt-3 border-t border-black/5 flex items-center gap-2 text-xs text-muted-foreground">
                   <Icon name={form.sendPush ? 'notifications_active' : 'notifications_off'} size={14} />
                   <span>{form.sendPush ? 'Push + in-app' : 'Тек in-app'}</span>
                   {(form.targetRole || form.targetUserId) && (
@@ -331,8 +331,8 @@ const AdminNotifications = () => {
 
               {/* Stats mini */}
               {stats && (
-                <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4">
-                  <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-3">Статистика</h3>
+                <div className="bg-card rounded-2xl shadow-sm border border-border p-4">
+                  <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wide mb-3">Статистика</h3>
                   <div className="space-y-3">
                     {[
                       { label: 'Барлық хабарлама', value: stats.total, icon: 'notifications', color: 'text-primary' },
@@ -342,9 +342,9 @@ const AdminNotifications = () => {
                       <div key={s.label} className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
                           <Icon name={s.icon} size={16} className={s.color} />
-                          <span className="text-sm text-gray-600">{s.label}</span>
+                          <span className="text-sm text-muted-foreground">{s.label}</span>
                         </div>
-                        <span className="font-bold text-gray-900">{s.value}</span>
+                        <span className="font-bold text-foreground">{s.value}</span>
                       </div>
                     ))}
                   </div>
@@ -359,16 +359,16 @@ const AdminNotifications = () => {
         {tab === 'history' && (
           <div className="space-y-3">
             <div className="flex items-center justify-between">
-              <p className="text-sm text-gray-500">{t('common.total')}: <span className="font-bold text-gray-800">{historyTotal}</span></p>
-              <button onClick={loadHistory} className="p-2 rounded-full hover:bg-gray-100">
-                <Icon name="refresh" size={18} className="text-gray-500" />
+              <p className="text-sm text-muted-foreground">{t('common.total')}: <span className="font-bold text-foreground">{historyTotal}</span></p>
+              <button onClick={loadHistory} className="p-2 rounded-full hover:bg-muted">
+                <Icon name="refresh" size={18} className="text-muted-foreground" />
               </button>
             </div>
 
             {loading && <div className="flex justify-center py-8"><div className="size-8 border-4 border-primary/30 border-t-primary rounded-full animate-spin" /></div>}
 
             {!loading && history.length === 0 && (
-              <div className="text-center py-12 text-gray-400">
+              <div className="text-center py-12 text-muted-foreground">
                 <Icon name="notifications_off" size={40} className="mx-auto mb-3 opacity-40" />
                 <p>{t('notifications.empty')}</p>
               </div>
@@ -377,18 +377,18 @@ const AdminNotifications = () => {
             {history.map(n => {
               const cfg = TYPE_STYLES[n.type] || TYPE_STYLES.info;
               return (
-                <div key={n.id} className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4">
+                <div key={n.id} className="bg-card rounded-2xl shadow-sm border border-border p-4">
                   <div className="flex items-start gap-3">
                     <div className={`size-9 rounded-full ${cfg.color.split(' ')[0]} flex items-center justify-center flex-shrink-0`}>
                       <Icon name={cfg.icon} size={18} className={cfg.color.split(' ')[1]} />
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-0.5">
-                        <p className="font-bold text-gray-900 text-sm truncate">{n.title}</p>
+                        <p className="font-bold text-foreground text-sm truncate">{n.title}</p>
                         {!n.is_read && <span className="size-2 rounded-full bg-primary flex-shrink-0" />}
                       </div>
-                      <p className="text-sm text-gray-600 line-clamp-2">{n.message || n.body}</p>
-                      <div className="flex items-center gap-2 mt-2 text-xs text-gray-400">
+                      <p className="text-sm text-muted-foreground line-clamp-2">{n.message || n.body}</p>
+                      <div className="flex items-center gap-2 mt-2 text-xs text-muted-foreground">
                         <Icon name="person" size={12} />
                         <span>{n.user_name || n.user_id}</span>
                         <span>({n.user_role})</span>
@@ -397,7 +397,7 @@ const AdminNotifications = () => {
                     </div>
                     <button
                       onClick={() => handleDelete(n.id)}
-                      className="p-1.5 rounded-lg hover:bg-red-50 text-gray-300 hover:text-red-500 transition-colors flex-shrink-0"
+                      className="p-1.5 rounded-lg hover:bg-red-50 text-muted-foreground hover:text-red-500 transition-colors flex-shrink-0"
                     >
                       <Icon name="delete" size={16} />
                     </button>
@@ -423,20 +423,20 @@ const AdminNotifications = () => {
                     { label: 'Push белсенді', value: stats.activePushSubscriptions, icon: 'install_mobile', color: 'bg-green-50 text-green-600' },
                     { label: 'Оқылды', value: stats.total - stats.unread, icon: 'check_circle', color: 'bg-primary/5 text-primary' },
                   ].map(s => (
-                    <div key={s.label} className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4">
+                    <div key={s.label} className="bg-card rounded-2xl shadow-sm border border-border p-4">
                       <div className={`size-10 rounded-full ${s.color.split(' ')[0]} flex items-center justify-center mb-3`}>
                         <Icon name={s.icon} size={20} className={s.color.split(' ')[1]} />
                       </div>
-                      <p className="text-2xl font-bold text-gray-900">{s.value}</p>
-                      <p className="text-xs text-gray-500 mt-0.5">{s.label}</p>
+                      <p className="text-2xl font-bold text-foreground">{s.value}</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">{s.label}</p>
                     </div>
                   ))}
                 </div>
 
                 {/* By type */}
                 {stats.byType?.length > 0 && (
-                  <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4">
-                    <h3 className="font-bold text-gray-800 mb-3 flex items-center gap-2">
+                  <div className="bg-card rounded-2xl shadow-sm border border-border p-4">
+                    <h3 className="font-bold text-foreground mb-3 flex items-center gap-2">
                       <Icon name="bar_chart" size={18} className="text-primary" />
                       {t('adminNotifications.sections.byType')}
                     </h3>
@@ -451,9 +451,9 @@ const AdminNotifications = () => {
                                 <Icon name={cfg.icon} size={14} className={cfg.color.split(' ')[1]} />
                                 <span className="font-medium">{cfg.label}</span>
                               </div>
-                              <span className="text-gray-500">{t.count}</span>
+                              <span className="text-muted-foreground">{t.count}</span>
                             </div>
-                            <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                            <div className="h-1.5 bg-muted rounded-full overflow-hidden">
                               <div className="h-full bg-primary rounded-full" style={{ width: `${pct}%` }} />
                             </div>
                           </div>
@@ -465,18 +465,18 @@ const AdminNotifications = () => {
 
                 {/* Recent activity */}
                 {stats.recentActivity?.length > 0 && (
-                  <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4">
-                    <h3 className="font-bold text-gray-800 mb-3 flex items-center gap-2">
+                  <div className="bg-card rounded-2xl shadow-sm border border-border p-4">
+                    <h3 className="font-bold text-foreground mb-3 flex items-center gap-2">
                       <Icon name="timeline" size={18} className="text-primary" />
                       {t('adminNotifications.sections.recent7d')}
                     </h3>
                     <div className="space-y-2">
                       {stats.recentActivity.map(a => (
                         <div key={a.date} className="flex items-center justify-between text-sm">
-                          <span className="text-gray-600">{new Date(a.date).toLocaleDateString('ru-RU', { day: '2-digit', month: 'short' })}</span>
+                          <span className="text-muted-foreground">{new Date(a.date).toLocaleDateString('ru-RU', { day: '2-digit', month: 'short' })}</span>
                           <div className="flex items-center gap-2">
                             <div className="h-1.5 rounded-full bg-primary" style={{ width: `${Math.min(a.count * 4, 80)}px` }} />
-                            <span className="font-bold text-gray-800 w-6 text-right">{a.count}</span>
+                            <span className="font-bold text-foreground w-6 text-right">{a.count}</span>
                           </div>
                         </div>
                       ))}

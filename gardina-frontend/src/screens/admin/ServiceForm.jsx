@@ -156,15 +156,15 @@ const ServiceForm = () => {
             )}
 
             {/* Header */}
-            <header className="sticky top-0 z-30 bg-white/80 backdrop-blur-md border-b border-gray-100 px-4 py-4">
+            <header className="sticky top-0 z-30 bg-card/80 backdrop-blur-md border-b border-border px-4 py-4">
                 <div className="flex items-center justify-between">
                     <button
                         onClick={() => navigate('/admin/catalog')}
-                        className="size-10 flex items-center justify-center rounded-full bg-gray-50 hover:bg-gray-100 transition-colors"
+                        className="size-10 flex items-center justify-center rounded-full bg-muted hover:bg-muted transition-colors"
                     >
-                        <Icon name="arrow_back" className="text-gray-600" />
+                        <Icon name="arrow_back" className="text-muted-foreground" />
                     </button>
-                    <h1 className="text-xl font-bold text-gray-900">
+                    <h1 className="text-xl font-bold text-foreground">
                         {isEditing ? 'Қызметті өзгерту' : 'Жаңа қызмет'}
                     </h1>
                     <div className="size-10"></div>
@@ -174,13 +174,13 @@ const ServiceForm = () => {
             <main className="p-4">
                 <form onSubmit={handleSubmit} className="space-y-6 max-w-2xl mx-auto">
                     {/* Main Info */}
-                    <div className="bg-white p-5 rounded-2xl shadow-sm space-y-4">
-                        <h2 className="font-bold text-lg text-gray-900 border-b border-gray-100 pb-2 mb-4">
+                    <div className="bg-card p-5 rounded-2xl shadow-sm space-y-4">
+                        <h2 className="font-bold text-lg text-foreground border-b border-border pb-2 mb-4">
                             Негізгі ақпарат
                         </h2>
 
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                            <label className="block text-sm font-medium text-foreground mb-1">
                                 Қызмет атауы <span className="text-red-500">*</span>
                             </label>
                             <input
@@ -189,21 +189,21 @@ const ServiceForm = () => {
                                 required
                                 value={formData.name}
                                 onChange={handleChange}
-                                className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all"
+                                className="w-full px-4 py-3 rounded-xl border border-border focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all"
                                 placeholder="Мысалы: Перде тігу (люверс)"
                             />
                         </div>
 
                         <div className="grid grid-cols-2 gap-4">
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                <label className="block text-sm font-medium text-foreground mb-1">
                                     Санат (Тип)
                                 </label>
                                 <select
                                     name="serviceType"
                                     value={formData.serviceType}
                                     onChange={handleChange}
-                                    className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all bg-white"
+                                    className="w-full px-4 py-3 rounded-xl border border-border focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all bg-card"
                                 >
                                     <option value="sewing">Тігу</option>
                                     <option value="installation">Орнату</option>
@@ -212,14 +212,14 @@ const ServiceForm = () => {
                                 </select>
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                <label className="block text-sm font-medium text-foreground mb-1">
                                     Есептеу әдісі
                                 </label>
                                 <select
                                     name="calcMethod"
                                     value={formData.calcMethod}
                                     onChange={handleChange}
-                                    className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all bg-white"
+                                    className="w-full px-4 py-3 rounded-xl border border-border focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all bg-card"
                                 >
                                     <option value="per_meter">Метр үшін</option>
                                     <option value="per_item">Дана үшін</option>
@@ -231,7 +231,7 @@ const ServiceForm = () => {
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                            <label className="block text-sm font-medium text-foreground mb-1">
                                 Сипаттама
                             </label>
                             <textarea
@@ -239,20 +239,20 @@ const ServiceForm = () => {
                                 rows="2"
                                 value={formData.description}
                                 onChange={handleChange}
-                                className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all"
+                                className="w-full px-4 py-3 rounded-xl border border-border focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all"
                                 placeholder="Қызмет туралы қосымша ақпарат..."
                             />
                         </div>
                     </div>
 
                     {/* Pricing */}
-                    <div className="bg-white p-5 rounded-2xl shadow-sm space-y-4">
-                        <h2 className="font-bold text-lg text-gray-900 border-b border-gray-100 pb-2 mb-4">
+                    <div className="bg-card p-5 rounded-2xl shadow-sm space-y-4">
+                        <h2 className="font-bold text-lg text-foreground border-b border-border pb-2 mb-4">
                             Баға
                         </h2>
 
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                            <label className="block text-sm font-medium text-foreground mb-1">
                                 Бағасы <span className="text-red-500">*</span>
                             </label>
                             <div className="relative">
@@ -263,10 +263,10 @@ const ServiceForm = () => {
                                     min="0"
                                     value={formData.baseRate}
                                     onChange={handleChange}
-                                    className="w-full pl-4 pr-8 py-3 rounded-xl border border-gray-200 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all font-bold text-lg"
+                                    className="w-full pl-4 pr-8 py-3 rounded-xl border border-border focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all font-bold text-lg"
                                     placeholder="0"
                                 />
-                                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 font-bold">₸</span>
+                                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground font-bold">₸</span>
                             </div>
                         </div>
                     </div>

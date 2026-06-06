@@ -215,7 +215,7 @@ const NotificationSettings = () => {
   return (
     <div className="min-h-screen bg-background-light pb-32">
       {/* Header */}
-      <div className="bg-white border-b border-gray-100 sticky top-0 z-10">
+      <div className="bg-card border-b border-border sticky top-0 z-10">
         <div className="flex items-center gap-4 p-4">
           <button onClick={() => navigate(-1)} className="p-2 -ml-2">
             <Icon name="arrow_back" />
@@ -236,8 +236,8 @@ const NotificationSettings = () => {
 
       <div className="p-4 space-y-6 max-w-3xl mx-auto">
         {/* Push Notifications Section */}
-        <div className="bg-white rounded-xl shadow-sm overflow-hidden">
-          <div className="p-4 border-b border-gray-100">
+        <div className="bg-card rounded-xl shadow-sm overflow-hidden">
+          <div className="p-4 border-b border-border">
             <h2 className="font-bold text-lg flex items-center gap-2">
               <Icon name="notifications_active" className="text-primary" />
               {t('notificationSettings.pushTitle')}
@@ -257,7 +257,7 @@ const NotificationSettings = () => {
                 </div>
               </div>
             ) : !pushSupported ? (
-              <div className="flex items-center gap-3 text-gray-500">
+              <div className="flex items-center gap-3 text-muted-foreground">
                 <Icon name="info" />
                 <span className="text-sm">{t('notificationSettings.unsupported')}</span>
               </div>
@@ -274,18 +274,18 @@ const NotificationSettings = () => {
             ) : (
               <>
                 {/* Big Toggle */}
-                <div className={`rounded-2xl p-4 border-2 transition-all ${pushStatus.isSubscribed ? 'bg-green-50 border-green-200' : 'bg-gray-50 border-gray-200'}`}>
+                <div className={`rounded-2xl p-4 border-2 transition-all ${pushStatus.isSubscribed ? 'bg-green-50 border-green-200' : 'bg-muted border-border'}`}>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <div className={`size-12 rounded-full flex items-center justify-center ${pushStatus.isSubscribed ? 'bg-green-100' : 'bg-gray-200'}`}>
+                      <div className={`size-12 rounded-full flex items-center justify-center ${pushStatus.isSubscribed ? 'bg-green-100' : 'bg-muted'}`}>
                         <Icon name={pushStatus.isSubscribed ? 'notifications_active' : 'notifications_off'} size={24}
-                          className={pushStatus.isSubscribed ? 'text-green-600' : 'text-gray-500'} />
+                          className={pushStatus.isSubscribed ? 'text-green-600' : 'text-muted-foreground'} />
                       </div>
                       <div>
-                        <p className={`font-bold ${pushStatus.isSubscribed ? 'text-green-800' : 'text-gray-700'}`}>
+                        <p className={`font-bold ${pushStatus.isSubscribed ? 'text-green-800' : 'text-foreground'}`}>
                           {pushStatus.isSubscribed ? t('notificationSettings.enabled') : t('notificationSettings.disabled')}
                         </p>
-                        <p className="text-sm text-gray-500">
+                        <p className="text-sm text-muted-foreground">
                           {pushStatus.isSubscribed
                             ? `${pushStatus.deviceCount} құрылғыда белсенді`
                             : t('notificationSettings.pushOffDesc')}
@@ -298,7 +298,7 @@ const NotificationSettings = () => {
                       disabled={isSaving}
                       className={`relative w-14 h-7 rounded-full transition-colors duration-300 flex-shrink-0 ${pushStatus.isSubscribed ? 'bg-green-500' : 'bg-gray-300'} disabled:opacity-50`}
                     >
-                      <span className={`absolute top-0.5 left-0.5 size-6 bg-white rounded-full shadow transition-transform duration-300 ${pushStatus.isSubscribed ? 'translate-x-7' : 'translate-x-0'}`} />
+                      <span className={`absolute top-0.5 left-0.5 size-6 bg-card rounded-full shadow transition-transform duration-300 ${pushStatus.isSubscribed ? 'translate-x-7' : 'translate-x-0'}`} />
                     </button>
                   </div>
                 </div>
@@ -329,8 +329,8 @@ const NotificationSettings = () => {
         </div>
 
         {/* Notification Categories */}
-        <div className="bg-white rounded-xl shadow-sm overflow-hidden">
-          <div className="p-4 border-b border-gray-100">
+        <div className="bg-card rounded-xl shadow-sm overflow-hidden">
+          <div className="p-4 border-b border-border">
             <h2 className="font-bold text-lg">{t('notificationSettings.typesTitle')}</h2>
           </div>
 
@@ -341,7 +341,7 @@ const NotificationSettings = () => {
                   <Icon name={category.icon} className="text-primary" />
                   <div>
                     <p className="font-medium">{category.title}</p>
-                    <p className="text-sm text-gray-500">{category.description}</p>
+                    <p className="text-sm text-muted-foreground">{category.description}</p>
                   </div>
                 </div>
 
@@ -374,8 +374,8 @@ const NotificationSettings = () => {
         </div>
 
         {/* Quiet Hours */}
-        <div className="bg-white rounded-xl shadow-sm overflow-hidden">
-          <div className="p-4 border-b border-gray-100">
+        <div className="bg-card rounded-xl shadow-sm overflow-hidden">
+          <div className="p-4 border-b border-border">
             <h2 className="font-bold text-lg flex items-center gap-2">
               <Icon name="do_not_disturb_on" className="text-primary" />
               {t('notificationSettings.quietHoursTitle')}
@@ -386,7 +386,7 @@ const NotificationSettings = () => {
             <div className="flex items-center justify-between mb-4">
               <div>
                 <p className="font-medium">{t('notificationSettings.quietMode')}</p>
-                <p className="text-sm text-gray-500">{t('notificationSettings.quietModeDesc')}</p>
+                <p className="text-sm text-muted-foreground">{t('notificationSettings.quietModeDesc')}</p>
               </div>
               <label className="relative inline-flex items-center cursor-pointer">
                 <input
@@ -395,14 +395,14 @@ const NotificationSettings = () => {
                   onChange={handleQuietHoursToggle}
                   className="sr-only peer"
                 />
-                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+                <div className="w-11 h-6 bg-muted peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-card after:border-input after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
               </label>
             </div>
 
             {preferences?.quietHours?.enabled && (
               <div className="flex items-center gap-4 mt-4">
                 <div>
-                  <label className="text-sm text-gray-500">{t('notificationSettings.startsAt')}</label>
+                  <label className="text-sm text-muted-foreground">{t('notificationSettings.startsAt')}</label>
                   <input
                     type="time"
                     value={preferences.quietHours.start || '22:00'}
@@ -410,9 +410,9 @@ const NotificationSettings = () => {
                     className="block mt-1 px-3 py-2 border rounded-lg"
                   />
                 </div>
-                <div className="text-gray-400 mt-6">-</div>
+                <div className="text-muted-foreground mt-6">-</div>
                 <div>
-                  <label className="text-sm text-gray-500">{t('notificationSettings.endsAt')}</label>
+                  <label className="text-sm text-muted-foreground">{t('notificationSettings.endsAt')}</label>
                   <input
                     type="time"
                     value={preferences.quietHours.end || '08:00'}
@@ -438,10 +438,10 @@ const ChannelToggle = ({ label, icon, enabled, onChange, disabled = false }) => 
     disabled={disabled}
     className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm transition-colors ${
       disabled
-        ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+        ? 'bg-muted text-muted-foreground cursor-not-allowed'
         : enabled
           ? 'bg-primary/10 text-primary border border-primary/20'
-          : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+          : 'bg-muted text-muted-foreground hover:bg-muted'
     }`}
   >
     <Icon name={icon} size={20} />

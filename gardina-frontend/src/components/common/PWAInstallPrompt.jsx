@@ -67,7 +67,7 @@ const PWAInstallPrompt = () => {
     <div className="pwa-install-prompt fixed bottom-24 left-4 right-4 z-50 animate-slideUp">
       <div className="bg-gradient-to-r from-primary to-primary-dark text-white rounded-2xl p-4 shadow-2xl border-2 border-white/20 max-w-md mx-auto">
         <div className="flex items-start gap-3">
-          <div className="size-12 rounded-xl bg-white/20 flex items-center justify-center flex-shrink-0">
+          <div className="size-12 rounded-xl bg-card/20 flex items-center justify-center flex-shrink-0">
             <Icon name="download" size={24} />
           </div>
           <div className="flex-1">
@@ -76,13 +76,13 @@ const PWAInstallPrompt = () => {
             <div className="flex gap-2">
               <button
                 onClick={handleInstall}
-                className="flex-1 bg-white text-primary font-bold py-2 px-4 rounded-xl hover:bg-white/90 transition-all"
+                className="flex-1 bg-card text-primary font-bold py-2 px-4 rounded-xl hover:bg-card/90 transition-all"
               >
                 {t('prompts.pwa.install')}
               </button>
               <button
                 onClick={handleDismiss}
-                className="px-4 py-2 bg-white/10 hover:bg-white/20 rounded-xl transition-all"
+                className="px-4 py-2 bg-card/10 hover:bg-card/20 rounded-xl transition-all"
                 aria-label={t('common.close')}
               >
                 <Icon name="close" />

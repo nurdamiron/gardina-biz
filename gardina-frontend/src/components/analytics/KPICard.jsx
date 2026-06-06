@@ -69,27 +69,27 @@ const KPICard = ({
 
     if (loading) {
         return (
-            <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 animate-pulse">
+            <div className="bg-card rounded-2xl p-5 shadow-sm border border-border animate-pulse">
                 <div className="flex items-start justify-between mb-4">
-                    <div className="h-6 w-32 bg-gray-200 rounded"></div>
-                    <div className="size-10 bg-gray-200 rounded-full"></div>
+                    <div className="h-6 w-32 bg-muted rounded"></div>
+                    <div className="size-10 bg-muted rounded-full"></div>
                 </div>
                 <div className="space-y-3">
-                    <div className="h-8 w-24 bg-gray-200 rounded"></div>
-                    <div className="h-2 bg-gray-200 rounded-full"></div>
-                    <div className="h-4 w-40 bg-gray-200 rounded"></div>
+                    <div className="h-8 w-24 bg-muted rounded"></div>
+                    <div className="h-2 bg-muted rounded-full"></div>
+                    <div className="h-4 w-40 bg-muted rounded"></div>
                 </div>
             </div>
         );
     }
 
     return (
-        <div className={`bg-white rounded-2xl p-5 shadow-sm border ${colors.border}`}>
+        <div className={`bg-card rounded-2xl p-5 shadow-sm border ${colors.border}`}>
             {/* Header */}
             <div className="flex items-start justify-between mb-4">
                 <div>
-                    <h3 className="font-bold text-gray-900">{title}</h3>
-                    <p className="text-xs text-gray-500 mt-0.5">{period}</p>
+                    <h3 className="font-bold text-foreground">{title}</h3>
+                    <p className="text-xs text-muted-foreground mt-0.5">{period}</p>
                 </div>
                 <div className={`size-10 rounded-full ${colors.light} ${colors.text} flex items-center justify-center`}>
                     <Icon name={icon} size={20} />
@@ -99,19 +99,19 @@ const KPICard = ({
             {/* Value */}
             <div className="mb-3">
                 <div className="flex items-baseline gap-2">
-                    <span className="text-3xl font-black text-gray-900">
+                    <span className="text-3xl font-black text-foreground">
                         {value.toLocaleString()}
                     </span>
-                    {valueUnit && <span className="text-sm font-medium text-gray-500">{valueUnit}</span>}
+                    {valueUnit && <span className="text-sm font-medium text-muted-foreground">{valueUnit}</span>}
                 </div>
-                <p className="text-xs text-gray-500 mt-1">
+                <p className="text-xs text-muted-foreground mt-1">
                     {t('dashboard.kpiCard.outOf', { target: target.toLocaleString(), unit: targetUnit })}
                 </p>
             </div>
 
             {/* Progress bar */}
             <div className="mb-2">
-                <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+                <div className="h-2 bg-muted rounded-full overflow-hidden">
                     <div
                         className={`h-full ${colors.bg} transition-all duration-500`}
                         style={{ width: `${percentage}%` }}
