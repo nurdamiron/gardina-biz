@@ -129,7 +129,7 @@ const PaymentRiskIndicator = ({
       </div>
 
       {/* Прогресс бар */}
-      <div className="relative h-2 bg-white/50 rounded-full overflow-hidden mb-3">
+      <div className="relative h-2 bg-card/50 rounded-full overflow-hidden mb-3">
         <div
           className={`absolute left-0 top-0 h-full ${config.progressBg} transition-all duration-500`}
           style={{ width: `${Math.min(paidPercent, 100)}%` }}
@@ -186,11 +186,11 @@ const PaymentRiskIndicator = ({
       {/* Экшн кнопки для проблемных платежей */}
       {riskLevel !== 'safe' && (
         <div className="mt-3 flex gap-2">
-          <button className={`flex-1 py-1.5 px-3 bg-white/70 rounded-lg text-xs font-bold ${config.textColor} hover:bg-white transition-colors flex items-center justify-center gap-1`}>
+          <button className={`flex-1 py-1.5 px-3 bg-card/70 rounded-lg text-xs font-bold ${config.textColor} hover:bg-card transition-colors flex items-center justify-center gap-1`}>
             <Icon name="call" size={14} />
             {t('payments.action.call')}
           </button>
-          <button className={`flex-1 py-1.5 px-3 bg-white/70 rounded-lg text-xs font-bold ${config.textColor} hover:bg-white transition-colors flex items-center justify-center gap-1`}>
+          <button className={`flex-1 py-1.5 px-3 bg-card/70 rounded-lg text-xs font-bold ${config.textColor} hover:bg-card transition-colors flex items-center justify-center gap-1`}>
             <Icon name="chat" size={14} />
             {t('payments.action.message')}
           </button>

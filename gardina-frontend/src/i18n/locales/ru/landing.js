@@ -1,10 +1,10 @@
 const landing = {
   nav: {
-    problems: 'Решения',
-    features: 'Преимущества',
-    modules: 'Разделы',
+    problems: 'Проблемы',
+    features: 'Возможности',
+    modules: 'Модули',
     compare: 'Сравнение',
-    pricing: 'Тарифы',
+    pricing: 'Цены',
     faq: 'Вопросы',
     login: 'Войти',
     whatsapp: 'WhatsApp',

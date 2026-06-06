@@ -89,7 +89,7 @@ const DealDetail = () => {
         const scheduledDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
 
         let dayLabel = '';
-        let dayColor = 'text-gray-900';
+        let dayColor = 'text-foreground';
 
         const months = monthNames(lang);
         const weekdays = weekdayNames(lang);
@@ -107,7 +107,7 @@ const DealDetail = () => {
             dayColor = 'text-primary';
         } else if (scheduledDate.getTime() === yesterday.getTime()) {
             dayLabel = labels.yesterday;
-            dayColor = 'text-gray-500';
+            dayColor = 'text-muted-foreground';
         } else if (scheduledDate > today) {
             const daysUntil = Math.ceil((scheduledDate - today) / (1000 * 60 * 60 * 24));
             if (daysUntil <= 7) {
@@ -115,11 +115,11 @@ const DealDetail = () => {
                 dayColor = 'text-primary';
             } else {
                 dayLabel = `${scheduledDate.getDate()} ${months[scheduledDate.getMonth()]}`;
-                dayColor = 'text-gray-900';
+                dayColor = 'text-foreground';
             }
         } else {
             dayLabel = `${scheduledDate.getDate()} ${months[scheduledDate.getMonth()]}`;
-            dayColor = 'text-gray-500';
+            dayColor = 'text-muted-foreground';
         }
 
         const time = formatTime24(dateString);
@@ -394,20 +394,20 @@ const DealDetail = () => {
                                         <p className="text-xs text-text-secondary mb-2 font-medium">{t('orders.detail.scheduledTime', 'Жоспарланған уақыт')}</p>
                                         <div className="flex items-center justify-between">
                                             <div className="flex items-center gap-3">
-                                                <div className="size-10 rounded-full bg-white flex items-center justify-center">
+                                                <div className="size-10 rounded-full bg-card flex items-center justify-center">
                                                     <Icon name="event" className="text-primary" />
                                                 </div>
                                                 <div>
                                                     <p className={`font-bold text-base ${scheduled.dayColor}`}>
                                                         {scheduled.dayLabel}
                                                     </p>
-                                                    <p className="text-xs text-gray-500">
+                                                    <p className="text-xs text-muted-foreground">
                                                         {scheduled.fullDateKazakh}
                                                     </p>
                                                 </div>
                                             </div>
                                             <div className="text-right">
-                                                <div className="flex items-center gap-1.5 bg-white px-3 py-1.5 rounded-lg border border-primary/25">
+                                                <div className="flex items-center gap-1.5 bg-card px-3 py-1.5 rounded-lg border border-primary/25">
                                                     <Icon name="schedule" size={16} className="text-primary" />
                                                     <span className="font-bold text-primary-dark">{scheduled.time}</span>
                                                 </div>

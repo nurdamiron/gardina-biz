@@ -50,50 +50,57 @@ const Sidebar = () => {
   };
 
   return (
-    <aside className="hidden md:flex flex-col w-60 min-h-screen bg-white border-r border-border-light fixed left-0 top-0 z-30">
+    <aside className="hidden md:flex flex-col w-60 min-h-screen bg-card border-r border-border fixed left-0 top-0 z-30">
       {/* Logo */}
-      <div className="px-6 py-5 border-b border-border-light">
-        <span className="text-xl font-black text-primary tracking-tight">Gardina</span>
-        {user?.organizationName && (
-          <p className="text-xs text-text-secondary mt-0.5 truncate">{user.organizationName}</p>
-        )}
+      <div className="h-16 px-5 flex items-center gap-2.5 border-b border-border">
+        <span className="size-8 rounded-md bg-primary text-primary-content flex items-center justify-center font-bold shrink-0">G</span>
+        <div className="min-w-0">
+          <span className="block text-sm font-semibold text-foreground leading-tight tracking-tight">Gardina</span>
+          {user?.organizationName && (
+            <p className="text-xs text-muted-foreground truncate leading-tight">{user.organizationName}</p>
+          )}
+        </div>
       </div>
 
       {/* Nav items */}
       <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
+        <p className="px-3 pb-2 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
+          {lang === 'kz' ? 'Мәзір' : 'Меню'}
+        </p>
         {tabs.map((tab) => {
           const active = isActive(tab.path);
           return (
             <button
               key={tab.path}
               onClick={() => navigate(tab.path)}
-              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${
+              className={`group w-full flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring ${
                 active
-                  ? 'bg-primary text-white'
-                  : 'text-text-secondary hover:bg-background-light hover:text-text-main'
+                  ? 'bg-primary/10 text-primary'
+                  : 'text-muted-foreground hover:bg-muted hover:text-foreground'
               }`}
             >
-              <Icon name={tab.icon} size={18} />
+              <Icon name={tab.icon} size={18} className={active ? 'text-primary' : 'text-muted-foreground group-hover:text-foreground'} />
               <span>{tab.label[lang === 'kz' ? 'kz' : 'ru']}</span>
+              {active && <span className="ml-auto size-1.5 rounded-full bg-primary" />}
             </button>
           );
         })}
       </nav>
 
       {/* User info + logout */}
-      <div className="px-3 py-4 border-t border-border-light">
-        <div className="flex items-center gap-3 px-3 py-2 rounded-xl bg-background-light mb-2">
-          <div className="size-8 bg-primary/20 rounded-full flex items-center justify-center flex-shrink-0">
-            <Icon name="person" size={16} className="text-primary" />
+      <div className="p-3 border-t border-border">
+        <div className="flex items-center gap-3 px-2 py-2 rounded-md mb-1">
+          <div className="size-9 bg-muted rounded-full flex items-center justify-center flex-shrink-0">
+            <span className="text-xs font-semibold text-foreground">{(user?.name || '?').slice(0, 1).toUpperCase()}</span>
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-xs font-bold text-text-main truncate">{user?.name}</p>
-            <p className="text-[10px] text-text-secondary">{t(`profile.roles.${user?.role}`, user?.role)}</p>
+            <p className="text-sm font-medium text-foreground truncate">{user?.name}</p>
+            <p className="text-xs text-muted-foreground">{t(`profile.roles.${user?.role}`, user?.role)}</p>
           </div>
         </div>
         <button
           onClick={() => logout().then(() => navigate('/login'))}
-          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-text-secondary hover:bg-red-50 hover:text-red-600 transition-all"
+          className="w-full flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
           <Icon name="logout" size={18} />
           <span>{lang === 'kz' ? 'Шығу' : 'Выйти'}</span>

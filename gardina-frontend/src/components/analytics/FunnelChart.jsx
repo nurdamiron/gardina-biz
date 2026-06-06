@@ -25,11 +25,11 @@ const FunnelChart = ({
     const { t, lang } = useI18n();
     if (loading) {
         return (
-            <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
-                {title && <div className="h-6 w-40 bg-gray-200 rounded mb-4 animate-pulse"></div>}
+            <div className="bg-card rounded-2xl p-5 shadow-sm border border-border">
+                {title && <div className="h-6 w-40 bg-muted rounded mb-4 animate-pulse"></div>}
                 <div className="space-y-3">
                     {[1,2,3,4].map(i => (
-                        <div key={i} className="h-12 bg-gray-200 rounded animate-pulse"
+                        <div key={i} className="h-12 bg-muted rounded animate-pulse"
                              style={{ width: `${100 - i * 15}%` }}></div>
                     ))}
                 </div>
@@ -39,10 +39,10 @@ const FunnelChart = ({
 
     if (data.length === 0) {
         return (
-            <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
-                {title && <h3 className="font-bold text-gray-900 mb-4">{title}</h3>}
+            <div className="bg-card rounded-2xl p-5 shadow-sm border border-border">
+                {title && <h3 className="font-bold text-foreground mb-4">{title}</h3>}
                 <div className="flex items-center justify-center h-48">
-                    <p className="text-gray-400">{t('dashboard.funnelChart.noData')}</p>
+                    <p className="text-muted-foreground">{t('dashboard.funnelChart.noData')}</p>
                 </div>
             </div>
         );
@@ -65,9 +65,9 @@ const FunnelChart = ({
     if (orientation === 'horizontal') {
         // Горизонтальная воронка
         return (
-            <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+            <div className="bg-card rounded-2xl p-5 shadow-sm border border-border">
                 {title && (
-                    <h3 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
+                    <h3 className="font-bold text-foreground mb-4 flex items-center gap-2">
                         <Icon name="filter_alt" className="text-primary" />
                         {title}
                     </h3>
@@ -82,15 +82,15 @@ const FunnelChart = ({
                             <div key={index} className="relative">
                                 {/* Label and value */}
                                 <div className="flex justify-between items-center mb-1">
-                                    <span className="text-sm font-medium text-gray-700">{item.label}</span>
+                                    <span className="text-sm font-medium text-foreground">{item.label}</span>
                                     <div className="flex items-center gap-2">
                                         {showValues && (
-                                            <span className="text-sm font-bold text-gray-900">
+                                            <span className="text-sm font-bold text-foreground">
                                                 {formatValue(item.value)}
                                             </span>
                                         )}
                                         {showPercentage && (
-                                            <span className="text-xs text-gray-500">
+                                            <span className="text-xs text-muted-foreground">
                                                 ({percentage.toFixed(0)}%)
                                             </span>
                                         )}
@@ -98,7 +98,7 @@ const FunnelChart = ({
                                 </div>
 
                                 {/* Bar */}
-                                <div className="h-10 bg-gray-100 rounded-lg overflow-hidden">
+                                <div className="h-10 bg-muted rounded-lg overflow-hidden">
                                     <div
                                         className={`h-full ${item.color || 'bg-primary'} transition-all duration-500`}
                                         style={{ width: `${widthPercentage}%` }}
@@ -108,7 +108,7 @@ const FunnelChart = ({
                                 {/* Conversion rate */}
                                 {index > 0 && (
                                     <div className="text-right mt-1">
-                                        <span className="text-xs text-gray-500">
+                                        <span className="text-xs text-muted-foreground">
                                             {t('dashboard.funnelChart.conversion')}: {data[index-1].value > 0 ? ((item.value / data[index-1].value) * 100).toFixed(1) : 0}%
                                         </span>
                                     </div>
@@ -123,9 +123,9 @@ const FunnelChart = ({
 
     // Вертикальная воронка (классическая)
     return (
-        <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+        <div className="bg-card rounded-2xl p-5 shadow-sm border border-border">
             {title && (
-                <h3 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
+                <h3 className="font-bold text-foreground mb-4 flex items-center gap-2">
                     <Icon name="filter_alt" className="text-primary" />
                     {title}
                 </h3>
@@ -165,7 +165,7 @@ const FunnelChart = ({
                             {/* Conversion arrow */}
                             {index < data.length - 1 && (
                                 <div className="flex justify-center my-1">
-                                    <div className="flex items-center gap-2 text-gray-400">
+                                    <div className="flex items-center gap-2 text-muted-foreground">
                                         <Icon name="arrow_downward" size={16} />
                                         <span className="text-xs font-medium">
                                             {((data[index + 1].value / item.value) * 100).toFixed(1)}%
@@ -179,9 +179,9 @@ const FunnelChart = ({
             </div>
 
             {/* Summary */}
-            <div className="mt-4 pt-4 border-t border-gray-200">
+            <div className="mt-4 pt-4 border-t border-border">
                 <div className="flex justify-between items-center">
-                    <span className="text-sm text-gray-600">{t('dashboard.funnelChart.totalConversion')}</span>
+                    <span className="text-sm text-muted-foreground">{t('dashboard.funnelChart.totalConversion')}</span>
                     <span className="text-lg font-black text-primary">
                         {totalValue > 0 ? ((data[data.length - 1].value / totalValue) * 100).toFixed(1) : 0}%
                     </span>

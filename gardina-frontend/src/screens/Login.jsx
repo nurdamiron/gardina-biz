@@ -51,32 +51,34 @@ const Login = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background-light via-white to-primary/10 flex flex-col items-center justify-center p-4 py-10">
-      <div className="w-full max-w-md">
+    <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4 py-10">
+      <div className="w-full max-w-sm">
         <div className="text-center mb-6">
-          <img src="/images/logo-header.png" alt="Gardina" className="w-40 h-auto mx-auto mb-3 drop-shadow-sm" />
-          <div className="flex justify-center mb-2">
+          <img src="/images/logo-header.png" alt="Gardina" className="w-72 h-auto mx-auto mb-4" />
+          <div className="flex justify-center">
             <LanguageSwitcher compact />
           </div>
-          <p className="text-text-secondary font-medium text-sm mt-1.5">{t('auth.loginSubtitle')}</p>
         </div>
 
-        <div className="rounded-3xl bg-white shadow-xl shadow-primary/5 border border-primary/10 overflow-hidden">
-          <form onSubmit={handleSubmit} className="p-6 sm:p-7">
-          <h2 className="text-xl font-bold mb-5">{t('auth.loginTitle')}</h2>
+        <div className="rounded-xl bg-card border border-border shadow-sm">
+          <div className="p-6 sm:p-7 pb-2">
+            <h2 className="text-2xl font-semibold tracking-tight text-foreground">{t('auth.loginTitle')}</h2>
+            <p className="text-sm text-muted-foreground mt-1.5">{t('auth.loginSubtitle')}</p>
+          </div>
+          <form onSubmit={handleSubmit} className="p-6 sm:p-7 pt-4 space-y-4">
 
           {(error || authError) && (
-            <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg flex items-start gap-3">
-              <Icon name="error" className="text-red-500" />
-              <p className="text-sm font-medium text-red-700">{error || authError}</p>
+            <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-md flex items-start gap-2.5">
+              <Icon name="error" size={18} className="text-destructive shrink-0 mt-0.5" />
+              <p className="text-sm font-medium text-destructive">{error || authError}</p>
             </div>
           )}
 
-          <div className="mb-4">
-            <label className="block text-sm font-bold mb-2">{t('auth.loginField')}</label>
+          <div className="space-y-1.5">
+            <label className="block text-sm font-medium text-foreground">{t('auth.loginField')}</label>
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Icon name="person" size={20} className="text-text-secondary" />
+                <Icon name="person" size={18} className="text-muted-foreground" />
               </div>
               <input
                 type="text"
@@ -84,7 +86,7 @@ const Login = () => {
                 onChange={(e) => setIdentifier(e.target.value)}
                 onInvalid={(e) => e.target.setCustomValidity(t('auth.fieldRequired'))}
                 onInput={(e) => e.target.setCustomValidity('')}
-                className="block w-full pl-10 pr-3 py-3 border border-gray-200 rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none"
+                className="block w-full h-10 pl-9 pr-3 text-sm bg-transparent border border-input rounded-md transition-colors placeholder:text-muted-foreground focus:border-primary focus:ring-2 focus:ring-ring/30 outline-none"
                 placeholder={t('auth.loginFieldPlaceholder')}
                 required
                 autoComplete="username"
@@ -93,17 +95,17 @@ const Login = () => {
           </div>
 
           {orgOptions && (
-            <div className="mb-4">
-              <label className="block text-sm font-bold mb-2">{t('auth.selectOrganization')}</label>
-              <p className="text-xs text-text-secondary mb-2">{t('auth.selectOrganizationHint')}</p>
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium text-foreground">{t('auth.selectOrganization')}</label>
+              <p className="text-xs text-muted-foreground">{t('auth.selectOrganizationHint')}</p>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Icon name="store" size={20} className="text-text-secondary" />
+                  <Icon name="store" size={18} className="text-muted-foreground" />
                 </div>
                 <select
                   value={selectedSlug}
                   onChange={(e) => setSelectedSlug(e.target.value)}
-                  className="block w-full pl-10 pr-3 py-3 border border-gray-200 rounded-xl bg-white focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none"
+                  className="block w-full h-10 pl-9 pr-3 text-sm border border-input rounded-md bg-card focus:border-primary focus:ring-2 focus:ring-ring/30 outline-none"
                 >
                   {orgOptions.map((o) => (
                     <option key={o.slug} value={o.slug}>{o.name || o.slug}</option>
@@ -113,11 +115,16 @@ const Login = () => {
             </div>
           )}
 
-          <div className="mb-6">
-            <label className="block text-sm font-bold mb-2">{t('auth.password')}</label>
+          <div className="space-y-1.5">
+            <div className="flex items-center justify-between">
+              <label className="block text-sm font-medium text-foreground">{t('auth.password')}</label>
+              <Link to="/forgot-password" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                {t('auth.forgotPassword')}
+              </Link>
+            </div>
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Icon name="lock" size={20} className="text-text-secondary" />
+                <Icon name="lock" size={18} className="text-muted-foreground" />
               </div>
               <input
                 type={showPassword ? 'text' : 'password'}
@@ -125,17 +132,17 @@ const Login = () => {
                 onChange={(e) => setPassword(e.target.value)}
                 onInvalid={(e) => e.target.setCustomValidity(t('auth.fieldRequired'))}
                 onInput={(e) => e.target.setCustomValidity('')}
-                className="block w-full pl-10 pr-12 py-3 border border-gray-200 rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none"
+                className="block w-full h-10 pl-9 pr-11 text-sm bg-transparent border border-input rounded-md transition-colors placeholder:text-muted-foreground focus:border-primary focus:ring-2 focus:ring-ring/30 outline-none"
                 placeholder={t('auth.passwordPlaceholder', 'Введите пароль')}
                 required
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                className="absolute inset-y-0 right-0 pr-3 flex items-center text-muted-foreground hover:text-foreground transition-colors"
                 aria-label={showPassword ? t('auth.hidePassword') : t('auth.showPassword')}
               >
-                <Icon name={showPassword ? 'visibility_off' : 'visibility'} size={20} className="text-text-secondary hover:text-primary" />
+                <Icon name={showPassword ? 'visibility_off' : 'visibility'} size={18} />
               </button>
             </div>
           </div>
@@ -143,30 +150,27 @@ const Login = () => {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-primary hover:brightness-110 active:scale-[0.98] text-white font-bold text-base py-3.5 rounded-xl shadow-lg shadow-primary/25 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+            className="w-full h-11 bg-primary hover:bg-primary/90 active:scale-[0.99] text-primary-content font-medium text-sm rounded-md shadow-sm transition-all flex items-center justify-center gap-2 outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:opacity-50"
           >
             {loading ? (
               <>
-                <div className="size-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                <div className="size-4 border-2 border-current border-t-transparent rounded-full animate-spin"></div>
                 {t('common.loading')}
               </>
             ) : (
               <>
                 {t('auth.login')}
-                <Icon name="arrow_forward" />
+                <Icon name="arrow_forward" size={18} />
               </>
             )}
           </button>
 
-          <div className="flex items-center justify-between mt-5 text-sm">
-            <Link to="/forgot-password" className="text-primary hover:underline font-medium">
-              {t('auth.forgotPassword')}
-            </Link>
+          <div className="text-center text-sm text-muted-foreground pt-1">
             <a
               href="https://wa.me/77079429827"
               target="_blank"
               rel="noopener noreferrer"
-              className="font-bold text-primary hover:underline"
+              className="font-medium text-primary hover:underline"
             >
               {t('auth.contactUs')}
             </a>
@@ -174,7 +178,7 @@ const Login = () => {
           </form>
         </div>
 
-        <p className="text-center text-xs text-text-secondary/90 mt-6">{t('auth.copyright')}</p>
+        <p className="text-center text-xs text-muted-foreground mt-6">{t('auth.copyright')}</p>
       </div>
     </div>
   );

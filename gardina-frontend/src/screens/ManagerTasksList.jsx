@@ -62,16 +62,16 @@ const ManagerTasksList = () => {
             scheduled: 'bg-primary/15 text-primary',
             in_progress: 'bg-yellow-100 text-yellow-800',
             completed: 'bg-green-100 text-green-800',
-        }[status] || 'bg-gray-100 text-gray-800';
+        }[status] || 'bg-muted text-foreground';
         return <span className={`px-2 py-0.5 rounded text-xs font-medium ${cls}`}>{t(`measurements.status.${status}`, status)}</span>;
     };
 
     return (
         <div className="bg-background-light min-h-screen flex flex-col pb-32">
             {/* Header */}
-            <header className="sticky top-0 z-30 bg-white/80 backdrop-blur-md border-b border-gray-100 px-4 py-3">
+            <header className="sticky top-0 z-30 bg-card/80 backdrop-blur-md border-b border-border px-4 py-3">
                 <div className="flex items-center justify-between">
-                    <h1 className="text-xl font-bold text-gray-900">{t('tasks.list.title')}</h1>
+                    <h1 className="text-xl font-bold text-foreground">{t('tasks.list.title')}</h1>
                     <button
                         onClick={() => navigate('/manager/order/new')}
                         className="flex items-center gap-1 bg-primary text-white px-3 py-1.5 rounded-lg text-sm font-medium hover:brightness-110 transition-all shadow-sm active:scale-95"
@@ -86,7 +86,7 @@ const ManagerTasksList = () => {
                     <select
                         value={statusFilter}
                         onChange={(e) => setStatusFilter(e.target.value)}
-                        className="bg-white border border-gray-200 text-gray-700 text-sm rounded-lg focus:ring-primary focus:border-primary block p-2"
+                        className="bg-card border border-border text-foreground text-sm rounded-lg focus:ring-primary focus:border-primary block p-2"
                     >
                         <option value="all">{t('orders.filters.allStatus')}</option>
                         <option value="scheduled">{t('measurements.status.scheduled')}</option>
@@ -97,7 +97,7 @@ const ManagerTasksList = () => {
                     <select
                         value={designerFilter}
                         onChange={(e) => setDesignerFilter(e.target.value)}
-                        className="bg-white border border-gray-200 text-gray-700 text-sm rounded-lg focus:ring-primary focus:border-primary block p-2"
+                        className="bg-card border border-border text-foreground text-sm rounded-lg focus:ring-primary focus:border-primary block p-2"
                     >
                         <option value="all">{t('orders.filters.allDesigners')}</option>
                         {designers.map(d => (
@@ -125,12 +125,12 @@ const ManagerTasksList = () => {
                                 <div className="flex justify-between items-start mb-2">
                                     <div>
                                         <h3 className="font-bold text-text-main">{item.clientName || t('orders.card.unknownClient')}</h3>
-                                        <p className="text-xs text-gray-500">{item.clientPhone}</p>
+                                        <p className="text-xs text-muted-foreground">{item.clientPhone}</p>
                                     </div>
                                     {getStatusBadge(item.status)}
                                 </div>
 
-                                <div className="flex items-center gap-2 text-sm text-gray-600 mb-2">
+                                <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
                                     <Icon name="location_on" size={18} />
                                     <span className="line-clamp-1">{item.address}</span>
                                 </div>
@@ -160,7 +160,7 @@ const ManagerTasksList = () => {
                         ))}
                     </div>
                 ) : (
-                    <div className="flex flex-col items-center justify-center py-12 text-gray-400">
+                    <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
                         <Icon name="inbox" size={48} />
                         <p>{t('tasks.list.empty')}</p>
                     </div>

@@ -11,14 +11,14 @@ const Projects = () => {
       <header className="sticky top-0 z-20 bg-background-light/95 backdrop-blur-sm px-4 pt-4 pb-3 border-b">
         <div className="flex items-center justify-between">
           <h1 className="text-2xl font-bold">Жобалар</h1>
-          <button onClick={() => navigate('/')} className="p-2 rounded-full hover:bg-gray-200">
+          <button onClick={() => navigate('/')} className="p-2 rounded-full hover:bg-muted">
             <Icon name="home" />
           </button>
         </div>
       </header>
 
       <main className="flex-1 flex flex-col items-center justify-center p-8">
-        <Icon name="folder_open" className="text-gray-300 text-8xl" />
+        <Icon name="folder_open" className="text-muted-foreground text-8xl" />
         <h2 className="text-2xl font-bold mt-6">Жобалар</h2>
         <p className="text-text-secondary mt-2 text-center">Бұл бөлім әзірлеу кезеңінде</p>
       </main>

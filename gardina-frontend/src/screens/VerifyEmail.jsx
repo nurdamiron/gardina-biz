@@ -33,7 +33,7 @@ const VerifyEmail = () => {
 
   return (
     <div className="min-h-screen bg-background-light flex items-center justify-center p-6">
-      <div className="bg-white rounded-3xl shadow-sm p-8 w-full max-w-sm text-center">
+      <div className="bg-card rounded-3xl shadow-sm p-8 w-full max-w-sm text-center">
         {status === 'loading' && (
           <>
             <div className="size-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-6" />

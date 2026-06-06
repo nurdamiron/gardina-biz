@@ -62,7 +62,7 @@ const OnboardingChecklist = () => {
       </div>
 
       {/* Progress bar */}
-      <div className="h-2 bg-white rounded-full overflow-hidden border border-primary/10 mb-4">
+      <div className="h-2 bg-card rounded-full overflow-hidden border border-primary/10 mb-4">
         <div
           className="h-full bg-gradient-to-r from-primary to-accent transition-all duration-500"
           style={{ width: `${data.progress}%` }}
@@ -74,7 +74,7 @@ const OnboardingChecklist = () => {
           <li key={item.id} className="flex items-center gap-3">
             <span
               className={`size-6 rounded-full flex items-center justify-center flex-shrink-0 ${
-                item.done ? 'bg-primary text-white' : 'bg-white border border-border-light text-text-secondary'
+                item.done ? 'bg-primary text-white' : 'bg-card border border-border-light text-text-secondary'
               }`}
             >
               {item.done ? <Icon name="check" size={14} /> : <span className="size-1.5 rounded-full bg-text-secondary" />}

@@ -25,23 +25,27 @@ const PageHeader = ({
   };
 
   return (
-    <div className="bg-white border-b border-gray-100 sticky top-0 z-10">
-      <div className="flex items-center justify-between p-4">
-        <div className="flex items-center gap-3">
+    <div className="bg-card/80 backdrop-blur border-b border-border sticky top-0 z-10">
+      <div className="flex items-center justify-between gap-3 px-4 py-3">
+        <div className="flex items-center gap-2.5 min-w-0">
           {showBack && (
-            <button onClick={handleBack} className="p-2 -ml-2 hover:bg-gray-100 rounded-full transition-colors">
-              <Icon name="arrow_back" />
+            <button
+              onClick={handleBack}
+              aria-label="Назад"
+              className="size-9 -ml-1 inline-flex items-center justify-center text-muted-foreground hover:bg-muted hover:text-foreground rounded-md transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            >
+              <Icon name="arrow_back" size={20} />
             </button>
           )}
-          <div>
-            <h1 className="text-xl font-bold">{title}</h1>
+          <div className="min-w-0">
+            <h1 className="font-display text-lg font-semibold tracking-tight text-foreground truncate">{title}</h1>
             {subtitle && (
-              <p className="text-sm text-gray-500">{subtitle}</p>
+              <p className="text-sm text-muted-foreground truncate">{subtitle}</p>
             )}
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 shrink-0">
           {rightContent}
           {showNotifications && <NotificationCenter />}
         </div>

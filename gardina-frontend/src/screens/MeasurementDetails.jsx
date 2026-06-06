@@ -251,7 +251,7 @@ const MeasurementDetails = () => {
   if (error || !measurement) {
     return (
       <div className="bg-background-light min-h-screen flex items-center justify-center p-4">
-        <div className="bg-white rounded-2xl p-8 shadow-sm text-center max-w-md">
+        <div className="bg-card rounded-2xl p-8 shadow-sm text-center max-w-md">
           <Icon name="error" size={48} className="text-red-500" />
           <h2 className="text-xl font-bold mt-4">{t('measurements.detail.errorTitle', 'Қате')}</h2>
           <p className="text-text-secondary mt-2">{error || t('measurements.detail.notFound', 'Өлшем табылмады')}</p>
@@ -308,11 +308,11 @@ const MeasurementDetails = () => {
     <div className="bg-background-light min-h-screen pb-32">
 
       {/* HEADER */}
-      <header className="sticky top-0 z-30 bg-white/80 backdrop-blur-md border-b border-gray-100 px-4 py-3">
+      <header className="sticky top-0 z-30 bg-card/80 backdrop-blur-md border-b border-border px-4 py-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <button onClick={() => navigate(-1)} className="size-10 rounded-full bg-gray-50 flex items-center justify-center hover:bg-gray-100 transition-colors">
-              <Icon name="arrow_back" className="text-gray-600" />
+            <button onClick={() => navigate(-1)} className="size-10 rounded-full bg-muted flex items-center justify-center hover:bg-muted transition-colors">
+              <Icon name="arrow_back" className="text-muted-foreground" />
             </button>
             <div>
               <h1 className="text-lg font-bold leading-tight">{t('measurements.detail.numberPrefix', 'Өлшем')} #{measurement.measurementNumber || id.slice(0,8)}</h1>
@@ -343,7 +343,7 @@ const MeasurementDetails = () => {
         <div className="space-y-4">
 
         {/* CLIENT INFO */}
-        <section className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+        <section className="bg-card rounded-2xl shadow-sm border border-border overflow-hidden">
           <div className="p-4 flex items-center gap-3">
             <div className="size-12 rounded-full bg-primary/10 text-primary flex items-center justify-center">
                 <Icon name="person" size={24} />
@@ -361,9 +361,9 @@ const MeasurementDetails = () => {
 
           <div className="px-4 pb-4 pt-2 border-t border-gray-50">
             <div className="flex items-start gap-2">
-              <Icon name="location_on" size={18} className="text-gray-400" />
+              <Icon name="location_on" size={18} className="text-muted-foreground" />
               <div className="flex-1">
-                <p className="text-sm text-gray-700">{measurement.address}</p>
+                <p className="text-sm text-foreground">{measurement.address}</p>
                 {measurement.mapLink && (
                   <button onClick={openMap} className="mt-1 text-xs text-primary font-bold flex items-center gap-1">
                     <Icon name="open_in_new" size={12} />
@@ -415,16 +415,16 @@ const MeasurementDetails = () => {
         {/* ROOMS LIST */}
         <section className="space-y-3">
           <div className="flex items-center justify-between px-1">
-            <h2 className="font-bold text-gray-900">{t('measurements.rooms.title', 'Бөлмелер')}</h2>
-            <span className="text-sm text-gray-500">{pluralize(totalRooms, NOUNS.room, lang)}</span>
+            <h2 className="font-bold text-foreground">{t('measurements.rooms.title', 'Бөлмелер')}</h2>
+            <span className="text-sm text-muted-foreground">{pluralize(totalRooms, NOUNS.room, lang)}</span>
           </div>
 
           {totalRooms === 0 ? (
-            <div className="bg-white rounded-2xl p-8 text-center shadow-sm border border-gray-100">
-              <div className="size-16 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-4">
-                <Icon name="add_home" size={28} className="text-gray-400" />
+            <div className="bg-card rounded-2xl p-8 text-center shadow-sm border border-border">
+              <div className="size-16 rounded-full bg-muted flex items-center justify-center mx-auto mb-4">
+                <Icon name="add_home" size={28} className="text-muted-foreground" />
               </div>
-              <p className="text-gray-500 mb-4">{t('measurements.rooms.empty', 'Әлі бөлме қосылмаған')}</p>
+              <p className="text-muted-foreground mb-4">{t('measurements.rooms.empty', 'Әлі бөлме қосылмаған')}</p>
               {['designer', 'admin'].includes(user?.role) && (
                 <button
                   onClick={() => navigate(`/designer/measurements/${id}/room`, { state: { measurementId: id, measurement } })}
@@ -445,22 +445,22 @@ const MeasurementDetails = () => {
                 const fabricCount = pb.fabricItems?.length || 0;
 
                 return (
-                  <div key={room.id} className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                  <div key={room.id} className="bg-card rounded-2xl shadow-sm border border-border overflow-hidden">
                     {/* Room Header - Collapsible */}
                     <div 
-                      className="p-4 flex items-center gap-3 cursor-pointer hover:bg-gray-50 transition-colors"
+                      className="p-4 flex items-center gap-3 cursor-pointer hover:bg-muted transition-colors"
                       onClick={() => toggleRoomExpand(room.id)}
                     >
                       <div className="size-12 rounded-xl bg-primary text-white flex items-center justify-center font-black text-lg">
                             {index + 1}
                           </div>
                       <div className="flex-1 min-w-0">
-                        <h3 className="font-bold text-gray-900 truncate">{room.roomName}</h3>
-                        <div className="flex items-center gap-2 text-xs text-gray-500">
+                        <h3 className="font-bold text-foreground truncate">{room.roomName}</h3>
+                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
                           <span>{widthM}{t('measurements.units.meter', 'м')} × {heightM}{t('measurements.units.meter', 'м')}</span>
                           {fabricCount > 0 && (
                             <>
-                              <span className="text-gray-300">|</span>
+                              <span className="text-muted-foreground">|</span>
                               <span>{fabricCount} {t('measurements.rooms.fabricUnit', 'мата')}</span>
                             </>
                           )}
@@ -474,10 +474,10 @@ const MeasurementDetails = () => {
 
                     {/* Expandable Content */}
                     {isExpanded && (
-                      <div className="border-t border-gray-100">
+                      <div className="border-t border-border">
                         {/* Edit Button — only designer/admin can edit rooms */}
                         {measurement.status !== 'completed' && ['designer', 'admin'].includes(user?.role) && (
-                          <div className="p-3 bg-gray-50 flex">
+                          <div className="p-3 bg-muted flex">
                             <button
                               onClick={(e) => { e.stopPropagation(); handleEditRoom(room); }}
                               className="flex-1 py-2 bg-primary text-white rounded-lg font-bold text-sm flex items-center justify-center gap-1"
@@ -490,20 +490,20 @@ const MeasurementDetails = () => {
 
                         {/* Fabrics */}
                         {pb.fabricItems && pb.fabricItems.length > 0 && (
-                          <div className="p-4 border-t border-gray-100">
-                            <p className="text-xs font-bold text-gray-500 uppercase mb-3">{t('measurements.rooms.fabrics', 'Маталар')}</p>
+                          <div className="p-4 border-t border-border">
+                            <p className="text-xs font-bold text-muted-foreground uppercase mb-3">{t('measurements.rooms.fabrics', 'Маталар')}</p>
                             <div className="space-y-2">
                               {pb.fabricItems.map((fabric, idx) => {
                                 const coef = fabric.fabricType === 'tulle' ? 3 : 2;
                                 const meters = Math.ceil(parseFloat(widthM) * coef + 0.5);
                                 return (
-                                  <div key={idx} className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
+                                  <div key={idx} className="flex items-center gap-3 p-3 bg-muted rounded-xl">
                                     <div className="size-10 rounded-lg bg-amber-100 text-amber-700 flex items-center justify-center">
                                       <Icon name="palette" />
                         </div>
                                     <div className="flex-1">
                                       <p className="font-bold text-sm">{fabric.fabricName || fabric.fabricCode}</p>
-                                      <p className="text-xs text-gray-500">
+                                      <p className="text-xs text-muted-foreground">
                                         {fabric.fabricType === 'tulle' ? t('measurements.rooms.tulle', 'Тюль (x3)') : t('measurements.rooms.curtain', 'Перде (x2)')} = {meters}{t('measurements.units.meter', 'м')}
                               </p>
                             </div>
@@ -517,8 +517,8 @@ const MeasurementDetails = () => {
 
                         {/* Estimate Table */}
                         {items.length > 0 && (
-                          <div className="p-4 border-t border-gray-100">
-                            <p className="text-xs font-bold text-gray-500 uppercase mb-3">{t('measurements.rooms.estimate', 'Смета')}</p>
+                          <div className="p-4 border-t border-border">
+                            <p className="text-xs font-bold text-muted-foreground uppercase mb-3">{t('measurements.rooms.estimate', 'Смета')}</p>
                             <div className="space-y-2">
                               {items.map((item, idx) => (
                                 <div key={idx} className="flex items-center justify-between py-2 border-b border-gray-50 last:border-0">
@@ -541,15 +541,15 @@ const MeasurementDetails = () => {
                                     </div>
                                     <div>
                                       <p className="text-sm font-medium">{item.name}</p>
-                                      <p className="text-xs text-gray-400">{item.qty} {item.unit} × {formatPrice(item.price)}</p>
+                                      <p className="text-xs text-muted-foreground">{item.qty} {item.unit} × {formatPrice(item.price)}</p>
                                     </div>
                                   </div>
                                   <p className="font-bold text-sm">{formatPrice(item.total)}</p>
                             </div>
                               ))}
                             </div>
-                            <div className="mt-3 pt-3 border-t border-gray-200 flex justify-between items-center">
-                              <span className="font-bold text-gray-700">{t('measurements.rooms.total', 'Барлығы:')}</span>
+                            <div className="mt-3 pt-3 border-t border-border flex justify-between items-center">
+                              <span className="font-bold text-foreground">{t('measurements.rooms.total', 'Барлығы:')}</span>
                               <span className="text-xl font-black text-green-600">{formatPrice(total)}</span>
                           </div>
                         </div>
@@ -557,8 +557,8 @@ const MeasurementDetails = () => {
 
                         {/* Photos */}
                         {room.designPhotos && room.designPhotos.length > 0 && (
-                          <div className="p-4 border-t border-gray-100">
-                            <p className="text-xs font-bold text-gray-500 uppercase mb-3">
+                          <div className="p-4 border-t border-border">
+                            <p className="text-xs font-bold text-muted-foreground uppercase mb-3">
                               {t('measurements.rooms.photos', 'Фото')} ({room.designPhotos.length})
                             </p>
                             <div className="grid grid-cols-3 gap-2">
@@ -577,7 +577,7 @@ const MeasurementDetails = () => {
 
                         {/* Notes */}
                         {room.notes && (
-                          <div className="p-4 border-t border-gray-100 bg-amber-50">
+                          <div className="p-4 border-t border-border bg-amber-50">
                             <p className="text-xs font-bold text-amber-700 uppercase mb-1">{t('measurements.rooms.note', 'Ескертпе')}</p>
                             <p className="text-sm text-amber-900">{room.notes}</p>
                         </div>
@@ -592,7 +592,7 @@ const MeasurementDetails = () => {
               {measurement.status !== 'completed' && ['designer', 'admin'].includes(user?.role) && (
               <button
                   onClick={() => navigate(`/designer/measurements/${id}/room`, { state: { measurementId: id, measurement } })}
-                  className="w-full py-4 border-2 border-dashed border-gray-200 rounded-2xl text-gray-500 font-bold hover:border-primary hover:text-primary hover:bg-primary/5 transition-all flex items-center justify-center gap-2"
+                  className="w-full py-4 border-2 border-dashed border-border rounded-2xl text-muted-foreground font-bold hover:border-primary hover:text-primary hover:bg-primary/5 transition-all flex items-center justify-center gap-2"
               >
                   <Icon name="add" />
                   {t('measurements.rooms.add', 'Бөлме қосу')}
@@ -604,9 +604,9 @@ const MeasurementDetails = () => {
 
         {/* Notes */}
         {measurement.notes && (
-          <section className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
-            <p className="text-xs font-bold text-gray-500 uppercase mb-2">{t('measurements.detail.generalNote', 'Жалпы ескертпе')}</p>
-            <p className="text-sm text-gray-700 whitespace-pre-line">{measurement.notes}</p>
+          <section className="bg-card rounded-2xl p-4 shadow-sm border border-border">
+            <p className="text-xs font-bold text-muted-foreground uppercase mb-2">{t('measurements.detail.generalNote', 'Жалпы ескертпе')}</p>
+            <p className="text-sm text-foreground whitespace-pre-line">{measurement.notes}</p>
           </section>
         )}
 
@@ -617,12 +617,12 @@ const MeasurementDetails = () => {
 
         {/* SUMMARY STATS */}
         <section className="grid grid-cols-2 gap-3">
-          <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 text-center">
+          <div className="bg-card rounded-xl p-4 shadow-sm border border-border text-center">
             <div className="size-10 rounded-full bg-primary/10 text-primary flex items-center justify-center mx-auto mb-2">
               <Icon name="door_sliding" />
             </div>
-            <p className="text-2xl font-black text-gray-900">{totalRooms}</p>
-            <p className="text-xs text-gray-500">{t('measurements.summary.rooms', 'Бөлме')}</p>
+            <p className="text-2xl font-black text-foreground">{totalRooms}</p>
+            <p className="text-xs text-muted-foreground">{t('measurements.summary.rooms', 'Бөлме')}</p>
           </div>
           {finance.plannedTotal <= 0 ? (
             <div className="rounded-xl p-4 border border-border-light bg-neutral-soft text-center">
@@ -698,8 +698,8 @@ const MeasurementDetails = () => {
         {totalRooms > 0 && (
           <section className="bg-gray-900 text-white rounded-2xl p-5">
             <div className="flex items-center justify-between mb-3">
-              <span className="text-gray-400">{t('measurements.summary.totalAmount', 'Жалпы сома')}</span>
-              <span className="text-sm text-gray-500">{pluralize(totalRooms, NOUNS.room, lang)}</span>
+              <span className="text-muted-foreground">{t('measurements.summary.totalAmount', 'Жалпы сома')}</span>
+              <span className="text-sm text-muted-foreground">{pluralize(totalRooms, NOUNS.room, lang)}</span>
             </div>
             <p className="text-4xl font-black">{formatPrice(totalEstimate)}</p>
           </section>
@@ -745,7 +745,7 @@ const MeasurementDetails = () => {
               disabled={completing || finance.paid < finance.eightyPercent}
               className={`w-full font-bold py-4 rounded-2xl shadow-lg transition-all flex items-center justify-center gap-2
                 ${finance.paid < finance.eightyPercent
-                  ? 'bg-gray-400 text-gray-200 cursor-not-allowed'
+                  ? 'bg-gray-400 text-muted-foreground cursor-not-allowed'
                   : 'bg-primary text-white hover:brightness-110'}
                 disabled:opacity-50`}
             >
@@ -767,7 +767,7 @@ const MeasurementDetails = () => {
               )}
             </button>
             {finance.paid < finance.eightyPercent && (
-              <p className="text-xs text-center text-gray-500 mt-2">
+              <p className="text-xs text-center text-muted-foreground mt-2">
                 {t('measurements.complete.hint', 'Өлшемді аяқтау үшін клиент минимум 80% төлеуі керек')}
               </p>
             )}
@@ -803,7 +803,7 @@ const MeasurementDetails = () => {
           <div className="relative w-full max-w-4xl">
             <button
               onClick={handleCloseImageModal}
-              className="absolute -top-12 right-0 size-10 rounded-full bg-white/10 text-white flex items-center justify-center hover:bg-white/20 transition-all"
+              className="absolute -top-12 right-0 size-10 rounded-full bg-card/10 text-white flex items-center justify-center hover:bg-card/20 transition-all"
             >
               <Icon name="close" />
             </button>

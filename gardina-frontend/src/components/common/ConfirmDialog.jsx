@@ -42,7 +42,7 @@ const ConfirmDialog = ({ isOpen, onClose, onConfirm, title, message, confirmText
   return (
     <div className="fixed inset-0 bg-black/60 z-[9999] flex items-center justify-center p-4 animate-in fade-in duration-200" onClick={onClose}>
       <div
-        className="bg-white rounded-2xl max-w-md w-full shadow-2xl animate-in zoom-in-95 duration-200"
+        className="bg-card rounded-2xl max-w-md w-full shadow-2xl animate-in zoom-in-95 duration-200"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header with gradient */}
@@ -57,14 +57,14 @@ const ConfirmDialog = ({ isOpen, onClose, onConfirm, title, message, confirmText
 
         {/* Content */}
         <div className="p-6">
-          <p className="text-gray-700 text-base leading-relaxed whitespace-pre-line">{message}</p>
+          <p className="text-foreground text-base leading-relaxed whitespace-pre-line">{message}</p>
         </div>
 
         {/* Actions */}
         <div className="px-6 pb-6 flex gap-3">
           <button
             onClick={onClose}
-            className="flex-1 px-6 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold rounded-xl transition-all"
+            className="flex-1 px-6 py-3 bg-muted hover:bg-muted text-foreground font-bold rounded-xl transition-all"
           >
             {cancelText}
           </button>

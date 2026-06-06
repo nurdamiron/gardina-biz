@@ -75,10 +75,10 @@ const ManagerDashboard = () => {
   return (
     <div className="bg-background-light min-h-screen pb-32">
       {/* Header */}
-      <header className="sticky top-0 z-30 bg-white/80 backdrop-blur-md border-b border-gray-100 px-4 py-3">
+      <header className="sticky top-0 z-30 bg-card/80 backdrop-blur-md border-b border-border px-4 py-3">
         <div>
-          <h1 className="text-xl font-bold text-gray-900 leading-tight">{t('dashboard.manager.panelTitle')}</h1>
-          <p className="text-gray-500 text-[11px] font-medium uppercase tracking-wide">{t('dashboard.manager.hello', { name: user?.name || '' })}</p>
+          <h1 className="text-xl font-bold text-foreground leading-tight">{t('dashboard.manager.panelTitle')}</h1>
+          <p className="text-muted-foreground text-[11px] font-medium uppercase tracking-wide">{t('dashboard.manager.hello', { name: user?.name || '' })}</p>
         </div>
       </header>
 
@@ -89,51 +89,51 @@ const ManagerDashboard = () => {
         ) : (
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
             {/* Scheduled Measurements */}
-            <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
+            <div className="bg-card rounded-2xl p-4 shadow-sm border border-border">
               <div className="flex items-center gap-3 mb-2">
                 <div className="size-10 rounded-full bg-primary/10 text-primary flex items-center justify-center">
                   <Icon name="calendar_today" />
                 </div>
-                <span className="text-3xl font-black text-gray-900">{stats.scheduledMeasurements}</span>
+                <span className="text-3xl font-black text-foreground">{stats.scheduledMeasurements}</span>
               </div>
-              <p className="text-sm font-bold text-gray-700">{t('dashboard.manager.measurements')}</p>
-              <p className="text-xs text-gray-500">{t('dashboard.manager.measurementsScheduled')}</p>
+              <p className="text-sm font-bold text-foreground">{t('dashboard.manager.measurements')}</p>
+              <p className="text-xs text-muted-foreground">{t('dashboard.manager.measurementsScheduled')}</p>
             </div>
 
             {/* Proposals Sent */}
-            <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
+            <div className="bg-card rounded-2xl p-4 shadow-sm border border-border">
               <div className="flex items-center gap-3 mb-2">
                 <div className="size-10 rounded-full bg-primary/5 text-primary flex items-center justify-center">
                   <Icon name="description" />
                 </div>
-                <span className="text-3xl font-black text-gray-900">{stats.proposalsSent}</span>
+                <span className="text-3xl font-black text-foreground">{stats.proposalsSent}</span>
               </div>
-              <p className="text-sm font-bold text-gray-700">{t('dashboard.funnel.proposals')}</p>
-              <p className="text-xs text-gray-500">{t('dashboard.manager.proposalsSent')}</p>
+              <p className="text-sm font-bold text-foreground">{t('dashboard.funnel.proposals')}</p>
+              <p className="text-xs text-muted-foreground">{t('dashboard.manager.proposalsSent')}</p>
             </div>
 
             {/* Closed Deals */}
-            <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
+            <div className="bg-card rounded-2xl p-4 shadow-sm border border-border">
               <div className="flex items-center gap-3 mb-2">
                 <div className="size-10 rounded-full bg-green-50 text-green-600 flex items-center justify-center">
                   <Icon name="check_circle" />
                 </div>
-                <span className="text-3xl font-black text-gray-900">{stats.closedDeals}</span>
+                <span className="text-3xl font-black text-foreground">{stats.closedDeals}</span>
               </div>
-              <p className="text-sm font-bold text-gray-700">{t('dashboard.statuses.completed')}</p>
-              <p className="text-xs text-gray-500">{t('dashboard.manager.closedSuccess')}</p>
+              <p className="text-sm font-bold text-foreground">{t('dashboard.statuses.completed')}</p>
+              <p className="text-xs text-muted-foreground">{t('dashboard.manager.closedSuccess')}</p>
             </div>
 
             {/* Total Revenue */}
-            <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
+            <div className="bg-card rounded-2xl p-4 shadow-sm border border-border">
               <div className="flex items-center gap-3 mb-2">
                 <div className="size-10 rounded-full bg-amber-50 text-amber-600 flex items-center justify-center">
                   <Icon name="payments" />
                 </div>
-                <span className="text-2xl font-black text-gray-900">{Math.round(stats.totalRevenue / 1000)}k</span>
+                <span className="text-2xl font-black text-foreground">{Math.round(stats.totalRevenue / 1000)}k</span>
               </div>
-              <p className="text-sm font-bold text-gray-700">{t('dashboard.stats.revenue')}</p>
-              <p className="text-xs text-gray-500">{t('dashboard.manager.revenueDeals')}</p>
+              <p className="text-sm font-bold text-foreground">{t('dashboard.stats.revenue')}</p>
+              <p className="text-xs text-muted-foreground">{t('dashboard.manager.revenueDeals')}</p>
             </div>
           </div>
         )}
@@ -195,7 +195,7 @@ const ManagerDashboard = () => {
           <div>
             <h2 className="text-lg font-bold mb-3">{t('dashboard.manager.urgentTasks')}</h2>
             {urgentTasks.length === 0 ? (
-              <div className="bg-white rounded-xl p-6 text-center shadow-sm">
+              <div className="bg-card rounded-xl p-6 text-center shadow-sm">
                 <Icon name="check_circle" size={40} className="text-green-500" />
                 <p className="text-text-secondary mt-2">{t('dashboard.manager.allDone')}</p>
               </div>
@@ -205,7 +205,7 @@ const ManagerDashboard = () => {
                   <div
                     key={idx}
                     onClick={task.action}
-                    className={`bg-white rounded-xl p-4 shadow-sm border-l-4 cursor-pointer hover:shadow-md transition-all ${task.severity === 'high' ? 'border-red-500' : 'border-yellow-500'
+                    className={`bg-card rounded-xl p-4 shadow-sm border-l-4 cursor-pointer hover:shadow-md transition-all ${task.severity === 'high' ? 'border-red-500' : 'border-yellow-500'
                       }`}
                   >
                     <div className="flex items-center gap-3">
@@ -237,8 +237,8 @@ const ManagerDashboard = () => {
               const today = new Date().toDateString();
               return new Date(m.scheduledAt).toDateString() === today;
             }).length === 0 ? (
-              <div className="bg-white rounded-xl p-6 text-center shadow-sm">
-                <Icon name="event_busy" size={40} className="text-gray-300" />
+              <div className="bg-card rounded-xl p-6 text-center shadow-sm">
+                <Icon name="event_busy" size={40} className="text-muted-foreground" />
                 <p className="text-text-secondary mt-2">{t('dashboard.manager.noTodayMeasurements', 'Бүгін өлшем жоқ')}</p>
               </div>
             ) : (
@@ -249,7 +249,7 @@ const ManagerDashboard = () => {
                     return new Date(m.scheduledAt).toDateString() === today;
                   })
                   .map(m => (
-                    <div key={m.id} className="bg-white rounded-xl p-4 shadow-sm">
+                    <div key={m.id} className="bg-card rounded-xl p-4 shadow-sm">
                       <div className="flex justify-between items-start">
                         <div>
                           <p className="text-xs text-primary font-bold">
@@ -274,9 +274,9 @@ const ManagerDashboard = () => {
         <div>
           <h2 className="text-lg font-bold mb-3 flex items-center justify-between">
             <span>{t('dashboard.manager.topDesigners', 'Топ дизайнерлер')}</span>
-            <span className="text-sm text-gray-500 font-normal">{t('dashboard.manager.thisMonth', 'осы ай')}</span>
+            <span className="text-sm text-muted-foreground font-normal">{t('dashboard.manager.thisMonth', 'осы ай')}</span>
           </h2>
-          <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
+          <div className="bg-card rounded-2xl p-4 shadow-sm border border-border">
             <div className="space-y-3">
               {(analytics.designersRanking?.slice(0, 5) || [
                 { name: 'Айдос Қасымов', completedMeasurements: 12, totalRevenue: 4500000 },
@@ -285,7 +285,7 @@ const ManagerDashboard = () => {
                 { name: 'Гүлжан Омарова', completedMeasurements: 7, totalRevenue: 2900000 },
                 { name: 'Қайрат Нұрлыбеков', completedMeasurements: 5, totalRevenue: 2100000 }
               ]).map((designer, idx) => (
-                <div key={idx} className="flex items-center justify-between p-3 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors">
+                <div key={idx} className="flex items-center justify-between p-3 bg-muted rounded-xl hover:bg-muted transition-colors">
                   <div className="flex items-center gap-3">
                     <div className={`size-8 rounded-full flex items-center justify-center text-white font-bold ${
                       idx === 0 ? 'bg-yellow-500' : idx === 1 ? 'bg-gray-400' : idx === 2 ? 'bg-orange-600' : 'bg-gray-300'
@@ -293,13 +293,13 @@ const ManagerDashboard = () => {
                       {idx + 1}
                     </div>
                     <div>
-                      <p className="font-bold text-sm text-gray-900">{designer.name}</p>
-                      <p className="text-xs text-gray-500">{designer.completedMeasurements || designer.sales || 0} {t('dashboard.manager.salesUnit', 'сатылым')}</p>
+                      <p className="font-bold text-sm text-foreground">{designer.name}</p>
+                      <p className="text-xs text-muted-foreground">{designer.completedMeasurements || designer.sales || 0} {t('dashboard.manager.salesUnit', 'сатылым')}</p>
                     </div>
                   </div>
                   <div className="text-right">
                     <p className="font-bold text-green-600">{((designer.totalRevenue || designer.amount || 0) / 1000000).toFixed(1)}M ₸</p>
-                    <p className="text-xs text-gray-500">{(((designer.totalRevenue || designer.amount || 0) / 16600000) * 100).toFixed(0)}%</p>
+                    <p className="text-xs text-muted-foreground">{(((designer.totalRevenue || designer.amount || 0) / 16600000) * 100).toFixed(0)}%</p>
                   </div>
                 </div>
               ))}
@@ -320,14 +320,14 @@ const ManagerDashboard = () => {
           <div className="grid grid-cols-2 gap-3">
             <button
               onClick={() => navigate('/manager/clients')}
-              className="bg-white hover:bg-gray-50 border border-gray-200 text-gray-700 font-bold py-4 rounded-xl shadow-sm transition-all flex flex-col items-center justify-center gap-2"
+              className="bg-card hover:bg-muted border border-border text-foreground font-bold py-4 rounded-xl shadow-sm transition-all flex flex-col items-center justify-center gap-2"
             >
               <Icon name="group" size={24} className="text-primary" />
               <p className="text-sm">{t('dashboard.manager.clients', 'Клиенттер')}</p>
             </button>
             <button
               onClick={() => navigate('/manager/orders')}
-              className="bg-white hover:bg-gray-50 border border-gray-200 text-gray-700 font-bold py-4 rounded-xl shadow-sm transition-all flex flex-col items-center justify-center gap-2"
+              className="bg-card hover:bg-muted border border-border text-foreground font-bold py-4 rounded-xl shadow-sm transition-all flex flex-col items-center justify-center gap-2"
             >
               <Icon name="handshake" size={24} className="text-green-600" />
               <p className="text-sm">{t('dashboard.manager.orders', 'Тапсырыстар')}</p>

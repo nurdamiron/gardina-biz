@@ -178,11 +178,11 @@ const AdminDashboard = () => {
     return (
         <div className="bg-background-light min-h-screen pb-32">
             {/* Header */}
-            <header className="sticky top-0 z-30 bg-white/80 backdrop-blur-md border-b border-gray-100 px-4 py-4">
+            <header className="sticky top-0 z-30 bg-card/80 backdrop-blur-md border-b border-border px-4 py-4">
                 <div className="flex items-center justify-between mb-3">
-                    <h1 className="text-xl font-bold text-gray-900">{t('adminDashboard.title')}</h1>
-                    <button onClick={refreshData} className="size-10 rounded-full bg-gray-50 hover:bg-gray-100 flex items-center justify-center transition-colors">
-                        <Icon name="refresh" className="text-gray-600" />
+                    <h1 className="text-xl font-bold text-foreground">{t('adminDashboard.title')}</h1>
+                    <button onClick={refreshData} className="size-10 rounded-full bg-muted hover:bg-muted flex items-center justify-center transition-colors">
+                        <Icon name="refresh" className="text-muted-foreground" />
                     </button>
                 </div>
 
@@ -191,7 +191,7 @@ const AdminDashboard = () => {
                     <button
                         onClick={() => setActiveTab('overview')}
                         className={`px-4 py-2 rounded-lg font-bold text-sm transition-all whitespace-nowrap ${
-                            activeTab === 'overview' ? 'bg-primary text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                            activeTab === 'overview' ? 'bg-primary text-white' : 'bg-muted text-muted-foreground hover:bg-muted'
                         }`}
                     >
                         {t('adminDashboard.tabs.overview')}
@@ -199,7 +199,7 @@ const AdminDashboard = () => {
                     <button
                         onClick={() => setActiveTab('timeline')}
                         className={`px-4 py-2 rounded-lg font-bold text-sm transition-all whitespace-nowrap ${
-                            activeTab === 'timeline' ? 'bg-primary text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                            activeTab === 'timeline' ? 'bg-primary text-white' : 'bg-muted text-muted-foreground hover:bg-muted'
                         }`}
                     >
                         {t('adminDashboard.tabs.timeline')}
@@ -207,7 +207,7 @@ const AdminDashboard = () => {
                     <button
                         onClick={() => setActiveTab('finance')}
                         className={`px-4 py-2 rounded-lg font-bold text-sm transition-all whitespace-nowrap ${
-                            activeTab === 'finance' ? 'bg-primary text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                            activeTab === 'finance' ? 'bg-primary text-white' : 'bg-muted text-muted-foreground hover:bg-muted'
                         }`}
                     >
                         {t('adminDashboard.tabs.finance')}
@@ -215,7 +215,7 @@ const AdminDashboard = () => {
                     <button
                         onClick={() => setActiveTab('team')}
                         className={`px-4 py-2 rounded-lg font-bold text-sm transition-all whitespace-nowrap ${
-                            activeTab === 'team' ? 'bg-primary text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                            activeTab === 'team' ? 'bg-primary text-white' : 'bg-muted text-muted-foreground hover:bg-muted'
                         }`}
                     >
                         {t('adminDashboard.tabs.team')}
@@ -223,7 +223,7 @@ const AdminDashboard = () => {
                     <button
                         onClick={() => setActiveTab('products')}
                         className={`px-4 py-2 rounded-lg font-bold text-sm transition-all whitespace-nowrap ${
-                            activeTab === 'products' ? 'bg-primary text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                            activeTab === 'products' ? 'bg-primary text-white' : 'bg-muted text-muted-foreground hover:bg-muted'
                         }`}
                     >
                         {t('adminDashboard.tabs.products')}
@@ -231,7 +231,7 @@ const AdminDashboard = () => {
                     <button
                         onClick={() => setActiveTab('clients')}
                         className={`px-4 py-2 rounded-lg font-bold text-sm transition-all whitespace-nowrap ${
-                            activeTab === 'clients' ? 'bg-primary text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                            activeTab === 'clients' ? 'bg-primary text-white' : 'bg-muted text-muted-foreground hover:bg-muted'
                         }`}
                     >
                         {t('adminDashboard.tabs.clients')}
@@ -239,7 +239,7 @@ const AdminDashboard = () => {
                     <button
                         onClick={() => setActiveTab('leads')}
                         className={`relative px-4 py-2 rounded-lg font-bold text-sm transition-all whitespace-nowrap ${
-                            activeTab === 'leads' ? 'bg-primary text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                            activeTab === 'leads' ? 'bg-primary text-white' : 'bg-muted text-muted-foreground hover:bg-muted'
                         }`}
                     >
                         Заявки с сайта
@@ -296,7 +296,7 @@ const AdminDashboard = () => {
 
                         {/* Left: nav grid */}
                         <div className="space-y-4">
-                            <h2 className="text-sm font-bold text-gray-400 uppercase tracking-wider">{t('adminDashboard.sections.quickActions')}</h2>
+                            <h2 className="text-sm font-bold text-muted-foreground uppercase tracking-wider">{t('adminDashboard.sections.quickActions')}</h2>
 
                             {/* 6-card uniform grid: catalog + nav + AI design studio */}
                             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 gap-3">
@@ -326,17 +326,17 @@ const AdminDashboard = () => {
 
                             {/* Recent measurements table — mobile: hidden on very small, shows on md+ */}
                             <div className="lg:hidden">
-                                <h2 className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-3">{lang === 'kz' ? 'Соңғы өлшемдер' : 'Последние замеры'}</h2>
+                                <h2 className="text-sm font-bold text-muted-foreground uppercase tracking-wider mb-3">{lang === 'kz' ? 'Соңғы өлшемдер' : 'Последние замеры'}</h2>
                                 <div className="space-y-2">
                                     {measurements.slice(0, 3).map(m => (
                                         <div key={m.id} onClick={() => navigate(`/measurements/${m.id}`)}
-                                            className="bg-white rounded-xl px-4 py-3 border border-gray-100 flex items-center gap-3 cursor-pointer hover:border-primary/30 transition-all">
+                                            className="bg-card rounded-xl px-4 py-3 border border-border flex items-center gap-3 cursor-pointer hover:border-primary/30 transition-all">
                                             <div className={`size-2 rounded-full shrink-0 ${m.status === 'completed' ? 'bg-emerald-500' : m.status === 'scheduled' ? 'bg-primary' : 'bg-amber-400'}`} />
                                             <div className="flex-1 min-w-0">
                                                 <p className="text-sm font-bold truncate">{m.clientName || '—'}</p>
-                                                <p className="text-[11px] text-gray-400 truncate">{m.address || '—'}</p>
+                                                <p className="text-[11px] text-muted-foreground truncate">{m.address || '—'}</p>
                                             </div>
-                                            <Icon name="chevron_right" size={16} className="text-gray-300 shrink-0" />
+                                            <Icon name="chevron_right" size={16} className="text-muted-foreground shrink-0" />
                                         </div>
                                     ))}
                                 </div>
@@ -345,10 +345,10 @@ const AdminDashboard = () => {
 
                         {/* Right: activity sidebar (desktop only) */}
                         <div className="hidden lg:flex flex-col gap-3">
-                            <h2 className="text-sm font-bold text-gray-400 uppercase tracking-wider">{lang === 'kz' ? 'Соңғы өлшемдер' : 'Последние замеры'}</h2>
-                            <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden flex-1">
+                            <h2 className="text-sm font-bold text-muted-foreground uppercase tracking-wider">{lang === 'kz' ? 'Соңғы өлшемдер' : 'Последние замеры'}</h2>
+                            <div className="bg-card rounded-2xl border border-border overflow-hidden flex-1">
                                 {measurements.slice(0, 7).length === 0 ? (
-                                    <div className="p-6 text-center text-sm text-gray-400">
+                                    <div className="p-6 text-center text-sm text-muted-foreground">
                                         <Icon name="inbox" size={28} className="mx-auto mb-2 opacity-30" />
                                         {lang === 'kz' ? 'Өлшем жоқ' : 'Замеров нет'}
                                     </div>
@@ -356,22 +356,22 @@ const AdminDashboard = () => {
                                     <div className="divide-y divide-gray-50">
                                         {measurements.slice(0, 7).map(m => (
                                             <div key={m.id} onClick={() => navigate(`/measurements/${m.id}`)}
-                                                className="px-4 py-3 flex items-center gap-3 cursor-pointer hover:bg-gray-50 transition-colors group">
+                                                className="px-4 py-3 flex items-center gap-3 cursor-pointer hover:bg-muted transition-colors group">
                                                 <div className={`size-2 rounded-full shrink-0 ${
                                                     m.status === 'completed' ? 'bg-emerald-500' :
                                                     m.status === 'in_progress' ? 'bg-amber-400' :
                                                     m.status === 'scheduled' ? 'bg-primary' : 'bg-gray-300'
                                                 }`} />
                                                 <div className="flex-1 min-w-0">
-                                                    <p className="text-sm font-semibold text-gray-800 truncate group-hover:text-primary transition-colors">{m.clientName || '—'}</p>
-                                                    <p className="text-[11px] text-gray-400 truncate">{m.address || '—'}</p>
+                                                    <p className="text-sm font-semibold text-foreground truncate group-hover:text-primary transition-colors">{m.clientName || '—'}</p>
+                                                    <p className="text-[11px] text-muted-foreground truncate">{m.address || '—'}</p>
                                                 </div>
-                                                <Icon name="chevron_right" size={14} className="text-gray-300 shrink-0 group-hover:text-primary transition-colors" />
+                                                <Icon name="chevron_right" size={14} className="text-muted-foreground shrink-0 group-hover:text-primary transition-colors" />
                                             </div>
                                         ))}
                                     </div>
                                 )}
-                                <div className="border-t border-gray-100 px-4 py-2.5">
+                                <div className="border-t border-border px-4 py-2.5">
                                     <button onClick={() => navigate('/measurements')}
                                         className="w-full text-xs font-semibold text-primary hover:text-primary-dark transition-colors text-center">
                                         {lang === 'kz' ? 'Барлығын көру →' : 'Смотреть все →'}
@@ -387,7 +387,7 @@ const AdminDashboard = () => {
                     <div className="space-y-4">
                         <div className="flex items-center justify-between">
                             <h2 className="text-lg font-bold">Өлшемдер Timeline</h2>
-                            <span className="text-sm text-gray-500">{measurements.length} өлшем</span>
+                            <span className="text-sm text-muted-foreground">{measurements.length} өлшем</span>
                         </div>
 
                         {loading ? (
@@ -395,9 +395,9 @@ const AdminDashboard = () => {
                                 <div className="size-12 border-4 border-primary/30 border-t-primary rounded-full animate-spin mx-auto"></div>
                             </div>
                         ) : Object.keys(groupedMeasurements).length === 0 ? (
-                            <div className="bg-white rounded-2xl p-8 text-center">
-                                <Icon name="event_busy" size={40} className="text-gray-300" />
-                                <p className="text-gray-500 mt-3">Өлшем жоқ</p>
+                            <div className="bg-card rounded-2xl p-8 text-center">
+                                <Icon name="event_busy" size={40} className="text-muted-foreground" />
+                                <p className="text-muted-foreground mt-3">Өлшем жоқ</p>
                             </div>
                         ) : (
                             <div className="space-y-6">
@@ -446,17 +446,17 @@ const AdminDashboard = () => {
                                                             {/* Measurement Card */}
                                                             <div
                                                                 onClick={() => navigate(`/measurements/${measurement.id}`)}
-                                                                className="bg-white rounded-xl p-4 shadow-sm border border-gray-200 hover:border-primary/40 hover:shadow-md transition-all cursor-pointer"
+                                                                className="bg-card rounded-xl p-4 shadow-sm border border-border hover:border-primary/40 hover:shadow-md transition-all cursor-pointer"
                                                             >
                                                                 <div className="flex items-start justify-between mb-3">
                                                                     <div className="flex-1">
                                                                         <div className="flex items-center gap-2 mb-1">
-                                                                            <h3 className="font-bold text-gray-900">{measurement.clientName}</h3>
+                                                                            <h3 className="font-bold text-foreground">{measurement.clientName}</h3>
                                                                             <span className={`px-2 py-0.5 rounded-lg text-[10px] font-bold text-white ${statusColors[measurement.status]}`}>
                                                                                 {statusLabels[measurement.status]}
                                                                             </span>
                                                                         </div>
-                                                                        <p className="text-xs text-gray-500 flex items-center gap-1">
+                                                                        <p className="text-xs text-muted-foreground flex items-center gap-1">
                                                                             <Icon name="schedule" size={14} />
                                                                             {formatTime24(measurement.scheduledAt)}
                                                                         </p>
@@ -464,7 +464,7 @@ const AdminDashboard = () => {
                                                                     {totalPrice > 0 && (
                                                                         <div className="text-right">
                                                                             <p className="text-lg font-black text-green-600">{totalPrice.toLocaleString()} ₸</p>
-                                                                            <p className="text-[10px] text-gray-500">Болжалды құн</p>
+                                                                            <p className="text-[10px] text-muted-foreground">Болжалды құн</p>
                                                                         </div>
                                                                     )}
                                                                 </div>
@@ -483,7 +483,7 @@ const AdminDashboard = () => {
 
                                                                 {/* Address */}
                                                                 {measurement.address && (
-                                                                    <div className="flex items-center gap-1 text-xs text-gray-500 mt-2">
+                                                                    <div className="flex items-center gap-1 text-xs text-muted-foreground mt-2">
                                                                         <Icon name="location_on" size={14} />
                                                                         <span className="line-clamp-1">{measurement.address}</span>
                                                                     </div>
@@ -514,8 +514,8 @@ const AdminDashboard = () => {
                         </div>
 
                         {/* Breakdown */}
-                        <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-200">
-                            <h3 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
+                        <div className="bg-card rounded-2xl p-5 shadow-sm border border-border">
+                            <h3 className="font-bold text-foreground mb-4 flex items-center gap-2">
                                 <Icon name="analytics" className="text-primary" />
                                 Кіріс бөлінісі
                             </h3>
@@ -569,19 +569,19 @@ const AdminDashboard = () => {
                         </div>
 
                         {/* Performance Indicators */}
-                        <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-200">
-                            <h3 className="font-bold text-gray-900 mb-4">Көрсеткіштер</h3>
+                        <div className="bg-card rounded-2xl p-5 shadow-sm border border-border">
+                            <h3 className="font-bold text-foreground mb-4">Көрсеткіштер</h3>
                             <div className="space-y-3">
                                 <div>
                                     <div className="flex justify-between text-sm mb-1">
-                                        <span className="text-gray-600">Аяқталу жылдамдығы</span>
-                                        <span className="font-bold text-gray-900">
+                                        <span className="text-muted-foreground">Аяқталу жылдамдығы</span>
+                                        <span className="font-bold text-foreground">
                                             {stats.totalMeasurements > 0
                                                 ? ((stats.completedMeasurements / stats.totalMeasurements) * 100).toFixed(0)
                                                 : 0}%
                                         </span>
                                     </div>
-                                    <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+                                    <div className="h-2 bg-muted rounded-full overflow-hidden">
                                         <div
                                             className="h-full bg-gradient-to-r from-green-500 to-green-600 transition-all duration-500"
                                             style={{ width: `${stats.totalMeasurements > 0 ? (stats.completedMeasurements / stats.totalMeasurements) * 100 : 0}%` }}
@@ -591,8 +591,8 @@ const AdminDashboard = () => {
 
                                 <div>
                                     <div className="flex justify-between text-sm mb-1">
-                                        <span className="text-gray-600">Орташа өлшем құны</span>
-                                        <span className="font-bold text-gray-900">
+                                        <span className="text-muted-foreground">Орташа өлшем құны</span>
+                                        <span className="font-bold text-foreground">
                                             {stats.completedMeasurements > 0
                                                 ? (financialBreakdown.totalRevenue / stats.completedMeasurements).toLocaleString(0)
                                                 : 0} ₸
@@ -651,20 +651,20 @@ const AdminDashboard = () => {
                         />
 
                         {/* Efficiency Stats */}
-                        <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
-                            <h3 className="font-bold text-gray-900 mb-4">Тиімділік көрсеткіштері</h3>
+                        <div className="bg-card rounded-2xl p-5 shadow-sm border border-border">
+                            <h3 className="font-bold text-foreground mb-4">Тиімділік көрсеткіштері</h3>
                             <div className="space-y-3">
                                 <div className="flex justify-between items-center">
-                                    <span className="text-sm text-gray-600">Орташа өлшем уақыты</span>
-                                    <span className="font-bold text-gray-900">2.5 сағат</span>
+                                    <span className="text-sm text-muted-foreground">Орташа өлшем уақыты</span>
+                                    <span className="font-bold text-foreground">2.5 сағат</span>
                                 </div>
                                 <div className="flex justify-between items-center">
-                                    <span className="text-sm text-gray-600">Конверсия өлшем → мәміле</span>
+                                    <span className="text-sm text-muted-foreground">Конверсия өлшем → мәміле</span>
                                     <span className="font-bold text-green-600">68%</span>
                                 </div>
                                 <div className="flex justify-between items-center">
-                                    <span className="text-sm text-gray-600">Орташа чек</span>
-                                    <span className="font-bold text-gray-900">450,000 ₸</span>
+                                    <span className="text-sm text-muted-foreground">Орташа чек</span>
+                                    <span className="font-bold text-foreground">450,000 ₸</span>
                                 </div>
                             </div>
                         </div>
@@ -708,16 +708,16 @@ const AdminDashboard = () => {
                         />
 
                         {/* Top Products */}
-                        <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
-                            <h3 className="font-bold text-gray-900 mb-4">Топ сатылымдар</h3>
+                        <div className="bg-card rounded-2xl p-5 shadow-sm border border-border">
+                            <h3 className="font-bold text-foreground mb-4">Топ сатылымдар</h3>
                             <div className="space-y-3">
                                 {['Blackout Royal', 'Tюль Crystal', 'Карниз Premium', 'Жалюзи Wood'].map((product, idx) => (
-                                    <div key={idx} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                    <div key={idx} className="flex items-center justify-between p-3 bg-muted rounded-lg">
                                         <div className="flex items-center gap-3">
-                                            <span className="text-lg font-bold text-gray-500">#{idx + 1}</span>
+                                            <span className="text-lg font-bold text-muted-foreground">#{idx + 1}</span>
                                             <div>
-                                                <p className="font-bold text-gray-900">{product}</p>
-                                                <p className="text-xs text-gray-500">15 сатылым</p>
+                                                <p className="font-bold text-foreground">{product}</p>
+                                                <p className="text-xs text-muted-foreground">15 сатылым</p>
                                             </div>
                                         </div>
                                         <span className="font-bold text-green-600">1,500,000 ₸</span>
@@ -778,8 +778,8 @@ const AdminDashboard = () => {
                         />
 
                         {/* Geographic Distribution */}
-                        <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
-                            <h3 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
+                        <div className="bg-card rounded-2xl p-5 shadow-sm border border-border">
+                            <h3 className="font-bold text-foreground mb-4 flex items-center gap-2">
                                 <Icon name="location_on" className="text-primary" />
                                 География бойынша
                             </h3>
@@ -787,31 +787,31 @@ const AdminDashboard = () => {
                                 <div className="flex items-center justify-between">
                                     <div className="flex items-center gap-2">
                                         <div className="size-2 rounded-full bg-primary"></div>
-                                        <span className="text-sm text-gray-700">Алматы</span>
+                                        <span className="text-sm text-foreground">Алматы</span>
                                     </div>
                                     <div className="flex items-center gap-2">
                                         <span className="font-bold">65%</span>
-                                        <span className="text-xs text-gray-500">(98 клиент)</span>
+                                        <span className="text-xs text-muted-foreground">(98 клиент)</span>
                                     </div>
                                 </div>
                                 <div className="flex items-center justify-between">
                                     <div className="flex items-center gap-2">
                                         <div className="size-2 rounded-full bg-green-500"></div>
-                                        <span className="text-sm text-gray-700">Астана</span>
+                                        <span className="text-sm text-foreground">Астана</span>
                                     </div>
                                     <div className="flex items-center gap-2">
                                         <span className="font-bold">25%</span>
-                                        <span className="text-xs text-gray-500">(38 клиент)</span>
+                                        <span className="text-xs text-muted-foreground">(38 клиент)</span>
                                     </div>
                                 </div>
                                 <div className="flex items-center justify-between">
                                     <div className="flex items-center gap-2">
                                         <div className="size-2 rounded-full bg-primary-light"></div>
-                                        <span className="text-sm text-gray-700">Басқа</span>
+                                        <span className="text-sm text-foreground">Басқа</span>
                                     </div>
                                     <div className="flex items-center gap-2">
                                         <span className="font-bold">10%</span>
-                                        <span className="text-xs text-gray-500">(14 клиент)</span>
+                                        <span className="text-xs text-muted-foreground">(14 клиент)</span>
                                     </div>
                                 </div>
                             </div>
@@ -823,29 +823,29 @@ const AdminDashboard = () => {
                 {activeTab === 'leads' && (
                     <div className="space-y-4">
                         <div className="flex items-center justify-between">
-                            <h2 className="text-sm font-bold text-gray-400 uppercase tracking-wider">Заявки с лендинга</h2>
+                            <h2 className="text-sm font-bold text-muted-foreground uppercase tracking-wider">Заявки с лендинга</h2>
                             <button
                                 onClick={loadLeads}
-                                className="size-8 rounded-full bg-white border border-gray-200 flex items-center justify-center hover:bg-gray-50 transition-colors"
+                                className="size-8 rounded-full bg-card border border-border flex items-center justify-center hover:bg-muted transition-colors"
                             >
-                                <Icon name="refresh" size={16} className="text-gray-500" />
+                                <Icon name="refresh" size={16} className="text-muted-foreground" />
                             </button>
                         </div>
 
                         {leadsLoading ? (
                             <div className="space-y-3">
                                 {[1, 2, 3].map((i) => (
-                                    <div key={i} className="bg-white rounded-2xl p-4 animate-pulse">
-                                        <div className="h-4 bg-gray-100 rounded w-1/3 mb-2" />
-                                        <div className="h-3 bg-gray-100 rounded w-1/2" />
+                                    <div key={i} className="bg-card rounded-2xl p-4 animate-pulse">
+                                        <div className="h-4 bg-muted rounded w-1/3 mb-2" />
+                                        <div className="h-3 bg-muted rounded w-1/2" />
                                     </div>
                                 ))}
                             </div>
                         ) : leads.length === 0 ? (
-                            <div className="bg-white rounded-2xl p-10 flex flex-col items-center gap-3 text-center shadow-sm border border-gray-100">
-                                <Icon name="inbox" size={40} className="text-gray-300" />
-                                <p className="text-gray-500 font-medium">Заявок пока нет</p>
-                                <p className="text-xs text-gray-400">Они появятся, когда кто-то заполнит форму на сайте</p>
+                            <div className="bg-card rounded-2xl p-10 flex flex-col items-center gap-3 text-center shadow-sm border border-border">
+                                <Icon name="inbox" size={40} className="text-muted-foreground" />
+                                <p className="text-muted-foreground font-medium">Заявок пока нет</p>
+                                <p className="text-xs text-muted-foreground">Они появятся, когда кто-то заполнит форму на сайте</p>
                             </div>
                         ) : (
                             <div className="space-y-3">
@@ -854,7 +854,7 @@ const AdminDashboard = () => {
                                         new:       { label: 'Новый',        cls: 'bg-blue-100 text-blue-700' },
                                         contacted: { label: 'Связались',    cls: 'bg-amber-100 text-amber-700' },
                                         converted: { label: 'Клиент',       cls: 'bg-green-100 text-green-700' },
-                                        rejected:  { label: 'Отказ',        cls: 'bg-gray-100 text-gray-500' },
+                                        rejected:  { label: 'Отказ',        cls: 'bg-muted text-muted-foreground' },
                                     };
                                     const cfg = statusCfg[lead.status] || statusCfg.new;
                                     const date = new Date(lead.created_at);
@@ -862,11 +862,11 @@ const AdminDashboard = () => {
                                     const timeStr = date.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
 
                                     return (
-                                        <div key={lead.id} className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
+                                        <div key={lead.id} className="bg-card rounded-2xl p-4 shadow-sm border border-border">
                                             <div className="flex items-start justify-between gap-3">
                                                 <div className="flex-1 min-w-0">
                                                     <div className="flex items-center gap-2 mb-1">
-                                                        <p className="font-bold text-gray-900 text-sm">{lead.name}</p>
+                                                        <p className="font-bold text-foreground text-sm">{lead.name}</p>
                                                         <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${cfg.cls}`}>{cfg.label}</span>
                                                     </div>
                                                     <a
@@ -876,12 +876,12 @@ const AdminDashboard = () => {
                                                         {lead.phone}
                                                     </a>
                                                     {lead.salon && (
-                                                        <p className="text-xs text-gray-500 mt-0.5">Салон: {lead.salon}</p>
+                                                        <p className="text-xs text-muted-foreground mt-0.5">Салон: {lead.salon}</p>
                                                     )}
                                                     {lead.comment && (
-                                                        <p className="text-xs text-gray-400 mt-1 italic">"{lead.comment}"</p>
+                                                        <p className="text-xs text-muted-foreground mt-1 italic">"{lead.comment}"</p>
                                                     )}
-                                                    <p className="text-[10px] text-gray-300 mt-1.5">{dateStr} · {timeStr}</p>
+                                                    <p className="text-[10px] text-muted-foreground mt-1.5">{dateStr} · {timeStr}</p>
                                                 </div>
 
                                                 <div className="flex flex-col gap-1.5 shrink-0">
@@ -906,7 +906,7 @@ const AdminDashboard = () => {
 
                                             {/* Status actions */}
                                             {lead.status !== 'converted' && lead.status !== 'rejected' && (
-                                                <div className="flex gap-2 mt-3 pt-3 border-t border-gray-100">
+                                                <div className="flex gap-2 mt-3 pt-3 border-t border-border">
                                                     {lead.status === 'new' && (
                                                         <button
                                                             onClick={() => updateLeadStatus(lead.id, 'contacted')}
@@ -926,7 +926,7 @@ const AdminDashboard = () => {
                                                     <button
                                                         onClick={() => updateLeadStatus(lead.id, 'rejected')}
                                                         disabled={updatingLead === lead.id}
-                                                        className="flex-1 py-1.5 text-xs font-bold rounded-lg bg-gray-50 text-gray-500 hover:bg-gray-100 transition-colors disabled:opacity-50"
+                                                        className="flex-1 py-1.5 text-xs font-bold rounded-lg bg-muted text-muted-foreground hover:bg-muted transition-colors disabled:opacity-50"
                                                     >
                                                         Отказ
                                                     </button>

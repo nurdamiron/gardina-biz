@@ -184,11 +184,11 @@ const MeasurementItemForm = ({ onAdd, roomHeight, corniceWidth }) => {
     };
 
     return (
-        <div className="bg-gray-50 p-3 rounded-xl border border-gray-200 space-y-3">
+        <div className="bg-muted p-3 rounded-xl border border-border space-y-3">
             <div className="relative">
-                <div className="flex bg-white rounded-lg border border-gray-300 focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20 transition-all">
+                <div className="flex bg-card rounded-lg border border-input focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20 transition-all">
                     <div className="pl-3 flex items-center pointer-events-none">
-                        <Icon name="search" className="text-gray-400" />
+                        <Icon name="search" className="text-muted-foreground" />
                     </div>
                     <input
                         ref={inputRef}
@@ -207,7 +207,7 @@ const MeasurementItemForm = ({ onAdd, roomHeight, corniceWidth }) => {
 
                 {/* Dropdown */}
                 {showDropdown && searchResults.length > 0 && (
-                    <div className="absolute top-full left-0 right-0 z-50 bg-white border border-gray-200 shadow-xl rounded-lg max-h-64 overflow-y-auto mt-1 no-scrollbar">
+                    <div className="absolute top-full left-0 right-0 z-50 bg-card border border-border shadow-xl rounded-lg max-h-64 overflow-y-auto mt-1 no-scrollbar">
                         {searchResults.map(p => (
                             <div
                                 key={p.id}
@@ -215,17 +215,17 @@ const MeasurementItemForm = ({ onAdd, roomHeight, corniceWidth }) => {
                                 className="p-3 hover:bg-primary/5 cursor-pointer border-b border-gray-50 last:border-0 transition-colors group"
                             >
                                 <div className="flex justify-between items-center mb-1">
-                                    <div className="font-bold text-gray-900 group-hover:text-primary transition-colors">{p.code}</div>
+                                    <div className="font-bold text-foreground group-hover:text-primary transition-colors">{p.code}</div>
                                     <div className={`text-[10px] uppercase font-bold px-2 py-0.5 rounded-full ${p.type === 'tulle' || p.type === 'curtain' ? 'bg-primary/15 text-primary-dark' :
-                                            p.type === 'cornice' ? 'bg-orange-100 text-orange-700' : 'bg-gray-100 text-gray-700'
+                                            p.type === 'cornice' ? 'bg-orange-100 text-orange-700' : 'bg-muted text-foreground'
                                         }`}>
                                         {p.type === 'tulle' ? 'Тюль' :
                                             p.type === 'curtain' ? 'Перде' :
                                                 p.type === 'cornice' ? 'Карниз' : 'Аксессуар'}
                                     </div>
                                 </div>
-                                <div className="text-xs text-gray-500 truncate">{p.name || 'Атауы жоқ'}</div>
-                                <div className="text-xs font-bold mt-1 text-gray-900">{p.price_per_meter || p.sellPrice} ₸</div>
+                                <div className="text-xs text-muted-foreground truncate">{p.name || 'Атауы жоқ'}</div>
+                                <div className="text-xs font-bold mt-1 text-foreground">{p.price_per_meter || p.sellPrice} ₸</div>
                             </div>
                         ))}
                     </div>
@@ -235,21 +235,21 @@ const MeasurementItemForm = ({ onAdd, roomHeight, corniceWidth }) => {
             {/* Params Row - Only show when product is selected */}
             {selectedProduct && type && (
                 <div className="animate-in fade-in slide-in-from-top-2 duration-200">
-                    <div className="flex flex-wrap items-end gap-2 bg-white/50 p-2 rounded-lg border border-gray-200/50">
+                    <div className="flex flex-wrap items-end gap-2 bg-card/50 p-2 rounded-lg border border-border/50">
                         {/* Type Indicator */}
-                        <div className="w-full flex items-center gap-2 mb-2 pb-2 border-b border-gray-100">
-                            <span className="text-xs font-bold text-gray-500">Таңдалды:</span>
-                            <span className="text-sm font-bold text-gray-900">{selectedProduct.name}</span>
-                            <span className="text-[10px] bg-gray-100 text-gray-600 px-1.5 rounded">{type}</span>
+                        <div className="w-full flex items-center gap-2 mb-2 pb-2 border-b border-border">
+                            <span className="text-xs font-bold text-muted-foreground">Таңдалды:</span>
+                            <span className="text-sm font-bold text-foreground">{selectedProduct.name}</span>
+                            <span className="text-[10px] bg-muted text-muted-foreground px-1.5 rounded">{type}</span>
                         </div>
 
                         {/* Variants Selector - Only for Curtain/Tulle */}
                         {['curtain', 'tulle'].includes(type) && variants.length > 0 && (
                             <div className="w-full mb-2">
-                                <label className="text-[10px] uppercase text-gray-500 font-bold block mb-1">Вариант таңдау</label>
+                                <label className="text-[10px] uppercase text-muted-foreground font-bold block mb-1">Вариант таңдау</label>
                                 <div className="flex flex-wrap gap-1">
                                     {loadingVariants ? (
-                                        <div className="text-xs text-gray-400 italic p-2">Жүктелуде...</div>
+                                        <div className="text-xs text-muted-foreground italic p-2">Жүктелуде...</div>
                                     ) : (
                                         variants.map((variant) => (
                                             <button
@@ -259,7 +259,7 @@ const MeasurementItemForm = ({ onAdd, roomHeight, corniceWidth }) => {
                                                 className={`px-3 py-1.5 rounded-lg border text-xs font-medium transition-all ${
                                                     selectedVariant?.id === variant.id
                                                         ? 'bg-primary text-white border-primary'
-                                                        : 'bg-white text-gray-700 border-gray-300 hover:border-primary hover:bg-primary/5'
+                                                        : 'bg-card text-foreground border-input hover:border-primary hover:bg-primary/5'
                                                 }`}
                                             >
                                                 <span className="font-bold">{variant.variantCode || variant.variant_code}</span>
@@ -275,27 +275,27 @@ const MeasurementItemForm = ({ onAdd, roomHeight, corniceWidth }) => {
 
                         {(type === 'tulle' || type === 'curtain') && (
                             <div className="flex-1 min-w-[100px]">
-                                <label className="text-[10px] uppercase text-gray-500 font-bold block mb-1">Коэфф (Жыйыру)</label>
+                                <label className="text-[10px] uppercase text-muted-foreground font-bold block mb-1">Коэфф (Жыйыру)</label>
                                 <input
                                     type="number"
                                     step="0.1"
                                     value={coeff}
                                     onChange={e => setCoeff(e.target.value)}
-                                    className="w-full p-2 rounded-lg border border-gray-300 text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 bg-white"
+                                    className="w-full p-2 rounded-lg border border-input text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 bg-card"
                                 />
                             </div>
                         )}
 
                         {(type === 'accessory' || type === 'tape') && (
                             <div className="flex-1 min-w-[100px]">
-                                <label className="text-[10px] uppercase text-gray-500 font-bold block mb-1">
+                                <label className="text-[10px] uppercase text-muted-foreground font-bold block mb-1">
                                     {type === 'tape' ? 'Ұзындық (м)' : 'Саны (шт)'}
                                 </label>
                                 <input
                                     type="number"
                                     value={quantity}
                                     onChange={e => setQuantity(e.target.value)}
-                                    className="w-full p-2 rounded-lg border border-gray-300 text-sm focus:border-primary bg-white"
+                                    className="w-full p-2 rounded-lg border border-input text-sm focus:border-primary bg-card"
                                 />
                             </div>
                         )}
@@ -303,11 +303,11 @@ const MeasurementItemForm = ({ onAdd, roomHeight, corniceWidth }) => {
                         {/* Complexity Selector for Sewn Items */}
                         {(type === 'tulle' || type === 'curtain') && (
                             <div className="w-32">
-                                <label className="text-[10px] uppercase text-gray-500 font-bold block mb-1">Күрделілік</label>
+                                <label className="text-[10px] uppercase text-muted-foreground font-bold block mb-1">Күрделілік</label>
                                 <select
                                     value={complexity}
                                     onChange={e => setComplexity(e.target.value)}
-                                    className="w-full p-2 rounded-lg border border-gray-300 text-sm bg-white"
+                                    className="w-full p-2 rounded-lg border border-input text-sm bg-card"
                                 >
                                     <option value="simple">Жай</option>
                                     <option value="medium">Орташа</option>
@@ -320,7 +320,7 @@ const MeasurementItemForm = ({ onAdd, roomHeight, corniceWidth }) => {
                             <button
                                 onClick={() => doCalculate()}
                                 disabled={calculating}
-                                className="p-2 bg-gray-200 rounded-lg text-gray-600 hover:bg-gray-300 transition-colors"
+                                className="p-2 bg-muted rounded-lg text-muted-foreground hover:bg-gray-300 transition-colors"
                                 title="Қайта есептеу"
                             >
                                 <Icon name={calculating ? 'refresh' : 'calculate'} size={20} className={calculating ? 'animate-spin' : ''} />
@@ -354,10 +354,10 @@ const MeasurementItemForm = ({ onAdd, roomHeight, corniceWidth }) => {
                                             <Icon name="check_circle" size={16} />
                                         </div>
                                         <div>
-                                            <span className="block font-bold text-gray-800 text-xs">
+                                            <span className="block font-bold text-foreground text-xs">
                                                 {calculation.techDetails?.totalFabric}м мата
                                             </span>
-                                            <span className="text-[10px] text-gray-500">
+                                            <span className="text-[10px] text-muted-foreground">
                                                 + Тігу: {calculation.clientCheck?.items?.find(i => i.name.includes('Тігу'))?.total.toLocaleString()} ₸
                                             </span>
                                         </div>

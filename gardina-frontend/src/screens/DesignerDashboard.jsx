@@ -122,7 +122,7 @@ const DesignerDashboard = () => {
   if (error) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-background-light p-4">
-        <div className="text-center p-8 bg-white rounded-2xl shadow-sm max-w-md">
+        <div className="text-center p-8 bg-card rounded-2xl shadow-sm max-w-md">
           <Icon name="error" size={48} className="text-red-500" />
           <h2 className="text-xl font-bold mt-4">{t('dashboard.designer.error', 'Қате')}</h2>
           <p className="text-text-secondary mt-2">{error}</p>
@@ -130,7 +130,7 @@ const DesignerDashboard = () => {
             <button onClick={loadDashboardData} className="flex-1 px-6 py-2 bg-primary text-white rounded-lg font-bold">
               {t('dashboard.designer.retry', 'Қайталау')}
             </button>
-            <button onClick={logout} className="px-6 py-2 bg-gray-100 rounded-lg font-bold">
+            <button onClick={logout} className="px-6 py-2 bg-muted rounded-lg font-bold">
               {t('dashboard.designer.logout', 'Шығу')}
             </button>
           </div>
@@ -146,7 +146,7 @@ const DesignerDashboard = () => {
 
     return (
       <div 
-        className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 hover:shadow-md hover:border-primary/20 transition-all"
+        className="bg-card rounded-2xl p-4 shadow-sm border border-border hover:shadow-md hover:border-primary/20 transition-all"
       >
         {/* Header */}
         <div className="flex items-start justify-between mb-3">
@@ -156,7 +156,7 @@ const DesignerDashboard = () => {
               <span className="font-bold text-primary-dark">{formatTime24(measurement.scheduledAt)}</span>
             </div>
             {showDate && (
-              <span className="text-xs text-gray-500">{dateInfo.full}</span>
+              <span className="text-xs text-muted-foreground">{dateInfo.full}</span>
             )}
           </div>
           {isPriorityHigh && (
@@ -168,30 +168,30 @@ const DesignerDashboard = () => {
         </div>
 
         {/* Client Name */}
-        <h3 className="font-bold text-gray-900 text-lg mb-2">
+        <h3 className="font-bold text-foreground text-lg mb-2">
           {measurement.clientName || t('dashboard.fallbacks.client', 'Клиент')}
         </h3>
 
         {/* Address */}
-        <div className="flex items-center gap-2 text-sm text-gray-600 mb-4 bg-gray-50 p-2 rounded-lg">
-          <Icon name="location_on" size={18} className="text-gray-400" />
+        <div className="flex items-center gap-2 text-sm text-muted-foreground mb-4 bg-muted p-2 rounded-lg">
+          <Icon name="location_on" size={18} className="text-muted-foreground" />
           <span className="line-clamp-1">{measurement.address || t('dashboard.fallbacks.address', 'Мекенжай көрсетілмеген')}</span>
         </div>
 
         {/* Room Type if available */}
         {measurement.roomType && (
-          <div className="flex items-center gap-2 text-xs text-gray-500 mb-4">
+          <div className="flex items-center gap-2 text-xs text-muted-foreground mb-4">
             <Icon name="door_front" size={16} />
             <span>{measurement.roomType}</span>
           </div>
         )}
 
         {/* Actions */}
-        <div className="flex items-center gap-2 pt-3 border-t border-gray-100">
+        <div className="flex items-center gap-2 pt-3 border-t border-border">
           {measurement.clientPhone && (
             <a
               href={`tel:${measurement.clientPhone}`}
-              className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-gray-100 text-gray-700 rounded-xl font-bold text-sm hover:bg-gray-200 transition-colors"
+              className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-muted text-foreground rounded-xl font-bold text-sm hover:bg-muted transition-colors"
               onClick={(e) => e.stopPropagation()}
             >
               <Icon name="call" size={18} />
@@ -212,17 +212,17 @@ const DesignerDashboard = () => {
 
   // Empty State Component
   const EmptyState = ({ icon, title, description }) => (
-    <div className="bg-white rounded-2xl p-8 text-center border border-gray-100">
-      <Icon name={icon} size={48} className="text-gray-300" />
-      <p className="text-gray-900 font-bold mt-4">{title}</p>
-      <p className="text-gray-500 text-sm mt-1">{description}</p>
+    <div className="bg-card rounded-2xl p-8 text-center border border-border">
+      <Icon name={icon} size={48} className="text-muted-foreground" />
+      <p className="text-foreground font-bold mt-4">{title}</p>
+      <p className="text-muted-foreground text-sm mt-1">{description}</p>
     </div>
   );
 
   return (
     <div className="bg-background-light min-h-screen pb-32">
       {/* Header */}
-      <header className="sticky top-0 z-30 bg-white/80 backdrop-blur-md border-b border-gray-100 px-4 py-4">
+      <header className="sticky top-0 z-30 bg-card/80 backdrop-blur-md border-b border-border px-4 py-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="relative">
@@ -232,17 +232,17 @@ const DesignerDashboard = () => {
               <div className="absolute bottom-0 right-0 size-3 bg-green-500 rounded-full border-2 border-white"></div>
             </div>
             <div>
-              <h2 className="text-lg font-bold text-gray-900 leading-tight">{t('dashboard.designerHello', { name: user?.name || '' })}</h2>
-              <p className="text-gray-500 text-sm">
+              <h2 className="text-lg font-bold text-foreground leading-tight">{t('dashboard.designerHello', { name: user?.name || '' })}</h2>
+              <p className="text-muted-foreground text-sm">
                 {todayFormatted.weekday}, {todayFormatted.day} {todayFormatted.month}
               </p>
             </div>
           </div>
           <button 
             onClick={loadDashboardData} 
-            className="size-10 rounded-full bg-gray-50 hover:bg-gray-100 flex items-center justify-center transition-colors"
+            className="size-10 rounded-full bg-muted hover:bg-muted flex items-center justify-center transition-colors"
           >
-            <Icon name="refresh" className="text-gray-600" />
+            <Icon name="refresh" className="text-muted-foreground" />
           </button>
         </div>
       </header>
@@ -257,15 +257,15 @@ const DesignerDashboard = () => {
           </div>
 
           <div className="grid grid-cols-3 gap-3">
-            <div className="bg-white/20 backdrop-blur-sm rounded-xl p-3 text-center">
+            <div className="bg-card/20 backdrop-blur-sm rounded-xl p-3 text-center">
               <p className="text-3xl font-black">{stats.today}</p>
               <p className="text-xs font-medium text-white/80 mt-1">{t('dashboard.todayLabel')}</p>
             </div>
-            <div className="bg-white/20 backdrop-blur-sm rounded-xl p-3 text-center">
+            <div className="bg-card/20 backdrop-blur-sm rounded-xl p-3 text-center">
               <p className="text-3xl font-black">{stats.week}</p>
               <p className="text-xs font-medium text-white/80 mt-1">{t('dashboard.thisWeek')}</p>
             </div>
-            <div className="bg-white/20 backdrop-blur-sm rounded-xl p-3 text-center">
+            <div className="bg-card/20 backdrop-blur-sm rounded-xl p-3 text-center">
               <p className="text-3xl font-black">{stats.month}</p>
               <p className="text-xs font-medium text-white/80 mt-1">{t('dashboard.thisMonth')}</p>
             </div>
@@ -354,8 +354,8 @@ const DesignerDashboard = () => {
                 {analytics.designerPerformance?.monthlyRankChange || '+2'} {t('dashboard.designer.rankPositionUnit', 'орын')}
               </span>
             </div>
-            <div className="h-2 bg-white/20 rounded-full overflow-hidden mt-3">
-              <div className="h-full bg-white transition-all duration-500"
+            <div className="h-2 bg-card/20 rounded-full overflow-hidden mt-3">
+              <div className="h-full bg-card transition-all duration-500"
                 style={{width: `${analytics.designerPerformance?.kpiProgress || 75}%`}}></div>
             </div>
             <p className="text-xs opacity-75 text-center mt-2">
@@ -368,7 +368,7 @@ const DesignerDashboard = () => {
       {/* Today's Tasks */}
       <section className="mt-6 px-4">
         <div className="flex items-center justify-between mb-3">
-          <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+          <h2 className="text-lg font-bold text-foreground flex items-center gap-2">
             <Icon name="today" className="text-primary" />
             {t('dashboard.designer.todayTasks', 'Бүгінгі тапсырмалар')}
           </h2>
@@ -404,7 +404,7 @@ const DesignerDashboard = () => {
       {tomorrowMeasurements.length > 0 && (
         <section className="mt-6 px-4">
           <div className="flex items-center justify-between mb-3">
-            <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+            <h2 className="text-lg font-bold text-foreground flex items-center gap-2">
               <Icon name="event" className="text-primary" />
               {t('dashboard.designer.tomorrow', 'Ертең')}
             </h2>
@@ -428,8 +428,8 @@ const DesignerDashboard = () => {
       {upcomingMeasurements.length > 0 && (
         <section className="mt-6 px-4 mb-6">
           <div className="flex items-center justify-between mb-3">
-            <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-              <Icon name="date_range" className="text-gray-400" />
+            <h2 className="text-lg font-bold text-foreground flex items-center gap-2">
+              <Icon name="date_range" className="text-muted-foreground" />
               {t('dashboard.designer.upcomingTasks', 'Алдағы тапсырмалар')}
             </h2>
             <button 

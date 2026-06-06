@@ -104,15 +104,15 @@ const AccessoriesForm = ({ totalTapeMeters, data, onChange }) => {
     <div className="space-y-6">
       <div className="flex items-center gap-2">
         <Icon name="category" className="text-primary" />
-        <h2 className="text-lg font-bold text-gray-900">Аксессуарлар</h2>
+        <h2 className="text-lg font-bold text-foreground">Аксессуарлар</h2>
         <span className="ml-auto text-sm font-bold text-green-600">{formatPrice(accessoriesTotal)}</span>
       </div>
 
       {/* Лента */}
-      <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+      <div className="bg-card rounded-2xl p-5 shadow-sm border border-border">
         <div className="flex items-center gap-2 mb-4">
           <Icon name="straighten" className="text-primary" />
-          <h3 className="font-bold text-gray-900">Таспа</h3>
+          <h3 className="font-bold text-foreground">Таспа</h3>
         </div>
 
         <div className="p-3 bg-primary/10 rounded-xl border border-primary/15 mb-4">
@@ -123,7 +123,7 @@ const AccessoriesForm = ({ totalTapeMeters, data, onChange }) => {
         </div>
 
         <div className="mb-4">
-          <label className="block text-sm font-medium text-gray-600 mb-2">Рулон өлшемі</label>
+          <label className="block text-sm font-medium text-muted-foreground mb-2">Рулон өлшемі</label>
           <div className="flex gap-2">
             {TAPE_ROLLS.map(roll => (
               <button
@@ -133,7 +133,7 @@ const AccessoriesForm = ({ totalTapeMeters, data, onChange }) => {
                 className={`flex-1 py-3 rounded-xl font-bold transition-all ${
                   data.tape?.rollId === roll.id || (!data.tape?.rollId && roll.id === 'tape_50m')
                     ? 'bg-primary text-white'
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                    : 'bg-muted text-muted-foreground hover:bg-muted'
                 }`}
               >
                 <span className="block">{roll.meters}м</span>
@@ -143,17 +143,17 @@ const AccessoriesForm = ({ totalTapeMeters, data, onChange }) => {
           </div>
         </div>
 
-        <div className="flex justify-between items-center p-3 bg-gray-50 rounded-xl">
-          <span className="text-gray-700">{tapeRolls} рулон × {formatPrice(selectedTapeRoll.price)}</span>
-          <span className="font-bold text-gray-900">{formatPrice(tapeTotal)}</span>
+        <div className="flex justify-between items-center p-3 bg-muted rounded-xl">
+          <span className="text-foreground">{tapeRolls} рулон × {formatPrice(selectedTapeRoll.price)}</span>
+          <span className="font-bold text-foreground">{formatPrice(tapeTotal)}</span>
         </div>
       </div>
 
       {/* Крючки */}
-      <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+      <div className="bg-card rounded-2xl p-5 shadow-sm border border-border">
         <div className="flex items-center gap-2 mb-4">
           <Icon name="link" className="text-primary-light" />
-          <h3 className="font-bold text-gray-900">Ілгектер</h3>
+          <h3 className="font-bold text-foreground">Ілгектер</h3>
         </div>
 
         <div className="p-3 bg-primary/5 rounded-xl border border-primary/15 mb-4">
@@ -165,7 +165,7 @@ const AccessoriesForm = ({ totalTapeMeters, data, onChange }) => {
         </div>
 
         <div className="mb-4">
-          <label className="block text-sm font-medium text-gray-600 mb-2">Түрі</label>
+          <label className="block text-sm font-medium text-muted-foreground mb-2">Түрі</label>
           <div className="flex gap-3">
             {HOOK_TYPES.map(hook => (
               <button
@@ -175,7 +175,7 @@ const AccessoriesForm = ({ totalTapeMeters, data, onChange }) => {
                 className={`flex-1 py-3 rounded-xl font-bold transition-all ${
                   data.hooks?.type === hook.id || (!data.hooks?.type && hook.id === 'plastic')
                     ? 'bg-primary text-white'
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                    : 'bg-muted text-muted-foreground hover:bg-muted'
                 }`}
               >
                 <span className="block">{hook.name}</span>
@@ -185,18 +185,18 @@ const AccessoriesForm = ({ totalTapeMeters, data, onChange }) => {
           </div>
         </div>
 
-        <div className="flex justify-between items-center p-3 bg-gray-50 rounded-xl">
-          <span className="text-gray-700">{hookPacks} қап × {formatPrice(selectedHookType.pricePerPack)}</span>
-          <span className="font-bold text-gray-900">{formatPrice(hooksTotal)}</span>
+        <div className="flex justify-between items-center p-3 bg-muted rounded-xl">
+          <span className="text-foreground">{hookPacks} қап × {formatPrice(selectedHookType.pricePerPack)}</span>
+          <span className="font-bold text-foreground">{formatPrice(hooksTotal)}</span>
         </div>
       </div>
 
       {/* Дополнительные аксессуары */}
-      <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+      <div className="bg-card rounded-2xl p-5 shadow-sm border border-border">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
             <Icon name="add_circle" className="text-amber-500" />
-            <h3 className="font-bold text-gray-900">Қосымша</h3>
+            <h3 className="font-bold text-foreground">Қосымша</h3>
           </div>
           <button
             type="button"
@@ -209,21 +209,21 @@ const AccessoriesForm = ({ totalTapeMeters, data, onChange }) => {
         </div>
 
         {extras.length === 0 ? (
-          <p className="text-gray-400 text-sm text-center py-4">Қосымша аксессуар жоқ</p>
+          <p className="text-muted-foreground text-sm text-center py-4">Қосымша аксессуар жоқ</p>
         ) : (
           <div className="space-y-2">
             {extras.map(extra => (
               <div key={extra.id} className="flex items-center justify-between p-3 bg-amber-50 rounded-xl border border-amber-200">
                 <div>
-                  <p className="font-bold text-gray-900">{extra.name}</p>
-                  <p className="text-xs text-gray-500">{extra.quantity} {extra.unit} × {formatPrice(extra.unitPrice)}</p>
+                  <p className="font-bold text-foreground">{extra.name}</p>
+                  <p className="text-xs text-muted-foreground">{extra.quantity} {extra.unit} × {formatPrice(extra.unitPrice)}</p>
                 </div>
                 <div className="flex items-center gap-3">
                   <span className="font-bold text-amber-700">{formatPrice(extra.total)}</span>
                   <button
                     type="button"
                     onClick={() => removeExtra(extra.id)}
-                    className="text-gray-400 hover:text-red-500"
+                    className="text-muted-foreground hover:text-red-500"
                   >
                     <Icon name="close" size={20} />
                   </button>
@@ -241,30 +241,30 @@ const AccessoriesForm = ({ totalTapeMeters, data, onChange }) => {
           onClick={() => setShowAddExtra(false)}
         >
           <div 
-            className="bg-white rounded-2xl w-full max-w-md max-h-[85vh] overflow-y-auto shadow-2xl"
+            className="bg-card rounded-2xl w-full max-w-md max-h-[85vh] overflow-y-auto shadow-2xl"
             onClick={e => e.stopPropagation()}
           >
-            <div className="sticky top-0 bg-white px-5 py-4 border-b border-gray-100 flex items-center justify-between">
+            <div className="sticky top-0 bg-card px-5 py-4 border-b border-border flex items-center justify-between">
               <h3 className="text-lg font-bold">Аксессуар қосу</h3>
               <button 
                 onClick={() => setShowAddExtra(false)} 
-                className="size-8 rounded-full bg-gray-100 flex items-center justify-center"
+                className="size-8 rounded-full bg-muted flex items-center justify-center"
               >
-                <Icon name="close" size={20} className="text-gray-500" />
+                <Icon name="close" size={20} className="text-muted-foreground" />
               </button>
             </div>
 
             <div className="p-5 space-y-4">
               {/* Список аксессуаров как кнопки */}
               <div>
-                <label className="block text-sm font-bold text-gray-700 mb-3">Өнім таңдау</label>
+                <label className="block text-sm font-bold text-foreground mb-3">Өнім таңдау</label>
                 
                 {loadingCatalog ? (
                   <div className="text-center py-8">
                     <div className="size-8 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto"></div>
                   </div>
                 ) : catalogAccessories.length === 0 ? (
-                  <div className="text-center py-8 text-gray-400">
+                  <div className="text-center py-8 text-muted-foreground">
                     <Icon name="inventory_2" size={32} />
                     <p className="text-sm mt-2">Каталогта аксессуар жоқ</p>
                   </div>
@@ -278,12 +278,12 @@ const AccessoriesForm = ({ totalTapeMeters, data, onChange }) => {
                         className={`w-full p-3 rounded-xl text-left transition-all flex items-center justify-between ${
                           selectedExtra === acc.id
                             ? 'bg-primary text-white'
-                            : 'bg-gray-50 hover:bg-gray-100'
+                            : 'bg-muted hover:bg-muted'
                         }`}
                       >
                         <div>
                           <p className="font-bold">{acc.name}</p>
-                          <p className={`text-xs ${selectedExtra === acc.id ? 'text-white/70' : 'text-gray-500'}`}>
+                          <p className={`text-xs ${selectedExtra === acc.id ? 'text-white/70' : 'text-muted-foreground'}`}>
                             {acc.code}
                           </p>
                         </div>
@@ -299,14 +299,14 @@ const AccessoriesForm = ({ totalTapeMeters, data, onChange }) => {
               {/* Количество */}
               {selectedExtra && (
                 <div>
-                  <label className="block text-sm font-bold text-gray-700 mb-2">Саны</label>
+                  <label className="block text-sm font-bold text-foreground mb-2">Саны</label>
                   <input
                     type="number"
                     min="1"
                     value={extraQty}
                     onChange={(e) => setExtraQty(parseInt(e.target.value) || 1)}
-                    className="w-full h-14 px-4 bg-gray-50 border-2 border-transparent rounded-xl 
-                      focus:bg-white focus:border-primary transition-all text-xl font-bold text-center"
+                    className="w-full h-14 px-4 bg-muted border-2 border-transparent rounded-xl 
+                      focus:bg-card focus:border-primary transition-all text-xl font-bold text-center"
                   />
                 </div>
               )}
@@ -318,9 +318,9 @@ const AccessoriesForm = ({ totalTapeMeters, data, onChange }) => {
                     <Icon name="check_circle" className="text-green-600" />
                     <span className="text-sm font-bold text-green-800">Таңдалды</span>
                   </div>
-                  <p className="font-bold text-gray-900">{selectedAccessory.name}</p>
-                  <div className="flex justify-between items-center mt-3 p-3 bg-white rounded-lg">
-                    <span className="text-gray-600">
+                  <p className="font-bold text-foreground">{selectedAccessory.name}</p>
+                  <div className="flex justify-between items-center mt-3 p-3 bg-card rounded-lg">
+                    <span className="text-muted-foreground">
                       {extraQty} × {formatPrice(selectedAccessory.pricePerMeter || selectedAccessory.price || 0)}
                     </span>
                     <span className="text-lg font-black text-green-700">
@@ -332,7 +332,7 @@ const AccessoriesForm = ({ totalTapeMeters, data, onChange }) => {
             </div>
 
             {/* Кнопка добавить */}
-            <div className="sticky bottom-0 bg-white p-5 border-t border-gray-100">
+            <div className="sticky bottom-0 bg-card p-5 border-t border-border">
               <button
                 type="button"
                 onClick={addExtra}

@@ -233,17 +233,17 @@ const MeasurementSummary = ({
     <div className="space-y-6">
       <div className="flex items-center gap-2">
         <Icon name="receipt_long" className="text-primary" />
-        <h2 className="text-lg font-bold text-gray-900">Жалпы смета</h2>
+        <h2 className="text-lg font-bold text-foreground">Жалпы смета</h2>
       </div>
 
       {/* Комнаты */}
       <div className="space-y-4">
         {roomsSummary.map((room, idx) => (
-          <div key={idx} className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+          <div key={idx} className="bg-card rounded-2xl p-5 shadow-sm border border-border">
             <div className="flex items-center justify-between mb-3">
               <div>
-                <h3 className="font-bold text-gray-900">{room.name}</h3>
-                <span className="text-xs text-gray-500">{getSolutionLabel(room.solutionType)}</span>
+                <h3 className="font-bold text-foreground">{room.name}</h3>
+                <span className="text-xs text-muted-foreground">{getSolutionLabel(room.solutionType)}</span>
               </div>
               <span className="text-lg font-bold text-primary">{formatPrice(room.total)}</span>
             </div>
@@ -251,12 +251,12 @@ const MeasurementSummary = ({
             <div className="space-y-2 text-sm">
               {room.details.map((detail, i) => (
                 <div key={i}>
-                  <div className="flex justify-between text-gray-600">
+                  <div className="flex justify-between text-muted-foreground">
                     <span>{detail.name}</span>
                     <span className="font-medium">{detail.value}</span>
                   </div>
                   {detail.sub && (
-                    <p className="text-xs text-gray-400 mt-0.5">{detail.sub}</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">{detail.sub}</p>
                   )}
                 </div>
               ))}
@@ -267,7 +267,7 @@ const MeasurementSummary = ({
 
       {/* Пустое состояние */}
       {rooms.length === 0 && (
-        <div className="text-center py-12 text-gray-400">
+        <div className="text-center py-12 text-muted-foreground">
           <Icon name="inventory_2" size={40} />
           <p className="mt-2">Бөлме қосылмаған</p>
         </div>
@@ -296,7 +296,7 @@ const MeasurementSummary = ({
       <div className="grid grid-cols-2 gap-3">
         <button
           type="button"
-          className="py-4 bg-white border-2 border-gray-200 text-gray-700 font-bold rounded-2xl flex items-center justify-center gap-2"
+          className="py-4 bg-card border-2 border-border text-foreground font-bold rounded-2xl flex items-center justify-center gap-2"
         >
           <Icon name="share" />
           WhatsApp

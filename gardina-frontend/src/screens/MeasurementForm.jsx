@@ -519,29 +519,29 @@ const MeasurementForm = () => {
   return (
     <div className="bg-background-light min-h-screen pb-32">
       {/* Header */}
-      <header className="sticky top-0 z-30 bg-white/80 backdrop-blur-md border-b border-gray-100 px-4 py-3">
+      <header className="sticky top-0 z-30 bg-card/80 backdrop-blur-md border-b border-border px-4 py-3">
         <div className="flex items-center gap-3">
-          <button onClick={() => navigate(-1)} className="size-10 rounded-full bg-gray-50 flex items-center justify-center hover:bg-gray-100 transition-colors">
-            <Icon name="arrow_back" className="text-gray-600" />
+          <button onClick={() => navigate(-1)} className="size-10 rounded-full bg-muted flex items-center justify-center hover:bg-muted transition-colors">
+            <Icon name="arrow_back" className="text-muted-foreground" />
           </button>
           <div>
             <h1 className="text-xl font-bold leading-tight">Өлшем алу</h1>
-            <p className="text-xs text-gray-500">{savedRooms.length} бөлме қосылды</p>
+            <p className="text-xs text-muted-foreground">{savedRooms.length} бөлме қосылды</p>
           </div>
         </div>
       </header>
 
       <main className="w-full max-w-lg mx-auto px-4 pt-4">
         {/* Client Info Card - Fixed at top */}
-        <div className="bg-white rounded-2xl p-4 shadow-sm mb-4 border border-gray-100">
+        <div className="bg-card rounded-2xl p-4 shadow-sm mb-4 border border-border">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="size-12 rounded-full bg-primary/10 flex items-center justify-center">
                 <Icon name="person" className="text-primary" />
               </div>
               <div>
-                <p className="font-bold text-gray-900">{clientData?.name}</p>
-                <p className="text-sm text-gray-500">{clientData?.phone}</p>
+                <p className="font-bold text-foreground">{clientData?.name}</p>
+                <p className="text-sm text-muted-foreground">{clientData?.phone}</p>
               </div>
             </div>
             <button onClick={() => setShowClientForm(true)} className="text-primary p-2 hover:bg-primary/10 rounded-lg transition-colors">
@@ -549,8 +549,8 @@ const MeasurementForm = () => {
             </button>
           </div>
           {clientData?.address && (
-            <div className="mt-3 pt-3 border-t border-gray-100">
-              <p className="text-sm text-gray-600 flex items-center gap-1">
+            <div className="mt-3 pt-3 border-t border-border">
+              <p className="text-sm text-muted-foreground flex items-center gap-1">
                 <Icon name="location_on" size={16} />
                 {clientData.address}
               </p>
@@ -561,33 +561,33 @@ const MeasurementForm = () => {
         {/* Saved Rooms List */}
         {savedRooms.length > 0 && (
           <div className="mb-4">
-            <h3 className="text-sm font-bold text-gray-700 mb-2 flex items-center gap-2">
+            <h3 className="text-sm font-bold text-foreground mb-2 flex items-center gap-2">
               <Icon name="check_circle" size={18} className="text-primary" />
               Қосылған бөлмелер
             </h3>
             <div className="space-y-2">
               {savedRooms.map((room, index) => (
-                <div key={room.tempId || room.id} className="bg-white rounded-xl p-3 shadow-sm border border-gray-100 flex items-center gap-3">
+                <div key={room.tempId || room.id} className="bg-card rounded-xl p-3 shadow-sm border border-border flex items-center gap-3">
                   {room.designPhotos && room.designPhotos.length > 0 ? (
                     <div className="flex -space-x-2">
                       {room.designPhotos.slice(0, 3).map((p, i) => (
                         <img key={i} src={p.preview} alt="Design" className="size-14 rounded-lg object-cover border-2 border-white" />
                       ))}
                       {room.designPhotos.length > 3 && (
-                        <div className="size-14 rounded-lg bg-gray-100 flex items-center justify-center border-2 border-white text-xs font-bold text-gray-500">
+                        <div className="size-14 rounded-lg bg-muted flex items-center justify-center border-2 border-white text-xs font-bold text-muted-foreground">
                           +{room.designPhotos.length - 3}
                         </div>
                       )}
                     </div>
                   ) : (
-                    <div className="size-14 rounded-lg bg-gray-100 flex items-center justify-center">
-                      <Icon name="image" className="text-gray-400" />
+                    <div className="size-14 rounded-lg bg-muted flex items-center justify-center">
+                      <Icon name="image" className="text-muted-foreground" />
                     </div>
                   )}
                   <div className="flex-1 min-w-0">
-                    <p className="font-bold text-gray-900 truncate">{room.roomName}</p>
+                    <p className="font-bold text-foreground truncate">{room.roomName}</p>
                     <div className="flex justify-between items-center mt-1">
-                      <p className="text-xs text-gray-500">Код: {room.fabricCode}</p>
+                      <p className="text-xs text-muted-foreground">Код: {room.fabricCode}</p>
                       {room.priceBreakdown?.clientCheck?.total > 0 && (
                         <span className="text-xs font-bold text-green-600 bg-green-50 px-2 py-0.5 rounded-lg">
                           {room.priceBreakdown.clientCheck.total.toLocaleString()} ₸
@@ -613,9 +613,9 @@ const MeasurementForm = () => {
         )}
 
         {/* New Room Form */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100">
-          <div className="bg-gradient-to-r from-primary/10 to-primary/10 px-4 py-3 border-b border-gray-100">
-            <h3 className="font-bold text-gray-900 flex items-center gap-2">
+        <div className="bg-card rounded-2xl shadow-sm border border-border">
+          <div className="bg-gradient-to-r from-primary/10 to-primary/10 px-4 py-3 border-b border-border">
+            <h3 className="font-bold text-foreground flex items-center gap-2">
               <Icon name="add_home" className="text-primary" />
               {savedRooms.length > 0 ? 'Жаңа бөлме қосу' : 'Бөлме қосу'}
             </h3>
@@ -624,7 +624,7 @@ const MeasurementForm = () => {
           <div className="p-4 space-y-4">
             {/* Room Selection */}
             <div>
-              <label className="block text-xs font-bold text-gray-700 mb-2">Бөлме *</label>
+              <label className="block text-xs font-bold text-foreground mb-2">Бөлме *</label>
 
               <div className="relative">
                 {/* Room display/selection button */}
@@ -634,7 +634,7 @@ const MeasurementForm = () => {
                       type="text"
                       value={customRoomName}
                       onChange={(e) => setCustomRoomName(e.target.value)}
-                      className="flex-1 p-3 bg-gray-50 border-2 border-gray-200 rounded-xl focus:border-primary focus:bg-white transition-all font-medium"
+                      className="flex-1 p-3 bg-muted border-2 border-border rounded-xl focus:border-primary focus:bg-card transition-all font-medium"
                       placeholder="Бөлме атауын жазыңыз..."
                       autoFocus
                     />
@@ -648,7 +648,7 @@ const MeasurementForm = () => {
                     <button
                       type="button"
                       onClick={() => { setShowCustomInput(false); setCustomRoomName(''); }}
-                      className="px-3 bg-gray-100 text-gray-600 rounded-xl font-bold hover:bg-gray-200 transition-colors"
+                      className="px-3 bg-muted text-muted-foreground rounded-xl font-bold hover:bg-muted transition-colors"
                     >
                       <Icon name="close" />
                     </button>
@@ -656,12 +656,12 @@ const MeasurementForm = () => {
                 ) : selectedRoom ? (
                   <div className="flex items-center gap-2">
                     <div className="flex-1 p-3 bg-primary/10 border-2 border-primary/30 rounded-xl">
-                      <span className="font-bold text-gray-900">{selectedRoom}</span>
+                      <span className="font-bold text-foreground">{selectedRoom}</span>
                     </div>
                     <button
                       type="button"
                       onClick={() => setShowRoomDropdown(!showRoomDropdown)}
-                      className="p-3 bg-gray-100 text-gray-600 rounded-xl hover:bg-gray-200 transition-colors"
+                      className="p-3 bg-muted text-muted-foreground rounded-xl hover:bg-muted transition-colors"
                     >
                       <Icon name="edit" />
                     </button>
@@ -670,16 +670,16 @@ const MeasurementForm = () => {
                   <button
                     type="button"
                     onClick={() => setShowRoomDropdown(!showRoomDropdown)}
-                    className="w-full flex items-center justify-between p-3 bg-gray-50 border-2 border-gray-200 rounded-xl hover:border-primary transition-colors"
+                    className="w-full flex items-center justify-between p-3 bg-muted border-2 border-border rounded-xl hover:border-primary transition-colors"
                   >
-                    <span className="text-gray-500">Бөлмені таңдаңыз...</span>
-                    <Icon name="expand_more" className="text-gray-400" />
+                    <span className="text-muted-foreground">Бөлмені таңдаңыз...</span>
+                    <Icon name="expand_more" className="text-muted-foreground" />
                   </button>
                 )}
 
                 {/* Dropdown menu - always positioned relative to parent */}
                 {showRoomDropdown && (
-                  <div className="absolute z-50 top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-xl shadow-xl max-h-64 overflow-y-auto">
+                  <div className="absolute z-50 top-full left-0 right-0 mt-1 bg-card border border-border rounded-xl shadow-xl max-h-64 overflow-y-auto">
                     {ROOM_TYPES.map(room => (
                       <button
                         key={room.id}
@@ -688,7 +688,7 @@ const MeasurementForm = () => {
                         className="w-full flex items-center gap-3 p-3 hover:bg-primary/5 transition-colors border-b border-gray-50 last:border-0"
                       >
                         <Icon name={room.icon} className="text-primary" />
-                        <span className="font-medium text-gray-900">{room.label}</span>
+                        <span className="font-medium text-foreground">{room.label}</span>
                       </button>
                     ))}
                     <button
@@ -710,18 +710,18 @@ const MeasurementForm = () => {
                 {/* 1. Dimensions (Global for this window) */}
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-xs font-bold text-gray-700 mb-2">Карниз ені (м) *</label>
+                    <label className="block text-xs font-bold text-foreground mb-2">Карниз ені (м) *</label>
                     <input
                       type="number"
                       step="0.01"
                       value={lengthMeters} // reusing lengthMeters as cornice width
                       onChange={e => setLengthMeters(e.target.value)}
-                      className="w-full p-3 bg-gray-50 border-2 border-gray-200 rounded-xl focus:border-primary focus:bg-white transition-all font-bold text-lg"
+                      className="w-full p-3 bg-muted border-2 border-border rounded-xl focus:border-primary focus:bg-card transition-all font-bold text-lg"
                       placeholder="3.5"
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-gray-700 mb-2">Бөлме биіктігі (м) *</label>
+                    <label className="block text-xs font-bold text-foreground mb-2">Бөлме биіктігі (м) *</label>
                     <input
                       type="number"
                       step="0.01"
@@ -732,7 +732,7 @@ const MeasurementForm = () => {
                         // If we want to recalculate all items when height changes, we'd need to update roomItems.
                         // For now, just let new items use this.
                       }}
-                      className="w-full p-3 bg-gray-50 border-2 border-gray-200 rounded-xl focus:border-primary focus:bg-white transition-all font-bold text-lg"
+                      className="w-full p-3 bg-muted border-2 border-border rounded-xl focus:border-primary focus:bg-card transition-all font-bold text-lg"
                       placeholder="2.8"
                     />
                   </div>
@@ -741,11 +741,11 @@ const MeasurementForm = () => {
                 {/* 2. Added Items List */}
                 {roomItems.length > 0 && (
                   <div className="space-y-2">
-                    <label className="block text-xs font-bold text-gray-700">Элементтер:</label>
+                    <label className="block text-xs font-bold text-foreground">Элементтер:</label>
                     {roomItems.map((item, idx) => (
-                      <div key={idx} className="bg-white p-3 rounded-xl border border-gray-200 shadow-sm flex justify-between items-center relative group">
+                      <div key={idx} className="bg-card p-3 rounded-xl border border-border shadow-sm flex justify-between items-center relative group">
                         <div>
-                          <div className="font-bold text-sm text-gray-900 flex items-center gap-2">
+                          <div className="font-bold text-sm text-foreground flex items-center gap-2">
                             <div>
                               {item.type === 'tulle' && 'Тюль'}
                               {item.type === 'curtain' && 'Перде'}
@@ -759,7 +759,7 @@ const MeasurementForm = () => {
                               </span>
                             )}
                           </div>
-                          <div className="text-xs text-gray-500">
+                          <div className="text-xs text-muted-foreground">
                             {item.calculation.total.toLocaleString()} ₸
                             {item.params.coeff && ` (k=${item.params.coeff})`}
                           </div>
@@ -784,8 +784,8 @@ const MeasurementForm = () => {
                 )}
 
                 {/* 3. Add Item Component */}
-                <div className="border-t border-gray-100 pt-4">
-                  <label className="block text-xs font-bold text-gray-700 mb-2">Элемент қосу</label>
+                <div className="border-t border-border pt-4">
+                  <label className="block text-xs font-bold text-foreground mb-2">Элемент қосу</label>
                   <MeasurementItemForm
                     onAdd={handleAddItem}
                     roomHeight={document.getElementById('roomHeightInput')?.value || 2.8}
@@ -801,7 +801,7 @@ const MeasurementForm = () => {
             <>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-bold text-gray-700 mb-2">Карниз ені *</label>
+                  <label className="block text-xs font-bold text-foreground mb-2">Карниз ені *</label>
                   <div className="flex items-stretch">
                     <input
                       type="number"
@@ -810,14 +810,14 @@ const MeasurementForm = () => {
                       onChange={(e) => {
                         setLengthMeters(e.target.value);
                       }}
-                      className="w-full p-3 bg-gray-50 border-2 border-gray-200 rounded-xl focus:border-primary focus:bg-white transition-all font-medium text-lg"
+                      className="w-full p-3 bg-muted border-2 border-border rounded-xl focus:border-primary focus:bg-card transition-all font-medium text-lg"
                       placeholder="3.0"
                     />
                   </div>
-                  <span className="text-[10px] text-gray-400">Карниз ені (метрмен)</span>
+                  <span className="text-[10px] text-muted-foreground">Карниз ені (метрмен)</span>
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-gray-700 mb-2">Төбе биіктігі</label>
+                  <label className="block text-xs font-bold text-foreground mb-2">Төбе биіктігі</label>
                   <input
                     type="number"
                     step="0.01"
@@ -827,7 +827,7 @@ const MeasurementForm = () => {
                       // Optional: Update heights for all items inside roomItems?
                       // For now, new items added will read this value.
                     }}
-                    className="w-full p-3 bg-gray-50 border-2 border-gray-200 rounded-xl focus:border-primary focus:bg-white transition-all font-medium text-lg"
+                    className="w-full p-3 bg-muted border-2 border-border rounded-xl focus:border-primary focus:bg-card transition-all font-medium text-lg"
                     placeholder="2.8"
                   />
                 </div>
@@ -835,11 +835,11 @@ const MeasurementForm = () => {
 
               {/* Design Photos */}
               <div>
-                <label className="block text-xs font-bold text-gray-700 mb-2">Дизайн фото</label>
+                <label className="block text-xs font-bold text-foreground mb-2">Дизайн фото</label>
 
                 <div className="grid grid-cols-2 gap-2 mb-2">
                   {designPhotos.map(photo => (
-                    <div key={photo.id} className="relative aspect-video rounded-xl overflow-hidden border border-gray-200">
+                    <div key={photo.id} className="relative aspect-video rounded-xl overflow-hidden border border-border">
                       <img src={photo.preview} alt="Design" className="w-full h-full object-cover" />
                       <button
                         type="button"
@@ -854,10 +854,10 @@ const MeasurementForm = () => {
                   <button
                     type="button"
                     onClick={() => designPhotoRef.current?.click()}
-                    className="aspect-video rounded-xl border-2 border-dashed border-gray-300 bg-gray-50 hover:border-primary hover:bg-primary/5 transition-all flex flex-col items-center justify-center gap-1"
+                    className="aspect-video rounded-xl border-2 border-dashed border-input bg-muted hover:border-primary hover:bg-primary/5 transition-all flex flex-col items-center justify-center gap-1"
                   >
                     <Icon name="add_photo_alternate" size={28} className="text-primary" />
-                    <span className="text-xs font-bold text-gray-600">Фото қосу</span>
+                    <span className="text-xs font-bold text-muted-foreground">Фото қосу</span>
                   </button>
                 </div>
 
@@ -902,7 +902,7 @@ const MeasurementForm = () => {
             <button
               type="button"
               onClick={() => setShowRoomDropdown(true)}
-              className="w-full mt-4 py-4 border-2 border-dashed border-gray-300 rounded-xl text-gray-600 font-bold hover:border-primary hover:text-primary transition-all flex items-center justify-center gap-2"
+              className="w-full mt-4 py-4 border-2 border-dashed border-input rounded-xl text-muted-foreground font-bold hover:border-primary hover:text-primary transition-all flex items-center justify-center gap-2"
             >
               <Icon name="add_circle" />
               Тағы бір бөлме қосу
@@ -912,13 +912,13 @@ const MeasurementForm = () => {
 
         {/* Global Accessories Section */}
         <div className="mt-8 mb-8">
-          <div className="bg-white rounded-2xl shadow-sm border border-orange-100 overflow-hidden">
+          <div className="bg-card rounded-2xl shadow-sm border border-orange-100 overflow-hidden">
             <div className="bg-orange-50 px-4 py-3 border-b border-orange-100 flex justify-between items-center">
               <h3 className="font-bold text-orange-900 flex items-center gap-2">
                 <Icon name="inventory_2" />
                 Қосымша материалдар
               </h3>
-              <div className="text-xs bg-white px-2 py-1 rounded-lg text-orange-600 font-bold border border-orange-200">
+              <div className="text-xs bg-card px-2 py-1 rounded-lg text-orange-600 font-bold border border-orange-200">
                 Жалпы тапсырыс үшін
               </div>
             </div>
@@ -992,9 +992,9 @@ const MeasurementForm = () => {
               {globalItems.length > 0 && (
                 <div className="space-y-2">
                   {globalItems.map((item, idx) => (
-                    <div key={idx} className="bg-white p-3 rounded-xl border border-gray-200 shadow-sm flex justify-between items-center relative group">
+                    <div key={idx} className="bg-card p-3 rounded-xl border border-border shadow-sm flex justify-between items-center relative group">
                       <div>
-                        <div className="font-bold text-sm text-gray-900 flex items-center gap-2">
+                        <div className="font-bold text-sm text-foreground flex items-center gap-2">
                           <div>
                             {item.type === 'tape' && 'Таспа'}
                             {item.type === 'accessory' && 'Аксессуар'}
@@ -1006,7 +1006,7 @@ const MeasurementForm = () => {
                             </span>
                           )}
                         </div>
-                        <div className="text-xs text-gray-500">
+                        <div className="text-xs text-muted-foreground">
                           {item.calculation.quantity} {item.calculation.unit} x {item.calculation.price} = {item.calculation.total.toLocaleString()} ₸
                         </div>
                       </div>
@@ -1029,8 +1029,8 @@ const MeasurementForm = () => {
               )}
 
               {/* Add Global Item Form (Reuse MeasurementItemForm) */}
-              <div className="border-t border-gray-100 pt-4">
-                <label className="block text-xs font-bold text-gray-700 mb-2">Қосымша элемент қосу</label>
+              <div className="border-t border-border pt-4">
+                <label className="block text-xs font-bold text-foreground mb-2">Қосымша элемент қосу</label>
                 <MeasurementItemForm
                   onAdd={(item) => setGlobalItems(prev => [...prev, item])}
                 />
@@ -1041,7 +1041,7 @@ const MeasurementForm = () => {
       </main>
 
       {/* Fixed Bottom Button */}
-      <div className="fixed bottom-0 left-0 w-full bg-white/95 backdrop-blur-md border-t p-4 z-40 pb-safe">
+      <div className="fixed bottom-0 left-0 w-full bg-card/95 backdrop-blur-md border-t p-4 z-40 pb-safe">
         <button
           type="button"
           onClick={handleSubmitAll}
@@ -1067,13 +1067,13 @@ const MeasurementForm = () => {
       {
         showDeleteModal && (
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={() => setShowDeleteModal(false)}>
-            <div className="bg-white rounded-2xl p-6 max-w-sm w-full shadow-2xl" onClick={(e) => e.stopPropagation()}>
+            <div className="bg-card rounded-2xl p-6 max-w-sm w-full shadow-2xl" onClick={(e) => e.stopPropagation()}>
               <div className="text-center">
                 <div className="size-16 rounded-full bg-red-50 flex items-center justify-center mx-auto mb-4">
                   <Icon name="delete" size={32} className="text-red-500" />
                 </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-2">Бөлмені жою?</h3>
-                <p className="text-gray-600 mb-6">
+                <h3 className="text-xl font-bold text-foreground mb-2">Бөлмені жою?</h3>
+                <p className="text-muted-foreground mb-6">
                   <span className="font-bold">{roomToDelete?.roomName}</span> бөлмесін жойғыңыз келетініне сенімдісіз бе? Бұл әрекетті қайтару мүмкін емес.
                 </p>
                 <div className="flex gap-3">
@@ -1083,7 +1083,7 @@ const MeasurementForm = () => {
                       setShowDeleteModal(false);
                       setRoomToDelete(null);
                     }}
-                    className="flex-1 py-3 bg-gray-100 text-gray-700 font-bold rounded-xl hover:bg-gray-200 transition-colors"
+                    className="flex-1 py-3 bg-muted text-foreground font-bold rounded-xl hover:bg-muted transition-colors"
                   >
                     Болдырмау
                   </button>

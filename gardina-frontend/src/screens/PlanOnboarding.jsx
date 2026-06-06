@@ -163,7 +163,7 @@ const PlanOnboarding = () => {
     <div className="min-h-screen bg-gradient-to-b from-background-light via-white to-primary/10 px-4 py-10 pb-16">
       <div className="max-w-5xl mx-auto">
         <div className="text-center mb-8">
-          <img src="/images/logo-header.png" alt="Gardina" className="w-32 h-auto mx-auto mb-4 drop-shadow-sm" />
+          <img src="/images/logo-header.png" alt="Gardina" className="w-64 h-auto mx-auto mb-4 drop-shadow-sm" />
           <div className="flex justify-center mb-2">
             <LanguageSwitcher compact />
           </div>
@@ -181,13 +181,13 @@ const PlanOnboarding = () => {
 
         <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-8">
           <span className="text-sm font-bold text-text-secondary">{t('onboarding.cycleLabel')}</span>
-          <div className="flex p-1 rounded-xl bg-gray-100 border border-gray-200/80">
+          <div className="flex p-1 rounded-xl bg-muted border border-border/80">
             <button
               type="button"
               onClick={() => setBillingCycle('monthly')}
               className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${
                 cycle === 'monthly'
-                  ? 'bg-white text-primary shadow-sm ring-1 ring-black/5'
+                  ? 'bg-card text-primary shadow-sm ring-1 ring-black/5'
                   : 'text-text-secondary'
               }`}
             >
@@ -198,7 +198,7 @@ const PlanOnboarding = () => {
               onClick={() => setBillingCycle('yearly')}
               className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${
                 cycle === 'yearly'
-                  ? 'bg-white text-primary shadow-sm ring-1 ring-black/5'
+                  ? 'bg-card text-primary shadow-sm ring-1 ring-black/5'
                   : 'text-text-secondary'
               }`}
             >
@@ -225,8 +225,8 @@ const PlanOnboarding = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5 lg:gap-6">
             {/* Start */}
             <div
-              className={`rounded-2xl border bg-white p-6 flex flex-col shadow-lg transition-all ${
-                currentPlan === 'start' ? 'border-primary ring-2 ring-primary/20' : 'border-gray-200'
+              className={`rounded-2xl border bg-card p-6 flex flex-col shadow-lg transition-all ${
+                currentPlan === 'start' ? 'border-primary ring-2 ring-primary/20' : 'border-border'
               }`}
             >
               <div className="flex items-center justify-between mb-3">
@@ -264,7 +264,7 @@ const PlanOnboarding = () => {
 
             {/* Pro */}
             <div
-              className={`rounded-2xl border bg-white p-6 flex flex-col shadow-xl transition-all relative md:-mt-2 md:mb-2 ${
+              className={`rounded-2xl border bg-card p-6 flex flex-col shadow-xl transition-all relative md:-mt-2 md:mb-2 ${
                 currentPlan === 'pro'
                   ? 'border-primary ring-2 ring-primary/30 shadow-primary/10'
                   : 'border-primary/40 ring-1 ring-primary/15'
@@ -309,7 +309,7 @@ const PlanOnboarding = () => {
                   type="button"
                   disabled={!!saving}
                   onClick={onProPaid}
-                  className="w-full py-2.5 rounded-xl border border-gray-200 text-text-main text-sm font-bold hover:bg-gray-50 transition-all disabled:opacity-50"
+                  className="w-full py-2.5 rounded-xl border border-border text-text-main text-sm font-bold hover:bg-muted transition-all disabled:opacity-50"
                 >
                   {saving === 'pro-paid'
                     ? t('onboarding.saving')
@@ -322,8 +322,8 @@ const PlanOnboarding = () => {
 
             {/* Network */}
             <div
-              className={`rounded-2xl border bg-white p-6 flex flex-col shadow-lg transition-all ${
-                currentPlan === 'network' ? 'border-primary ring-2 ring-primary/20' : 'border-gray-200'
+              className={`rounded-2xl border bg-card p-6 flex flex-col shadow-lg transition-all ${
+                currentPlan === 'network' ? 'border-primary ring-2 ring-primary/20' : 'border-border'
               }`}
             >
               <div className="flex items-center justify-between mb-3">

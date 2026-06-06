@@ -197,7 +197,7 @@ const KazakhDatePicker = ({ value, onChange, error, occupiedSlots = [] }) => {
         <div className="space-y-4">
             {/* Horizontal Date Scroller */}
             <div>
-                <label className="block text-sm font-bold mb-3 text-gray-700">Күні</label>
+                <label className="block text-sm font-bold mb-3 text-foreground">Күні</label>
                 <div className="flex gap-3 overflow-x-auto pb-4 no-scrollbar -mx-2 px-2">
                     {dates.map((date, index) => {
                         const active = isSelected(date);
@@ -238,14 +238,14 @@ const KazakhDatePicker = ({ value, onChange, error, occupiedSlots = [] }) => {
                                     ${active
                                         ? 'bg-primary text-white border-primary shadow-lg shadow-primary/30 transform scale-105'
                                         : isFullyBooked
-                                            ? 'bg-gray-50 text-gray-300 border-transparent cursor-not-allowed opacity-60'
-                                            : 'bg-gray-50 text-gray-400 border-transparent hover:bg-gray-100'}
+                                            ? 'bg-muted text-muted-foreground border-transparent cursor-not-allowed opacity-60'
+                                            : 'bg-muted text-muted-foreground border-transparent hover:bg-muted'}
                                 `}
                             >
                                 <span className="text-[10px] font-bold uppercase mb-1">
                                     {label}
                                 </span>
-                                <span className={`text-2xl font-black ${active ? 'text-white' : 'text-gray-900'}`}>
+                                <span className={`text-2xl font-black ${active ? 'text-white' : 'text-foreground'}`}>
                                     {date.getDate()}
                                 </span>
                                 <span className="text-[9px] font-medium truncate max-w-full px-1">
@@ -259,10 +259,10 @@ const KazakhDatePicker = ({ value, onChange, error, occupiedSlots = [] }) => {
 
             {/* Time Grid */}
             <div>
-                <label className="block text-sm font-bold mb-3 text-gray-700">Уақыты</label>
+                <label className="block text-sm font-bold mb-3 text-foreground">Уақыты</label>
                 <div className="grid grid-cols-4 sm:grid-cols-6 gap-2">
                     {visibleSlots.length === 0 && (
-                        <p className="col-span-4 text-sm text-gray-400 py-2">Бүгінге бос уақыт жоқ</p>
+                        <p className="col-span-4 text-sm text-muted-foreground py-2">Бүгінге бос уақыт жоқ</p>
                     )}
                     {visibleSlots.map(time => {
                         const isOccupied = isTimeOccupied(time);
@@ -279,13 +279,13 @@ const KazakhDatePicker = ({ value, onChange, error, occupiedSlots = [] }) => {
                                     ${isActive
                                         ? 'bg-primary text-white border-primary shadow-md'
                                         : isOccupied
-                                            ? 'bg-gray-100 text-gray-300 border-gray-100 cursor-not-allowed'
-                                            : 'bg-white text-gray-600 border-gray-100 hover:border-gray-200'}
+                                            ? 'bg-muted text-muted-foreground border-border cursor-not-allowed'
+                                            : 'bg-card text-muted-foreground border-border hover:border-border'}
                                 `}
                             >
                                 {time}
                                 {isOccupied && (
-                                    <div className="absolute inset-0 flex items-center justify-center bg-gray-100/50">
+                                    <div className="absolute inset-0 flex items-center justify-center bg-muted/50">
                                         <div className="h-0.5 w-full bg-gray-300 rotate-45 transform scale-x-150"></div>
                                     </div>
                                 )}
@@ -303,8 +303,8 @@ const KazakhDatePicker = ({ value, onChange, error, occupiedSlots = [] }) => {
                             <Icon name="event_available" size={20} />
                         </div>
                         <div>
-                            <p className="text-[10px] text-gray-500 font-bold uppercase">Таңдалды</p>
-                            <p className="text-sm font-bold text-gray-900">
+                            <p className="text-[10px] text-muted-foreground font-bold uppercase">Таңдалды</p>
+                            <p className="text-sm font-bold text-foreground">
                                 {new Date(selectedDate).getDate()} {KZ_MONTHS[new Date(selectedDate).getMonth()]}, {selectedTime}
                             </p>
                         </div>

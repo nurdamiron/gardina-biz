@@ -162,7 +162,7 @@ const Register = () => {
     <div className="min-h-screen bg-gradient-to-b from-background-light via-white to-primary/10 flex flex-col items-center justify-center p-4 py-10">
       <div className="w-full max-w-md">
         <div className="text-center mb-6">
-          <img src="/images/logo-header.png" alt="Gardina" className="w-40 h-auto mx-auto mb-3 drop-shadow-sm" />
+          <img src="/images/logo-header.png" alt="Gardina" className="w-80 h-auto mx-auto mb-3 drop-shadow-sm" />
           <div className="flex justify-center mb-2">
             <LanguageSwitcher compact />
           </div>
@@ -170,17 +170,17 @@ const Register = () => {
           <p className="text-sm text-text-secondary mt-1.5 font-medium">{t('auth.registerSubtitle')}</p>
         </div>
 
-        <div className="rounded-3xl bg-white shadow-xl shadow-primary/5 border border-primary/10 overflow-hidden">
+        <div className="rounded-3xl bg-card shadow-xl shadow-primary/5 border border-primary/10 overflow-hidden">
           <div className="h-1 bg-gradient-to-r from-primary via-primary-light to-accent" />
 
           <div className="p-6 sm:p-7">
-            <div className="flex p-1 rounded-xl bg-gray-100/90 border border-gray-200/80 mb-6">
+            <div className="flex p-1 rounded-xl bg-muted/90 border border-border/80 mb-6">
               <button
                 type="button"
                 onClick={() => switchMode(MODES.salon)}
                 className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-lg text-sm font-bold transition-all ${
                   mode === MODES.salon
-                    ? 'bg-white text-primary shadow-sm ring-1 ring-black/5'
+                    ? 'bg-card text-primary shadow-sm ring-1 ring-black/5'
                     : 'text-text-secondary hover:text-text-main'
                 }`}
               >
@@ -192,7 +192,7 @@ const Register = () => {
                 onClick={() => switchMode(MODES.join)}
                 className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-lg text-sm font-bold transition-all ${
                   mode === MODES.join
-                    ? 'bg-white text-primary shadow-sm ring-1 ring-black/5'
+                    ? 'bg-card text-primary shadow-sm ring-1 ring-black/5'
                     : 'text-text-secondary hover:text-text-main'
                 }`}
               >
@@ -223,7 +223,7 @@ const Register = () => {
                         type="text"
                         value={organizationName}
                         onChange={(e) => onOrgNameChange(e.target.value)}
-                        className="block w-full pl-10 pr-3 py-3 border border-gray-200 rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-shadow"
+                        className="block w-full pl-10 pr-3 py-3 border border-border rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-shadow"
                         placeholder={t('auth.organizationNamePlaceholder')}
                         autoComplete="organization"
                       />
@@ -250,7 +250,7 @@ const Register = () => {
                               .replace(/[^a-z0-9-]/g, '')
                           );
                         }}
-                        className="block w-full pl-10 pr-3 py-3 border border-gray-200 rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-shadow font-mono text-sm"
+                        className="block w-full pl-10 pr-3 py-3 border border-border rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-shadow font-mono text-sm"
                         placeholder={t('auth.organizationSlugPlaceholder')}
                         autoComplete="off"
                       />
@@ -296,7 +296,7 @@ const Register = () => {
                             .replace(/[^a-z0-9-]/g, '')
                         )
                       }
-                      className="block w-full pl-10 pr-3 py-3 border border-gray-200 rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-shadow font-mono text-sm"
+                      className="block w-full pl-10 pr-3 py-3 border border-border rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-shadow font-mono text-sm"
                       placeholder={t('auth.organizationSlugJoinPlaceholder')}
                       autoComplete="off"
                     />
@@ -317,7 +317,7 @@ const Register = () => {
                     type="text"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    className="block w-full pl-10 pr-3 py-3 border border-gray-200 rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-shadow"
+                    className="block w-full pl-10 pr-3 py-3 border border-border rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-shadow"
                     placeholder={t('auth.fullNamePlaceholder')}
                     autoComplete="name"
                   />
@@ -336,7 +336,7 @@ const Register = () => {
                     type="text"
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
-                    className="block w-full pl-10 pr-3 py-3 border border-gray-200 rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-shadow"
+                    className="block w-full pl-10 pr-3 py-3 border border-border rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-shadow"
                     placeholder={t('auth.phonePlaceholder')}
                     autoComplete="tel"
                     inputMode="tel"
@@ -356,7 +356,7 @@ const Register = () => {
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="block w-full pl-10 pr-3 py-3 border border-gray-200 rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-shadow"
+                    className="block w-full pl-10 pr-3 py-3 border border-border rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-shadow"
                     placeholder="you@example.com"
                     autoComplete="email"
                   />
@@ -375,7 +375,7 @@ const Register = () => {
                     type={showPassword ? 'text' : 'password'}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="block w-full pl-10 pr-12 py-3 border border-gray-200 rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-shadow"
+                    className="block w-full pl-10 pr-12 py-3 border border-border rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-shadow"
                     placeholder={t('auth.passwordPlaceholderMin')}
                     autoComplete="new-password"
                   />
@@ -406,7 +406,7 @@ const Register = () => {
                     type={showPassword ? 'text' : 'password'}
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
-                    className="block w-full pl-10 pr-3 py-3 border border-gray-200 rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-shadow"
+                    className="block w-full pl-10 pr-3 py-3 border border-border rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-shadow"
                     placeholder={t('auth.passwordConfirmPlaceholder')}
                     autoComplete="new-password"
                   />
@@ -418,7 +418,7 @@ const Register = () => {
                   type="checkbox"
                   checked={acceptedTerms}
                   onChange={(e) => setAcceptedTerms(e.target.checked)}
-                  className="mt-0.5 size-4 rounded border-gray-300 text-primary focus:ring-primary"
+                  className="mt-0.5 size-4 rounded border-input text-primary focus:ring-primary"
                 />
                 <span className="text-xs text-text-secondary leading-relaxed">
                   {t('auth.consentText')}{' '}

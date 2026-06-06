@@ -10,7 +10,7 @@ import { useI18n } from '../../contexts/I18nContext';
 // Shared modal backdrop
 const ModalBackdrop = ({ children, onClose }) => (
   <div className="fixed inset-0 bg-black/50 z-50 flex items-end sm:items-center justify-center p-4" onClick={onClose}>
-    <div className="bg-white rounded-2xl p-6 w-full max-w-sm shadow-2xl" onClick={e => e.stopPropagation()}>
+    <div className="bg-card rounded-2xl p-6 w-full max-w-sm shadow-2xl" onClick={e => e.stopPropagation()}>
       {children}
     </div>
   </div>
@@ -93,29 +93,29 @@ const AdminSettings = () => {
   ];
 
   const SettingsGroup = ({ title, items }) => (
-    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-      <div className="px-4 py-3 bg-gray-50 border-b border-gray-100">
-        <h3 className="font-bold text-gray-700 text-sm">{title}</h3>
+    <div className="bg-card rounded-2xl shadow-sm border border-border overflow-hidden">
+      <div className="px-4 py-3 bg-muted border-b border-border">
+        <h3 className="font-bold text-foreground text-sm">{title}</h3>
       </div>
       {items.map((item, index) => (
         <button
           key={item.label}
           onClick={item.onClick}
           className={`
-            w-full flex items-center gap-4 p-4 text-left hover:bg-gray-50 active:bg-gray-100 transition-colors
-            ${index !== items.length - 1 ? 'border-b border-gray-100' : ''}
+            w-full flex items-center gap-4 p-4 text-left hover:bg-muted active:bg-muted transition-colors
+            ${index !== items.length - 1 ? 'border-b border-border' : ''}
           `}
         >
           <div className="size-10 rounded-full bg-primary/10 flex items-center justify-center">
             <Icon name={item.icon} size={22} className="text-primary" />
           </div>
           <div className="flex-1">
-            <p className="font-medium text-gray-900">{item.label}</p>
+            <p className="font-medium text-foreground">{item.label}</p>
             {item.subtitle && (
-              <p className="text-xs text-gray-500">{item.subtitle}</p>
+              <p className="text-xs text-muted-foreground">{item.subtitle}</p>
             )}
           </div>
-          <Icon name="chevron_right" className="text-gray-400" />
+          <Icon name="chevron_right" className="text-muted-foreground" />
         </button>
       ))}
     </div>
@@ -124,20 +124,20 @@ const AdminSettings = () => {
   return (
     <div className="bg-background-light min-h-screen pb-32">
       {/* Header */}
-      <header className="sticky top-0 z-30 bg-white/80 backdrop-blur-md border-b border-gray-100 px-4 py-4">
-        <h1 className="text-xl font-bold text-gray-900">{t('adminSettings.title')}</h1>
+      <header className="sticky top-0 z-30 bg-card/80 backdrop-blur-md border-b border-border px-4 py-4">
+        <h1 className="text-xl font-bold text-foreground">{t('adminSettings.title')}</h1>
       </header>
 
       <main className="p-4 space-y-4 max-w-3xl mx-auto">
         {/* Admin Profile Card */}
-        <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+        <div className="bg-card rounded-2xl p-5 shadow-sm border border-border">
           <div className="flex items-center gap-4">
             <div className="size-16 rounded-full bg-primary/10 flex items-center justify-center">
               <Icon name="admin_panel_settings" size={28} className="text-primary" />
             </div>
             <div className="flex-1">
-              <h2 className="text-lg font-bold text-gray-900">{user?.name || t('adminLayout.admin')}</h2>
-              <p className="text-sm text-gray-500">{user?.phone || '—'}</p>
+              <h2 className="text-lg font-bold text-foreground">{user?.name || t('adminLayout.admin')}</h2>
+              <p className="text-sm text-muted-foreground">{user?.phone || '—'}</p>
               <span className="inline-block mt-1 px-3 py-1 rounded-full text-xs font-bold bg-primary/10 text-primary-dark">
                 {t('adminSettings.roleAdmin')}
               </span>
@@ -155,9 +155,9 @@ const AdminSettings = () => {
         <SettingsGroup title={t('adminSettings.systemGroup')} items={systemItems} />
 
         {/* Interface Settings */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-          <div className="px-4 py-3 bg-gray-50 border-b border-gray-100">
-            <h3 className="font-bold text-gray-700 text-sm">{t('adminSettings.interfaceGroup')}</h3>
+        <div className="bg-card rounded-2xl shadow-sm border border-border overflow-hidden">
+          <div className="px-4 py-3 bg-muted border-b border-border">
+            <h3 className="font-bold text-foreground text-sm">{t('adminSettings.interfaceGroup')}</h3>
           </div>
           <div className="flex items-center justify-between gap-4 p-4">
             <div className="flex items-center gap-3">
@@ -165,8 +165,8 @@ const AdminSettings = () => {
                 <Icon name="settings" size={20} className="text-primary" />
               </div>
               <div>
-                <p className="font-medium text-gray-900">{t('common.language')}</p>
-                <p className="text-xs text-gray-500">KZ / RU</p>
+                <p className="font-medium text-foreground">{t('common.language')}</p>
+                <p className="text-xs text-muted-foreground">KZ / RU</p>
               </div>
             </div>
             <LanguageSwitcher compact />
@@ -174,7 +174,7 @@ const AdminSettings = () => {
         </div>
 
         {/* App Info */}
-        <p className="text-center text-xs text-gray-400 py-2">{t('adminSettings.version')}</p>
+        <p className="text-center text-xs text-muted-foreground py-2">{t('adminSettings.version')}</p>
 
         {/* Logout Button */}
         <button
@@ -193,20 +193,20 @@ const AdminSettings = () => {
           onClick={() => setShowLogoutConfirm(false)}
         >
           <div 
-            className="bg-white rounded-2xl p-6 w-full max-w-sm shadow-2xl"
+            className="bg-card rounded-2xl p-6 w-full max-w-sm shadow-2xl"
             onClick={e => e.stopPropagation()}
           >
             <div className="text-center">
               <div className="size-14 rounded-full bg-red-100 flex items-center justify-center mx-auto mb-4">
                 <Icon name="logout" size={24} className="text-red-500" />
               </div>
-              <h3 className="text-lg font-bold text-gray-900 mb-2">{t('adminSettings.logoutConfirmTitle')}</h3>
-              <p className="text-gray-500 text-sm mb-6">{t('adminSettings.logoutConfirmText')}</p>
+              <h3 className="text-lg font-bold text-foreground mb-2">{t('adminSettings.logoutConfirmTitle')}</h3>
+              <p className="text-muted-foreground text-sm mb-6">{t('adminSettings.logoutConfirmText')}</p>
               
               <div className="flex gap-3">
                 <button
                   onClick={() => setShowLogoutConfirm(false)}
-                  className="flex-1 py-3 bg-gray-100 text-gray-700 font-bold rounded-xl hover:bg-gray-200 transition-colors"
+                  className="flex-1 py-3 bg-muted text-foreground font-bold rounded-xl hover:bg-muted transition-colors"
                 >
                   {t('common.cancel')}
                 </button>
@@ -232,14 +232,14 @@ const AdminSettings = () => {
           <div className="space-y-4">
             {[{ label: t('adminSettings.fullName'), key: 'name' }, { label: t('adminSettings.loginPhone'), key: 'phone' }].map(f => (
               <div key={f.key}>
-                <label className="block text-sm font-semibold text-gray-700 mb-1.5">{f.label}</label>
+                <label className="block text-sm font-semibold text-foreground mb-1.5">{f.label}</label>
                 <input type="text" value={profileForm[f.key]} onChange={e => setProfileForm(p => ({ ...p, [f.key]: e.target.value }))}
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none" />
+                  className="w-full px-4 py-3 border border-border rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none" />
               </div>
             ))}
           </div>
           <div className="flex gap-3 mt-6">
-            <button onClick={() => setModal(null)} className="flex-1 py-3 bg-gray-100 text-gray-700 font-bold rounded-xl">{t('common.cancel')}</button>
+            <button onClick={() => setModal(null)} className="flex-1 py-3 bg-muted text-foreground font-bold rounded-xl">{t('common.cancel')}</button>
             <button onClick={handleSaveProfile} disabled={profileSaving} className="flex-1 py-3 bg-primary text-white font-bold rounded-xl disabled:opacity-50">
               {profileSaving ? t('adminSettings.saving') : t('common.save')}
             </button>
@@ -264,14 +264,14 @@ const AdminSettings = () => {
               <div className="space-y-4">
                 {[{ label: t('adminSettings.currentPassword'), key: 'current' }, { label: t('adminSettings.newPassword'), key: 'next' }, { label: t('adminSettings.confirmNewPassword'), key: 'confirm' }].map(f => (
                   <div key={f.key}>
-                    <label className="block text-sm font-semibold text-gray-700 mb-1.5">{f.label}</label>
+                    <label className="block text-sm font-semibold text-foreground mb-1.5">{f.label}</label>
                     <input type="password" value={pwForm[f.key]} onChange={e => setPwForm(p => ({ ...p, [f.key]: e.target.value }))}
-                      className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none" />
+                      className="w-full px-4 py-3 border border-border rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none" />
                   </div>
                 ))}
               </div>
               <div className="flex gap-3 mt-6">
-                <button onClick={() => setModal(null)} className="flex-1 py-3 bg-gray-100 text-gray-700 font-bold rounded-xl">{t('common.cancel')}</button>
+                <button onClick={() => setModal(null)} className="flex-1 py-3 bg-muted text-foreground font-bold rounded-xl">{t('common.cancel')}</button>
                 <button onClick={handleChangePassword} disabled={pwSaving} className="flex-1 py-3 bg-primary text-white font-bold rounded-xl disabled:opacity-50">
                   {pwSaving ? t('adminSettings.changing') : t('adminSettings.change')}
                 </button>
@@ -291,8 +291,8 @@ const AdminSettings = () => {
             <h3 className="text-lg font-bold mb-2">
               {modal === 'company' ? t('adminSettings.companyInfo') : modal === 'payment' ? t('adminSettings.paymentDetails') : modal === 'commission' ? t('adminSettings.commission') : t('adminSettings.delivery')}
             </h3>
-            <p className="text-gray-500 text-sm mb-6">{t('common.comingSoon')}</p>
-            <button onClick={() => setModal(null)} className="w-full py-3 bg-gray-100 text-gray-700 font-bold rounded-xl">{t('common.close')}</button>
+            <p className="text-muted-foreground text-sm mb-6">{t('common.comingSoon')}</p>
+            <button onClick={() => setModal(null)} className="w-full py-3 bg-muted text-foreground font-bold rounded-xl">{t('common.close')}</button>
           </div>
         </ModalBackdrop>
       )}

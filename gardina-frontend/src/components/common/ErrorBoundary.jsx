@@ -35,8 +35,14 @@ class ErrorBoundary extends React.Component {
     if (this.state.error) {
       return (
         <div className="min-h-screen flex items-center justify-center bg-background-light p-6">
-          <div className="max-w-md w-full bg-white rounded-2xl shadow-lg p-8 text-center">
-            <div className="text-5xl mb-3">⚠️</div>
+          <div className="max-w-md w-full bg-card rounded-2xl shadow-lg p-8 text-center">
+            <div className="mx-auto mb-4 size-14 rounded-full bg-destructive/10 flex items-center justify-center">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-destructive" aria-hidden="true">
+                <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+                <line x1="12" y1="9" x2="12" y2="13" />
+                <line x1="12" y1="17" x2="12.01" y2="17" />
+              </svg>
+            </div>
             <h1 className="text-xl font-bold text-text-main mb-2">
               Қате орын алды
             </h1>
@@ -53,7 +59,7 @@ class ErrorBoundary extends React.Component {
               </button>
               <button
                 onClick={this.reset}
-                className="px-5 py-2.5 rounded-xl border border-gray-200 text-text-main font-bold text-sm hover:bg-gray-50 transition-all"
+                className="px-5 py-2.5 rounded-xl border border-border text-text-main font-bold text-sm hover:bg-muted transition-all"
               >
                 Жабу
               </button>

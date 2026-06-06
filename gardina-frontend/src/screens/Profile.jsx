@@ -35,7 +35,7 @@ const EditProfileModal = ({ user, onClose, onSaved }) => {
 
   return (
     <ModalBackdrop onClose={onClose}>
-      <h3 className="text-lg font-bold text-gray-900 mb-5">{t('profile.edit.title')}</h3>
+      <h3 className="text-lg font-bold text-foreground mb-5">{t('profile.edit.title')}</h3>
 
       {error && (
         <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-700">{error}</div>
@@ -43,22 +43,22 @@ const EditProfileModal = ({ user, onClose, onSaved }) => {
 
       <div className="space-y-4">
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-1.5">{t('profile.edit.name')}</label>
+          <label className="block text-sm font-semibold text-foreground mb-1.5">{t('profile.edit.name')}</label>
           <input
             type="text"
             value={name}
             onChange={e => setName(e.target.value)}
-            className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none"
+            className="w-full px-4 py-3 border border-border rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none"
             placeholder={t('profile.edit.namePlaceholder')}
           />
         </div>
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-1.5">{t('profile.edit.phone')}</label>
+          <label className="block text-sm font-semibold text-foreground mb-1.5">{t('profile.edit.phone')}</label>
           <input
             type="text"
             value={phone}
             onChange={e => setPhone(e.target.value)}
-            className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none"
+            className="w-full px-4 py-3 border border-border rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none"
             placeholder={t('profile.edit.phonePlaceholder')}
             inputMode="tel"
           />
@@ -68,7 +68,7 @@ const EditProfileModal = ({ user, onClose, onSaved }) => {
       <div className="flex gap-3 mt-6">
         <button
           onClick={onClose}
-          className="flex-1 py-3 bg-gray-100 text-gray-700 font-bold rounded-xl hover:bg-gray-200 transition-colors"
+          className="flex-1 py-3 bg-muted text-foreground font-bold rounded-xl hover:bg-muted transition-colors"
         >
           {t('common.cancel')}
         </button>
@@ -129,14 +129,14 @@ const ChangePasswordModal = ({ onClose }) => {
 
   return (
     <ModalBackdrop onClose={onClose}>
-      <h3 className="text-lg font-bold text-gray-900 mb-5">{t('profile.password.title')}</h3>
+      <h3 className="text-lg font-bold text-foreground mb-5">{t('profile.password.title')}</h3>
 
       {success ? (
         <div className="text-center py-4">
           <div className="size-14 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-3">
             <Icon name="check_circle" size={24} className="text-green-500" />
           </div>
-          <p className="font-semibold text-gray-800">{t('profile.password.successTitle')}</p>
+          <p className="font-semibold text-foreground">{t('profile.password.successTitle')}</p>
         </div>
       ) : (
         <>
@@ -174,7 +174,7 @@ const ChangePasswordModal = ({ onClose }) => {
           <div className="flex gap-3 mt-6">
             <button
               onClick={onClose}
-              className="flex-1 py-3 bg-gray-100 text-gray-700 font-bold rounded-xl hover:bg-gray-200 transition-colors"
+              className="flex-1 py-3 bg-muted text-foreground font-bold rounded-xl hover:bg-muted transition-colors"
             >
               {t('common.cancel')}
             </button>
@@ -202,21 +202,21 @@ const HelpModal = ({ onClose }) => {
         <div className="size-10 rounded-full bg-primary/10 flex items-center justify-center">
           <Icon name="help" className="text-primary" />
         </div>
-        <h3 className="text-lg font-bold text-gray-900">{t('profile.help.title')}</h3>
+        <h3 className="text-lg font-bold text-foreground">{t('profile.help.title')}</h3>
       </div>
 
-      <div className="space-y-4 text-sm text-gray-600">
+      <div className="space-y-4 text-sm text-muted-foreground">
         <HelpItem icon="phone" title={t('profile.help.contact')} value={t('profile.help.contactValue')} />
         <HelpItem icon="mail" title={t('profile.help.email')} value={t('profile.help.emailValue')} />
         <HelpItem icon="schedule" title={t('profile.help.schedule')} value={t('profile.help.scheduleValue')} />
-        <div className="pt-3 border-t border-gray-100">
-          <p className="text-xs text-gray-400 text-center">{t('profile.help.appVersion')}</p>
+        <div className="pt-3 border-t border-border">
+          <p className="text-xs text-muted-foreground text-center">{t('profile.help.appVersion')}</p>
         </div>
       </div>
 
       <button
         onClick={onClose}
-        className="w-full mt-6 py-3 bg-gray-100 text-gray-700 font-bold rounded-xl hover:bg-gray-200 transition-colors"
+        className="w-full mt-6 py-3 bg-muted text-foreground font-bold rounded-xl hover:bg-muted transition-colors"
       >
         {t('common.close')}
       </button>
@@ -231,7 +231,7 @@ const ModalBackdrop = ({ children, onClose }) => (
     onClick={onClose}
   >
     <div
-      className="bg-white rounded-2xl p-6 w-full max-w-sm shadow-2xl"
+      className="bg-card rounded-2xl p-6 w-full max-w-sm shadow-2xl"
       onClick={e => e.stopPropagation()}
     >
       {children}
@@ -241,19 +241,19 @@ const ModalBackdrop = ({ children, onClose }) => (
 
 const PasswordField = ({ label, value, onChange, show, onToggle, placeholder }) => (
   <div>
-    <label className="block text-sm font-semibold text-gray-700 mb-1.5">{label}</label>
+    <label className="block text-sm font-semibold text-foreground mb-1.5">{label}</label>
     <div className="relative">
       <input
         type={show ? 'text' : 'password'}
         value={value}
         onChange={e => onChange(e.target.value)}
         placeholder={placeholder}
-        className="w-full px-4 py-3 pr-12 border border-gray-200 rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none"
+        className="w-full px-4 py-3 pr-12 border border-border rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none"
       />
       <button
         type="button"
         onClick={onToggle}
-        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-muted-foreground"
       >
         <Icon name={show ? 'visibility_off' : 'visibility'} size={22} />
       </button>
@@ -262,11 +262,11 @@ const PasswordField = ({ label, value, onChange, show, onToggle, placeholder }) 
 );
 
 const HelpItem = ({ icon, title, value }) => (
-  <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
+  <div className="flex items-center gap-3 p-3 bg-muted rounded-xl">
     <Icon name={icon} size={22} className="text-primary" />
     <div>
-      <p className="text-xs text-gray-400">{title}</p>
-      <p className="font-semibold text-gray-800">{value}</p>
+      <p className="text-xs text-muted-foreground">{title}</p>
+      <p className="font-semibold text-foreground">{value}</p>
     </div>
   </div>
 );
@@ -298,7 +298,7 @@ const Profile = () => {
     installer: 'bg-green-100 text-green-700',
   };
 
-  const roleColor = roleColors[user?.role] || 'bg-gray-100 text-gray-700';
+  const roleColor = roleColors[user?.role] || 'bg-muted text-foreground';
   const roleLabel = t(`profile.roles.${user?.role || 'employee'}`, t('profile.roles.employee'));
 
   const menuItems = [
@@ -330,77 +330,77 @@ const Profile = () => {
 
   return (
     <div className="bg-background-light min-h-screen pb-32">
-      <header className="sticky top-0 z-30 bg-white/80 backdrop-blur-md border-b border-gray-100 px-4 py-4">
-        <h1 className="text-xl font-bold text-gray-900">{t('profile.title')}</h1>
+      <header className="sticky top-0 z-30 bg-card/80 backdrop-blur-md border-b border-border px-4 py-4">
+        <h1 className="text-xl font-bold text-foreground">{t('profile.title')}</h1>
       </header>
 
       <main className="p-4 space-y-4 max-w-3xl mx-auto">
         {/* Profile Card */}
-        <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+        <div className="bg-card rounded-2xl p-5 shadow-sm border border-border">
           <div className="flex items-center gap-4">
             <div className="size-16 rounded-full bg-primary/10 flex items-center justify-center">
               <Icon name="person" size={28} className="text-primary" />
             </div>
             <div className="flex-1">
-              <h2 className="text-lg font-bold text-gray-900">{user?.name || t('profile.defaultUserName')}</h2>
-              <p className="text-sm text-gray-500">{user?.phone || t('profile.unknownPhone')}</p>
+              <h2 className="text-lg font-bold text-foreground">{user?.name || t('profile.defaultUserName')}</h2>
+              <p className="text-sm text-muted-foreground">{user?.phone || t('profile.unknownPhone')}</p>
               <span className={`inline-block mt-1 px-3 py-1 rounded-full text-xs font-bold ${roleColor}`}>
                 {roleLabel}
               </span>
             </div>
             <button
               onClick={() => setModal('edit')}
-              className="size-9 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors"
+              className="size-9 rounded-full bg-muted flex items-center justify-center hover:bg-muted transition-colors"
               aria-label={t('common.edit')}
             >
-              <Icon name="edit" size={20} className="text-gray-600" />
+              <Icon name="edit" size={20} className="text-muted-foreground" />
             </button>
           </div>
         </div>
 
         {/* Account Info */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+        <div className="bg-card rounded-2xl shadow-sm border border-border overflow-hidden">
           <div className="flex items-center gap-4 p-4">
             <div className="size-10 rounded-full bg-primary/10 flex items-center justify-center">
               <Icon name="badge" className="text-primary" />
             </div>
             <div className="flex-1">
-              <p className="text-xs text-gray-500">{t('profile.loginLabel')}</p>
-              <p className="font-semibold text-gray-900">{user?.phone || t('profile.unknownPhone')}</p>
+              <p className="text-xs text-muted-foreground">{t('profile.loginLabel')}</p>
+              <p className="font-semibold text-foreground">{user?.phone || t('profile.unknownPhone')}</p>
             </div>
           </div>
         </div>
 
         {/* Language */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+        <div className="bg-card rounded-2xl shadow-sm border border-border overflow-hidden">
           <div className="flex items-center gap-4 p-4">
             <div className="size-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
               <Icon name="language" className="text-primary" />
             </div>
             <div className="flex-1">
-              <p className="font-medium text-gray-900">{t('common.language')}</p>
+              <p className="font-medium text-foreground">{t('common.language')}</p>
             </div>
             <LanguageSwitcher />
           </div>
         </div>
 
         {/* Menu Items */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+        <div className="bg-card rounded-2xl shadow-sm border border-border overflow-hidden">
           {menuItems.map((item, index) => (
             <button
               key={item.label}
               onClick={item.onClick}
-              className={`w-full flex items-center gap-4 p-4 text-left hover:bg-gray-50 active:bg-gray-100 transition-colors
-                ${index !== menuItems.length - 1 ? 'border-b border-gray-100' : ''}`}
+              className={`w-full flex items-center gap-4 p-4 text-left hover:bg-muted active:bg-muted transition-colors
+                ${index !== menuItems.length - 1 ? 'border-b border-border' : ''}`}
             >
-              <div className="size-10 rounded-full bg-gray-100 flex items-center justify-center flex-shrink-0">
-                <Icon name={item.icon} size={22} className="text-gray-600" />
+              <div className="size-10 rounded-full bg-muted flex items-center justify-center flex-shrink-0">
+                <Icon name={item.icon} size={22} className="text-muted-foreground" />
               </div>
               <div className="flex-1">
-                <p className="font-medium text-gray-900">{item.label}</p>
-                {item.desc && <p className="text-xs text-gray-400 mt-0.5">{item.desc}</p>}
+                <p className="font-medium text-foreground">{item.label}</p>
+                {item.desc && <p className="text-xs text-muted-foreground mt-0.5">{item.desc}</p>}
               </div>
-              <Icon name="chevron_right" className="text-gray-400" />
+              <Icon name="chevron_right" className="text-muted-foreground" />
             </button>
           ))}
         </div>
@@ -433,19 +433,19 @@ const Profile = () => {
           onClick={() => setShowLogoutConfirm(false)}
         >
           <div
-            className="bg-white rounded-2xl p-6 w-full max-w-sm shadow-2xl"
+            className="bg-card rounded-2xl p-6 w-full max-w-sm shadow-2xl"
             onClick={e => e.stopPropagation()}
           >
             <div className="text-center">
               <div className="size-14 rounded-full bg-red-100 flex items-center justify-center mx-auto mb-4">
                 <Icon name="logout" size={24} className="text-red-500" />
               </div>
-              <h3 className="text-lg font-bold text-gray-900 mb-2">{t('profile.logout.confirmTitle')}</h3>
-              <p className="text-gray-500 text-sm mb-6">{t('profile.logout.confirmText')}</p>
+              <h3 className="text-lg font-bold text-foreground mb-2">{t('profile.logout.confirmTitle')}</h3>
+              <p className="text-muted-foreground text-sm mb-6">{t('profile.logout.confirmText')}</p>
               <div className="flex gap-3">
                 <button
                   onClick={() => setShowLogoutConfirm(false)}
-                  className="flex-1 py-3 bg-gray-100 text-gray-700 font-bold rounded-xl hover:bg-gray-200 transition-colors"
+                  className="flex-1 py-3 bg-muted text-foreground font-bold rounded-xl hover:bg-muted transition-colors"
                 >
                   {t('common.cancel')}
                 </button>

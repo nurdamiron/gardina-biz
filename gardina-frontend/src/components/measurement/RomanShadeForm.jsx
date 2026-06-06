@@ -68,42 +68,42 @@ const RomanShadeForm = ({ data, onChange }) => {
   return (
     <div className="space-y-6">
       {/* Размеры */}
-      <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+      <div className="bg-card rounded-2xl p-5 shadow-sm border border-border">
         <div className="flex items-center gap-2 mb-4">
           <Icon name="straighten" className="text-primary" />
-          <h3 className="font-bold text-gray-900">Терезе өлшемі</h3>
+          <h3 className="font-bold text-foreground">Терезе өлшемі</h3>
         </div>
 
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-600 mb-2">Ені</label>
+            <label className="block text-sm font-medium text-muted-foreground mb-2">Ені</label>
             <div className="relative">
               <input
                 type="number"
                 step="0.01"
                 value={data.width || ''}
                 onChange={(e) => updateData({ width: e.target.value })}
-                className="w-full h-14 px-4 pr-10 bg-gray-50 border-2 border-transparent rounded-xl 
-                  focus:bg-white focus:border-primary transition-all text-xl font-bold"
+                className="w-full h-14 px-4 pr-10 bg-muted border-2 border-transparent rounded-xl 
+                  focus:bg-card focus:border-primary transition-all text-xl font-bold"
                 placeholder="0.00"
               />
-              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold">м</span>
+              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground font-bold">м</span>
             </div>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-600 mb-2">Биіктігі</label>
+            <label className="block text-sm font-medium text-muted-foreground mb-2">Биіктігі</label>
             <div className="relative">
               <input
                 type="number"
                 step="0.01"
                 value={data.height || ''}
                 onChange={(e) => updateData({ height: e.target.value })}
-                className="w-full h-14 px-4 pr-10 bg-gray-50 border-2 border-transparent rounded-xl 
-                  focus:bg-white focus:border-primary transition-all text-xl font-bold"
+                className="w-full h-14 px-4 pr-10 bg-muted border-2 border-transparent rounded-xl 
+                  focus:bg-card focus:border-primary transition-all text-xl font-bold"
                 placeholder="0.00"
               />
-              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold">м</span>
+              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground font-bold">м</span>
             </div>
           </div>
         </div>
@@ -119,10 +119,10 @@ const RomanShadeForm = ({ data, onChange }) => {
       </div>
 
       {/* Количество штор */}
-      <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+      <div className="bg-card rounded-2xl p-5 shadow-sm border border-border">
         <div className="flex items-center gap-2 mb-4">
-          <Icon name="grid_view" className="text-gray-600" />
-          <h3 className="font-bold text-gray-900">Штора саны</h3>
+          <Icon name="grid_view" className="text-muted-foreground" />
+          <h3 className="font-bold text-foreground">Штора саны</h3>
         </div>
 
         <div className="flex gap-3">
@@ -134,7 +134,7 @@ const RomanShadeForm = ({ data, onChange }) => {
               className={`flex-1 py-3 rounded-xl font-bold text-xl transition-all ${
                 data.quantity === num
                   ? 'bg-primary text-white'
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  : 'bg-muted text-muted-foreground hover:bg-muted'
               }`}
             >
               {num}
@@ -144,10 +144,10 @@ const RomanShadeForm = ({ data, onChange }) => {
       </div>
 
       {/* Ткань */}
-      <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+      <div className="bg-card rounded-2xl p-5 shadow-sm border border-border">
         <div className="flex items-center gap-2 mb-4">
           <Icon name="texture" className="text-amber-600" />
-          <h3 className="font-bold text-gray-900">Мата</h3>
+          <h3 className="font-bold text-foreground">Мата</h3>
           {fabricTotal > 0 && (
             <span className="ml-auto text-sm font-bold text-green-600">{formatPrice(fabricTotal)}</span>
           )}
@@ -162,23 +162,23 @@ const RomanShadeForm = ({ data, onChange }) => {
               setShowFabricList(true);
             }}
             onFocus={() => setShowFabricList(true)}
-            className="w-full h-12 px-4 bg-gray-50 border-2 border-transparent rounded-xl 
-              focus:bg-white focus:border-primary transition-all"
+            className="w-full h-12 px-4 bg-muted border-2 border-transparent rounded-xl 
+              focus:bg-card focus:border-primary transition-all"
             placeholder="Мата іздеу..."
           />
           
           {showFabricList && filteredFabrics.length > 0 && (
-            <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-xl shadow-xl border border-gray-100 z-20 overflow-hidden">
+            <div className="absolute top-full left-0 right-0 mt-2 bg-card rounded-xl shadow-xl border border-border z-20 overflow-hidden">
               {filteredFabrics.map(fabric => (
                 <button
                   key={fabric.id}
                   type="button"
                   onClick={() => selectFabric(fabric)}
-                  className="w-full px-4 py-3 text-left hover:bg-gray-50 border-b last:border-0 flex justify-between items-center"
+                  className="w-full px-4 py-3 text-left hover:bg-muted border-b last:border-0 flex justify-between items-center"
                 >
                   <div>
-                    <p className="font-bold text-gray-900">{fabric.name}</p>
-                    <p className="text-xs text-gray-500">{fabric.code}</p>
+                    <p className="font-bold text-foreground">{fabric.name}</p>
+                    <p className="text-xs text-muted-foreground">{fabric.code}</p>
                   </div>
                   <span className="font-bold text-primary">{formatPrice(fabric.pricePerMeter)}/м</span>
                 </button>
@@ -191,8 +191,8 @@ const RomanShadeForm = ({ data, onChange }) => {
           <div className="p-3 bg-amber-50 rounded-xl border border-amber-200">
             <div className="flex justify-between items-start">
               <div>
-                <p className="font-bold text-gray-900">{data.fabric.fabricName}</p>
-                <p className="text-xs text-gray-500">{data.fabric.fabricCode}</p>
+                <p className="font-bold text-foreground">{data.fabric.fabricName}</p>
+                <p className="text-xs text-muted-foreground">{data.fabric.fabricCode}</p>
               </div>
               <button
                 type="button"
@@ -200,7 +200,7 @@ const RomanShadeForm = ({ data, onChange }) => {
                   updateData({ fabric: null });
                   setSearchFabric('');
                 }}
-                className="text-gray-400 hover:text-red-500"
+                className="text-muted-foreground hover:text-red-500"
               >
                 <Icon name="close" size={20} />
               </button>
@@ -214,10 +214,10 @@ const RomanShadeForm = ({ data, onChange }) => {
       </div>
 
       {/* Механизм */}
-      <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+      <div className="bg-card rounded-2xl p-5 shadow-sm border border-border">
         <div className="flex items-center gap-2 mb-4">
-          <Icon name="settings" className="text-gray-600" />
-          <h3 className="font-bold text-gray-900">Механизм</h3>
+          <Icon name="settings" className="text-muted-foreground" />
+          <h3 className="font-bold text-foreground">Механизм</h3>
         </div>
 
         <div className="grid grid-cols-2 gap-3">
@@ -229,7 +229,7 @@ const RomanShadeForm = ({ data, onChange }) => {
               className={`py-4 rounded-xl font-bold transition-all ${
                 data.mechanism === mech.id
                   ? 'bg-primary text-white'
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  : 'bg-muted text-muted-foreground hover:bg-muted'
               }`}
             >
               <span className="block">{mech.name}</span>
@@ -240,36 +240,36 @@ const RomanShadeForm = ({ data, onChange }) => {
       </div>
 
       {/* Система/Карниз */}
-      <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+      <div className="bg-card rounded-2xl p-5 shadow-sm border border-border">
         <div className="flex items-center gap-2 mb-4">
-          <Icon name="horizontal_rule" className="text-gray-600" />
-          <h3 className="font-bold text-gray-900">Рим жүйесі</h3>
+          <Icon name="horizontal_rule" className="text-muted-foreground" />
+          <h3 className="font-bold text-foreground">Рим жүйесі</h3>
         </div>
 
-        <div className="flex justify-between items-center p-3 bg-gray-50 rounded-xl">
-          <span className="text-gray-700">Стандарт жүйе</span>
-          <span className="font-bold text-gray-900">{formatPrice(systemTotal)}</span>
+        <div className="flex justify-between items-center p-3 bg-muted rounded-xl">
+          <span className="text-foreground">Стандарт жүйе</span>
+          <span className="font-bold text-foreground">{formatPrice(systemTotal)}</span>
         </div>
       </div>
 
       {/* Пошив */}
-      <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+      <div className="bg-card rounded-2xl p-5 shadow-sm border border-border">
         <div className="flex items-center gap-2 mb-4">
-          <Icon name="cut" className="text-gray-600" />
-          <h3 className="font-bold text-gray-900">Тігу</h3>
+          <Icon name="cut" className="text-muted-foreground" />
+          <h3 className="font-bold text-foreground">Тігу</h3>
         </div>
 
-        <div className="flex justify-between items-center p-3 bg-gray-50 rounded-xl">
-          <span className="text-gray-700">Рим пердесін тігу</span>
-          <span className="font-bold text-gray-900">{formatPrice(sewingTotal)}</span>
+        <div className="flex justify-between items-center p-3 bg-muted rounded-xl">
+          <span className="text-foreground">Рим пердесін тігу</span>
+          <span className="font-bold text-foreground">{formatPrice(sewingTotal)}</span>
         </div>
       </div>
 
       {/* Монтаж */}
-      <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+      <div className="bg-card rounded-2xl p-5 shadow-sm border border-border">
         <div className="flex items-center gap-2 mb-4">
-          <Icon name="build" className="text-gray-600" />
-          <h3 className="font-bold text-gray-900">Орнату</h3>
+          <Icon name="build" className="text-muted-foreground" />
+          <h3 className="font-bold text-foreground">Орнату</h3>
         </div>
 
         <label className="flex items-center gap-3 cursor-pointer">
@@ -284,16 +284,16 @@ const RomanShadeForm = ({ data, onChange }) => {
               }
             })}
             className={`relative w-12 h-6 rounded-full transition-colors duration-200 cursor-pointer flex-shrink-0 ${
-              data.installation?.needed ? 'bg-primary' : 'bg-gray-200'
+              data.installation?.needed ? 'bg-primary' : 'bg-muted'
             }`}
           >
-            <div className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full shadow transition-transform duration-200 ${
+            <div className={`absolute top-1 left-1 w-4 h-4 bg-card rounded-full shadow transition-transform duration-200 ${
               data.installation?.needed ? 'translate-x-6' : 'translate-x-0'
             }`} />
           </div>
-          <span className="font-medium text-gray-700">Орнату керек</span>
+          <span className="font-medium text-foreground">Орнату керек</span>
           {data.installation?.needed && (
-            <span className="ml-auto font-bold text-gray-600">{formatPrice(installPrice)}</span>
+            <span className="ml-auto font-bold text-muted-foreground">{formatPrice(installPrice)}</span>
           )}
         </label>
       </div>

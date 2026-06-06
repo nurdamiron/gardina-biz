@@ -83,9 +83,9 @@ const ChartLine = ({
     };
 
     return (
-        <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+        <div className="bg-card rounded-2xl p-5 shadow-sm border border-border">
             {title && (
-                <h3 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
+                <h3 className="font-bold text-foreground mb-4 flex items-center gap-2">
                     <Icon name="show_chart" className="text-primary" />
                     {title}
                 </h3>
@@ -158,7 +158,7 @@ const ChartLine = ({
                         return (
                             <div
                                 key={index}
-                                className={`absolute whitespace-nowrap text-[10px] font-bold text-gray-700 transform ${xAnchor} -translate-y-full`}
+                                className={`absolute whitespace-nowrap text-[10px] font-bold text-foreground transform ${xAnchor} -translate-y-full`}
                                 style={{
                                     left: `${point.x}%`,
                                     top: `${point.y}%`
@@ -172,9 +172,9 @@ const ChartLine = ({
             </div>
 
             {/* X-axis labels */}
-            <div className="flex justify-between mt-2 pt-2 border-t border-gray-200">
+            <div className="flex justify-between mt-2 pt-2 border-t border-border">
                 {data.map((item, index) => (
-                    <div key={index} className="text-xs text-gray-600 font-medium">
+                    <div key={index} className="text-xs text-muted-foreground font-medium">
                         {item.label}
                     </div>
                 ))}
