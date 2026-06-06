@@ -82,6 +82,10 @@ router.post('/login', loginLimiter, (req, res) => authController.login(req, res)
 // GET /api/auth/me - Get current user (protected)
 router.get('/me', authenticate, (req, res) => authController.me(req, res));
 
+// DELETE /api/auth/me - Self-service account deletion (App Store 5.1.1(v) requirement).
+// Requires password confirmation in the body; whitelisted from the read-only billing gate.
+router.delete('/me', authenticate, (req, res) => authController.deleteAccount(req, res));
+
 // POST /api/auth/refresh-token - Refresh access token
 router.post('/refresh-token', refreshLimiter, (req, res) => authController.refreshToken(req, res));
 

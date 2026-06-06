@@ -595,4 +595,71 @@ export class AuthController {
       });
     }
   }
+
+  /**
+   * DELETE /api/auth/me
+   * Self-service account deletion (required by App Store Guideline 5.1.1(v)).
+   * Requires password re-confirmation. Performs GDPR-style erasure: personal data
+   * is stripped and the account is deactivated so it can never log in again, while
+   * the organization's business records that reference the user are preserved.
+   * Guards against the last active admin orphaning a whole tenant.
+   */
+  async deleteAccount(req, res) {
+    try {
+      const userId = req.user.id;
+      const { password } = req.body || {};
+
+      if (!password) {
+        return res.status(400).json({
+          success: false,
+          error: 'Аккаунтты жою үшін құпия сөзбен растаңыз',
+        });
+      }
+
+      // findByIdUnscoped returns password_hash + role + organization_id.
+      const user = await this.userRepository.findByIdUnscoped(userId);
+      if (!user) {
+        return res.status(404).json({ success: false, error: 'Пайдаланушы табылмады' });
+      }
+
+      const passwordOk = await this.authService.verifyPassword(password, user.password_hash);
+      if (!passwordOk) {
+        return res.status(401).json({ success: false, error: 'Құпия сөз қате' });
+      }
+
+      // Last-admin guard: deleting the sole admin would orphan the whole salon.
+      if (user.role === 'admin') {
+        const adminCount = await this.userRepository.countActiveAdmins(user.organization_id);
+        if (adminCount <= 1) {
+          return res.status(409).json({
+            success: false,
+            code: 'LAST_ADMIN',
+            error:
+              'Сіз салонның жалғыз әкімшісісіз. Алдымен әкімші құқығын басқа қызметкерге беріңіз немесе қолдау қызметіне хабарласыңыз.',
+          });
+        }
+      }
+
+      // Set an unusable password hash so the (now anonymized) row can never authenticate.
+      const deadHash = await this.authService.hashPassword(crypto.randomBytes(24).toString('hex'));
+      await this.userRepository.anonymizeAndDeactivate(userId, deadHash);
+
+      // Immediately invalidate the current access token.
+      if (req.tokenDecoded) {
+        blacklistToken(req.tokenDecoded);
+      }
+
+      return res.json({
+        success: true,
+        message: 'Аккаунт жойылды',
+      });
+    } catch (error) {
+      console.error(`[AuthController.deleteAccount] Failed for user ${req.user?.id}: ${error.message}`);
+      return res.status(500).json({
+        success: false,
+        error: 'Аккаунтты жою сәтсіз аяқталды',
+        message: error.message,
+      });
+    }
+  }
 }

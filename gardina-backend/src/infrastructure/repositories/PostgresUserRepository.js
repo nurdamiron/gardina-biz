@@ -171,6 +171,41 @@ export class PostgresUserRepository {
     return result.rows.length > 0;
   }
 
+  /** How many active admins an organization currently has (last-admin guard). */
+  async countActiveAdmins(organizationId) {
+    const result = await pool.query(
+      `SELECT COUNT(*)::int AS n
+         FROM users
+        WHERE organization_id = $1 AND role = 'admin' AND is_active = true`,
+      [organizationId]
+    );
+    return result.rows[0]?.n ?? 0;
+  }
+
+  /**
+   * Self-service account deletion (GDPR-style erasure): strips personal data and
+   * deactivates the account so it can never log in again, while preserving the
+   * organization's business records (deals/measurements) that reference this user.
+   * Unscoped on purpose — the caller may already be in read-only/expired state and
+   * only ever deletes their own id.
+   */
+  async anonymizeAndDeactivate(id, deadPasswordHash) {
+    const result = await pool.query(
+      `UPDATE users
+          SET is_active = false,
+              email = NULL,
+              name = 'Удалённый аккаунт',
+              phone = 'deleted:' || id::text,
+              avatar_url = NULL,
+              password_hash = $2,
+              updated_at = CURRENT_TIMESTAMP
+        WHERE id = $1
+        RETURNING id`,
+      [id, deadPasswordHash]
+    );
+    return result.rows.length > 0;
+  }
+
   async updateLastLogin(id) {
     await pool.query(
       'UPDATE users SET last_login_at = CURRENT_TIMESTAMP WHERE id = $1',
