@@ -1,0 +1,18 @@
+{
+  "name": "gardina-prod-tests",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "SAFE production test suite for Gardina (read-only + isolated test accounts). Never destructive on real data.",
+  "scripts": {
+    "smoke": "vitest run smoke.test.js",
+    "contract": "vitest run contract.test.js",
+    "security": "vitest run security.test.js",
+    "test": "vitest run",
+    "audit": "echo 'Run npm audit in gardina-backend and gardina-frontend, not here.' && exit 0",
+    "load": "echo 'Run with k6:  k6 run load/k6-smoke.js   (staging / low-traffic only)' && exit 1"
+  },
+  "devDependencies": {
+    "vitest": "^2.1.0"
+  }
+}

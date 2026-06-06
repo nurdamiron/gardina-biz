@@ -1,0 +1,3343 @@
+openapi: 3.1.0
+info:
+  title: Gardina API
+  version: 1.0.0
+  description: >-
+    Multi-tenant SaaS ERP for curtain/drapery salons. Single source of truth for
+    the web and iOS clients. All resource routes are tenant-scoped via the JWT
+    (the token carries `organizationId`); clients never pass tenant ids explicitly.
+
+
+    AUTH: JWT Bearer. Access token ~7d, refresh token ~30d, bcrypt passwords.
+
+
+    READ-ONLY MODE: when the organization's subscription is expired/past_due/canceled,
+    write operations return 402 with `code: SUBSCRIPTION_READ_ONLY`. The `/auth` and
+    `/billing` route groups are whitelisted.
+
+
+    RATE LIMITS: global 100 req / 15 min per IP on `/api`. Stricter per-route limits:
+    login 5/15min, password-reset 5/15min, register-salon & register 3/h, refresh 30/15min.
+
+
+    RESPONSE ENVELOPE: most endpoints return `{ success: true, data: ... }`. Errors
+    return `{ success: false, error: "..."}` or `{ error, message, timestamp }` from
+    the global handler. Shapes vary by controller; this contract documents the common
+    cases.
+servers:
+  - url: https://api.gardina.alashed.kz/api
+    description: Production
+  - url: http://localhost:5000/api
+    description: Local development
+
+security:
+  - bearerAuth: []
+
+tags:
+  - name: Auth
+  - name: Deals
+  - name: Orders
+  - name: Clients
+  - name: Measurements
+  - name: Proposals
+  - name: Users
+  - name: Catalog
+  - name: Analytics
+  - name: Payments
+  - name: Notifications
+  - name: Installations
+  - name: Billing
+  - name: Audit
+  - name: Onboarding
+  - name: Leads
+  - name: Upload
+  - name: Health
+
+paths:
+  # ──────────────────────────────────────────── HEALTH ───────────────────────
+  /health:
+    get:
+      tags: [Health]
+      summary: Liveness + DB connectivity check
+      description: >-
+        Mounted at the server root (NOT under /api). Returns 200 when the DB
+        responds, 503 otherwise. There are no `/ready` or `/version` endpoints in
+        the current backend.
+      security: []
+      servers:
+        - url: https://api.gardina.alashed.kz
+        - url: http://localhost:5000
+      responses:
+        '200':
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: healthy }
+                  database: { type: string, example: connected }
+                  timestamp: { type: string, format: date-time }
+        '503':
+          description: Unhealthy (DB disconnected)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: unhealthy }
+                  database: { type: string, example: disconnected }
+                  error: { type: string }
+                  timestamp: { type: string, format: date-time }
+
+  # ──────────────────────────────────────────── AUTH ─────────────────────────
+  /auth/register-salon:
+    post:
+      tags: [Auth]
+      summary: Register a new salon (tenant + admin user)
+      description: Public SaaS signup. Creates an organization and its first admin. Rate limit 3/hour/IP.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [organizationName, name, phone, password]
+              properties:
+                organizationName: { type: string }
+                slug: { type: string, description: Optional; auto-generated from name if omitted }
+                name: { type: string, description: Admin full name }
+                email: { type: string, format: email }
+                phone: { type: string }
+                password: { type: string, format: password, minLength: 6 }
+      responses:
+        '201':
+          description: Tenant created
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AuthResult' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '429': { $ref: '#/components/responses/TooManyRequests' }
+
+  /auth/register:
+    post:
+      tags: [Auth]
+      summary: Register a user (disabled unless ALLOW_PUBLIC_REGISTRATION=true)
+      description: Returns 403 in production by default. Rate limit 3/hour/IP.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, phone, password]
+              properties:
+                name: { type: string }
+                email: { type: string, format: email }
+                phone: { type: string }
+                password: { type: string, format: password }
+                role: { $ref: '#/components/schemas/UserRole' }
+      responses:
+        '201':
+          description: User created
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AuthResult' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '429': { $ref: '#/components/responses/TooManyRequests' }
+
+  /auth/login:
+    post:
+      tags: [Auth]
+      summary: Login
+      description: Login by phone or email. Rate limit 5/15min/IP (successful logins not counted).
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [login, password]
+              properties:
+                login: { type: string, description: Phone or email }
+                password: { type: string, format: password }
+                organizationSlug: { type: string, description: Optional tenant disambiguation }
+      responses:
+        '200':
+          description: Authenticated
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AuthResult' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '429': { $ref: '#/components/responses/TooManyRequests' }
+
+  /auth/refresh-token:
+    post:
+      tags: [Auth]
+      summary: Exchange a refresh token for new tokens
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [refreshToken]
+              properties:
+                refreshToken: { type: string }
+      responses:
+        '200':
+          description: New tokens
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  data:
+                    type: object
+                    properties:
+                      tokens: { $ref: '#/components/schemas/TokenPair' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '429': { $ref: '#/components/responses/TooManyRequests' }
+
+  /auth/me:
+    get:
+      tags: [Auth]
+      summary: Get the current authenticated user
+      responses:
+        '200':
+          description: Current user
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  data: { $ref: '#/components/schemas/User' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+    delete:
+      tags: [Auth]
+      summary: Delete the current user's account (self-service)
+      description: >
+        App Store Guideline 5.1.1(v) account-deletion path. Requires password
+        re-confirmation. Performs GDPR-style erasure (personal data stripped,
+        account deactivated and can no longer log in); organization business
+        records that reference the user are preserved. Returns 409 `LAST_ADMIN`
+        if the caller is the only active admin of the organization. Whitelisted
+        from the read-only billing gate, so it works on an expired subscription.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [password]
+              properties:
+                password:
+                  type: string
+                  format: password
+                  description: Current password, for confirmation
+      responses:
+        '200': { $ref: '#/components/responses/Success' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '409':
+          description: Caller is the last active admin (code LAST_ADMIN)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean, example: false }
+                  code: { type: string, example: LAST_ADMIN }
+                  error: { type: string }
+
+  /auth/logout:
+    post:
+      tags: [Auth]
+      summary: Logout (blacklists the access token in-memory)
+      responses:
+        '200': { $ref: '#/components/responses/Success' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /auth/password-reset/request:
+    post:
+      tags: [Auth]
+      summary: Request a password-reset email
+      description: Rate limit 5/15min/IP. Always returns success to avoid account enumeration.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                login: { type: string, description: Phone or email }
+      responses:
+        '200': { $ref: '#/components/responses/Success' }
+        '429': { $ref: '#/components/responses/TooManyRequests' }
+
+  /auth/password-reset/confirm:
+    post:
+      tags: [Auth]
+      summary: Confirm a password reset with the emailed token
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [token, password]
+              properties:
+                token: { type: string }
+                password: { type: string, format: password, minLength: 6 }
+      responses:
+        '200': { $ref: '#/components/responses/Success' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '429': { $ref: '#/components/responses/TooManyRequests' }
+
+  /auth/check-slug:
+    get:
+      tags: [Auth]
+      summary: Check organization slug availability
+      security: []
+      parameters:
+        - name: slug
+          in: query
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Availability result
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  available: { type: boolean }
+                  slug: { type: string }
+                  reason: { type: string, example: too_short }
+
+  /auth/verify-email:
+    get:
+      tags: [Auth]
+      summary: Verify an email address via emailed token
+      security: []
+      parameters:
+        - name: token
+          in: query
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { $ref: '#/components/responses/Success' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+
+  /auth/resend-verification:
+    post:
+      tags: [Auth]
+      summary: Resend the email-verification message (authenticated)
+      responses:
+        '200': { $ref: '#/components/responses/Success' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /auth/invite/{token}:
+    get:
+      tags: [Auth]
+      summary: Get invite details by token
+      security: []
+      parameters:
+        - $ref: '#/components/parameters/InviteToken'
+      responses:
+        '200':
+          description: Invite details
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  data:
+                    type: object
+                    properties:
+                      email: { type: string, format: email }
+                      role: { $ref: '#/components/schemas/UserRole' }
+                      organizationName: { type: string }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /auth/invite/{token}/accept:
+    post:
+      tags: [Auth]
+      summary: Accept an invite and create the account
+      security: []
+      parameters:
+        - $ref: '#/components/parameters/InviteToken'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, password]
+              properties:
+                name: { type: string }
+                phone: { type: string }
+                password: { type: string, format: password, minLength: 6 }
+      responses:
+        '201':
+          description: Account created
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AuthResult' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  # ──────────────────────────────────────────── DEALS ────────────────────────
+  /deals/funnel:
+    get:
+      tags: [Deals]
+      summary: Deal funnel counts/amounts by status
+      responses:
+        '200':
+          description: Funnel breakdown
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/FunnelResponse' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /deals:
+    get:
+      tags: [Deals]
+      summary: List deals
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Limit'
+        - name: status
+          in: query
+          schema: { $ref: '#/components/schemas/DealStatus' }
+        - name: designerId
+          in: query
+          schema: { type: string, format: uuid }
+        - name: clientId
+          in: query
+          schema: { type: string, format: uuid }
+        - name: search
+          in: query
+          schema: { type: string }
+      responses:
+        '200':
+          description: Deal list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  data:
+                    type: array
+                    items: { $ref: '#/components/schemas/Deal' }
+                  pagination: { $ref: '#/components/schemas/Pagination' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+    post:
+      tags: [Deals]
+      summary: Create a deal
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/DealCreate' }
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/DealResponse' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '402': { $ref: '#/components/responses/ReadOnly' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /deals/{id}:
+    parameters:
+      - $ref: '#/components/parameters/Id'
+    get:
+      tags: [Deals]
+      summary: Get a deal by id (with events/timeline)
+      responses:
+        '200':
+          description: Deal
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/DealResponse' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+    delete:
+      tags: [Deals]
+      summary: Delete a deal
+      responses:
+        '200': { $ref: '#/components/responses/Success' }
+        '402': { $ref: '#/components/responses/ReadOnly' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /deals/{id}/status:
+    patch:
+      tags: [Deals]
+      summary: Update deal status
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [status]
+              properties:
+                status: { $ref: '#/components/schemas/DealStatus' }
+                note: { type: string }
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/DealResponse' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '402': { $ref: '#/components/responses/ReadOnly' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /deals/{id}/payment:
+    patch:
+      tags: [Deals]
+      summary: Record a payment against a deal
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [amount]
+              properties:
+                amount: { type: number, format: float }
+                type:
+                  type: string
+                  enum: [prepayment, final_payment]
+                paymentStatus: { $ref: '#/components/schemas/PaymentStatus' }
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/DealResponse' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '402': { $ref: '#/components/responses/ReadOnly' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  # ──────────────────────────────────────────── ORDERS ───────────────────────
+  # NOTE: /orders mirrors /deals exactly (frontend aliases ordersAPI as dealsAPI).
+  /orders/funnel:
+    get:
+      tags: [Orders]
+      summary: Order funnel counts/amounts by status
+      responses:
+        '200':
+          description: Funnel breakdown
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/FunnelResponse' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /orders:
+    get:
+      tags: [Orders]
+      summary: List orders
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Limit'
+        - name: status
+          in: query
+          schema: { $ref: '#/components/schemas/DealStatus' }
+      responses:
+        '200':
+          description: Order list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  data:
+                    type: array
+                    items: { $ref: '#/components/schemas/Deal' }
+                  pagination: { $ref: '#/components/schemas/Pagination' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+    post:
+      tags: [Orders]
+      summary: Create an order (deal)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/DealCreate' }
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/DealResponse' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '402': { $ref: '#/components/responses/ReadOnly' }
+
+  /orders/{id}:
+    parameters:
+      - $ref: '#/components/parameters/Id'
+    get:
+      tags: [Orders]
+      summary: Get an order by id
+      responses:
+        '200':
+          description: Order
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/DealResponse' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    delete:
+      tags: [Orders]
+      summary: Delete an order
+      responses:
+        '200': { $ref: '#/components/responses/Success' }
+        '402': { $ref: '#/components/responses/ReadOnly' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /orders/{id}/status:
+    patch:
+      tags: [Orders]
+      summary: Update order status
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [status]
+              properties:
+                status: { $ref: '#/components/schemas/DealStatus' }
+                note: { type: string }
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/DealResponse' }
+        '402': { $ref: '#/components/responses/ReadOnly' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /orders/{id}/payment:
+    patch:
+      tags: [Orders]
+      summary: Record a payment against an order
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [amount]
+              properties:
+                amount: { type: number, format: float }
+                type: { type: string, enum: [prepayment, final_payment] }
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/DealResponse' }
+        '402': { $ref: '#/components/responses/ReadOnly' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  # ──────────────────────────────────────────── CLIENTS ──────────────────────
+  /clients:
+    get:
+      tags: [Clients]
+      summary: List clients
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Limit'
+        - name: search
+          in: query
+          schema: { type: string }
+      responses:
+        '200':
+          description: Client list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  data:
+                    type: array
+                    items: { $ref: '#/components/schemas/Client' }
+                  pagination: { $ref: '#/components/schemas/Pagination' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+    post:
+      tags: [Clients]
+      summary: Create a client
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ClientInput' }
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  data: { $ref: '#/components/schemas/Client' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '402': { $ref: '#/components/responses/ReadOnly' }
+
+  /clients/{id}:
+    parameters:
+      - $ref: '#/components/parameters/Id'
+    get:
+      tags: [Clients]
+      summary: Get a client by id
+      responses:
+        '200':
+          description: Client
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  data: { $ref: '#/components/schemas/Client' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    put:
+      tags: [Clients]
+      summary: Update a client
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ClientInput' }
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  data: { $ref: '#/components/schemas/Client' }
+        '402': { $ref: '#/components/responses/ReadOnly' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    delete:
+      tags: [Clients]
+      summary: Delete a client
+      responses:
+        '200': { $ref: '#/components/responses/Success' }
+        '402': { $ref: '#/components/responses/ReadOnly' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  # ────────────────────────────────────────── MEASUREMENTS ───────────────────
+  /measurements:
+    get:
+      tags: [Measurements]
+      summary: List measurements
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Limit'
+        - name: status
+          in: query
+          schema: { $ref: '#/components/schemas/MeasurementStatus' }
+        - name: designerId
+          in: query
+          schema: { type: string, format: uuid }
+        - name: clientId
+          in: query
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: Measurement list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  data:
+                    type: array
+                    items: { $ref: '#/components/schemas/Measurement' }
+                  pagination: { $ref: '#/components/schemas/Pagination' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+    post:
+      tags: [Measurements]
+      summary: Create a measurement
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/MeasurementInput' }
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  data: { $ref: '#/components/schemas/Measurement' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '402': { $ref: '#/components/responses/ReadOnly' }
+
+  /measurements/{id}:
+    parameters:
+      - $ref: '#/components/parameters/Id'
+    get:
+      tags: [Measurements]
+      summary: Get a measurement (with windows)
+      responses:
+        '200':
+          description: Measurement
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  data: { $ref: '#/components/schemas/Measurement' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    put:
+      tags: [Measurements]
+      summary: Update a measurement (and its windows)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/MeasurementInput'
+                - type: object
+                  properties:
+                    windows:
+                      type: array
+                      items: { $ref: '#/components/schemas/MeasurementWindowInput' }
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  data: { $ref: '#/components/schemas/Measurement' }
+        '402': { $ref: '#/components/responses/ReadOnly' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /measurements/{id}/complete:
+    patch:
+      tags: [Measurements]
+      summary: Mark a measurement as completed
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      responses:
+        '200':
+          description: Completed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  data: { $ref: '#/components/schemas/Measurement' }
+        '402': { $ref: '#/components/responses/ReadOnly' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /measurements/{id}/windows:
+    post:
+      tags: [Measurements]
+      summary: Add a window to a measurement
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/MeasurementWindowInput' }
+      responses:
+        '201':
+          description: Window created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  data: { $ref: '#/components/schemas/MeasurementWindow' }
+        '402': { $ref: '#/components/responses/ReadOnly' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /measurements/{id}/windows/{windowId}:
+    parameters:
+      - $ref: '#/components/parameters/Id'
+      - $ref: '#/components/parameters/WindowId'
+    get:
+      tags: [Measurements]
+      summary: Get a specific window
+      responses:
+        '200':
+          description: Window
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  data: { $ref: '#/components/schemas/MeasurementWindow' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    put:
+      tags: [Measurements]
+      summary: Update a window
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/MeasurementWindowInput' }
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  data: { $ref: '#/components/schemas/MeasurementWindow' }
+        '402': { $ref: '#/components/responses/ReadOnly' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    delete:
+      tags: [Measurements]
+      summary: Delete a window
+      responses:
+        '200': { $ref: '#/components/responses/Success' }
+        '402': { $ref: '#/components/responses/ReadOnly' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /measurements/{id}/photos:
+    post:
+      tags: [Measurements]
+      summary: Attach a photo to a measurement
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [url]
+              properties:
+                url: { type: string, format: uri }
+                thumbnailUrl: { type: string, format: uri }
+                photoType: { $ref: '#/components/schemas/PhotoType' }
+                windowId: { type: string, format: uuid }
+                description: { type: string }
+      responses:
+        '201':
+          description: Photo attached
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  data: { $ref: '#/components/schemas/Photo' }
+        '402': { $ref: '#/components/responses/ReadOnly' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /measurements/{id}/payments:
+    post:
+      tags: [Measurements]
+      summary: Record a payment tied to a measurement
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [amount]
+              properties:
+                amount: { type: number, format: float }
+                method: { type: string }
+                note: { type: string }
+      responses:
+        '201':
+          description: Payment recorded
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  data: { $ref: '#/components/schemas/Payment' }
+        '402': { $ref: '#/components/responses/ReadOnly' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  # ───────────────────────────────────────── PROPOSALS ───────────────────────
+  /proposals:
+    get:
+      tags: [Proposals]
+      summary: List proposals
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Limit'
+        - name: status
+          in: query
+          schema: { $ref: '#/components/schemas/ProposalStatus' }
+        - name: clientId
+          in: query
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: Proposal list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  data:
+                    type: array
+                    items: { $ref: '#/components/schemas/Proposal' }
+                  pagination: { $ref: '#/components/schemas/Pagination' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+    post:
+      tags: [Proposals]
+      summary: Create a proposal
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ProposalInput' }
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  data: { $ref: '#/components/schemas/Proposal' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '402': { $ref: '#/components/responses/ReadOnly' }
+
+  /proposals/{id}:
+    parameters:
+      - $ref: '#/components/parameters/Id'
+    get:
+      tags: [Proposals]
+      summary: Get a proposal by id
+      responses:
+        '200':
+          description: Proposal
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  data: { $ref: '#/components/schemas/Proposal' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    put:
+      tags: [Proposals]
+      summary: Update a proposal
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ProposalInput' }
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  data: { $ref: '#/components/schemas/Proposal' }
+        '402': { $ref: '#/components/responses/ReadOnly' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    delete:
+      tags: [Proposals]
+      summary: Delete a proposal
+      responses:
+        '200': { $ref: '#/components/responses/Success' }
+        '402': { $ref: '#/components/responses/ReadOnly' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  # ──────────────────────────────────────────── USERS ────────────────────────
+  /users/designers:
+    get:
+      tags: [Users]
+      summary: List designers (any authenticated role)
+      responses:
+        '200':
+          description: Designer list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  data:
+                    type: array
+                    items: { $ref: '#/components/schemas/User' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /users/me:
+    put:
+      tags: [Users]
+      summary: Update own profile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name: { type: string }
+                email: { type: string, format: email }
+                phone: { type: string }
+                avatarUrl: { type: string, format: uri }
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  data: { $ref: '#/components/schemas/User' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /users/me/change-password:
+    post:
+      tags: [Users]
+      summary: Change own password
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [currentPassword, newPassword]
+              properties:
+                currentPassword: { type: string, format: password }
+                newPassword: { type: string, format: password, minLength: 6 }
+      responses:
+        '200': { $ref: '#/components/responses/Success' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /users:
+    get:
+      tags: [Users]
+      summary: List all users (admin, manager)
+      parameters:
+        - name: role
+          in: query
+          schema: { $ref: '#/components/schemas/UserRole' }
+      responses:
+        '200':
+          description: User list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  data:
+                    type: array
+                    items: { $ref: '#/components/schemas/User' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
+  /users/{id}:
+    get:
+      tags: [Users]
+      summary: Get a user by id (admin, manager)
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      responses:
+        '200':
+          description: User
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  data: { $ref: '#/components/schemas/User' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /users/admin/create:
+    post:
+      tags: [Users]
+      summary: Create a user (admin). Enforces plan user limit.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, phone, password, role]
+              properties:
+                name: { type: string }
+                email: { type: string, format: email }
+                phone: { type: string }
+                password: { type: string, format: password }
+                role: { $ref: '#/components/schemas/UserRole' }
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  data: { $ref: '#/components/schemas/User' }
+        '402':
+          description: Plan user limit reached or read-only mode
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
+  /users/admin/{id}:
+    put:
+      tags: [Users]
+      summary: Update a user (admin)
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name: { type: string }
+                email: { type: string, format: email }
+                phone: { type: string }
+                role: { $ref: '#/components/schemas/UserRole' }
+                isActive: { type: boolean }
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  data: { $ref: '#/components/schemas/User' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    delete:
+      tags: [Users]
+      summary: Delete a user (admin)
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      responses:
+        '200': { $ref: '#/components/responses/Success' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /users/admin/{id}/reset-password:
+    post:
+      tags: [Users]
+      summary: Reset a user's password (admin)
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                newPassword: { type: string, format: password }
+      responses:
+        '200': { $ref: '#/components/responses/Success' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /users/admin/invite:
+    post:
+      tags: [Users]
+      summary: Send a staff invite email (admin). Enforces plan limit.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, role]
+              properties:
+                email: { type: string, format: email }
+                role: { $ref: '#/components/schemas/UserRole' }
+      responses:
+        '201': { $ref: '#/components/responses/Success' }
+        '402':
+          description: Plan limit reached or read-only mode
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
+  /users/invitations:
+    get:
+      tags: [Users]
+      summary: List pending invites (admin)
+      responses:
+        '200':
+          description: Invitation list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id: { type: string, format: uuid }
+                        email: { type: string, format: email }
+                        role: { $ref: '#/components/schemas/UserRole' }
+                        createdAt: { type: string, format: date-time }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
+  /users/invitations/{id}:
+    delete:
+      tags: [Users]
+      summary: Revoke a pending invite (admin)
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      responses:
+        '200': { $ref: '#/components/responses/Success' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  # ──────────────────────────────────────────── CATALOG ──────────────────────
+  /catalog/products:
+    get:
+      tags: [Catalog]
+      summary: List products with filters
+      parameters:
+        - name: type
+          in: query
+          schema: { type: string, enum: [fabric, curtain, accessory, service] }
+        - name: search
+          in: query
+          schema: { type: string }
+        - $ref: '#/components/parameters/Limit'
+      responses:
+        '200':
+          description: Product list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  data:
+                    type: array
+                    items: { $ref: '#/components/schemas/Fabric' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+    post:
+      tags: [Catalog]
+      summary: Create a product (admin)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/FabricInput' }
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  data: { $ref: '#/components/schemas/Fabric' }
+        '402': { $ref: '#/components/responses/ReadOnly' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
+  /catalog/products/search:
+    get:
+      tags: [Catalog]
+      summary: Autocomplete products by product code
+      parameters:
+        - name: code
+          in: query
+          schema: { type: string }
+      responses:
+        '200':
+          description: Matching products
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  data:
+                    type: array
+                    items: { $ref: '#/components/schemas/Fabric' }
+
+  /catalog/products/search-by-code:
+    get:
+      tags: [Catalog]
+      summary: Search by variant (article) code
+      parameters:
+        - name: code
+          in: query
+          schema: { type: string }
+      responses:
+        '200':
+          description: Matching products/variants
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  data:
+                    type: array
+                    items: { $ref: '#/components/schemas/Fabric' }
+
+  /catalog/products/code/{code}:
+    get:
+      tags: [Catalog]
+      summary: Get a product by exact code
+      parameters:
+        - name: code
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Product
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  data: { $ref: '#/components/schemas/Fabric' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /catalog/products/{id}:
+    parameters:
+      - $ref: '#/components/parameters/Id'
+    get:
+      tags: [Catalog]
+      summary: Get a product by id
+      responses:
+        '200':
+          description: Product
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  data: { $ref: '#/components/schemas/Fabric' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    put:
+      tags: [Catalog]
+      summary: Update a product (admin)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/FabricInput' }
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  data: { $ref: '#/components/schemas/Fabric' }
+        '402': { $ref: '#/components/responses/ReadOnly' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    delete:
+      tags: [Catalog]
+      summary: Delete a product (admin)
+      responses:
+        '200': { $ref: '#/components/responses/Success' }
+        '402': { $ref: '#/components/responses/ReadOnly' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /catalog/products/{id}/variants:
+    parameters:
+      - $ref: '#/components/parameters/Id'
+    get:
+      tags: [Catalog]
+      summary: List variants of a product
+      responses:
+        '200':
+          description: Variant list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  data:
+                    type: array
+                    items: { $ref: '#/components/schemas/ProductVariant' }
+    post:
+      tags: [Catalog]
+      summary: Create a product variant (admin)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ProductVariantInput' }
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  data: { $ref: '#/components/schemas/ProductVariant' }
+        '402': { $ref: '#/components/responses/ReadOnly' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
+  /catalog/variants/{id}:
+    parameters:
+      - $ref: '#/components/parameters/Id'
+    put:
+      tags: [Catalog]
+      summary: Update a variant (admin)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ProductVariantInput' }
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  data: { $ref: '#/components/schemas/ProductVariant' }
+        '402': { $ref: '#/components/responses/ReadOnly' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    delete:
+      tags: [Catalog]
+      summary: Delete a variant (admin)
+      responses:
+        '200': { $ref: '#/components/responses/Success' }
+        '402': { $ref: '#/components/responses/ReadOnly' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /catalog/products/{productId}/variants/{variantId}/default:
+    put:
+      tags: [Catalog]
+      summary: Set a variant as the product default (admin)
+      parameters:
+        - name: productId
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+        - name: variantId
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: Default set
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  data: { $ref: '#/components/schemas/ProductVariant' }
+        '402': { $ref: '#/components/responses/ReadOnly' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /catalog/services:
+    get:
+      tags: [Catalog]
+      summary: List service rates
+      parameters:
+        - name: type
+          in: query
+          schema: { type: string }
+      responses:
+        '200':
+          description: Service list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  data:
+                    type: array
+                    items: { $ref: '#/components/schemas/ServiceRate' }
+    post:
+      tags: [Catalog]
+      summary: Create a service rate (admin)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ServiceRateInput' }
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  data: { $ref: '#/components/schemas/ServiceRate' }
+        '402': { $ref: '#/components/responses/ReadOnly' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
+  /catalog/services/{id}:
+    parameters:
+      - $ref: '#/components/parameters/Id'
+    get:
+      tags: [Catalog]
+      summary: Get a service rate by id
+      responses:
+        '200':
+          description: Service
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  data: { $ref: '#/components/schemas/ServiceRate' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    put:
+      tags: [Catalog]
+      summary: Update a service rate (admin)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ServiceRateInput' }
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  data: { $ref: '#/components/schemas/ServiceRate' }
+        '402': { $ref: '#/components/responses/ReadOnly' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    delete:
+      tags: [Catalog]
+      summary: Delete a service rate (admin)
+      responses:
+        '200': { $ref: '#/components/responses/Success' }
+        '402': { $ref: '#/components/responses/ReadOnly' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /catalog/calculate:
+    post:
+      tags: [Catalog]
+      summary: Calculate the price for a room/window configuration
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                fabricId: { type: string, format: uuid }
+                fabricMeters: { type: number, format: float }
+                width: { type: number, description: mm }
+                height: { type: number, description: mm }
+                services:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      serviceId: { type: string, format: uuid }
+                      quantity: { type: number }
+                discountPercent: { type: number, format: float }
+      responses:
+        '200':
+          description: Price breakdown
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  data:
+                    type: object
+                    properties:
+                      fabricCost: { type: number }
+                      servicesCost: { type: number }
+                      subtotal: { type: number }
+                      discount: { type: number }
+                      total: { type: number }
+                      breakdown: { type: object, additionalProperties: true }
+        '400': { $ref: '#/components/responses/BadRequest' }
+
+  # ──────────────────────────────────────────── ANALYTICS ────────────────────
+  /analytics/dashboard-stats:
+    get:
+      tags: [Analytics]
+      summary: Dashboard summary stats (role-filtered)
+      parameters:
+        - $ref: '#/components/parameters/Period'
+      responses:
+        '200': { $ref: '#/components/responses/AnalyticsObject' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /analytics/designer-performance:
+    get:
+      tags: [Analytics]
+      summary: Designer performance (own for designers; any for manager/admin)
+      parameters:
+        - name: designerId
+          in: query
+          schema: { type: string, format: uuid }
+        - $ref: '#/components/parameters/Period'
+      responses:
+        '200': { $ref: '#/components/responses/AnalyticsObject' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /analytics/designer-earnings:
+    get:
+      tags: [Analytics]
+      summary: Designer earnings / commissions
+      parameters:
+        - name: designerId
+          in: query
+          schema: { type: string, format: uuid }
+        - $ref: '#/components/parameters/Period'
+      responses:
+        '200': { $ref: '#/components/responses/AnalyticsObject' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /analytics/designers-ranking:
+    get:
+      tags: [Analytics]
+      summary: Designers ranking/leaderboard
+      parameters:
+        - $ref: '#/components/parameters/Period'
+      responses:
+        '200': { $ref: '#/components/responses/AnalyticsArray' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /analytics/weekly-activity:
+    get:
+      tags: [Analytics]
+      summary: Weekly activity (user-filtered)
+      responses:
+        '200': { $ref: '#/components/responses/AnalyticsArray' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /analytics/product-sales:
+    get:
+      tags: [Analytics]
+      summary: Product sales (admin, manager)
+      parameters:
+        - $ref: '#/components/parameters/Period'
+      responses:
+        '200': { $ref: '#/components/responses/AnalyticsArray' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
+  /analytics/top-products:
+    get:
+      tags: [Analytics]
+      summary: Top products (admin, manager)
+      parameters:
+        - $ref: '#/components/parameters/Period'
+        - $ref: '#/components/parameters/Limit'
+      responses:
+        '200': { $ref: '#/components/responses/AnalyticsArray' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
+  /analytics/sales-by-category:
+    get:
+      tags: [Analytics]
+      summary: Sales by category (admin, manager)
+      parameters:
+        - $ref: '#/components/parameters/Period'
+      responses:
+        '200': { $ref: '#/components/responses/AnalyticsArray' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
+  /analytics/monthly-trends:
+    get:
+      tags: [Analytics]
+      summary: Monthly trends (admin, manager)
+      responses:
+        '200': { $ref: '#/components/responses/AnalyticsArray' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
+  /analytics/client-funnel:
+    get:
+      tags: [Analytics]
+      summary: Client funnel (admin, manager, sales)
+      parameters:
+        - $ref: '#/components/parameters/Period'
+      responses:
+        '200': { $ref: '#/components/responses/AnalyticsObject' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
+  /analytics/client-retention:
+    get:
+      tags: [Analytics]
+      summary: Client retention (admin, manager)
+      responses:
+        '200': { $ref: '#/components/responses/AnalyticsObject' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
+  /analytics/clients-by-source:
+    get:
+      tags: [Analytics]
+      summary: Clients grouped by acquisition source (admin, manager)
+      responses:
+        '200': { $ref: '#/components/responses/AnalyticsArray' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
+  /analytics/team-kpis:
+    get:
+      tags: [Analytics]
+      summary: Team KPIs (admin, manager)
+      parameters:
+        - $ref: '#/components/parameters/Period'
+      responses:
+        '200': { $ref: '#/components/responses/AnalyticsObject' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
+  /analytics/team-efficiency:
+    get:
+      tags: [Analytics]
+      summary: Team efficiency (admin, manager)
+      responses:
+        '200': { $ref: '#/components/responses/AnalyticsObject' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
+  /analytics/revenue-breakdown:
+    get:
+      tags: [Analytics]
+      summary: Revenue breakdown (admin only)
+      parameters:
+        - $ref: '#/components/parameters/Period'
+      responses:
+        '200': { $ref: '#/components/responses/AnalyticsObject' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
+  /analytics/payment-risks:
+    get:
+      tags: [Analytics]
+      summary: Payment risk / overdue deals (admin, manager)
+      responses:
+        '200': { $ref: '#/components/responses/AnalyticsArray' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
+  # ──────────────────────────────────────────── PAYMENTS ─────────────────────
+  /payments:
+    get:
+      tags: [Payments]
+      summary: List payments with filters
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Limit'
+        - name: dealId
+          in: query
+          schema: { type: string, format: uuid }
+        - name: status
+          in: query
+          schema: { $ref: '#/components/schemas/PaymentStatus' }
+      responses:
+        '200':
+          description: Payment list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  data:
+                    type: array
+                    items: { $ref: '#/components/schemas/Payment' }
+                  pagination: { $ref: '#/components/schemas/Pagination' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+    post:
+      tags: [Payments]
+      summary: Create a payment
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [dealId, amount]
+              properties:
+                dealId: { type: string, format: uuid }
+                amount: { type: number, format: float }
+                method: { type: string }
+                type: { type: string, enum: [prepayment, final_payment] }
+                note: { type: string }
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  data: { $ref: '#/components/schemas/Payment' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '402': { $ref: '#/components/responses/ReadOnly' }
+
+  /payments/{id}:
+    delete:
+      tags: [Payments]
+      summary: Delete a payment
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      responses:
+        '200': { $ref: '#/components/responses/Success' }
+        '402': { $ref: '#/components/responses/ReadOnly' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  # ──────────────────────────────────────── NOTIFICATIONS ────────────────────
+  /notifications/push/vapid-key:
+    get:
+      tags: [Notifications]
+      summary: Get the Web Push VAPID public key
+      security: []
+      responses:
+        '200':
+          description: VAPID key
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  publicKey: { type: string }
+
+  /notifications:
+    get:
+      tags: [Notifications]
+      summary: List the current user's notifications
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Limit'
+        - name: unread
+          in: query
+          schema: { type: boolean }
+      responses:
+        '200':
+          description: Notification list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  data:
+                    type: array
+                    items: { $ref: '#/components/schemas/Notification' }
+                  pagination: { $ref: '#/components/schemas/Pagination' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+    post:
+      tags: [Notifications]
+      summary: Create a notification (admin/system)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [userId, type, title]
+              properties:
+                userId: { type: string, format: uuid }
+                type: { $ref: '#/components/schemas/NotificationType' }
+                title: { type: string }
+                message: { type: string }
+                actionUrl: { type: string, format: uri }
+                metadata: { type: object, additionalProperties: true }
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  data: { $ref: '#/components/schemas/Notification' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /notifications/unread-count:
+    get:
+      tags: [Notifications]
+      summary: Get unread notification count
+      responses:
+        '200':
+          description: Count
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  count: { type: integer }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /notifications/{id}/read:
+    patch:
+      tags: [Notifications]
+      summary: Mark a notification as read
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      responses:
+        '200': { $ref: '#/components/responses/Success' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /notifications/read-all:
+    patch:
+      tags: [Notifications]
+      summary: Mark all notifications as read
+      responses:
+        '200': { $ref: '#/components/responses/Success' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /notifications/push/subscribe:
+    post:
+      tags: [Notifications]
+      summary: Register a Web Push subscription
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [endpoint, keys]
+              properties:
+                endpoint: { type: string, format: uri }
+                keys:
+                  type: object
+                  properties:
+                    p256dh: { type: string }
+                    auth: { type: string }
+                deviceName: { type: string }
+      responses:
+        '201': { $ref: '#/components/responses/Success' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+
+  /notifications/push/apns:
+    post:
+      tags: [Notifications]
+      summary: Register a native iOS APNs device token
+      description: >
+        Stores the iOS device token in push_subscriptions (platform=ios). Idempotent
+        per (user, token). Used by the native iOS client; Web Push clients use
+        /notifications/push/subscribe instead.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [deviceToken]
+              properties:
+                deviceToken:
+                  type: string
+                  description: APNs device token (hex string)
+      responses:
+        '201': { $ref: '#/components/responses/Success' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+
+  /notifications/push/unsubscribe:
+    delete:
+      tags: [Notifications]
+      summary: Remove a Web Push subscription
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                endpoint: { type: string, format: uri }
+      responses:
+        '200': { $ref: '#/components/responses/Success' }
+
+  /notifications/push/status:
+    get:
+      tags: [Notifications]
+      summary: Check the current user's push subscription status
+      responses:
+        '200':
+          description: Status
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  subscribed: { type: boolean }
+                  devices: { type: integer }
+
+  /notifications/preferences:
+    get:
+      tags: [Notifications]
+      summary: Get notification preferences
+      responses:
+        '200':
+          description: Preferences
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  data: { type: object, additionalProperties: true }
+    put:
+      tags: [Notifications]
+      summary: Update notification preferences
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        '200': { $ref: '#/components/responses/Success' }
+
+  /notifications/test-push:
+    post:
+      tags: [Notifications]
+      summary: Send a test push to the current user (dev)
+      responses:
+        '200': { $ref: '#/components/responses/Success' }
+
+  /notifications/admin/stats:
+    get:
+      tags: [Notifications]
+      summary: Notification delivery stats (admin)
+      responses:
+        '200': { $ref: '#/components/responses/AnalyticsObject' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
+  /notifications/admin/all:
+    get:
+      tags: [Notifications]
+      summary: List all notifications across the org (admin)
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Limit'
+      responses:
+        '200':
+          description: Notification list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  data:
+                    type: array
+                    items: { $ref: '#/components/schemas/Notification' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
+  /notifications/admin/broadcast:
+    post:
+      tags: [Notifications]
+      summary: Broadcast a notification to users (admin)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [type, title]
+              properties:
+                type: { $ref: '#/components/schemas/NotificationType' }
+                title: { type: string }
+                message: { type: string }
+                roles:
+                  type: array
+                  items: { $ref: '#/components/schemas/UserRole' }
+      responses:
+        '201': { $ref: '#/components/responses/Success' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
+  /notifications/admin/{id}:
+    delete:
+      tags: [Notifications]
+      summary: Delete a notification (admin)
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      responses:
+        '200': { $ref: '#/components/responses/Success' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  # ───────────────────────────────────────── INSTALLATIONS ───────────────────
+  /installations:
+    get:
+      tags: [Installations]
+      summary: List installations
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Limit'
+        - name: status
+          in: query
+          schema: { $ref: '#/components/schemas/InstallationStatus' }
+        - name: installerId
+          in: query
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: Installation list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  data:
+                    type: array
+                    items: { $ref: '#/components/schemas/Installation' }
+                  pagination: { $ref: '#/components/schemas/Pagination' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+    post:
+      tags: [Installations]
+      summary: Create an installation (admin, manager)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/InstallationInput' }
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  data: { $ref: '#/components/schemas/Installation' }
+        '402': { $ref: '#/components/responses/ReadOnly' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
+  /installations/{id}:
+    parameters:
+      - $ref: '#/components/parameters/Id'
+    get:
+      tags: [Installations]
+      summary: Get an installation by id
+      responses:
+        '200':
+          description: Installation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  data: { $ref: '#/components/schemas/Installation' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    put:
+      tags: [Installations]
+      summary: Update an installation (admin, manager)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/InstallationInput' }
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  data: { $ref: '#/components/schemas/Installation' }
+        '402': { $ref: '#/components/responses/ReadOnly' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    delete:
+      tags: [Installations]
+      summary: Delete an installation (admin, manager)
+      responses:
+        '200': { $ref: '#/components/responses/Success' }
+        '402': { $ref: '#/components/responses/ReadOnly' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  # ──────────────────────────────────────────── BILLING ──────────────────────
+  /billing/status:
+    get:
+      tags: [Billing]
+      summary: Current subscription/billing status
+      responses:
+        '200':
+          description: Billing status
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  data: { $ref: '#/components/schemas/BillingStatus' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /billing/select-plan:
+    post:
+      tags: [Billing]
+      summary: Select / change the subscription plan
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [planCode]
+              properties:
+                planCode: { type: string, enum: [start, pro, network] }
+                billingCycle: { type: string, enum: [monthly, yearly] }
+      responses:
+        '200':
+          description: Plan selected
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  data: { $ref: '#/components/schemas/BillingStatus' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+
+  /billing/start-pro-trial:
+    post:
+      tags: [Billing]
+      summary: Start the Pro trial
+      responses:
+        '200':
+          description: Trial started
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  data: { $ref: '#/components/schemas/BillingStatus' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+
+  # ──────────────────────────────────────────── AUDIT ────────────────────────
+  /audit:
+    get:
+      tags: [Audit]
+      summary: Audit log for an entity (admin, manager)
+      parameters:
+        - name: entityType
+          in: query
+          schema: { type: string, example: deal }
+        - name: entityId
+          in: query
+          schema: { type: string, format: uuid }
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Limit'
+      responses:
+        '200':
+          description: Audit log entries
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  data:
+                    type: array
+                    items: { $ref: '#/components/schemas/AuditLog' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
+  # ──────────────────────────────────────────── ONBOARDING ───────────────────
+  /onboarding/checklist:
+    get:
+      tags: [Onboarding]
+      summary: Onboarding checklist progress
+      responses:
+        '200':
+          description: Checklist
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  data:
+                    type: object
+                    additionalProperties: true
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /onboarding/sample-data:
+    delete:
+      tags: [Onboarding]
+      summary: Purge seeded sample data
+      responses:
+        '200': { $ref: '#/components/responses/Success' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  # ──────────────────────────────────────────── LEADS ────────────────────────
+  /leads:
+    post:
+      tags: [Leads]
+      summary: Submit a landing-page lead (public)
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, phone]
+              properties:
+                name: { type: string }
+                phone: { type: string }
+                salon: { type: string }
+                comment: { type: string }
+      responses:
+        '201':
+          description: Lead captured
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  data: { $ref: '#/components/schemas/Lead' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+    get:
+      tags: [Leads]
+      summary: List leads (admin)
+      parameters:
+        - name: status
+          in: query
+          schema: { type: string }
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Limit'
+      responses:
+        '200':
+          description: Lead list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  data:
+                    type: array
+                    items: { $ref: '#/components/schemas/Lead' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
+  /leads/{id}/status:
+    patch:
+      tags: [Leads]
+      summary: Update a lead's status (admin)
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [status]
+              properties:
+                status: { type: string, example: contacted }
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  data: { $ref: '#/components/schemas/Lead' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  # ──────────────────────────────────────────── UPLOAD ───────────────────────
+  /upload/photo:
+    post:
+      tags: [Upload]
+      summary: Upload a single photo
+      description: >-
+        multipart/form-data. Field name `photo`. Max 10MB, magic-byte validated,
+        jpeg/png/webp/gif only. Stored in S3.
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [photo]
+              properties:
+                photo: { type: string, format: binary }
+      responses:
+        '201':
+          description: Uploaded
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  data:
+                    type: object
+                    properties:
+                      url: { type: string, format: uri }
+                      thumbnailUrl: { type: string, format: uri }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /upload/photos:
+    post:
+      tags: [Upload]
+      summary: Upload multiple photos (max 10)
+      description: multipart/form-data. Field name `photos` (array). Each file max 10MB, jpeg/png/webp/gif.
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [photos]
+              properties:
+                photos:
+                  type: array
+                  items: { type: string, format: binary }
+                  maxItems: 10
+      responses:
+        '201':
+          description: Uploaded
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        url: { type: string, format: uri }
+                        thumbnailUrl: { type: string, format: uri }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+# ════════════════════════════════════════════ COMPONENTS ═════════════════════
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  parameters:
+    Id:
+      name: id
+      in: path
+      required: true
+      schema: { type: string, format: uuid }
+    WindowId:
+      name: windowId
+      in: path
+      required: true
+      schema: { type: string, format: uuid }
+    InviteToken:
+      name: token
+      in: path
+      required: true
+      schema: { type: string }
+    Page:
+      name: page
+      in: query
+      schema: { type: integer, minimum: 1, default: 1 }
+    Limit:
+      name: limit
+      in: query
+      schema: { type: integer, minimum: 1, maximum: 200, default: 50 }
+    Period:
+      name: period
+      in: query
+      description: Time window for the analytics query.
+      schema:
+        type: string
+        enum: [today, week, month, quarter, year, all]
+
+  responses:
+    Success:
+      description: Operation succeeded
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success: { type: boolean, example: true }
+              message: { type: string }
+    AnalyticsObject:
+      description: Analytics result (object payload)
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success: { type: boolean }
+              data: { type: object, additionalProperties: true }
+    AnalyticsArray:
+      description: Analytics result (array payload)
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success: { type: boolean }
+              data:
+                type: array
+                items: { type: object, additionalProperties: true }
+    BadRequest:
+      description: Validation error
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    Unauthorized:
+      description: Missing or invalid JWT
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    Forbidden:
+      description: Authenticated but role not permitted
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    NotFound:
+      description: Resource not found (or not in caller's tenant)
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    TooManyRequests:
+      description: Rate limit exceeded
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    ReadOnly:
+      description: Subscription read-only mode — writes blocked
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: '#/components/schemas/Error'
+              - type: object
+                properties:
+                  code:
+                    type: string
+                    const: SUBSCRIPTION_READ_ONLY
+
+  schemas:
+    # ── Common ──────────────────────────────────────────────────────────────
+    Error:
+      type: object
+      properties:
+        success: { type: boolean, example: false }
+        error: { type: string }
+        message: { type: string }
+        code: { type: string }
+        timestamp: { type: string, format: date-time }
+    Pagination:
+      type: object
+      properties:
+        page: { type: integer }
+        limit: { type: integer }
+        total: { type: integer }
+        totalPages: { type: integer }
+
+    # ── Enums ───────────────────────────────────────────────────────────────
+    UserRole:
+      type: string
+      enum: [designer, manager, production, installer, admin, sales]
+    DealStatus:
+      type: string
+      enum:
+        - lead
+        - measurement_scheduled
+        - measurement_done
+        - proposal_sent
+        - proposal_accepted
+        - contract_signed
+        - in_production
+        - ready_for_installation
+        - installation_scheduled
+        - installed
+        - completed
+        - cancelled
+    OrderStatus:
+      type: string
+      enum: [pending, cutting, sewing, quality_check, ready, shipped]
+    MeasurementStatus:
+      type: string
+      enum: [scheduled, in_progress, completed, cancelled]
+    ProposalStatus:
+      type: string
+      enum: [draft, sent, viewed, accepted, rejected]
+    PaymentStatus:
+      type: string
+      enum: [pending, partial, paid, refunded]
+    InstallationStatus:
+      type: string
+      enum: [scheduled, in_progress, completed, rescheduled, cancelled]
+    FabricType:
+      type: string
+      enum: [transparent, semi_blackout, blackout, decorative]
+    MountingType:
+      type: string
+      enum: [wall, ceiling, frame, niche]
+    NotificationType:
+      type: string
+      enum: [urgent, warning, info]
+    PhotoType:
+      type: string
+      enum: [room, window, upper_zone, obstacle, fabric_sample, after_installation, other]
+    SubscriptionStatus:
+      type: string
+      enum: [active, trial, past_due, pending_payment, canceled]
+
+    # ── Auth ────────────────────────────────────────────────────────────────
+    TokenPair:
+      type: object
+      properties:
+        accessToken: { type: string }
+        refreshToken: { type: string }
+    AuthResult:
+      type: object
+      properties:
+        success: { type: boolean, example: true }
+        data:
+          type: object
+          properties:
+            user: { $ref: '#/components/schemas/User' }
+            tokens: { $ref: '#/components/schemas/TokenPair' }
+
+    # ── Core entities ─────────────────────────────────────────────────────────
+    Organization:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        name: { type: string }
+        slug: { type: string }
+        currentPlanCode: { type: string, enum: [start, pro, network], nullable: true }
+        billingCycle: { type: string, enum: [monthly, yearly] }
+        subscriptionStatus: { $ref: '#/components/schemas/SubscriptionStatus' }
+        trialStartedAt: { type: string, format: date-time, nullable: true }
+        trialEndsAt: { type: string, format: date-time, nullable: true }
+        readOnlySince: { type: string, format: date-time, nullable: true }
+        maxUsersOverride: { type: integer, nullable: true }
+        maxSalonsOverride: { type: integer, nullable: true }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+
+    User:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        organizationId: { type: string, format: uuid }
+        name: { type: string }
+        email: { type: string, format: email, nullable: true }
+        phone: { type: string }
+        role: { $ref: '#/components/schemas/UserRole' }
+        avatarUrl: { type: string, format: uri, nullable: true }
+        isActive: { type: boolean }
+        lastLoginAt: { type: string, format: date-time, nullable: true }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+
+    Client:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        organizationId: { type: string, format: uuid }
+        name: { type: string }
+        phone: { type: string }
+        whatsapp: { type: string, nullable: true }
+        email: { type: string, format: email, nullable: true }
+        address: { type: string, nullable: true }
+        notes: { type: string, nullable: true }
+        source: { type: string, nullable: true }
+        tags:
+          type: array
+          items: { type: string }
+        createdBy: { type: string, format: uuid, nullable: true }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+    ClientInput:
+      type: object
+      required: [name, phone]
+      properties:
+        name: { type: string }
+        phone: { type: string }
+        whatsapp: { type: string }
+        email: { type: string, format: email }
+        address: { type: string }
+        notes: { type: string }
+        source: { type: string }
+        tags:
+          type: array
+          items: { type: string }
+
+    Measurement:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        organizationId: { type: string, format: uuid }
+        clientId: { type: string, format: uuid }
+        designerId: { type: string, format: uuid }
+        status: { $ref: '#/components/schemas/MeasurementStatus' }
+        scheduledAt: { type: string, format: date-time, nullable: true }
+        startedAt: { type: string, format: date-time, nullable: true }
+        completedAt: { type: string, format: date-time, nullable: true }
+        address: { type: string }
+        roomType: { type: string, nullable: true }
+        budgetMin: { type: number, format: float, nullable: true }
+        budgetMax: { type: number, format: float, nullable: true }
+        deadline: { type: string, format: date, nullable: true }
+        clientReaction: { type: string, nullable: true }
+        notes: { type: string, nullable: true }
+        deliveryCost: { type: number, format: float, nullable: true, description: Added by auto-migration }
+        mapLink: { type: string, nullable: true }
+        priority: { type: string, nullable: true, default: standard }
+        styles: { type: string, nullable: true }
+        curtainTypes: { type: string, nullable: true }
+        technicalFeatures:
+          type: array
+          items: { type: string }
+        windows:
+          type: array
+          items: { $ref: '#/components/schemas/MeasurementWindow' }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+    MeasurementInput:
+      type: object
+      required: [clientId, address]
+      properties:
+        clientId: { type: string, format: uuid }
+        designerId: { type: string, format: uuid }
+        address: { type: string }
+        scheduledAt: { type: string, format: date-time }
+        roomType: { type: string }
+        budgetMin: { type: number, format: float }
+        budgetMax: { type: number, format: float }
+        deadline: { type: string, format: date }
+        notes: { type: string }
+        deliveryCost: { type: number, format: float }
+        mapLink: { type: string }
+        priority: { type: string }
+        styles: { type: string }
+        curtainTypes: { type: string }
+        technicalFeatures:
+          type: array
+          items: { type: string }
+
+    MeasurementWindow:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        measurementId: { type: string, format: uuid }
+        windowNumber: { type: integer }
+        roomName: { type: string, nullable: true }
+        widthLeft: { type: integer, nullable: true, description: mm }
+        widthCenter: { type: integer, nullable: true, description: mm }
+        widthRight: { type: integer, nullable: true, description: mm }
+        heightLeft: { type: integer, nullable: true, description: mm }
+        heightCenter: { type: integer, nullable: true, description: mm }
+        heightRight: { type: integer, nullable: true, description: mm }
+        mountingType: { $ref: '#/components/schemas/MountingType' }
+        topOffset: { type: integer, nullable: true }
+        sillHeight: { type: integer, nullable: true }
+        obstacles:
+          type: array
+          items: { type: object, additionalProperties: true }
+        fabricCode: { type: string, nullable: true, description: Added by auto-migration }
+        fabricBrand: { type: string, nullable: true }
+        designPhotos:
+          type: array
+          items: { type: string, format: uri }
+        priceBreakdown: { type: object, additionalProperties: true }
+        notes: { type: string, nullable: true }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+    MeasurementWindowInput:
+      type: object
+      properties:
+        windowNumber: { type: integer }
+        roomName: { type: string }
+        widthLeft: { type: integer }
+        widthCenter: { type: integer }
+        widthRight: { type: integer }
+        heightLeft: { type: integer }
+        heightCenter: { type: integer }
+        heightRight: { type: integer }
+        mountingType: { $ref: '#/components/schemas/MountingType' }
+        topOffset: { type: integer }
+        sillHeight: { type: integer }
+        obstacles:
+          type: array
+          items: { type: object, additionalProperties: true }
+        fabricCode: { type: string }
+        fabricBrand: { type: string }
+        designPhotos:
+          type: array
+          items: { type: string, format: uri }
+        notes: { type: string }
+
+    Photo:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        organizationId: { type: string, format: uuid }
+        measurementId: { type: string, format: uuid, nullable: true }
+        windowId: { type: string, format: uuid, nullable: true }
+        dealId: { type: string, format: uuid, nullable: true }
+        photoType: { $ref: '#/components/schemas/PhotoType' }
+        url: { type: string, format: uri }
+        thumbnailUrl: { type: string, format: uri, nullable: true }
+        description: { type: string, nullable: true }
+        createdAt: { type: string, format: date-time }
+
+    Deal:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        organizationId: { type: string, format: uuid }
+        clientId: { type: string, format: uuid }
+        designerId: { type: string, format: uuid }
+        measurementId: { type: string, format: uuid, nullable: true }
+        proposalId: { type: string, format: uuid, nullable: true }
+        status: { $ref: '#/components/schemas/DealStatus' }
+        totalAmount: { type: number, format: float, nullable: true }
+        prepayment: { type: number, format: float }
+        prepaymentPercent: { type: number, format: float, default: 50 }
+        finalPayment: { type: number, format: float }
+        paymentStatus: { $ref: '#/components/schemas/PaymentStatus' }
+        deadline: { type: string, format: date, nullable: true }
+        designerCommissionPercent: { type: number, format: float, default: 7 }
+        designerCommission: { type: number, format: float, nullable: true }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+    DealCreate:
+      type: object
+      required: [clientId]
+      properties:
+        clientId: { type: string, format: uuid }
+        designerId: { type: string, format: uuid }
+        measurementId: { type: string, format: uuid }
+        proposalId: { type: string, format: uuid }
+        status: { $ref: '#/components/schemas/DealStatus' }
+        totalAmount: { type: number, format: float }
+        prepaymentPercent: { type: number, format: float }
+        deadline: { type: string, format: date }
+        designerCommissionPercent: { type: number, format: float }
+    DealResponse:
+      type: object
+      properties:
+        success: { type: boolean }
+        data:
+          allOf:
+            - $ref: '#/components/schemas/Deal'
+            - type: object
+              properties:
+                events:
+                  type: array
+                  items: { $ref: '#/components/schemas/DealEvent' }
+
+    DealEvent:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        organizationId: { type: string, format: uuid }
+        dealId: { type: string, format: uuid }
+        eventType: { type: string }
+        description: { type: string, nullable: true }
+        metadata: { type: object, additionalProperties: true }
+        createdBy: { type: string, format: uuid, nullable: true }
+        createdAt: { type: string, format: date-time }
+
+    Proposal:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        organizationId: { type: string, format: uuid }
+        measurementId: { type: string, format: uuid, nullable: true }
+        clientId: { type: string, format: uuid }
+        designerId: { type: string, format: uuid }
+        variantName: { type: string, nullable: true }
+        fabricId: { type: string, format: uuid, nullable: true }
+        fabricMeters: { type: number, format: float, nullable: true }
+        fabricCost: { type: number, format: float, nullable: true }
+        curtainId: { type: string, format: uuid, nullable: true }
+        curtainCost: { type: number, format: float, nullable: true }
+        sewingCost: { type: number, format: float, nullable: true }
+        installationCost: { type: number, format: float, nullable: true }
+        additionalCosts:
+          type: array
+          items: { type: object, additionalProperties: true }
+        discountPercent: { type: number, format: float, default: 0 }
+        totalCost: { type: number, format: float }
+        status: { $ref: '#/components/schemas/ProposalStatus' }
+        sentAt: { type: string, format: date-time, nullable: true }
+        viewedAt: { type: string, format: date-time, nullable: true }
+        decidedAt: { type: string, format: date-time, nullable: true }
+        pdfUrl: { type: string, format: uri, nullable: true }
+        notes: { type: string, nullable: true }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+    ProposalInput:
+      type: object
+      required: [clientId, totalCost]
+      properties:
+        measurementId: { type: string, format: uuid }
+        clientId: { type: string, format: uuid }
+        designerId: { type: string, format: uuid }
+        variantName: { type: string }
+        fabricId: { type: string, format: uuid }
+        fabricMeters: { type: number, format: float }
+        fabricCost: { type: number, format: float }
+        curtainId: { type: string, format: uuid }
+        curtainCost: { type: number, format: float }
+        sewingCost: { type: number, format: float }
+        installationCost: { type: number, format: float }
+        additionalCosts:
+          type: array
+          items: { type: object, additionalProperties: true }
+        discountPercent: { type: number, format: float }
+        totalCost: { type: number, format: float }
+        status: { $ref: '#/components/schemas/ProposalStatus' }
+        notes: { type: string }
+
+    Fabric:
+      description: >-
+        Catalog product. Backed by the `products` table (type fabric/curtain/
+        accessory/service). Historically called "fabric"; routes are /catalog/products.
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        name: { type: string }
+        code: { type: string }
+        type: { type: string, enum: [fabric, curtain, accessory, service] }
+        category: { type: string, nullable: true }
+        pricePerMeter: { type: number, format: float, nullable: true }
+        costPrice: { type: number, format: float, nullable: true }
+        widthCm: { type: integer, default: 280 }
+        brand: { type: string, nullable: true }
+        supplier: { type: string, nullable: true }
+        description: { type: string, nullable: true }
+        imageUrl: { type: string, format: uri, nullable: true }
+        stockQuantity: { type: number, format: float, default: 0 }
+        unit: { type: string, enum: [meter, piece, set, item], default: meter }
+        isAvailable: { type: boolean, default: true }
+        properties: { type: object, additionalProperties: true }
+        variants:
+          type: array
+          items: { $ref: '#/components/schemas/ProductVariant' }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+    FabricInput:
+      type: object
+      required: [name, code, type]
+      properties:
+        name: { type: string }
+        code: { type: string }
+        type: { type: string, enum: [fabric, curtain, accessory, service] }
+        category: { type: string }
+        pricePerMeter: { type: number, format: float }
+        costPrice: { type: number, format: float }
+        widthCm: { type: integer }
+        brand: { type: string }
+        supplier: { type: string }
+        description: { type: string }
+        imageUrl: { type: string, format: uri }
+        stockQuantity: { type: number, format: float }
+        unit: { type: string, enum: [meter, piece, set, item] }
+        isAvailable: { type: boolean }
+        properties: { type: object, additionalProperties: true }
+
+    ProductVariant:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        productId: { type: string, format: uuid }
+        variantCode: { type: string }
+        variantName: { type: string, nullable: true }
+        hexColor: { type: string, nullable: true, example: '#FF5733' }
+        stockQuantity: { type: number, format: float, default: 0 }
+        imageUrl: { type: string, format: uri, nullable: true }
+        isAvailable: { type: boolean, default: true }
+        isDefault: { type: boolean, default: false }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+    ProductVariantInput:
+      type: object
+      required: [variantCode]
+      properties:
+        variantCode: { type: string }
+        variantName: { type: string }
+        hexColor: { type: string }
+        stockQuantity: { type: number, format: float }
+        imageUrl: { type: string, format: uri }
+        isAvailable: { type: boolean }
+        isDefault: { type: boolean }
+
+    ServiceRate:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        name: { type: string }
+        description: { type: string, nullable: true }
+        serviceType: { type: string, default: installation }
+        calcMethod: { type: string, enum: [per_meter, per_piece, fixed], default: per_meter }
+        baseRate: { type: number, format: float, default: 0 }
+        isActive: { type: boolean, default: true }
+        organizationId: { type: string, format: uuid, nullable: true }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+    ServiceRateInput:
+      type: object
+      required: [name]
+      properties:
+        name: { type: string }
+        description: { type: string }
+        serviceType: { type: string }
+        calcMethod: { type: string, enum: [per_meter, per_piece, fixed] }
+        baseRate: { type: number, format: float }
+        isActive: { type: boolean }
+
+    Order:
+      description: Production order (one per deal).
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        organizationId: { type: string, format: uuid }
+        dealId: { type: string, format: uuid }
+        status: { $ref: '#/components/schemas/OrderStatus' }
+        assignedTo: { type: string, format: uuid, nullable: true }
+        techCardUrl: { type: string, format: uri, nullable: true }
+        techSpecs: { type: object, additionalProperties: true }
+        startedAt: { type: string, format: date-time, nullable: true }
+        completedAt: { type: string, format: date-time, nullable: true }
+        estimatedCompletion: { type: string, format: date, nullable: true }
+        issues: { type: string, nullable: true }
+        qualityNotes: { type: string, nullable: true }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+
+    Installation:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        organizationId: { type: string, format: uuid }
+        dealId: { type: string, format: uuid }
+        orderId: { type: string, format: uuid, nullable: true }
+        installerId: { type: string, format: uuid, nullable: true }
+        status: { $ref: '#/components/schemas/InstallationStatus' }
+        scheduledAt: { type: string, format: date-time }
+        startedAt: { type: string, format: date-time, nullable: true }
+        completedAt: { type: string, format: date-time, nullable: true }
+        address: { type: string }
+        clientPhone: { type: string, nullable: true }
+        clientContactName: { type: string, nullable: true }
+        notes: { type: string, nullable: true }
+        completionNotes: { type: string, nullable: true }
+        clientRating: { type: integer, minimum: 1, maximum: 5, nullable: true }
+        clientFeedback: { type: string, nullable: true }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+    InstallationInput:
+      type: object
+      required: [dealId, scheduledAt, address]
+      properties:
+        dealId: { type: string, format: uuid }
+        orderId: { type: string, format: uuid }
+        installerId: { type: string, format: uuid }
+        status: { $ref: '#/components/schemas/InstallationStatus' }
+        scheduledAt: { type: string, format: date-time }
+        address: { type: string }
+        clientPhone: { type: string }
+        clientContactName: { type: string }
+        notes: { type: string }
+        completionNotes: { type: string }
+        clientRating: { type: integer, minimum: 1, maximum: 5 }
+        clientFeedback: { type: string }
+
+    Payment:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        organizationId: { type: string, format: uuid }
+        dealId: { type: string, format: uuid }
+        amount: { type: number, format: float }
+        method: { type: string, nullable: true }
+        type: { type: string, enum: [prepayment, final_payment], nullable: true }
+        status: { $ref: '#/components/schemas/PaymentStatus' }
+        note: { type: string, nullable: true }
+        createdBy: { type: string, format: uuid, nullable: true }
+        createdAt: { type: string, format: date-time }
+
+    Notification:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        organizationId: { type: string, format: uuid }
+        userId: { type: string, format: uuid }
+        type: { $ref: '#/components/schemas/NotificationType' }
+        title: { type: string }
+        message: { type: string, nullable: true }
+        actionUrl: { type: string, format: uri, nullable: true }
+        metadata: { type: object, additionalProperties: true }
+        isRead: { type: boolean, default: false }
+        readAt: { type: string, format: date-time, nullable: true }
+        createdAt: { type: string, format: date-time }
+
+    SubscriptionPlan:
+      type: object
+      properties:
+        code: { type: string, enum: [start, pro, network] }
+        name: { type: string }
+        description: { type: string, nullable: true }
+        maxUsers: { type: integer }
+        maxSalons: { type: integer }
+        hasProductionWorkflow: { type: boolean }
+        hasInventory: { type: boolean }
+        hasNetworkAnalytics: { type: boolean }
+        isActive: { type: boolean }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+
+    BillingStatus:
+      type: object
+      properties:
+        subscriptionStatus: { $ref: '#/components/schemas/SubscriptionStatus' }
+        currentPlanCode: { type: string, enum: [start, pro, network], nullable: true }
+        billingCycle: { type: string, enum: [monthly, yearly] }
+        trialStartedAt: { type: string, format: date-time, nullable: true }
+        trialEndsAt: { type: string, format: date-time, nullable: true }
+        readOnlySince: { type: string, format: date-time, nullable: true }
+        isReadOnly: { type: boolean }
+        usersCount: { type: integer }
+        maxUsers: { type: integer }
+        plan: { $ref: '#/components/schemas/SubscriptionPlan' }
+
+    Lead:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        name: { type: string }
+        phone: { type: string }
+        salon: { type: string, nullable: true }
+        comment: { type: string, nullable: true }
+        status: { type: string, default: new }
+        source: { type: string, default: landing }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+
+    AuditLog:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        organizationId: { type: string, format: uuid }
+        userId: { type: string, format: uuid, nullable: true }
+        userName: { type: string, nullable: true }
+        actionType: { type: string, example: update }
+        entityType: { type: string, example: deal }
+        entityId: { type: string, format: uuid, nullable: true }
+        entityName: { type: string, nullable: true }
+        changes: { type: object, additionalProperties: true }
+        createdAt: { type: string, format: date-time }
+
+    FunnelResponse:
+      type: object
+      properties:
+        success: { type: boolean }
+        data:
+          type: array
+          items:
+            type: object
+            properties:
+              status: { $ref: '#/components/schemas/DealStatus' }
+              count: { type: integer }
+              totalAmount: { type: number, format: float }
