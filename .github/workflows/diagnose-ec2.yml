@@ -7,40 +7,44 @@ jobs:
   diagnose:
     runs-on: ubuntu-latest
     steps:
-      - name: Inspect EC2 via SSM
+      - name: Inspect LIVE EC2 (13.51.198.130 / i-06e2d5837c24c75f3) via SSM
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_DEFAULT_REGION: ${{ secrets.AWS_REGION }}
         run: |
           CMD_ID=$(aws ssm send-command \
-            --instance-ids i-03108d97efac1ce59 \
+            --instance-ids i-06e2d5837c24c75f3 \
             --document-name "AWS-RunShellScript" \
             --parameters '{"commands":[
-              "echo ===PORTS_LISTENING===",
-              "ss -tlnp 2>/dev/null | grep -E \":300[0-9]\" || true",
-              "echo ===API_GARDINA_NGINX_BLOCK===",
-              "docker exec hafiza-nginx sh -c \"nginx -T 2>/dev/null\" | grep -n -A35 \"server_name api.gardina\" | head -80 || true",
-              "echo ===THROUGH_NGINX_LOCAL===",
-              "echo -n nginx_leads: ; curl -sk -o /dev/null -w \"%{http_code}\\n\" https://localhost/api/leads -H \"Host: api.gardina.alashed.kz\"",
-              "echo -n nginx_funnel: ; curl -sk -o /dev/null -w \"%{http_code}\\n\" \"https://localhost/api/analytics/client-funnel?period=month\" -H \"Host: api.gardina.alashed.kz\"",
-              "echo ===DIRECT_3002===",
-              "echo -n direct_leads: ; curl -s -o /dev/null -w \"%{http_code}\\n\" localhost:3002/api/leads",
-              "echo ===WHAT_IS_ON_OTHER_PORTS===",
-              "for P in 3001 3003 3004 3005; do echo -n port$P/api/leads: ; curl -s -o /dev/null -w \"%{http_code}\\n\" localhost:$P/api/leads 2>/dev/null || echo down; done",
+              "echo ===DOCKER_PS===",
+              "docker ps --format \"{{.Names}} | {{.Image}} | {{.Ports}} | {{.Status}}\"",
+              "echo ===NETWORKS===",
+              "docker network ls | grep -iE \"gardina|stack\" || true",
+              "echo ===NGINX_NAME===",
+              "NG=$(docker ps --format \"{{.Names}}\" | grep -i nginx | head -1); echo NGINX=$NG",
+              "echo ===API_GARDINA_BLOCK===",
+              "docker exec $NG sh -c \"nginx -T 2>/dev/null\" | grep -n -A20 \"server_name api.gardina\" | head -40 || true",
+              "echo ===GARDINA_BACKEND_CONTAINER===",
+              "docker ps -a --format \"{{.Names}} | {{.Image}} | {{.Ports}}\" | grep -i gardina || echo NO_GARDINA_CONTAINER",
+              "echo ===CODE_VERSION_IN_BACKEND===",
+              "GB=$(docker ps --format \"{{.Names}}\" | grep -i gardina | grep -i back | head -1); echo BACKEND=$GB",
+              "docker exec $GB sh -c \"grep -c api/leads src/server.js; grep SCHEDULED: src/domain/aggregates/Deal.js\" 2>/dev/null || echo CANNOT_EXEC",
+              "echo ===COMPOSE===",
+              "find /home /root /opt /srv -maxdepth 4 -name \"docker-compose*.y*ml\" 2>/dev/null | xargs -I{} sh -c \"echo {}; grep -l gardina {} 2>/dev/null\" | head -20",
               "echo ===DONE==="
             ]}' \
             --query 'Command.CommandId' --output text)
           echo "SSM Command ID: $CMD_ID"
           for i in $(seq 1 30); do
             sleep 8
-            STATUS=$(aws ssm get-command-invocation --command-id "$CMD_ID" --instance-id i-03108d97efac1ce59 --query 'Status' --output text 2>/dev/null || echo "InProgress")
+            STATUS=$(aws ssm get-command-invocation --command-id "$CMD_ID" --instance-id i-06e2d5837c24c75f3 --query 'Status' --output text 2>/dev/null || echo "InProgress")
             echo "[$i] $STATUS"
             if echo "$STATUS" | grep -qE "^(Success|Failed|TimedOut|Cancelled)$"; then
               echo "================ STDOUT ================"
-              aws ssm get-command-invocation --command-id "$CMD_ID" --instance-id i-03108d97efac1ce59 --query 'StandardOutputContent' --output text
+              aws ssm get-command-invocation --command-id "$CMD_ID" --instance-id i-06e2d5837c24c75f3 --query 'StandardOutputContent' --output text
               echo "================ STDERR ================"
-              aws ssm get-command-invocation --command-id "$CMD_ID" --instance-id i-03108d97efac1ce59 --query 'StandardErrorContent' --output text
+              aws ssm get-command-invocation --command-id "$CMD_ID" --instance-id i-06e2d5837c24c75f3 --query 'StandardErrorContent' --output text
               [ "$STATUS" = "Success" ] || exit 1
               break
             fi
