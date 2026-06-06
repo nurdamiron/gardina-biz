@@ -17,20 +17,20 @@ jobs:
             --instance-ids i-03108d97efac1ce59 \
             --document-name "AWS-RunShellScript" \
             --parameters '{"commands":[
-              "echo ===DOCKER_PS===",
-              "docker ps --format \"{{.Names}} | {{.Image}} | {{.Ports}}\"",
-              "echo ===BACKEND_ALL===",
-              "docker ps -a --format \"{{.Names}} | {{.Image}} | {{.Ports}} | {{.Status}}\" | grep -i backend || true",
-              "echo ===NETWORKS===",
-              "docker network ls",
-              "echo ===NGINX_NAME===",
-              "NGINX=$(docker ps --format \"{{.Names}}\" | grep -i nginx | head -1); echo NGINX=$NGINX",
-              "echo ===NGINX_PROXY_PASS===",
-              "docker exec $NGINX sh -c \"nginx -T 2>/dev/null\" | grep -iE \"proxy_pass|server_name|upstream|listen \" | head -60 || true",
-              "echo ===HEALTH_3002===",
-              "curl -s -m 5 localhost:3002/health || echo NO_3002",
-              "echo ===COMPOSE_FILES===",
-              "find /home /root /opt /srv -maxdepth 4 -name \"docker-compose*.y*ml\" 2>/dev/null | head -10",
+              "echo ===IMAGE_AND_CONTAINER_TIME===",
+              "docker inspect gardina-backend --format \"container_created={{.Created}} image={{.Config.Image}}\" || true",
+              "docker image inspect gardina-stack-backend:new --format \"image_created={{.Created}}\" || true",
+              "echo ===IN_CONTAINER_SERVER_JS_MOUNTS===",
+              "docker exec gardina-backend sh -c \"grep -nE \\\"api/leads|api/notifications|push/apns\\\" src/server.js\" || true",
+              "echo ===IN_CONTAINER_APNS_ROUTE===",
+              "docker exec gardina-backend sh -c \"grep -n push/apns src/presentation/http/routes/notification.routes.js\" || echo NO_APNS_ROUTE",
+              "echo ===IN_CONTAINER_FUNNEL_ENUM===",
+              "docker exec gardina-backend sh -c \"grep -c measurement_scheduled src/application/services/analytics/ClientAnalyticsService.js\" || true",
+              "echo ===IN_CONTAINER_DEAL_ENUM===",
+              "docker exec gardina-backend sh -c \"grep -n SCHEDULED: src/domain/aggregates/Deal.js\" || true",
+              "echo ===DIRECT_LOCALHOST_3002===",
+              "echo -n leads: ; curl -s -o /dev/null -w \"%{http_code}\\n\" localhost:3002/api/leads",
+              "echo -n apns: ; curl -s -o /dev/null -w \"%{http_code}\\n\" -X POST localhost:3002/api/notifications/push/apns -H \"Content-Type: application/json\" -d \"{}\"",
               "echo ===DONE==="
             ]}' \
             --query 'Command.CommandId' --output text)
