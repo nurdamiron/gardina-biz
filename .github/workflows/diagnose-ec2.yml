@@ -1,0 +1,50 @@
+name: Diagnose EC2 (docker + nginx routing)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Inspect EC2 via SSM
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: ${{ secrets.AWS_REGION }}
+        run: |
+          CMD_ID=$(aws ssm send-command \
+            --instance-ids i-03108d97efac1ce59 \
+            --document-name "AWS-RunShellScript" \
+            --parameters '{"commands":[
+              "echo ===DOCKER_PS===",
+              "docker ps --format \"{{.Names}} | {{.Image}} | {{.Ports}}\"",
+              "echo ===BACKEND_ALL===",
+              "docker ps -a --format \"{{.Names}} | {{.Image}} | {{.Ports}} | {{.Status}}\" | grep -i backend || true",
+              "echo ===NETWORKS===",
+              "docker network ls",
+              "echo ===NGINX_NAME===",
+              "NGINX=$(docker ps --format \"{{.Names}}\" | grep -i nginx | head -1); echo NGINX=$NGINX",
+              "echo ===NGINX_PROXY_PASS===",
+              "docker exec $NGINX sh -c \"nginx -T 2>/dev/null\" | grep -iE \"proxy_pass|server_name|upstream|listen \" | head -60 || true",
+              "echo ===HEALTH_3002===",
+              "curl -s -m 5 localhost:3002/health || echo NO_3002",
+              "echo ===COMPOSE_FILES===",
+              "find /home /root /opt /srv -maxdepth 4 -name \"docker-compose*.y*ml\" 2>/dev/null | head -10",
+              "echo ===DONE==="
+            ]}' \
+            --query 'Command.CommandId' --output text)
+          echo "SSM Command ID: $CMD_ID"
+          for i in $(seq 1 30); do
+            sleep 8
+            STATUS=$(aws ssm get-command-invocation --command-id "$CMD_ID" --instance-id i-03108d97efac1ce59 --query 'Status' --output text 2>/dev/null || echo "InProgress")
+            echo "[$i] $STATUS"
+            if echo "$STATUS" | grep -qE "^(Success|Failed|TimedOut|Cancelled)$"; then
+              echo "================ STDOUT ================"
+              aws ssm get-command-invocation --command-id "$CMD_ID" --instance-id i-03108d97efac1ce59 --query 'StandardOutputContent' --output text
+              echo "================ STDERR ================"
+              aws ssm get-command-invocation --command-id "$CMD_ID" --instance-id i-03108d97efac1ce59 --query 'StandardErrorContent' --output text
+              [ "$STATUS" = "Success" ] || exit 1
+              break
+            fi
+          done
