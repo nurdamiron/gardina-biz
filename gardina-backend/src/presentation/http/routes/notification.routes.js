@@ -28,8 +28,11 @@ router.patch('/read-all', controller.markAllRead);
 
 // ==================== PUSH SUBSCRIPTION ====================
 
-// POST /api/notifications/push/subscribe - Subscribe to push
+// POST /api/notifications/push/subscribe - Subscribe to push (Web Push)
 router.post('/push/subscribe', controller.subscribePush);
+
+// POST /api/notifications/push/apns - Register a native iOS APNs device token
+router.post('/push/apns', controller.registerApnsDevice);
 
 // DELETE /api/notifications/push/unsubscribe - Unsubscribe from push
 router.delete('/push/unsubscribe', controller.unsubscribePush);

@@ -1,5 +1,6 @@
 import webpush from 'web-push';
 import pool from '../database/config.js';
+import { apnsService } from './APNsService.js';
 
 /**
  * PushService - handles Web Push notifications
@@ -62,6 +63,39 @@ export class PushService {
   }
 
   /**
+   * Register a native iOS (APNs) device token for a user. Stored in the same
+   * push_subscriptions table with platform='ios'; the Web Push columns are kept
+   * non-null (empty) and a synthetic `apns:<token>` endpoint reuses the existing
+   * (user_id, endpoint) upsert key for idempotency.
+   */
+  async subscribeApns(userId, organizationId, deviceToken, userAgent = null) {
+    if (!deviceToken) {
+      throw new Error('deviceToken is required');
+    }
+    if (!organizationId) {
+      throw new Error('organizationId is required to create a push subscription');
+    }
+
+    const endpoint = `apns:${deviceToken}`;
+    const result = await pool.query(
+      `INSERT INTO push_subscriptions (organization_id, user_id, endpoint, p256dh, auth, platform, device_token, user_agent, last_used_at)
+       VALUES ($1, $2, $3, '', '', 'ios', $4, $5, NOW())
+       ON CONFLICT (user_id, endpoint)
+       DO UPDATE SET
+         organization_id = EXCLUDED.organization_id,
+         platform = 'ios',
+         device_token = EXCLUDED.device_token,
+         user_agent = EXCLUDED.user_agent,
+         is_active = true,
+         last_used_at = NOW()
+       RETURNING *`,
+      [organizationId, userId, endpoint, deviceToken, userAgent]
+    );
+
+    return result.rows[0];
+  }
+
+  /**
    * Unsubscribe from push notifications
    */
   async unsubscribe(userId, endpoint = null) {
@@ -102,9 +136,13 @@ export class PushService {
   }
 
   /**
-   * Send push notification to a specific subscription
+   * Send to one device — routes to APNs for iOS subscriptions, Web Push otherwise.
    */
   async sendToSubscription(subscription, payload) {
+    if (subscription.platform === 'ios' || subscription.device_token) {
+      return this.sendToApns(subscription, payload);
+    }
+
     if (!this.isConfigured) {
       console.warn('PushService: Skipping push - not configured');
       return { success: false, error: 'not_configured' };
@@ -146,6 +184,35 @@ export class PushService {
 
       return { success: false, error: error.message };
     }
+  }
+
+  /**
+   * Send to a native iOS device via APNs. Deactivates the subscription on
+   * permanently-dead tokens so we stop retrying.
+   */
+  async sendToApns(subscription, payload) {
+    const result = await apnsService.send(subscription.device_token, {
+      title: payload.title,
+      body: payload.body || payload.message,
+      badge: payload.badge,
+      data: payload.data,
+    });
+
+    if (result.success) {
+      await pool.query(
+        'UPDATE push_subscriptions SET last_used_at = NOW() WHERE id = $1',
+        [subscription.id]
+      );
+      return { success: true };
+    }
+
+    const deadTokenReasons = ['BadDeviceToken', 'Unregistered', 'DeviceTokenNotForTopic'];
+    if (result.status === 410 || deadTokenReasons.includes(result.reason)) {
+      await this.deactivateSubscription(subscription.id);
+      return { success: false, error: 'subscription_expired' };
+    }
+
+    return { success: false, error: result.reason || 'apns_failed' };
   }
 
   /**

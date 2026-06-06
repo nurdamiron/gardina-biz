@@ -310,6 +310,38 @@ export class NotificationController {
   }
 
   /**
+   * POST /api/notifications/push/apns
+   * Register a native iOS APNs device token for the current user.
+   */
+  registerApnsDevice = async (req, res) => {
+    try {
+      const { deviceToken } = req.body;
+      if (!deviceToken || typeof deviceToken !== 'string') {
+        return res.status(400).json({ success: false, error: 'deviceToken is required' });
+      }
+
+      const userAgent = req.headers['user-agent'];
+      const subscription = await pushService.subscribeApns(
+        req.user.id,
+        req.user.organizationId,
+        deviceToken,
+        userAgent
+      );
+
+      res.status(201).json({
+        success: true,
+        data: {
+          id: subscription.id,
+          message: 'APNs device registered'
+        }
+      });
+    } catch (error) {
+      console.error('NotificationController.registerApnsDevice error:', error);
+      res.status(500).json({ success: false, error: error.message });
+    }
+  }
+
+  /**
    * DELETE /api/notifications/push/unsubscribe
    * Unsubscribe from push notifications
    */

@@ -304,6 +304,25 @@ async function runAutoMigrations() {
       );
     `);
 
+    // APNs (iOS push) — extend push_subscriptions with platform + device_token.
+    // Guarded so it is a no-op if the notification system (015) hasn't run yet.
+    await client.query(`
+      DO $$
+      BEGIN
+        IF EXISTS (
+          SELECT 1 FROM information_schema.tables WHERE table_name = 'push_subscriptions'
+        ) THEN
+          ALTER TABLE push_subscriptions
+            ADD COLUMN IF NOT EXISTS platform VARCHAR(10) NOT NULL DEFAULT 'web',
+            ADD COLUMN IF NOT EXISTS device_token TEXT;
+        END IF;
+      END $$;
+    `);
+    await client.query(
+      `CREATE INDEX IF NOT EXISTS idx_push_subscriptions_device_token
+         ON push_subscriptions(device_token) WHERE device_token IS NOT NULL;`
+    );
+
     await client.query('COMMIT');
     console.log('✅  Auto-migrations completed');
   } catch (err) {
