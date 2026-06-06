@@ -7,7 +7,7 @@ jobs:
   diagnose:
     runs-on: ubuntu-latest
     steps:
-      - name: Inspect LIVE EC2 (13.51.198.130 / i-06e2d5837c24c75f3) via SSM
+      - name: Inspect LIVE gardina-backend run config (i-06e2d5837c24c75f3)
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -17,21 +17,15 @@ jobs:
             --instance-ids i-06e2d5837c24c75f3 \
             --document-name "AWS-RunShellScript" \
             --parameters '{"commands":[
-              "echo ===DOCKER_PS===",
-              "docker ps --format \"{{.Names}} | {{.Image}} | {{.Ports}} | {{.Status}}\"",
-              "echo ===NETWORKS===",
-              "docker network ls | grep -iE \"gardina|stack\" || true",
-              "echo ===NGINX_NAME===",
-              "NG=$(docker ps --format \"{{.Names}}\" | grep -i nginx | head -1); echo NGINX=$NG",
-              "echo ===API_GARDINA_BLOCK===",
-              "docker exec $NG sh -c \"nginx -T 2>/dev/null\" | grep -n -A20 \"server_name api.gardina\" | head -40 || true",
-              "echo ===GARDINA_BACKEND_CONTAINER===",
-              "docker ps -a --format \"{{.Names}} | {{.Image}} | {{.Ports}}\" | grep -i gardina || echo NO_GARDINA_CONTAINER",
-              "echo ===CODE_VERSION_IN_BACKEND===",
-              "GB=$(docker ps --format \"{{.Names}}\" | grep -i gardina | grep -i back | head -1); echo BACKEND=$GB",
-              "docker exec $GB sh -c \"grep -c api/leads src/server.js; grep SCHEDULED: src/domain/aggregates/Deal.js\" 2>/dev/null || echo CANNOT_EXEC",
-              "echo ===COMPOSE===",
-              "find /home /root /opt /srv -maxdepth 4 -name \"docker-compose*.y*ml\" 2>/dev/null | xargs -I{} sh -c \"echo {}; grep -l gardina {} 2>/dev/null\" | head -20",
+              "echo ===NETMODE_RESTART_PORTS===",
+              "docker inspect gardina-backend --format \"netmode={{.HostConfig.NetworkMode}} restart={{.HostConfig.RestartPolicy.Name}}\"",
+              "docker port gardina-backend",
+              "echo ===ENV_KEYS_ONLY===",
+              "docker inspect gardina-backend --format \"{{range .Config.Env}}{{println .}}{{end}}\" | sed \"s/=.*//\" | sort",
+              "echo ===IMAGE===",
+              "docker inspect gardina-backend --format \"{{.Config.Image}}\"",
+              "echo ===NETWORKS_ON_BOX===",
+              "docker network ls",
               "echo ===DONE==="
             ]}' \
             --query 'Command.CommandId' --output text)
