@@ -1,0 +1,85 @@
+name: Deploy Backend → LIVE EC2 (13.51.198.130)
+
+# One-off / manual deploy to the server the public DNS actually points at
+# (i-06e2d5837c24c75f3 / 13.51.198.130), where the gardina-backend container
+# runs on host port 3004. Reuses the live container's existing env (DB/JWT/VAPID)
+# so nothing is dropped. The normal deploy-backend.yml targets the other box.
+
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy-live:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Package backend (no .env — live env is reused on the box)
+        run: |
+          tar --warning=no-file-changed -czf /tmp/gardina-backend-live.tar.gz \
+            gardina-backend/src \
+            gardina-backend/package.json \
+            gardina-backend/package-lock.json \
+            gardina-backend/Dockerfile
+
+      - name: Upload to S3
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: ${{ secrets.AWS_REGION }}
+        run: |
+          aws s3 cp /tmp/gardina-backend-live.tar.gz s3://alashed-deploy-temp/gardina-backend-live.tar.gz
+
+      - name: Presign
+        id: presign
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: ${{ secrets.AWS_REGION }}
+        run: |
+          URL=$(aws s3 presign s3://alashed-deploy-temp/gardina-backend-live.tar.gz --expires-in 1800)
+          echo "url=$URL" >> $GITHUB_OUTPUT
+
+      - name: Deploy on LIVE EC2 via SSM
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: ${{ secrets.AWS_REGION }}
+        run: |
+          PRESIGN_URL="${{ steps.presign.outputs.url }}"
+          CMD_ID=$(aws ssm send-command \
+            --instance-ids i-06e2d5837c24c75f3 \
+            --document-name "AWS-RunShellScript" \
+            --parameters "{\"commands\":[
+              \"set -e\",
+              \"docker inspect gardina-backend --format '{{range .Config.Env}}{{println .}}{{end}}' > /tmp/gardina-live.env\",
+              \"rm -rf /tmp/gd-live && mkdir -p /tmp/gd-live && cd /tmp/gd-live\",
+              \"wget -q -O b.tar.gz '${PRESIGN_URL}' && echo DL_OK\",
+              \"tar -xzf b.tar.gz\",
+              \"cd gardina-backend && docker build --no-cache --pull -t gardina-stack-backend:new . 2>&1 | tail -6\",
+              \"docker tag gardina-stack-backend:latest gardina-stack-backend:rollback || true\",
+              \"docker stop gardina-backend || true\",
+              \"docker rm gardina-backend || true\",
+              \"docker run -d --name gardina-backend --restart always --network bridge -p 3004:3001 --env-file /tmp/gardina-live.env gardina-stack-backend:new\",
+              \"docker tag gardina-stack-backend:new gardina-stack-backend:latest\",
+              \"sleep 6\",
+              \"docker ps | grep gardina-backend\",
+              \"echo HEALTH: ; curl -s -m 8 localhost:3004/health || echo HEALTH_FAIL\",
+              \"rm -f /tmp/gardina-live.env\",
+              \"echo DEPLOY_OK\"
+            ]}" \
+            --query 'Command.CommandId' --output text)
+          echo "SSM Command ID: $CMD_ID"
+          for i in $(seq 1 40); do
+            sleep 10
+            STATUS=$(aws ssm get-command-invocation --command-id "$CMD_ID" --instance-id i-06e2d5837c24c75f3 --query 'Status' --output text 2>/dev/null || echo "InProgress")
+            echo "[$i] $STATUS"
+            if echo "$STATUS" | grep -qE "^(Success|Failed|TimedOut|Cancelled)$"; then
+              echo "================ STDOUT ================"
+              aws ssm get-command-invocation --command-id "$CMD_ID" --instance-id i-06e2d5837c24c75f3 --query 'StandardOutputContent' --output text
+              echo "================ STDERR ================"
+              aws ssm get-command-invocation --command-id "$CMD_ID" --instance-id i-06e2d5837c24c75f3 --query 'StandardErrorContent' --output text
+              [ "$STATUS" = "Success" ] || exit 1
+              break
+            fi
+          done
