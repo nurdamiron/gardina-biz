@@ -32,7 +32,13 @@ export class ClientController {
 
   async create(req, res) {
     try {
-      const { phone } = req.body;
+      const { name, phone } = req.body;
+
+      // Required-field validation — return 400 instead of letting a NOT NULL
+      // DB constraint surface as a 500 (and leak the column name).
+      if (!name || typeof name !== 'string' || !name.trim()) {
+        return res.status(400).json({ success: false, error: 'Аты міндетті (name is required)' });
+      }
 
       // Check if client with this phone already exists
       if (phone) {
@@ -53,7 +59,8 @@ export class ClientController {
       const client = await this.clientRepository.create({ ...req.body, createdBy: req.user.id });
       res.status(201).json({ success: true, data: client });
     } catch (error) {
-      res.status(500).json({ success: false, error: error.message });
+      console.error('[ClientController.create]', error.message);
+      res.status(500).json({ success: false, error: 'Клиентті құру сәтсіз аяқталды' });
     }
   }
 

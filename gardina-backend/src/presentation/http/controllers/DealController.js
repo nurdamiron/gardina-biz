@@ -58,7 +58,7 @@ export class DealController {
       res.status(500).json({
         success: false,
         error: 'Failed to fetch funnel stats',
-        message: error.message,
+        message: 'Server error',
       });
     }
   }
@@ -106,7 +106,7 @@ export class DealController {
       res.status(500).json({
         success: false,
         error: 'Failed to fetch deals',
-        message: error.message,
+        message: 'Server error',
       });
     }
   }
@@ -144,7 +144,7 @@ export class DealController {
       res.status(500).json({
         success: false,
         error: 'Failed to fetch deal',
-        message: error.message,
+        message: 'Server error',
       });
     }
   }
@@ -215,7 +215,7 @@ export class DealController {
       res.status(500).json({
         success: false,
         error: 'Failed to create deal',
-        message: error.message,
+        message: 'Server error',
       });
     }
   }
@@ -321,7 +321,7 @@ export class DealController {
       res.status(500).json({
         success: false,
         error: 'Failed to update deal status',
-        message: error.message,
+        message: 'Server error',
       });
     }
   }
@@ -385,7 +385,7 @@ export class DealController {
       res.status(500).json({
         success: false,
         error: 'Failed to record payment',
-        message: error.message,
+        message: 'Server error',
       });
     }
   }
@@ -416,7 +416,7 @@ export class DealController {
       res.status(500).json({
         success: false,
         error: 'Failed to delete deal',
-        message: error.message,
+        message: 'Server error',
       });
     }
   }

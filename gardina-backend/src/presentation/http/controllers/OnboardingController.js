@@ -37,7 +37,7 @@ export class OnboardingController {
         ),
         pool.query(
           `SELECT COUNT(*)::int AS n FROM deals
-           WHERE organization_id = $1 AND status NOT IN ('lead', 'scheduled', 'cancelled', 'rejected')`,
+           WHERE organization_id = $1 AND status NOT IN ('lead', 'measurement_scheduled', 'cancelled')`,
           [orgId]
         ),
         pool.query(

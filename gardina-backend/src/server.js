@@ -298,6 +298,17 @@ async function runAutoMigrations() {
       );
     `);
 
+    // service_rates complexity multipliers (full schema from 001-catalog-system).
+    // The simplified CREATE TABLE above omits them, so DBs provisioned via
+    // auto-migrate lacked these columns and /catalog/services 500'd
+    // ("column complexity_simple does not exist").
+    await client.query(`
+      ALTER TABLE service_rates
+        ADD COLUMN IF NOT EXISTS complexity_simple DECIMAL(3,2) DEFAULT 1.0,
+        ADD COLUMN IF NOT EXISTS complexity_medium DECIMAL(3,2) DEFAULT 1.3,
+        ADD COLUMN IF NOT EXISTS complexity_complex DECIMAL(3,2) DEFAULT 2.0;
+    `);
+
     await client.query(`
       CREATE TABLE IF NOT EXISTS leads (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
