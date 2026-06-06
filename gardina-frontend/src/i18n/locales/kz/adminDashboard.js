@@ -1,5 +1,7 @@
 const adminDashboard = {
   title: 'Админ панелі',
+  analyticsError: 'Аналитиканың бір бөлігі жүктелмеді. Деректер толық болмауы мүмкін.',
+  retry: 'Қайталау',
   tabs: {
     overview: 'Жалпы',
     timeline: 'Timeline',

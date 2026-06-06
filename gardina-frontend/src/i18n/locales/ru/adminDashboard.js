@@ -1,5 +1,7 @@
 const adminDashboard = {
   title: 'Панель админа',
+  analyticsError: 'Не удалось загрузить часть аналитики. Данные могут быть неполными.',
+  retry: 'Повторить',
   tabs: {
     overview: 'Обзор',
     timeline: 'Таймлайн',

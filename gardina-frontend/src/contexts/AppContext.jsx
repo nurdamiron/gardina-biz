@@ -20,6 +20,9 @@ export const AppProvider = ({ children }) => {
   });
   const [loading, setLoading] = useState(false);
   const [analyticsLoading, setAnalyticsLoading] = useState(false);
+  // True when one or more analytics widgets failed to load (so the UI can tell
+  // the user instead of silently showing zeros).
+  const [analyticsError, setAnalyticsError] = useState(false);
 
   // Use refs for cache timestamps to avoid stale closures
   const lastFetchRef = useRef(null);
@@ -71,7 +74,9 @@ export const AppProvider = ({ children }) => {
 
     try {
       setAnalyticsLoading(true);
+      setAnalyticsError(false);
       const newAnalytics = {};
+      let anyAnalyticsFailed = false;
 
       // Load data based on role
       if (role === 'admin') {
@@ -106,6 +111,8 @@ export const AppProvider = ({ children }) => {
         setClients(loadedClients);
         setDesigners(loadedDesigners);
         newAnalytics._clients = loadedClients; // expose for callers
+        anyAnalyticsFailed = [dashboardStats, designersRanking, productSales, monthlyTrends, clientFunnel, teamKPIs]
+          .some(r => r.status === 'rejected');
 
       } else if (role === 'manager') {
         const [
@@ -126,6 +133,8 @@ export const AppProvider = ({ children }) => {
         const loadedManagerClients = clientsRes.status === 'fulfilled' ? (clientsRes.value.data.data || []) : [];
         setClients(loadedManagerClients);
         newAnalytics._clients = loadedManagerClients;
+        anyAnalyticsFailed = [dashboardStats, weeklyActivity, designersRanking]
+          .some(r => r.status === 'rejected');
 
       } else if (role === 'designer') {
         const [
@@ -144,15 +153,19 @@ export const AppProvider = ({ children }) => {
         if (designerPerformance.status === 'fulfilled') newAnalytics.designerPerformance = designerPerformance.value.data.data;
         if (designerEarnings.status === 'fulfilled') newAnalytics.designerEarnings = designerEarnings.value.data.data;
         if (designersRanking.status === 'fulfilled') newAnalytics.designersRanking = designersRanking.value.data.data;
+        anyAnalyticsFailed = [dashboardStats, designerPerformance, designerEarnings, designersRanking]
+          .some(r => r.status === 'rejected');
       }
 
       setAnalytics(prev => ({ ...prev, ...newAnalytics }));
       lastAnalyticsFetchRef.current = Date.now();
+      setAnalyticsError(anyAnalyticsFailed);
       setAnalyticsLoading(false);
 
       return newAnalytics;
     } catch (error) {
       console.error('Error loading analytics:', error);
+      setAnalyticsError(true);
       setAnalyticsLoading(false);
       // Don't throw - return partial data
       return analytics;
@@ -196,6 +209,7 @@ export const AppProvider = ({ children }) => {
     // Loading states
     loading,
     analyticsLoading,
+    analyticsError,
 
     // Methods
     loadData,

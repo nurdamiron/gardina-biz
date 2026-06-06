@@ -32,6 +32,7 @@ const AdminDashboard = () => {
         analytics,
         loading,
         analyticsLoading,
+        analyticsError,
         loadData,
         loadAnalytics
     } = useApp();
@@ -252,6 +253,20 @@ const AdminDashboard = () => {
             </header>
 
             <main className="p-4 space-y-5 max-w-7xl mx-auto">
+                {analyticsError && (
+                    <div className="flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3">
+                        <Icon name="warning" className="text-amber-600 mt-0.5 shrink-0" />
+                        <div className="flex-1 min-w-0">
+                            <p className="text-sm text-amber-800">{t('adminDashboard.analyticsError')}</p>
+                        </div>
+                        <button
+                            onClick={refreshData}
+                            className="text-sm font-medium text-amber-700 hover:text-amber-900 shrink-0"
+                        >
+                            {t('adminDashboard.retry')}
+                        </button>
+                    </div>
+                )}
                 <OnboardingChecklist />
 
                 {/* ── Stats row ── compact white cards, left-accent border */}
