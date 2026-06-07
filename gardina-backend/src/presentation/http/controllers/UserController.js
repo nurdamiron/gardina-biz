@@ -166,6 +166,43 @@ export class UserController {
       // Update role or is_active separately (not in base update method)
       if (role !== undefined || isActive !== undefined) {
         const orgId = req.user.organizationId;
+
+        // Guard against locking the organization out of admin access. Look at
+        // the target's current state and whether this change strips admin.
+        const tgtRes = await pool.query(
+          'SELECT role, is_active FROM users WHERE id = $1 AND organization_id = $2',
+          [id, orgId]
+        );
+        const tgt = tgtRes.rows[0];
+        if (!tgt) return res.status(404).json({ success: false, error: 'User not found' });
+
+        const deactivating = isActive === false && tgt.is_active;
+        const demoting = role !== undefined && role !== 'admin' && tgt.role === 'admin';
+
+        // You cannot deactivate or demote yourself out of admin (you'd lock
+        // yourself out). The user reported being able to deactivate themselves.
+        if (id === req.user.id && (deactivating || demoting)) {
+          return res.status(400).json({
+            success: false,
+            error: 'Өзіңізді деактивациялай немесе әкімшіліктен шығара алмайсыз',
+          });
+        }
+
+        // The org must keep at least one active admin.
+        if (tgt.role === 'admin' && (deactivating || demoting)) {
+          const cnt = await pool.query(
+            `SELECT COUNT(*)::int AS n FROM users
+             WHERE organization_id = $1 AND role = 'admin' AND is_active = true AND id <> $2`,
+            [orgId, id]
+          );
+          if ((cnt.rows[0]?.n || 0) === 0) {
+            return res.status(400).json({
+              success: false,
+              error: 'Ұйымда кемінде бір белсенді әкімші болуы керек',
+            });
+          }
+        }
+
         if (role !== undefined) {
           await pool.query(
             'UPDATE users SET role = $1, updated_at = NOW() WHERE id = $2 AND organization_id = $3',

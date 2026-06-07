@@ -4,6 +4,7 @@ import api from '../../services/api';
 import BottomNav from '../../components/navigation/BottomNav';
 import Icon from '../../components/common/Icon';
 import { useI18n } from '../../contexts/I18nContext';
+import { useAuth } from '../../contexts/AuthContext';
 
 const ROLE_VALUES = ['designer', 'manager', 'sales', 'admin'];
 const ROLE_COLORS = {
@@ -18,6 +19,7 @@ const EMPTY_INVITE = { email: '', role: 'designer' };
 
 const AdminUsers = () => {
   const { t, lang } = useI18n();
+  const { user: currentUser } = useAuth();
   const navigate = useNavigate();
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -142,11 +144,19 @@ const AdminUsers = () => {
   };
 
   const handleToggleActive = async (u) => {
+    // You can't deactivate your own account — that would lock you out.
+    if (u.id === currentUser?.id && u.is_active) {
+      showToast(t('adminUsers.errors.cannotDeactivateSelf', 'Өзіңізді деактивациялай алмайсыз'), false);
+      return;
+    }
     try {
       await api.put(`/users/admin/${u.id}`, { isActive: !u.is_active });
       showToast(u.is_active ? t('adminUsers.toast.deactivated') : t('adminUsers.toast.activated'));
       load();
-    } catch { showToast(t('adminUsers.errors.generic'), false); }
+    } catch (e) {
+      // Surface the backend guard message (self / last-admin) instead of a generic error.
+      showToast(e.response?.data?.error || t('adminUsers.errors.generic'), false);
+    }
   };
 
   const handleDelete = async () => {
@@ -302,9 +312,11 @@ const AdminUsers = () => {
                         <button onClick={() => openPassword(u)} className="p-1.5 rounded-lg hover:bg-muted text-muted-foreground" title={lang === 'kz' ? 'Құпия сөзді өзгерту' : 'Сменить пароль'}>
                           <Icon name="lock" size={16} />
                         </button>
-                        <button onClick={() => handleToggleActive(u)} className={`p-1.5 rounded-lg ${u.is_active ? 'hover:bg-amber-50 text-amber-500' : 'hover:bg-green-50 text-green-500'}`}>
-                          <Icon name={u.is_active ? 'block' : 'check_circle'} size={16} />
-                        </button>
+                        {!(u.id === currentUser?.id && u.is_active) && (
+                          <button onClick={() => handleToggleActive(u)} className={`p-1.5 rounded-lg ${u.is_active ? 'hover:bg-amber-50 text-amber-500' : 'hover:bg-green-50 text-green-500'}`}>
+                            <Icon name={u.is_active ? 'block' : 'check_circle'} size={16} />
+                          </button>
+                        )}
                       </div>
                     </td>
                   </tr>
@@ -348,9 +360,11 @@ const AdminUsers = () => {
                   <button onClick={() => openPassword(u)} aria-label={lang === 'kz' ? 'Құпия сөзді өзгерту' : 'Сменить пароль'} className="size-10 flex items-center justify-center rounded-lg hover:bg-muted text-muted-foreground">
                     <Icon name="lock" size={18} />
                   </button>
-                  <button onClick={() => handleToggleActive(u)} aria-label={u.is_active ? (lang === 'kz' ? 'Өшіру' : 'Деактивировать') : (lang === 'kz' ? 'Қосу' : 'Активировать')} className={`size-10 flex items-center justify-center rounded-lg ${u.is_active ? 'hover:bg-amber-50 text-amber-500' : 'hover:bg-green-50 text-green-500'}`}>
-                    <Icon name={u.is_active ? 'block' : 'check_circle'} size={18} />
-                  </button>
+                  {!(u.id === currentUser?.id && u.is_active) && (
+                    <button onClick={() => handleToggleActive(u)} aria-label={u.is_active ? (lang === 'kz' ? 'Өшіру' : 'Деактивировать') : (lang === 'kz' ? 'Қосу' : 'Активировать')} className={`size-10 flex items-center justify-center rounded-lg ${u.is_active ? 'hover:bg-amber-50 text-amber-500' : 'hover:bg-green-50 text-green-500'}`}>
+                      <Icon name={u.is_active ? 'block' : 'check_circle'} size={18} />
+                    </button>
+                  )}
                 </div>
               </div>
             </div>
