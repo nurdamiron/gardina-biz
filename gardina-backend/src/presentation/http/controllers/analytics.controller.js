@@ -4,6 +4,18 @@ import { ClientAnalyticsService    } from '../../../application/services/analyti
 import { TeamAnalyticsService      } from '../../../application/services/analytics/TeamAnalyticsService.js';
 import { assertUserBelongsToOrganization } from '../../../application/services/analytics/analyticsHelpers.js';
 
+// Only admins and managers may view analytics for *other* users. Designers and
+// sales can see their own numbers only — earnings/performance are sensitive and
+// previously any designer could read a colleague's via ?designerId/?userId.
+const PRIVILEGED_VIEW_ROLES = new Set(['admin', 'manager']);
+function assertCanViewOther(reqUser, targetId) {
+  if (targetId && targetId !== reqUser.id && !PRIVILEGED_VIEW_ROLES.has(reqUser.role)) {
+    const err = new Error('Сізде басқа қызметкердің деректерін көру құқығы жоқ');
+    err.status = 403;
+    throw err;
+  }
+}
+
 const respondError = (res, error) => {
   const status = error.status || 500;
   const isProd = process.env.NODE_ENV === 'production';
@@ -22,8 +34,9 @@ export class AnalyticsController {
       const userRole = req.query.role || req.user.role;
       const targetUserId = req.query.userId || req.user.id;
 
-      // If admin/manager passes ?userId=… it must belong to the same tenant
+      // If admin/manager passes ?userId=… it must belong to the same tenant.
       if (req.query.userId && req.query.userId !== req.user.id) {
+        assertCanViewOther(req.user, req.query.userId);
         await assertUserBelongsToOrganization(req.query.userId, orgId);
       }
 
@@ -42,6 +55,7 @@ export class AnalyticsController {
       const targetDesignerId = req.query.designerId || req.user.id;
 
       if (req.query.designerId && req.query.designerId !== req.user.id) {
+        assertCanViewOther(req.user, req.query.designerId);
         await assertUserBelongsToOrganization(req.query.designerId, orgId);
       }
 
@@ -71,6 +85,7 @@ export class AnalyticsController {
       const targetDesignerId = req.query.designerId || req.user.id;
 
       if (req.query.designerId && req.query.designerId !== req.user.id) {
+        assertCanViewOther(req.user, req.query.designerId);
         await assertUserBelongsToOrganization(req.query.designerId, orgId);
       }
 
@@ -89,6 +104,7 @@ export class AnalyticsController {
       const userRole = req.query.role || req.user.role;
 
       if (req.query.userId && req.query.userId !== req.user.id) {
+        assertCanViewOther(req.user, req.query.userId);
         await assertUserBelongsToOrganization(req.query.userId, orgId);
       }
 

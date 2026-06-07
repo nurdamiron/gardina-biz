@@ -27,6 +27,12 @@ export class NotificationController {
 
   create = async (req, res) => {
     try {
+      // Only admins may create a notification for someone else. Everyone else
+      // can only create one for themselves — otherwise any user could spam a
+      // colleague's (or the admin's) notification feed via a chosen userId.
+      if (req.body.userId && req.body.userId !== req.user.id && req.user.role !== 'admin') {
+        return res.status(403).json({ success: false, error: 'Forbidden' });
+      }
       const data = { ...req.body, userId: req.body.userId || req.user.id };
       const notification = await this.notificationRepository.create(data);
       res.status(201).json({ success: true, data: notification });

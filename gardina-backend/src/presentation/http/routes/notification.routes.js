@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { NotificationController } from '../controllers/NotificationController.js';
-import { authenticate } from '../middleware/auth.middleware.js';
+import { authenticate, authorize } from '../middleware/auth.middleware.js';
 
 const router = Router();
 const controller = new NotificationController();
@@ -54,9 +54,9 @@ router.put('/preferences', controller.updatePreferences);
 router.post('/test-push', controller.sendTestPush);
 
 // ==================== ADMIN ROUTES ====================
-router.get('/admin/stats', controller.adminGetStats);
-router.get('/admin/all', controller.adminGetAll);
-router.post('/admin/broadcast', controller.adminBroadcast);
-router.delete('/admin/:id', controller.adminDelete);
+router.get('/admin/stats', authorize('admin'), controller.adminGetStats);
+router.get('/admin/all', authorize('admin'), controller.adminGetAll);
+router.post('/admin/broadcast', authorize('admin'), controller.adminBroadcast);
+router.delete('/admin/:id', authorize('admin'), controller.adminDelete);
 
 export default router;
