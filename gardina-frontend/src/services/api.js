@@ -175,6 +175,13 @@ export const authAPI = {
   refreshToken: (refreshToken) => api.post('/auth/refresh-token', { refreshToken }),
 };
 
+// Onboarding (checklist + demo/sample data cleanup)
+export const onboardingAPI = {
+  getChecklist: () => api.get('/onboarding/checklist'),
+  // Removes the seeded demo clients/products (is_sample = true) for the org.
+  purgeSampleData: () => api.delete('/onboarding/sample-data'),
+};
+
 // Billing / tariffs (authenticated)
 export const billingAPI = {
   status: () => api.get('/billing/status'),

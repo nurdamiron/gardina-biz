@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { clientsAPI } from '../services/api';
+import { clientsAPI, onboardingAPI } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
 import { useI18n } from '../contexts/I18nContext';
 import BottomNav from '../components/navigation/BottomNav';
@@ -27,6 +27,7 @@ const ManagerClientsList = () => {
   const [clients, setClients] = useState([]);
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
+  const [purging, setPurging] = useState(false);
 
   useEffect(() => {
     loadClients();
@@ -40,6 +41,21 @@ const ManagerClientsList = () => {
       setLoading(false);
     } catch (error) {
       setLoading(false);
+    }
+  };
+
+  // Registration seeds a couple of "(демо)" clients/products so the app isn't
+  // empty on first login. Let the admin wipe them in one click.
+  const hasDemoData = clients.some(c => c.is_sample);
+  const handlePurgeDemo = async () => {
+    setPurging(true);
+    try {
+      await onboardingAPI.purgeSampleData();
+      await loadClients();
+    } catch (e) {
+      // keep the banner; nothing destructive happened
+    } finally {
+      setPurging(false);
     }
   };
 
@@ -79,6 +95,28 @@ const ManagerClientsList = () => {
       </header>
 
       <main className="p-4 max-w-7xl mx-auto">
+        {/* Demo-data banner — only the admin can purge the seeded sample clients/products */}
+        {!loading && hasDemoData && user?.role === 'admin' && (
+          <div className="mb-4 bg-amber-50 border border-amber-200 rounded-xl p-4 flex items-start gap-3">
+            <Icon name="info" size={20} className="text-amber-600 shrink-0 mt-0.5" />
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold text-amber-800">
+                {t('clients.demo.title', 'Бұл демо-деректер')}
+              </p>
+              <p className="text-xs text-amber-700 mt-0.5">
+                {t('clients.demo.hint', 'Тіркелу кезінде үлгі ретінде қосылған. Нақты жұмысты бастар алдында өшіріңіз.')}
+              </p>
+            </div>
+            <button
+              onClick={handlePurgeDemo}
+              disabled={purging}
+              className="shrink-0 inline-flex items-center gap-1.5 h-9 px-3 bg-amber-600 text-white rounded-lg font-semibold text-xs hover:bg-amber-700 transition-colors disabled:opacity-50"
+            >
+              <Icon name="delete" size={15} />
+              {purging ? t('clients.demo.clearing', 'Тазалануда...') : t('clients.demo.clear', 'Демо-деректерді өшіру')}
+            </button>
+          </div>
+        )}
         {loading ? (
           <div className="text-center py-8">
             <div className="size-10 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto"></div>
@@ -104,6 +142,9 @@ const ManagerClientsList = () => {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
                       <p className="font-bold text-text-main truncate">{client.name}</p>
+                      {client.is_sample && (
+                        <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-700">{t('clients.demo.badge', 'демо')}</span>
+                      )}
                       {src && (
                         <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${src.cls}`}>{src.label}</span>
                       )}
