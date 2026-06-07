@@ -194,14 +194,13 @@ const OrdersList = ({ filterByManager = false }) => {
                         className="shrink-0 bg-muted border-none text-muted-foreground text-xs font-semibold rounded-full py-1.5 px-3 min-w-[120px]"
                     >
                         <option value="all">{t('orders.filters.allStatus')}</option>
-                        <option value="scheduled">{t('orders.status.scheduled')}</option>
-                        <option value="measured">{t('orders.status.measured')}</option>
+                        <option value="measurement_scheduled">{t('orders.status.scheduled')}</option>
+                        <option value="measurement_done">{t('orders.status.measured')}</option>
                         <option value="in_production">{t('orders.status.in_production')}</option>
-                        <option value="ready">{t('orders.status.ready')}</option>
-                        <option value="installing">{t('orders.status.installing')}</option>
+                        <option value="ready_for_installation">{t('orders.status.ready')}</option>
+                        <option value="installation_scheduled">{t('orders.status.installing')}</option>
                         <option value="completed">{t('orders.status.completed')}</option>
                         <option value="cancelled">{t('orders.status.cancelled')}</option>
-                        <option value="rejected">{t('orders.status.rejected')}</option>
                     </select>
 
                     {!filterByManager && (

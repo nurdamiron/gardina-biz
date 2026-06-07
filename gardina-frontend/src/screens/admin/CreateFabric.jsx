@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import catalogAPI, { uploadAPI } from '../../services/api';
+import { catalogAPI, uploadAPI } from '../../services/api';
 import Icon from '../../components/common/Icon';
 import { useI18n } from '../../contexts/I18nContext';
 
@@ -67,11 +67,16 @@ const CreateFabric = () => {
                 isAvailable: data.isAvailable
             });
 
-            // Load color variants
-            const colorsRes = await catalogAPI.getProductColors(id);
-            if (colorsRes.data.data && colorsRes.data.data.length > 0) {
-                // Just use color names/codes as simple strings
-                setColors(colorsRes.data.data.map(c => c.color_name || c.color_code));
+            // Load color variants (best-effort — a variant error must not abort
+            // the whole edit screen, otherwise the form bounces with "loadError").
+            try {
+                const colorsRes = await catalogAPI.getProductVariants(id);
+                const variants = colorsRes.data?.data || [];
+                if (variants.length > 0) {
+                    setColors(variants.map(v => v.variant_name || v.variant_code).filter(Boolean));
+                }
+            } catch (variantErr) {
+                console.error('Failed to load product variants:', variantErr);
             }
         } catch (error) {
             setNotification({ type: 'error', message: t('fabrics.form.loadError', 'Тауар мәліметін жүктеу мүмкін болмады') });

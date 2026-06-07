@@ -38,7 +38,7 @@ const AdminReports = () => {
     try {
       const [dash, trends, ranking, revenue, risks, products, funnel, kpis] = await Promise.allSettled([
         api.get(`/analytics/dashboard-stats?period=${period}`),
-        api.get(`/analytics/monthly-trends?months=6`),
+        api.get(`/analytics/monthly-trends?period=6`),
         api.get(`/analytics/designers-ranking?period=${period}`),
         api.get(`/analytics/revenue-breakdown?period=${period}`),
         api.get(`/analytics/payment-risks`),

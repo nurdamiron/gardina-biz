@@ -135,8 +135,8 @@ const DealDetail = () => {
             'lead':              { nextStatus: 'proposal_sent',     key: 'orders.statusFlow.start',          kz: 'Бастау',               icon: 'play_arrow' },
             'proposal_sent':     { nextStatus: 'proposal_accepted', key: 'orders.statusFlow.proposalAccept', kz: 'Ұсыныс қабылданды',    icon: 'check_circle' },
             'proposal_accepted': { nextStatus: 'contract_signed',   key: 'orders.statusFlow.signContract',   kz: 'Келісім-шарт жасау',   icon: 'contract_edit' },
-            'contract_signed':   { nextStatus: 'production',        key: 'orders.statusFlow.toProduction',   kz: 'Өндіріске жіберу',     icon: 'precision_manufacturing' },
-            'production':        { nextStatus: 'completed',         key: 'orders.statusFlow.complete',       kz: 'Аяқтау',               icon: 'done_all' },
+            'contract_signed':   { nextStatus: 'in_production',     key: 'orders.statusFlow.toProduction',   kz: 'Өндіріске жіберу',     icon: 'precision_manufacturing' },
+            'in_production':     { nextStatus: 'completed',         key: 'orders.statusFlow.complete',       kz: 'Аяқтау',               icon: 'done_all' },
             'completed': null,
             'cancelled': null
         };

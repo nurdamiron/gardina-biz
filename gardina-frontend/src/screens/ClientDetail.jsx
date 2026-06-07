@@ -21,6 +21,9 @@ const ClientDetail = () => {
     const [showEditModal, setShowEditModal] = useState(false);
     const [editForm, setEditForm] = useState({ name: '', phone: '', address: '', notes: '' });
     const [saving, setSaving] = useState(false);
+    const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+    const [deleting, setDeleting] = useState(false);
+    const [deleteError, setDeleteError] = useState(null);
 
     useEffect(() => {
         loadClientData();
@@ -62,6 +65,27 @@ const ClientDetail = () => {
             console.error(e);
         } finally {
             setSaving(false);
+        }
+    };
+
+    const handleDeleteClient = async () => {
+        setDeleting(true);
+        setDeleteError(null);
+        try {
+            const res = await clientsAPI.delete(id);
+            if (res.data?.success) {
+                navigate(user?.role === 'admin' ? '/admin/clients' : '/manager/clients');
+            } else {
+                setDeleteError(res.data?.error || t('clients.detail.deleteError', 'Клиентті жою мүмкін болмады'));
+            }
+        } catch (e) {
+            // Backend blocks deletion when the client has linked deals/measurements.
+            setDeleteError(
+                e.response?.data?.error ||
+                t('clients.detail.deleteErrorLinked', 'Жою мүмкін емес. Клиентте мәмілелер немесе өлшеулер бар болуы мүмкін.')
+            );
+        } finally {
+            setDeleting(false);
         }
     };
 
@@ -138,6 +162,14 @@ const ClientDetail = () => {
                                 </a>
                             )}
                         </div>
+
+                        <button
+                            onClick={() => { setDeleteError(null); setShowDeleteConfirm(true); }}
+                            className="flex items-center justify-center gap-2 p-2.5 rounded-xl text-red-500 hover:bg-red-50 transition-colors text-sm font-semibold border border-red-100"
+                        >
+                            <Icon name="delete" size={18} />
+                            {t('clients.detail.deleteClient', 'Клиентті жою')}
+                        </button>
                     </div>
                 </div>
 
@@ -238,6 +270,34 @@ const ClientDetail = () => {
                             <button onClick={handleSaveClient} disabled={saving || !editForm.name.trim()} className="flex-1 py-3 bg-primary text-white font-bold rounded-xl disabled:opacity-50">
                                 {saving ? t('common.saving') : t('common.save')}
                             </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Delete Client Confirmation Modal */}
+            {showDeleteConfirm && (
+                <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={() => !deleting && setShowDeleteConfirm(false)}>
+                    <div className="bg-card rounded-2xl p-6 w-full max-w-sm shadow-2xl" onClick={e => e.stopPropagation()}>
+                        <div className="text-center">
+                            <div className="size-14 rounded-full bg-red-100 flex items-center justify-center mx-auto mb-4">
+                                <Icon name="delete" size={24} className="text-red-500" />
+                            </div>
+                            <h3 className="text-lg font-bold mb-2">{t('clients.detail.deleteClient', 'Клиентті жою')}</h3>
+                            <p className="text-muted-foreground text-sm mb-4">
+                                <span className="font-semibold">{client?.name}</span> {t('clients.detail.deleteConfirm', 'клиентін жойғыңыз келе ме? Бұл әрекетті болдырмау мүмкін емес.')}
+                            </p>
+                            {deleteError && (
+                                <p className="text-red-500 text-sm font-medium mb-4 bg-red-50 rounded-lg p-2">{deleteError}</p>
+                            )}
+                            <div className="flex gap-3">
+                                <button onClick={() => setShowDeleteConfirm(false)} disabled={deleting} className="flex-1 py-3 bg-muted text-foreground font-bold rounded-xl disabled:opacity-50">
+                                    {t('common.cancel', 'Болдырмау')}
+                                </button>
+                                <button onClick={handleDeleteClient} disabled={deleting} className="flex-1 py-3 bg-red-500 text-white font-bold rounded-xl hover:bg-red-600 transition-colors disabled:opacity-50">
+                                    {deleting ? t('clients.detail.deleting', 'Жойылуда...') : t('clients.detail.delete', 'Жою')}
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
