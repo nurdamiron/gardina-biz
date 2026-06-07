@@ -342,6 +342,25 @@ async function runAutoMigrations() {
          ON push_subscriptions(device_token) WHERE device_token IS NOT NULL;`
     );
 
+    // products CHECK constraints were stale and rejected the unit/type values
+    // the product form actually sends (unit m/pcs/roll/pack/box/pair; type
+    // ready_made) -> every such create/edit 500'd. Widen them to a superset of
+    // legacy + app values so existing rows stay valid and new ones are accepted.
+    await client.query(`
+      DO $$
+      BEGIN
+        IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'products') THEN
+          ALTER TABLE products DROP CONSTRAINT IF EXISTS products_unit_check;
+          ALTER TABLE products ADD CONSTRAINT products_unit_check
+            CHECK (unit IN ('meter','piece','set','item','m','pcs','roll','pack','box','pair'));
+
+          ALTER TABLE products DROP CONSTRAINT IF EXISTS products_type_check;
+          ALTER TABLE products ADD CONSTRAINT products_type_check
+            CHECK (type IN ('fabric','curtain','accessory','service','blackout','tulle','cornice','jalousie','ready_made'));
+        END IF;
+      END $$;
+    `);
+
     await client.query('COMMIT');
     console.log('✅  Auto-migrations completed');
   } catch (err) {

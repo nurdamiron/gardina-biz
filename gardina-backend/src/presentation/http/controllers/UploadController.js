@@ -185,6 +185,37 @@ export class UploadController {
   }
 
   /**
+   * Serve (proxy) an uploaded media object from the private S3 bucket.
+   * Public on purpose — keys are random UUIDs and <img src> cannot send auth
+   * headers. Streams bytes through the backend so a private bucket still works.
+   */
+  async serveFile(req, res) {
+    try {
+      const key = req.params[0]; // everything after /file/
+      if (!key || key.includes('..')) {
+        return res.status(400).json({ success: false, error: 'Invalid key' });
+      }
+
+      const obj = await this.s3Service.getObject(key);
+
+      res.setHeader('Content-Type', obj.contentType);
+      if (obj.contentLength != null) res.setHeader('Content-Length', obj.contentLength);
+      res.setHeader('Cache-Control', 'public, max-age=86400, immutable');
+
+      obj.body.on('error', () => {
+        if (!res.headersSent) res.status(500).end();
+      });
+      obj.body.pipe(res);
+    } catch (error) {
+      const notFound = error?.name === 'NoSuchKey' || error?.$metadata?.httpStatusCode === 404;
+      if (!notFound) {
+        console.error(`[UploadController.serveFile] Failed for ${req.params[0]}: ${error.message}`);
+      }
+      res.status(notFound ? 404 : 500).json({ success: false, error: 'File not available' });
+    }
+  }
+
+  /**
    * Middleware for single file
    */
   single(fieldName = 'photo') {

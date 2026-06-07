@@ -1,4 +1,4 @@
-import { S3Client, PutObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3';
+import { S3Client, PutObjectCommand, DeleteObjectCommand, GetObjectCommand } from '@aws-sdk/client-s3';
 import { Upload } from '@aws-sdk/lib-storage';
 import dotenv from 'dotenv';
 import { v4 as uuidv4 } from 'uuid';
@@ -35,6 +35,27 @@ export class S3UploadService {
 
     this.bucket = process.env.AWS_S3_BUCKET;
     this.prefix = process.env.AWS_S3_PREFIX || '';
+    // Public base for served media. The S3 bucket is NOT publicly readable, so
+    // uploaded objects are exposed through the backend proxy (/api/upload/file/*)
+    // instead of a direct S3 URL (which returns 403 to anonymous <img> requests).
+    this.publicApiBase = (process.env.PUBLIC_API_URL || process.env.API_PUBLIC_URL || 'https://api.gardina.alashed.kz').replace(/\/+$/, '');
+  }
+
+  /**
+   * Stream an object back from S3 using the backend's own (valid) credentials.
+   * Lets <img src> work against a private bucket without a public bucket policy.
+   * @param {string} key - S3 object key (e.g. "uploads/products/.../uuid.png")
+   * @returns {Promise<{body: ReadableStream, contentType: string, contentLength: number}>}
+   */
+  async getObject(key) {
+    const res = await this.s3Client.send(
+      new GetObjectCommand({ Bucket: this.bucket, Key: key })
+    );
+    return {
+      body: res.Body,
+      contentType: res.ContentType || 'application/octet-stream',
+      contentLength: res.ContentLength,
+    };
   }
 
   /**
@@ -96,7 +117,9 @@ export class S3UploadService {
 
       await upload.done();
 
-      const url = `https://${this.bucket}.s3.${process.env.AWS_REGION}.amazonaws.com/${fileName}`;
+      // Serve through the backend proxy, not a direct S3 URL — the bucket is
+      // private (direct URLs 403 for anonymous <img> requests).
+      const url = `${this.publicApiBase}/api/upload/file/${fileName}`;
 
       return {
         url,

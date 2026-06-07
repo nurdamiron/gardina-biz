@@ -545,10 +545,24 @@ export class CatalogController {
       const fabric = await this.fabricRepository.create(fabricData);
       console.log('✅ Fabric created:', fabric.id, fabric.code);
 
-      // Create product variants (colors) if provided
+      // Create product variants (colors) if provided.
+      // The product form sends colors as { colorName, colorCode } (both set to
+      // the text the user typed). The variant repo requires a NOT-NULL
+      // variantCode, so translate the color shape into the variant shape —
+      // otherwise "create product with a color" 500'd on variant_code NOT NULL.
       if (colors && Array.isArray(colors) && colors.length > 0) {
-        console.log(`🎨 Creating ${colors.length} color variants...`);
-        const productVariants = await this.variantRepository.createVariants(fabric.id, colors);
+        const variantPayload = colors.map((c, i) => {
+          const code = c.variantCode ?? c.colorCode ?? c.colorName ?? `${fabric.code}-${i + 1}`;
+          return {
+            variantCode: String(code).slice(0, 50),
+            variantName: c.variantName ?? c.colorName ?? c.colorCode ?? null,
+            hexColor: c.hexColor ?? null,
+            stockQuantity: c.stockQuantity ?? 0,
+            imageUrl: c.imageUrl ?? null,
+          };
+        });
+        console.log(`🎨 Creating ${variantPayload.length} color variants...`);
+        const productVariants = await this.variantRepository.createVariants(fabric.id, variantPayload);
         fabric.variants = productVariants;
         console.log(`✅ Created ${productVariants.length} color variants`);
       }
