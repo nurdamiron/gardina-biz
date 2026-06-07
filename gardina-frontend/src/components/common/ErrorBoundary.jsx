@@ -1,4 +1,5 @@
 import React from 'react';
+import { isChunkLoadError, reloadOnceForChunkError } from '../../utils/chunkReload';
 
 /**
  * Catches render-time errors anywhere below it and shows a friendly fallback
@@ -8,14 +9,20 @@ import React from 'react';
 class ErrorBoundary extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { error: null };
+    this.state = { error: null, isChunkError: false };
   }
 
   static getDerivedStateFromError(error) {
-    return { error };
+    return { error, isChunkError: isChunkLoadError(error) };
   }
 
   componentDidCatch(error, info) {
+    // A failed lazy-chunk import after a deploy is not a real crash — the tab is
+    // running a stale build. Reload once to pull fresh, matching assets.
+    if (isChunkLoadError(error)) {
+      reloadOnceForChunkError();
+      return;
+    }
     // eslint-disable-next-line no-console
     console.error('[ErrorBoundary]', error, info?.componentStack);
     if (typeof window !== 'undefined' && typeof window.gardinaReportError === 'function') {
@@ -32,6 +39,17 @@ class ErrorBoundary extends React.Component {
   };
 
   render() {
+    // Stale build after a deploy — we're reloading; show a calm spinner, not
+    // the error card (a reload is already in flight from componentDidCatch).
+    if (this.state.isChunkError) {
+      return (
+        <div className="min-h-screen flex flex-col items-center justify-center bg-background-light p-6 gap-4">
+          <div className="size-10 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+          <p className="text-sm text-text-secondary">Жаңартылуда…</p>
+        </div>
+      );
+    }
+
     if (this.state.error) {
       return (
         <div className="min-h-screen flex items-center justify-center bg-background-light p-6">
