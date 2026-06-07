@@ -14,13 +14,22 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Package backend (no .env — live env is reused on the box)
+      - name: Package backend (live env reused on box; AWS keys refreshed from secrets)
         run: |
+          # The live container's baked-in env still carries a rotated/dead AWS
+          # access key, which makes every S3 photo upload 500. We keep the rest of
+          # the live env (DB/JWT/VAPID/region/bucket) and only refresh the two
+          # credential vars from the valid GitHub secrets.
+          cat > gardina-backend/.env.aws << EOF
+          AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          EOF
           tar --warning=no-file-changed -czf /tmp/gardina-backend-live.tar.gz \
             gardina-backend/src \
             gardina-backend/package.json \
             gardina-backend/package-lock.json \
-            gardina-backend/Dockerfile
+            gardina-backend/Dockerfile \
+            gardina-backend/.env.aws
 
       - name: Upload to S3
         env:
@@ -52,10 +61,11 @@ jobs:
             --document-name "AWS-RunShellScript" \
             --parameters "{\"commands\":[
               \"set -e\",
-              \"docker inspect gardina-backend --format '{{range .Config.Env}}{{println .}}{{end}}' > /tmp/gardina-live.env\",
+              \"docker inspect gardina-backend --format '{{range .Config.Env}}{{println .}}{{end}}' | grep -v '^AWS_ACCESS_KEY_ID=' | grep -v '^AWS_SECRET_ACCESS_KEY=' > /tmp/gardina-live.env\",
               \"rm -rf /tmp/gd-live && mkdir -p /tmp/gd-live && cd /tmp/gd-live\",
               \"wget -q -O b.tar.gz '${PRESIGN_URL}' && echo DL_OK\",
               \"tar -xzf b.tar.gz\",
+              \"cat /tmp/gd-live/gardina-backend/.env.aws >> /tmp/gardina-live.env && echo AWS_ENV_MERGED\",
               \"cd gardina-backend && docker build --no-cache --pull -t gardina-stack-backend:new . 2>&1 | tail -6\",
               \"docker tag gardina-stack-backend:latest gardina-stack-backend:rollback || true\",
               \"docker stop gardina-backend || true\",
@@ -65,7 +75,7 @@ jobs:
               \"sleep 6\",
               \"docker ps | grep gardina-backend\",
               \"echo HEALTH: ; curl -s -m 8 localhost:3004/health || echo HEALTH_FAIL\",
-              \"rm -f /tmp/gardina-live.env\",
+              \"rm -f /tmp/gardina-live.env /tmp/gd-live/gardina-backend/.env.aws\",
               \"echo DEPLOY_OK\"
             ]}" \
             --query 'Command.CommandId' --output text)

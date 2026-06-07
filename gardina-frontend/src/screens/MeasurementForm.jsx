@@ -453,7 +453,10 @@ const MeasurementForm = () => {
                   photoType: 'design',
                   folder: 'orders'
                 });
-                if (uploadRes.data.success) {
+                if (!uploadRes.data?.success) {
+                  throw new Error(uploadRes.data?.error || 'Фото жүктелмеді');
+                }
+                {
                   uploadedPhotos.push({
                     id: photo.id,
                     url: uploadRes.data.data.url,
@@ -478,6 +481,8 @@ const MeasurementForm = () => {
               }
             }
           } catch (err) {
+            // Surface upload failures instead of silently saving a photoless room.
+            throw err;
           }
         }
 
@@ -507,6 +512,13 @@ const MeasurementForm = () => {
 
       navigate(`/designer/measurements/${measurementId}`);
     } catch (error) {
+      const code = error?.response?.data?.code;
+      const apiMsg = error?.response?.data?.error || error?.message;
+      if (code === 'SUBSCRIPTION_READ_ONLY') {
+        showToast('Жазылым белсенді емес — тарифті жаңартыңыз', 'error');
+      } else {
+        showToast(apiMsg || 'Сақтау кезінде қате шықты. Қайталап көріңіз.', 'error');
+      }
     } finally {
       setSubmitting(false);
     }
