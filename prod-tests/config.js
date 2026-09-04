@@ -47,7 +47,7 @@ function resolveBaseUrl() {
   for (const c of candidates) {
     if (c && /^https?:\/\//.test(c)) return c.replace(/\/$/, '');
   }
-  return 'https://api.gardina.alashed.kz/api';
+  return 'https://api.gardina.kz/api';
 }
 
 export const config = {
@@ -73,7 +73,7 @@ export const config = {
   requestTimeoutMs: parseInt(process.env.REQUEST_TIMEOUT_MS || '15000', 10),
 
   // Origin used for CORS checks (must be an allowed origin to get ACAO back).
-  corsOrigin: process.env.CORS_ORIGIN || 'https://gardina.alashed.kz',
+  corsOrigin: process.env.CORS_ORIGIN || 'https://app.gardina.kz',
 };
 
 // The /health endpoint is mounted at the SERVER ROOT, not under /api.

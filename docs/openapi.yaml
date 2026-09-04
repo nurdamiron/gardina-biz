@@ -25,7 +25,7 @@ info:
     the global handler. Shapes vary by controller; this contract documents the common
     cases.
 servers:
-  - url: https://api.gardina.alashed.kz/api
+  - url: https://api.gardina.kz/api
     description: Production
   - url: http://localhost:5000/api
     description: Local development
@@ -65,7 +65,7 @@ paths:
         the current backend.
       security: []
       servers:
-        - url: https://api.gardina.alashed.kz
+        - url: https://api.gardina.kz
         - url: http://localhost:5000
       responses:
         '200':

@@ -38,7 +38,7 @@ export class S3UploadService {
     // Public base for served media. The S3 bucket is NOT publicly readable, so
     // uploaded objects are exposed through the backend proxy (/api/upload/file/*)
     // instead of a direct S3 URL (which returns 403 to anonymous <img> requests).
-    this.publicApiBase = (process.env.PUBLIC_API_URL || process.env.API_PUBLIC_URL || 'https://api.gardina.alashed.kz').replace(/\/+$/, '');
+    this.publicApiBase = (process.env.PUBLIC_API_URL || process.env.API_PUBLIC_URL || 'https://api.gardina.kz').replace(/\/+$/, '');
   }
 
   /**

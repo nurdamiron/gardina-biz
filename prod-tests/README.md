@@ -72,7 +72,7 @@ header checks, IDOR-style 404 probe) still run; account-dependent tests are
 ## Load test (k6, staging only)
 
 ```bash
-GARDINA_BASE_URL=https://staging-api.gardina.alashed.kz/api \
+GARDINA_BASE_URL=https://staging-api.gardina.kz/api \
 TEST_LOGIN=... TEST_PASSWORD=... TEST_ORG_SLUG=... \
 k6 run load/k6-smoke.js
 ```

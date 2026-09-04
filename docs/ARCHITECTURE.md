@@ -10,7 +10,7 @@ database serve every salon (tenant); each tenant's data is isolated by `organiza
   its own thin client over the same database / business domain.
 
 **API base path: `/api`** (no `/v1` prefix).
-- prod: `https://api.gardina.alashed.kz/api`
+- prod: `https://api.gardina.kz/api`
 - dev:  `http://localhost:5000/api`
 
 The full HTTP contract lives in [`openapi.yaml`](./openapi.yaml).

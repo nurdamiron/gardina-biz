@@ -113,4 +113,4 @@ jobs:
       - name: Health check
         run: |
           sleep 5
-          curl -fsS https://api.gardina.alashed.kz/health || echo "Health check skipped (no domain yet)"
+          curl -fsS https://api.gardina.kz/health || echo "Health check skipped (no domain yet)"

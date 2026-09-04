@@ -42,7 +42,6 @@ const allowedOrigins = [
   'https://gardina-web.vercel.app',
   'https://app.gardina.kz',
   'https://gardina.kz',
-  'https://gardina.alashed.kz',
   process.env.FRONTEND_URL,
 ].filter(Boolean);
 

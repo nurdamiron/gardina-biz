@@ -34,7 +34,7 @@ Every sensitive-API access needs a clear, specific reason or the app is rejected
 
 ## 2. App Transport Security (ATS)
 
-The backend API is HTTPS-only (`https://api.gardina.alashed.kz/api`), so **no
+The backend API is HTTPS-only (`https://api.gardina.kz/api`), so **no
 ATS exceptions are needed**. Do NOT add `NSAllowsArbitraryLoads`.
 
 Leave ATS at its secure default (preferred — simplest, no key required), i.e. do

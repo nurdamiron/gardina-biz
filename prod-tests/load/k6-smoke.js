@@ -9,12 +9,12 @@
 //  READ-ONLY (GET /health + authed GET /deals). It NEVER writes data.
 //
 //  Run:
-//    BASE_URL=https://staging-api.gardina.alashed.kz/api \
+//    BASE_URL=https://staging-api.gardina.kz/api \
 //    TEST_LOGIN=... TEST_PASSWORD=... TEST_ORG_SLUG=... \
 //    k6 run load/k6-smoke.js
 //
 //  Health-only (no account needed):
-//    BASE_URL=https://staging-api.gardina.alashed.kz/api k6 run load/k6-smoke.js
+//    BASE_URL=https://staging-api.gardina.kz/api k6 run load/k6-smoke.js
 // ============================================================================
 
 import http from 'k6/http';
@@ -22,7 +22,7 @@ import { check, sleep } from 'k6';
 import { Rate } from 'k6/metrics';
 
 // k6 has no Vite collision, so BASE_URL works here; GARDINA_BASE_URL also accepted.
-const BASE_URL = (__ENV.GARDINA_BASE_URL || __ENV.BASE_URL || 'https://api.gardina.alashed.kz/api').replace(/\/$/, '');
+const BASE_URL = (__ENV.GARDINA_BASE_URL || __ENV.BASE_URL || 'https://api.gardina.kz/api').replace(/\/$/, '');
 const ROOT_URL = BASE_URL.replace(/\/api$/, '');
 const TEST_LOGIN = __ENV.TEST_LOGIN || '';
 const TEST_PASSWORD = __ENV.TEST_PASSWORD || '';

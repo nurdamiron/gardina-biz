@@ -10,10 +10,10 @@ function normalizeApiBaseUrl(raw) {
   if (raw == null || String(raw).trim() === '') return fallback;
   let u = String(raw).trim().replace(/\/+$/, '');
   if (!u.endsWith('/api')) u = `${u}/api`;
-  // The production API lives at api.gardina.alashed.kz. The bare gardina.kz
-  // domain is not registered (NXDOMAIN), so rewrite any stale config pointing
-  // there — keeps prod working even if a Vercel env var is left outdated.
-  u = u.replace(/\/\/api\.gardina\.kz\b/, '//api.gardina.alashed.kz');
+  // The production API lives at api.gardina.kz. Rewrite any stale config still
+  // pointing at the old api.gardina.alashed.kz host so prod keeps working even
+  // if a Vercel env var is left outdated.
+  u = u.replace(/\/\/api\.gardina\.alashed\.kz\b/, '//api.gardina.kz');
   return u;
 }
 
@@ -30,7 +30,7 @@ export function getAxiosApiError(err, fallback = 'Қате орын алды') {
     if (d.message != null && String(d.message).trim()) return String(d.message).trim();
   }
   if (status === 404) {
-    return 'Сервер жолы табылмады (404). API мекенжайы /api деп аяқталуы керек (мысалы: https://api.gardina.alashed.kz/api).';
+    return 'Сервер жолы табылмады (404). API мекенжайы /api деп аяқталуы керек (мысалы: https://api.gardina.kz/api).';
   }
   if (!err.response) {
     return 'Желіге қосылу мүмкін емес. Интернет пен API мекенжайын тексеріңіз.';

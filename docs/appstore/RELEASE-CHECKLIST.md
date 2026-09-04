@@ -37,7 +37,7 @@ Choose ONE approach and document it in the repo:
 - [ ] Deployment target = iOS 17.0.
 - [ ] **App icon**: full set present in asset catalog including 1024×1024 marketing icon (no alpha, no transparency, no rounded corners — square, opaque).
 - [ ] **Launch screen**: storyboard or SwiftUI launch screen present (no static splash image-only fallback that Apple flags).
-- [ ] **ATS**: `NSAppTransportSecurity` left to default (HTTPS-only). No `NSAllowsArbitraryLoads`. API is HTTPS (`https://api.gardina.alashed.kz`) so no exceptions needed. See `INFO-PLIST-KEYS.md`.
+- [ ] **ATS**: `NSAppTransportSecurity` left to default (HTTPS-only). No `NSAllowsArbitraryLoads`. API is HTTPS (`https://api.gardina.kz`) so no exceptions needed. See `INFO-PLIST-KEYS.md`.
 - [ ] **App thinning / Bitcode**: Bitcode is deprecated — leave off. Ensure asset catalog enables app thinning (default). Ship via App Store Connect for on-demand slicing.
 - [ ] Build version & marketing version set (e.g. `1.0.0` / build `1`); increment build on every upload.
 - [ ] No debug-only code, no `print`/log of tokens, Sentry DSN points at prod, no localhost API base in Release config.

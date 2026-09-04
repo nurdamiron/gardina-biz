@@ -201,8 +201,8 @@ export class UploadController {
       res.setHeader('Content-Type', obj.contentType);
       if (obj.contentLength != null) res.setHeader('Content-Length', obj.contentLength);
       res.setHeader('Cache-Control', 'public, max-age=86400, immutable');
-      // The frontend (gardina.alashed.kz) embeds these images from a different
-      // origin (api.gardina.alashed.kz). Helmet's default CORP 'same-origin'
+      // The frontend (app.gardina.kz) embeds these images from a different
+      // origin (api.gardina.kz). Helmet's default CORP 'same-origin'
       // makes the browser refuse the cross-origin <img>, so override it here and
       // allow anonymous cross-origin reads (canvas/fetch) too.
       res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
