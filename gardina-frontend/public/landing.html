@@ -1266,154 +1266,161 @@
     applyLang(savedLang === 'ru' ? 'ru' : 'kz');
     const savedBilling = localStorage.getItem('gardina_billing');
     applyBilling(savedBilling === 'yearly' ? 'yearly' : 'monthly');
+
+    /* ------------------------------------------------------------------
+     * Phone demo (#app-flow).
+     * Deliberately dependency-free and in the main script: this used to live
+     * in the Motion module below, so a slow or blocked CDN — or simply
+     * prefers-reduced-motion — left the demo frozen on step 1 with steps 2
+     * and 3 unreachable. The crossfade is a plain CSS transition on
+     * .app-screen; Motion is only ever a bonus.
+     * ------------------------------------------------------------------ */
+    (function initAppFlow() {
+      const screens = [...document.querySelectorAll('.app-screen')];
+      const cards = [...document.querySelectorAll('.app-step')];
+      if (!screens.length || !cards.length) return;
+
+      const STEP_MS = 4000;
+      const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+      let step = 0;
+      let timer = null;
+      let inView = false;
+      let held = false; // pointer or keyboard focus is on the demo
+
+      function setStep(next) {
+        step = ((next % screens.length) + screens.length) % screens.length;
+        screens.forEach((el, i) => {
+          const active = i === step;
+          el.classList.toggle('is-active', active);
+          el.style.pointerEvents = active ? 'auto' : 'none';
+          el.setAttribute('aria-hidden', active ? 'false' : 'true');
+        });
+        cards.forEach((el, i) => {
+          const active = i === step;
+          el.classList.toggle('is-active', active);
+          el.setAttribute('aria-pressed', active ? 'true' : 'false');
+        });
+      }
+
+      function stop() {
+        if (timer) { clearInterval(timer); timer = null; }
+      }
+
+      function start() {
+        stop();
+        // Auto-advance is motion; honour the user's preference. The steps stay
+        // manually navigable either way, so no content is unreachable.
+        if (reduceMotion.matches || !inView || held || document.hidden) return;
+        timer = setInterval(() => setStep(step + 1), STEP_MS);
+      }
+
+      // Steps double as controls, so every screen is reachable by click and by
+      // keyboard even when nothing is animating.
+      cards.forEach((card, i) => {
+        card.setAttribute('role', 'button');
+        card.setAttribute('tabindex', '0');
+        card.addEventListener('click', () => { setStep(i); start(); });
+        card.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setStep(i); start(); }
+        });
+      });
+
+      const section = document.querySelector('#app-flow');
+      ['pointerenter', 'focusin'].forEach((ev) =>
+        section.addEventListener(ev, () => { held = true; stop(); }));
+      ['pointerleave', 'focusout'].forEach((ev) =>
+        section.addEventListener(ev, () => { held = false; start(); }));
+
+      document.addEventListener('visibilitychange', start);
+      reduceMotion.addEventListener('change', start);
+
+      new IntersectionObserver(([entry]) => {
+        inView = entry.isIntersecting;
+        start();
+      }, { threshold: 0.2 }).observe(section);
+
+      setStep(0);
+    })();
   </script>
 
-  <!-- Motion: Framer-тің командасының DOM-анімациясы (CDN) -->
-  <script type="module">
-    (async () => {
-      const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-      if (reduce) return;
+  <!-- Reveal animations. Deliberately dependency-free: this used to import
+       `motion` from esm.sh, which cost ~21 third-party requests and, when the
+       CDN was slow or blocked, took every animation on the page down with it.
+       Plain IntersectionObserver + CSS transitions now do the same job. The
+       hiding styles live behind the .js-anim class added below, so if this
+       script never runs the page simply renders fully visible. -->
+  <script>
+    (function initReveals() {
+      const reduce = window.matchMedia('(prefers-reduced-motion: reduce)');
+      if (reduce.matches) return;
 
-      let animate;
-      let stagger;
-      try {
-        const motion = await import('https://esm.sh/motion@12.23.26');
-        animate = motion.animate;
-        stagger = motion.stagger;
-      } catch (err) {
-        console.warn('Motion CDN жүктелмеді:', err);
-        return;
+      document.documentElement.classList.add('js-anim');
+
+      const mark = (els, cls) => els.forEach((el) => el && el.classList.add(cls || 'reveal'));
+      const show = (els, stepMs = 65, startMs = 0) => els.forEach((el, i) => {
+        if (!el) return;
+        el.style.transitionDelay = (startMs + i * stepMs) + 'ms';
+        el.classList.add('is-in');
+      });
+
+      function onceInView(target, cb) {
+        if (!target) return;
+        const io = new IntersectionObserver(([entry]) => {
+          if (!entry.isIntersecting) return;
+          io.disconnect();
+          cb();
+        }, { threshold: 0.14, rootMargin: '0px 0px -8% 0px' });
+        io.observe(target);
       }
 
-      const easing = [0.22, 1, 0.36, 1];
-
-      function observeStagger(sectionSelector, childSelector, startDelay = 0) {
-        const section = document.querySelector(sectionSelector);
-        if (!section) return;
-
-        let played = false;
-        const io = new IntersectionObserver(
-          ([entry]) => {
-            if (!entry.isIntersecting || played) return;
-            played = true;
-            io.disconnect();
-            const els = [...section.querySelectorAll(childSelector)];
-            if (!els.length) return;
-            animate(els, { opacity: [0, 1], y: [32, 0] }, {
-              delay: stagger(0.065, { startDelay }),
-              duration: 0.52,
-              easing,
-            });
-          },
-          { threshold: 0.14, rootMargin: '0px 0px -8% 0px' },
-        );
-        io.observe(section);
-      }
-
-      const logoChip = document.querySelector('.logo-wordmark-wrap');
-      if (logoChip) {
-        animate(logoChip, { opacity: [0, 1], scale: [0.94, 1] }, { duration: 0.45, easing });
-      }
-
+      // --- Hero: reveals on load, not on scroll ---
+      const logo = document.querySelector('.logo-wordmark-wrap');
       const heroBits = [...document.querySelectorAll('.hero-text > *')];
-      if (heroBits.length) {
-        animate(heroBits, { opacity: [0, 1], y: [36, 0] }, {
-          delay: stagger(0.08, { startDelay: 0.06 }),
-          duration: 0.52,
-          easing,
-        });
-      }
-
       const mockBox = document.querySelector('.hero-visual .hero-mock');
       const mockLines = [...document.querySelectorAll('.mock-line')];
-      if (mockBox) {
-        animate(mockBox, { opacity: [0, 1], scale: [0.96, 1] }, {
-          duration: 0.55,
-          delay: 0.28,
-          easing,
-        });
-      }
-      if (mockLines.length) {
-        animate(mockLines, { opacity: [0, 1], x: [-18, 0] }, {
-          delay: stagger(0.09, { startDelay: 0.52 }),
-          duration: 0.42,
-          easing,
-        });
-      }
 
-      observeStagger('#pain .pain-grid', '.pain-card', 0);
-      observeStagger('#app-flow .app-flow-steps', '.app-step', 0.05);
-      observeStagger('#features .features-grid', '.feature-card', 0.04);
-      observeStagger('#modules .modules-grid', '.module-card', 0);
-      observeStagger('#process .process-steps', '.process-step', 0.06);
+      if (logo) mark([logo], 'reveal-scale');
+      mark(heroBits);
+      if (mockBox) mark([mockBox], 'reveal-scale');
+      mark(mockLines, 'reveal-x');
+
+      requestAnimationFrame(() => {
+        if (logo) show([logo]);
+        show(heroBits, 80, 60);
+        if (mockBox) show([mockBox], 0, 280);
+        show(mockLines, 90, 520);
+      });
+
+      // --- Section grids: staggered on first scroll into view ---
+      [
+        ['#pain .pain-grid', '.pain-card', 0],
+        ['#app-flow .app-flow-steps', '.app-step', 50],
+        ['#features .features-grid', '.feature-card', 40],
+        ['#modules .modules-grid', '.module-card', 0],
+        ['#process .process-steps', '.process-step', 60],
+      ].forEach(([sectionSel, childSel, startMs]) => {
+        const section = document.querySelector(sectionSel);
+        if (!section) return;
+        const els = [...section.querySelectorAll(childSel)];
+        if (!els.length) return;
+        mark(els);
+        onceInView(section, () => show(els, 65, startMs));
+      });
 
       const appPhone = document.querySelector('.motion-app-phone');
       if (appPhone) {
-        animate(appPhone, { opacity: [0, 1], y: [20, 0], scale: [0.97, 1] }, {
-          duration: 0.55,
-          easing,
-        });
+        mark([appPhone], 'reveal-scale');
+        onceInView(appPhone, () => show([appPhone]));
       }
 
-      const appScreens = [...document.querySelectorAll('.app-screen')];
-      const appStepCards = [...document.querySelectorAll('.app-step')];
-      if (appScreens.length && appStepCards.length) {
-        let step = 0;
-        function setStep(nextStep) {
-          step = nextStep;
-          appScreens.forEach((el, idx) => {
-            const active = idx === step;
-            el.classList.toggle('is-active', active);
-            el.style.opacity = active ? '1' : '0';
-            el.style.transform = active ? 'translateX(0)' : 'translateX(22px)';
-            el.style.pointerEvents = active ? 'auto' : 'none';
-          });
-          appStepCards.forEach((el, idx) => el.classList.toggle('is-active', idx === step));
-          animate(appScreens[step], { opacity: [0, 1], x: [16, 0] }, { duration: 0.35, easing });
-        }
-        setStep(0);
-        setInterval(() => {
-          const next = (step + 1) % appScreens.length;
-          setStep(next);
-        }, 2500);
-      }
-
+      // --- Mini widgets inside the pain cards ---
+      const painSection = document.querySelector('#pain');
       const painUis = [...document.querySelectorAll('.motion-pain-ui')];
-      if (painUis.length) {
-        animate(painUis, { opacity: [0, 1], y: [16, 0] }, {
-          delay: stagger(0.08, { startDelay: 0.18 }),
-          duration: 0.42,
-          easing,
-        });
-      }
-
-      const painLines = [...document.querySelectorAll('.motion-pain-line')];
-      if (painLines.length) {
-        animate(painLines, { scaleX: [0.4, 1], opacity: [0.35, 1] }, {
-          duration: 1.15,
-          easing,
-          delay: stagger(0.06, { startDelay: 0.35 }),
-        });
-      }
-
-      const painPills = [...document.querySelectorAll('.motion-pain-pill')];
-      if (painPills.length) {
-        animate(painPills, { opacity: [0.65, 1, 0.65] }, {
-          duration: 2.2,
-          delay: stagger(0.12),
-          repeat: Infinity,
-          easing: 'ease-in-out',
-        });
-      }
-
-      const painProgress = document.querySelector('.motion-pain-progress');
-      if (painProgress) {
-        animate(painProgress, { width: ['22%', '70%'] }, {
-          duration: 1.1,
-          delay: 0.5,
-          easing,
-        });
-      }
+      mark(painUis);
+      onceInView(painSection, () => {
+        show(painUis, 80, 180);
+        painSection.classList.add('pain-in');
+      });
     })();
   </script>
 </body>
