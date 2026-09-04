@@ -9,9 +9,14 @@ services:
     image: nginx:alpine
     container_name: gardina-nginx
     restart: always
+    # Defaults publish on the host's 80/443. On a shared box where another web
+    # server (e.g. cPanel Apache/LiteSpeed) already owns those ports, set
+    # NGINX_HTTP_BIND / NGINX_HTTPS_BIND in ./.env to a loopback high port
+    # (e.g. 127.0.0.1:8080) and reverse-proxy the gardina.kz hostnames to it
+    # from the existing edge server. See docs/MIGRATION-gardina.kz.md.
     ports:
-      - "80:80"
-      - "443:443"
+      - "${NGINX_HTTP_BIND:-80}:80"
+      - "${NGINX_HTTPS_BIND:-443}:443"
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./nginx/conf.d:/etc/nginx/conf.d:ro
@@ -59,6 +64,31 @@ services:
       - gardina-network
 
   # ============================================
+  # POSTGRESQL - primary datastore (backend + bot)
+  # ============================================
+  # Migrated onto this host (pg_dump/pg_restore). To keep using an external
+  # managed DB instead, comment this service out and point DB_HOST at it.
+  postgres:
+    image: postgres:16-alpine
+    container_name: gardina-postgres
+    restart: always
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB:-gardina_shtory}
+      - POSTGRES_USER=${POSTGRES_USER:-postgres}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in ./.env}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    expose:
+      - "5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-gardina_shtory}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - gardina-network
+
+  # ============================================
   # BACKEND API - api.gardina.kz
   # ============================================
   backend:
@@ -72,8 +102,14 @@ services:
       - PORT=3001
     env_file:
       - ./gardina-backend/.env.production
+    volumes:
+      # Home for locally-stored uploads when UPLOAD_DRIVER=local (see runbook).
+      - gardina-uploads:/app/uploads
     expose:
       - "3001"
+    depends_on:
+      postgres:
+        condition: service_healthy
     networks:
       - gardina-network
 
@@ -102,6 +138,9 @@ services:
     restart: always
     env_file:
       - ./gardina-bot/.env
+    depends_on:
+      postgres:
+        condition: service_healthy
     networks:
       - gardina-network
 
@@ -111,3 +150,5 @@ networks:
 
 volumes:
   certbot-reload:
+  postgres-data:
+  gardina-uploads:
