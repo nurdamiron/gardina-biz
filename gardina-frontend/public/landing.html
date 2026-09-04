@@ -125,11 +125,57 @@
               Gardina · бүгінгі тапсырыстар
             </div>
             <div class="hero-mock-rows">
-              <div class="hero-mock-row mock-line"></div>
-              <div class="hero-mock-row short mock-line"></div>
-              <div class="hero-mock-row accent mock-line">Жаңа келісім · өлшем жоспарланды</div>
-              <div class="hero-mock-row mock-line"></div>
-              <div class="hero-mock-row short mock-line"></div>
+              <aside class="mock-nav" aria-hidden="true">
+                <span class="mock-new"><span class="material-symbols-outlined">add</span><span class="mock-new-text">Жаңа тапсырыс</span></span>
+                <span class="mock-nav-item is-active"><span class="material-symbols-outlined">groups</span><span class="mock-nav-text">Клиенттер</span></span>
+                <span class="mock-nav-item"><span class="material-symbols-outlined">receipt_long</span><span class="mock-nav-text">Тапсырыстар</span></span>
+                <span class="mock-nav-item"><span class="material-symbols-outlined">straighten</span><span class="mock-nav-text">Өлшем</span></span>
+                <span class="mock-nav-item"><span class="material-symbols-outlined">request_quote</span><span class="mock-nav-text">Ұсыныс</span></span>
+                <span class="mock-nav-item"><span class="material-symbols-outlined">payments</span><span class="mock-nav-text">Төлем</span></span>
+              </aside>
+
+              <div class="mock-main">
+                <div class="mock-kpis">
+                  <div class="mock-kpi mock-line">
+                    <span class="mock-kpi-value">18</span>
+                    <span class="mock-kpi-label">Белсенді тапсырыс</span>
+                  </div>
+                  <div class="mock-kpi mock-line">
+                    <span class="mock-kpi-value">6</span>
+                    <span class="mock-kpi-label">Бүгінгі өлшем</span>
+                  </div>
+                  <div class="mock-kpi mock-line">
+                    <span class="mock-kpi-value">2 450 000 ₸</span>
+                    <span class="mock-kpi-label">Осы айда</span>
+                  </div>
+                </div>
+
+                <div class="hero-mock-row accent mock-line">Жаңа келісім · өлшем жоспарланды</div>
+
+                <div class="mock-table">
+                  <div class="mock-tr mock-line">
+                    <span class="mock-avatar">АС</span>
+                    <span class="mock-name">Айгүл С.</span>
+                    <span class="mock-meta">4 терезе</span>
+                    <span class="mock-chip ok">Тігуде</span>
+                    <span class="mock-amount">420 000 ₸</span>
+                  </div>
+                  <div class="mock-tr mock-line">
+                    <span class="mock-avatar">МТ</span>
+                    <span class="mock-name">Мақсат Т.</span>
+                    <span class="mock-meta">2 терезе</span>
+                    <span class="mock-chip warn">Төлем күтуде</span>
+                    <span class="mock-amount">185 000 ₸</span>
+                  </div>
+                  <div class="mock-tr mock-line">
+                    <span class="mock-avatar">ДК</span>
+                    <span class="mock-name">Дана Қ.</span>
+                    <span class="mock-meta">6 терезе</span>
+                    <span class="mock-chip">Өлшем</span>
+                    <span class="mock-amount">96 000 ₸</span>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -745,7 +791,22 @@
           '#app-flow .app-step:nth-child(2) p': 'Өлшем, фото, ұсыныс бір тапсырыс ішінде қалады.',
           '#app-flow .app-step:nth-child(3) h3': 'Тігу, монтаж, төлем',
           '#app-flow .app-step:nth-child(3) p': 'Орындау кезеңдері мен төлем күйін командамен бірге бақылайсыз.',
-          '.hero-badge': 'Кез келген жерден ашылады · командаға ыңғайлы',
+          '.hero-badge': '<span class="material-symbols-outlined">cloud</span>Кез келген жерден ашылады · командаға ыңғайлы',
+          '.mock-new .mock-new-text': 'Жаңа тапсырыс',
+          '.mock-nav-item:nth-child(2) .mock-nav-text': 'Клиенттер',
+          '.mock-nav-item:nth-child(3) .mock-nav-text': 'Тапсырыстар',
+          '.mock-nav-item:nth-child(4) .mock-nav-text': 'Өлшем',
+          '.mock-nav-item:nth-child(5) .mock-nav-text': 'Ұсыныс',
+          '.mock-nav-item:nth-child(6) .mock-nav-text': 'Төлем',
+          '.mock-kpi:nth-child(1) .mock-kpi-label': 'Белсенді тапсырыс',
+          '.mock-kpi:nth-child(2) .mock-kpi-label': 'Бүгінгі өлшем',
+          '.mock-kpi:nth-child(3) .mock-kpi-label': 'Осы айда',
+          '.mock-tr:nth-child(1) .mock-meta': '4 терезе',
+          '.mock-tr:nth-child(2) .mock-meta': '2 терезе',
+          '.mock-tr:nth-child(3) .mock-meta': '6 терезе',
+          '.mock-tr:nth-child(1) .mock-chip': 'Тігуде',
+          '.mock-tr:nth-child(2) .mock-chip': 'Төлем күтуде',
+          '.mock-tr:nth-child(3) .mock-chip': 'Өлшем',
           '.hero h1': 'Перде бизнесіңізді<br><span>бір жүйеден басқарыңыз</span>',
           '.hero-description': 'Gardina — перде салоныңызға немесе ательеңізге арналған жұмыс құралы. Клиентпен жұмыс, ұсыныс, өлшем, тігу және төлем бойынша барлық мәлімет бір жерде көрінеді. Ештеңе жоғалмайды, бәрі ретімен тұрады.',
           '.hero-mock-top': '<div class="hero-mock-dots"><span></span><span></span><span></span></div>Gardina · бүгінгі тапсырыстар',
@@ -940,7 +1001,22 @@
           '#app-flow .app-step:nth-child(2) p': 'Замер, фото и предложение остаются внутри одного заказа.',
           '#app-flow .app-step:nth-child(3) h3': 'Пошив, монтаж, оплата',
           '#app-flow .app-step:nth-child(3) p': 'Контролируете этапы выполнения и статус оплаты вместе с командой.',
-          '.hero-badge': 'Открывается из любого места · удобно для команды',
+          '.hero-badge': '<span class="material-symbols-outlined">cloud</span>Открывается из любого места · удобно для команды',
+          '.mock-new .mock-new-text': 'Новый заказ',
+          '.mock-nav-item:nth-child(2) .mock-nav-text': 'Клиенты',
+          '.mock-nav-item:nth-child(3) .mock-nav-text': 'Заказы',
+          '.mock-nav-item:nth-child(4) .mock-nav-text': 'Замеры',
+          '.mock-nav-item:nth-child(5) .mock-nav-text': 'Предложения',
+          '.mock-nav-item:nth-child(6) .mock-nav-text': 'Оплаты',
+          '.mock-kpi:nth-child(1) .mock-kpi-label': 'Активных заказов',
+          '.mock-kpi:nth-child(2) .mock-kpi-label': 'Замеров сегодня',
+          '.mock-kpi:nth-child(3) .mock-kpi-label': 'В этом месяце',
+          '.mock-tr:nth-child(1) .mock-meta': '4 окна',
+          '.mock-tr:nth-child(2) .mock-meta': '2 окна',
+          '.mock-tr:nth-child(3) .mock-meta': '6 окон',
+          '.mock-tr:nth-child(1) .mock-chip': 'В пошиве',
+          '.mock-tr:nth-child(2) .mock-chip': 'Ждёт оплаты',
+          '.mock-tr:nth-child(3) .mock-chip': 'Замер',
           '.hero h1': 'Управляйте шторным бизнесом<br><span>в одной системе</span>',
           '.hero-description': 'Gardina — удобный инструмент для салона штор и ателье. Клиенты, замеры, предложения, пошив и оплаты собраны в одном месте. Ничего не теряется, все под контролем.',
           '.hero-mock-top': '<div class="hero-mock-dots"><span></span><span></span><span></span></div>Gardina · заказы на сегодня',
