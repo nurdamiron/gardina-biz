@@ -12,7 +12,8 @@
   --ink: #0a0f0d;
   --ink-2: #1c2421;
   --muted: #5c6b64;
-  --muted-2: #8a9791;
+  /* was #8a9791 — only 3.04:1 on white, below WCAG AA for body text */
+  --muted-2: #69776f;
 
   /* Lines */
   --line: rgba(10, 15, 13, 0.08);
@@ -303,9 +304,9 @@ nav a:hover {
 }
 
 .btn-outline-light {
-  background: rgba(255, 255, 255, 0.04);
+  background: rgba(255, 255, 255, 0.06);
   color: #fff;
-  border-color: rgba(255, 255, 255, 0.22);
+  border-color: rgba(255, 255, 255, 0.32);
 }
 
 .btn-outline-light:hover {
@@ -1838,15 +1839,31 @@ nav a:hover {
   border-radius: var(--r-md);
 }
 
+/* The default WhatsApp button is near-black, which disappears against the
+   dark CTA card. Use the WhatsApp green here, matching the floating button. */
+.cta .btn-whatsapp {
+  background: #25d366;
+  border-color: #1fb356;
+  color: #06301a;
+  box-shadow: 0 10px 26px -10px rgba(37, 211, 102, 0.55);
+}
+
+.cta .btn-whatsapp:hover {
+  background: #2ee06f;
+}
+
 /* ============ FOOTER ============ */
+/* The wordmark is dark green artwork — on the near-black footer it was
+   effectively invisible, and 40px was too small to read. Knock it out to
+   white at the same size it has in the header. */
 .footer-logo-img {
-  width: 40px;
-  height: 40px;
-  max-width: none;
+  width: 112px;
+  height: auto;
+  max-width: 100%;
   display: block;
   margin-bottom: 18px;
-  opacity: 0.95;
-  border-radius: var(--r-sm);
+  filter: brightness(0) invert(1);
+  opacity: 0.92;
 }
 
 footer {
@@ -1911,7 +1928,7 @@ footer {
   letter-spacing: 0.09em;
   text-transform: uppercase;
   margin-bottom: 18px;
-  color: rgba(255, 255, 255, 0.34);
+  color: rgba(255, 255, 255, 0.56);
 }
 
 .footer-links ul {
@@ -1922,7 +1939,8 @@ footer {
   margin-bottom: 11px;
 }
 
-.footer-links a {
+.footer-links a,
+.footer-links li > span {
   font-size: 0.875rem;
   font-weight: 400;
   color: rgba(255, 255, 255, 0.62);
@@ -1943,7 +1961,7 @@ footer {
   flex-wrap: wrap;
   gap: 16px;
   font-size: 0.78rem;
-  color: rgba(255, 255, 255, 0.34);
+  color: rgba(255, 255, 255, 0.56);
 }
 
 .footer-bottom a {
