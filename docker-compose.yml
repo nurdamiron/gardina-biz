@@ -1,73 +1,34 @@
-version: '3.8'
+# ============================================
+# GARDINA — isolated from other projects on the same host
+# ============================================
+# This box already runs a shared Caddy reverse proxy (another project's
+# docker-compose, ports 80/443) fronting other sites. Gardina does NOT run
+# its own nginx/certbot here — there's only one public IP, so a second
+# process can't bind 80/443, and running one would fight the shared Caddy's
+# own ACME challenges on those same ports.
+#
+# Isolation model (same pattern already used for the other apps on this
+# Caddy): every Gardina service — postgres, backend, frontend, bot — lives
+# on its own private `gardina-network`, own volumes, own containers. Nothing
+# here shares a database, a volume, or a filesystem with another project.
+# The ONLY coupling to the shared host is that `backend` and `frontend` also
+# join the pre-existing external network the shared Caddy runs on (set via
+# CADDY_NETWORK in ./.env), purely so Caddy's reverse_proxy can resolve
+# gardina-backend / gardina-frontend by container name. Caddy itself is
+# configured with a few lines in the shared Caddyfile — see
+# docs/MIGRATION-gardina.kz.md.
+#
+# The static landing page (gardina.kz / www.gardina.kz) needs no container at
+# all: it's served by the shared Caddy directly via file_server from
+# gardina-frontend/public, bind-mounted read-only into the Caddy container.
 
 services:
   # ============================================
-  # NGINX REVERSE PROXY
-  # Handles routing for all domains
-  # ============================================
-  nginx:
-    image: nginx:alpine
-    container_name: gardina-nginx
-    restart: always
-    # Defaults publish on the host's 80/443. On a shared box where another web
-    # server (e.g. cPanel Apache/LiteSpeed) already owns those ports, set
-    # NGINX_HTTP_BIND / NGINX_HTTPS_BIND in ./.env to a loopback high port
-    # (e.g. 127.0.0.1:8080) and reverse-proxy the gardina.kz hostnames to it
-    # from the existing edge server. See docs/MIGRATION-gardina.kz.md.
-    ports:
-      - "${NGINX_HTTP_BIND:-80}:80"
-      - "${NGINX_HTTPS_BIND:-443}:443"
-    volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./nginx/conf.d:/etc/nginx/conf.d:ro
-      - ./certbot/conf:/etc/letsencrypt:ro
-      - ./certbot/www:/var/www/certbot:ro
-      - ./gardina-frontend/public:/var/www/landing:ro
-    depends_on:
-      - backend
-      - frontend
-    networks:
-      - gardina-network
-
-  # ============================================
-  # CERTBOT - SSL Certificate Management
-  # ============================================
-  # certbot's --deploy-hook only runs inside the certbot container,
-  # which has no docker socket access, so it writes a timestamp to a
-  # shared volume. The nginx-reloader sidecar watches that volume and
-  # runs `nginx -s reload` whenever it changes. Without this, nginx
-  # serves the old cert until the next manual restart and clients see
-  # NET::ERR_CERT_DATE_INVALID after expiry.
-  certbot:
-    image: certbot/certbot
-    container_name: gardina-certbot
-    volumes:
-      - ./certbot/conf:/etc/letsencrypt
-      - ./certbot/www:/var/www/certbot
-      - certbot-reload:/var/lib/letsencrypt-reload
-    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew --deploy-hook \"date -u +%FT%TZ > /var/lib/letsencrypt-reload/trigger\"; sleep 12h & wait $${!}; done;'"
-    networks:
-      - gardina-network
-
-  nginx-reloader:
-    image: docker:cli
-    container_name: gardina-nginx-reloader
-    restart: always
-    depends_on:
-      - certbot
-      - nginx
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-      - certbot-reload:/var/lib/letsencrypt-reload
-    entrypoint: "/bin/sh -c 'touch /var/lib/letsencrypt-reload/trigger; last=$$(stat -c %Y /var/lib/letsencrypt-reload/trigger 2>/dev/null || echo 0); while sleep 60; do current=$$(stat -c %Y /var/lib/letsencrypt-reload/trigger 2>/dev/null || echo 0); if [ \"$$current\" != \"$$last\" ]; then echo \"[nginx-reloader] cert renewed, reloading nginx\"; docker exec gardina-nginx nginx -s reload || true; last=$$current; fi; done'"
-    networks:
-      - gardina-network
-
-  # ============================================
   # POSTGRESQL - primary datastore (backend + bot)
   # ============================================
-  # Migrated onto this host (pg_dump/pg_restore). To keep using an external
-  # managed DB instead, comment this service out and point DB_HOST at it.
+  # Own container, own volume, own network — not shared with any other
+  # project's database. To use an external managed DB instead, comment this
+  # out and point DB_HOST at it in gardina-backend/.env.production.
   postgres:
     image: postgres:16-alpine
     container_name: gardina-postgres
@@ -103,7 +64,7 @@ services:
     env_file:
       - ./gardina-backend/.env.production
     volumes:
-      # Home for locally-stored uploads when UPLOAD_DRIVER=local (see runbook).
+      # UPLOAD_DRIVER=local (default, no AWS account needed) writes here.
       - gardina-uploads:/app/uploads
     expose:
       - "3001"
@@ -112,6 +73,7 @@ services:
         condition: service_healthy
     networks:
       - gardina-network
+      - caddy-edge # so the shared Caddy can reverse_proxy to gardina-backend:3001
 
   # ============================================
   # FRONTEND APP - app.gardina.kz
@@ -128,6 +90,7 @@ services:
       - "80"
     networks:
       - gardina-network
+      - caddy-edge # so the shared Caddy can reverse_proxy to gardina-frontend:80
 
   # ============================================
   # TELEGRAM BOT - Gardina Academy
@@ -145,10 +108,17 @@ services:
       - gardina-network
 
 networks:
+  # Private to Gardina — postgres and the bot are never reachable from it.
   gardina-network:
     driver: bridge
+  # The shared host's existing reverse-proxy network. Must already exist
+  # (created by the other project's docker-compose) — set its real name in
+  # ./.env if it isn't called myshop_default. `external: true` means compose
+  # never creates or deletes it, only joins backend/frontend to it.
+  caddy-edge:
+    name: ${CADDY_NETWORK:-myshop_default}
+    external: true
 
 volumes:
-  certbot-reload:
   postgres-data:
   gardina-uploads:

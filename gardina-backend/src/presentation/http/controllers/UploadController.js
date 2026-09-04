@@ -1,5 +1,20 @@
 import multer from 'multer';
 import { S3UploadService } from '../../../infrastructure/services/S3UploadService.js';
+import { LocalUploadService } from '../../../infrastructure/services/LocalUploadService.js';
+
+/**
+ * Pick the storage driver from UPLOAD_DRIVER: 'local' (default — no AWS
+ * account required, writes to UPLOAD_DIR / the gardina-uploads Docker
+ * volume) or 's3' (requires AWS_REGION/AWS_ACCESS_KEY_ID/AWS_SECRET_ACCESS_KEY/AWS_S3_BUCKET).
+ */
+function createUploadService() {
+  const driver = (process.env.UPLOAD_DRIVER || 'local').toLowerCase();
+  if (driver === 's3') return new S3UploadService();
+  if (driver !== 'local') {
+    console.warn(`[UploadController] Unknown UPLOAD_DRIVER "${driver}", falling back to "local"`);
+  }
+  return new LocalUploadService();
+}
 
 // Allow-list for image uploads. SVG is intentionally rejected — it can carry
 // inline <script> and is an XSS vector when served back to a browser.
@@ -68,7 +83,7 @@ const upload = multer({
  */
 export class UploadController {
   constructor() {
-    this.s3Service = new S3UploadService();
+    this.uploadService = createUploadService();
     this.upload = upload;
   }
 
@@ -121,7 +136,7 @@ export class UploadController {
         contentType: realMime,
       };
 
-      const result = await this.s3Service.uploadFile(
+      const result = await this.uploadService.uploadFile(
         req.file.buffer,
         req.file.originalname,
         folder,
@@ -169,7 +184,7 @@ export class UploadController {
       const folder = req.body.folder || 'measurements';
 
       const filesWithMime = req.files.map(f => ({ ...f, contentType: detectImageMime(f.buffer) }));
-      const results = await this.s3Service.uploadMultiple(filesWithMime, folder);
+      const results = await this.uploadService.uploadMultiple(filesWithMime, folder);
 
       res.json({
         success: true,
@@ -185,9 +200,10 @@ export class UploadController {
   }
 
   /**
-   * Serve (proxy) an uploaded media object from the private S3 bucket.
-   * Public on purpose — keys are random UUIDs and <img src> cannot send auth
-   * headers. Streams bytes through the backend so a private bucket still works.
+   * Serve (proxy) an uploaded media object — from local disk or a private S3
+   * bucket, depending on UPLOAD_DRIVER. Public on purpose — keys are random
+   * UUIDs and <img src> cannot send auth headers. Streams bytes through the
+   * backend so a private bucket (or a disk with no direct web access) still works.
    */
   async serveFile(req, res) {
     try {
@@ -196,7 +212,7 @@ export class UploadController {
         return res.status(400).json({ success: false, error: 'Invalid key' });
       }
 
-      const obj = await this.s3Service.getObject(key);
+      const obj = await this.uploadService.getObject(key);
 
       res.setHeader('Content-Type', obj.contentType);
       if (obj.contentLength != null) res.setHeader('Content-Length', obj.contentLength);
@@ -213,7 +229,7 @@ export class UploadController {
       });
       obj.body.pipe(res);
     } catch (error) {
-      const notFound = error?.name === 'NoSuchKey' || error?.$metadata?.httpStatusCode === 404;
+      const notFound = error?.name === 'NoSuchKey' || error?.$metadata?.httpStatusCode === 404 || error?.code === 'ENOENT';
       if (!notFound) {
         console.error(`[UploadController.serveFile] Failed for ${req.params[0]}: ${error.message}`);
       }
