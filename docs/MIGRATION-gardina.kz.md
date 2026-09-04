@@ -1,5 +1,46 @@
 # Migration runbook — move Gardina to `gardina.kz` on the new server
 
+> **⚠️ Superseded by reality, 2026-09-04.** Everything below this notice was
+> written from a cPanel/WHM hosting welcome email and is **wrong** for the
+> actual box. The real server is plain **Ubuntu 20.04 + Docker**, with no
+> cPanel/WHM at all. Ports 80/443 are already owned by a **Caddy** container
+> (`myshop-caddy-1`, project dir `/opt/myshop/infra`) that fronts two other
+> live projects on this same host — `ortodok.kz` (codename `myshop`) and a
+> newly-migrated `slash` project. Section "Sections 3/4/9" (cPanel Include
+> Editor, AlmaLinux `dnf`, WHM AutoSSL) do not apply — ignore them.
+>
+> **What's actually done so far** (see chat log for full detail):
+> - `gardina.kz` + `www.gardina.kz` are now **live** as a Caddy site block
+>   appended to `/opt/myshop/infra/Caddyfile`, serving the static landing
+>   (`gardina-frontend/public`, copied to `/srv/gardina/landing` on the host,
+>   bind-mounted into the caddy container). Valid Let's Encrypt cert issued.
+> - Fixed a **pre-existing bug**: the caddy container's bind-mounted
+>   `Caddyfile` had gone stale (classic single-file-bind-mount gotcha —an
+>   atomic file replace orphans the mount) and hadn't picked up edits since
+>   before the `slash` blocks were added. `docker compose up -d caddy`
+>   (recreate, not `restart`) fixed it for both projects.
+> - Freed ~8GB of disk via `docker image prune -f` / `docker builder prune -f`
+>   (dangling images + build cache only — no tagged/rollback images touched).
+> - Repo cloned to `/opt/gardina` on the server (via `git bundle`, since the
+>   GitHub repo is **private** and the server has no GitHub credentials —
+>   `origin` is set to the real HTTPS URL for when a deploy key/PAT exists).
+> - `app.gardina.kz` / `api.gardina.kz` are **not up yet** — blocked on real
+>   secrets (AWS S3 keys, JWT secrets, bot token, DB access) only the account
+>   owner has; `S3UploadService` throws at import time without AWS creds, so
+>   the backend cannot even boot without them or a local-storage driver.
+>
+> The routing model for app/api here: gardina's `backend`/`frontend`
+> containers should join the **existing** `myshop_default` docker network
+> (external) so `myshop-caddy-1` can reverse-proxy to them by container name —
+> **do not** run gardina's own nginx/certbot on 80/443, Caddy already owns
+> those ports for the whole box. `docker-compose.yml` in this repo still
+> defines its own nginx/certbot; that needs trimming for this deployment.
+>
+> A rewritten version of this whole document (matching the real Caddy-based
+> setup) is a TODO — treat the above notice as the source of truth until then.
+
+---
+
 Target: run the whole Gardina stack (landing + CRM app + API + Telegram bot +
 PostgreSQL) on the shared server **`178.88.167.84`**, served at **`gardina.kz`**,
 **isolated** from the `ortodok.kz` / cPanel workload already on that box.
