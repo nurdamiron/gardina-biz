@@ -49,3 +49,11 @@ dev-dist/
 
 # iOS app lives in its own repository (gardina-ios)
 gardina-ios/
+
+# Env backups — the `.env` rule above does not match `.env.bak`, and these
+# carry DB passwords, JWT secrets and AWS keys.
+.env.*
+!.env.example
+
+# Playwright MCP scratch output (snapshots, screenshots, console logs)
+.playwright-mcp/
