@@ -38,7 +38,13 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Inter+Tight:wght@600;700;800&display=swap" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&display=swap" rel="stylesheet">
+  <!-- Icon font is subset to the glyphs this page actually renders: the full
+       Material Symbols variable font is 313 KB, this subset is under 8 KB.
+       Adding a new <span class="material-symbols-outlined">name</span>, or a
+       new CSS `content: "name"` ligature (see .price-features li::before),
+       means adding that name to icon_names below — otherwise it silently
+       renders as its own literal text instead of a glyph. -->
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&icon_names=arrow_forward,call,chat,check,check_circle,cloud,error,groups,login,payments,precision_manufacturing,priority_high,request_quote,rocket_launch,sell,shield_lock,straighten,verified&display=swap" rel="stylesheet">
 
   <link rel="stylesheet" href="/styles.css">
 
@@ -173,21 +179,6 @@
             Ештеңе жоғалмайды, бәрі ретімен тұрады.
           </p>
 
-          <div class="hero-stats">
-            <div class="stat">
-              <div class="stat-value">Клиенттер</div>
-              <div class="stat-label">Барлығы бір тізімде</div>
-            </div>
-            <div class="stat">
-              <div class="stat-value">Ұсыныс</div>
-              <div class="stat-label">Жіберу және бақылау</div>
-            </div>
-            <div class="stat">
-              <div class="stat-value">Бақылау</div>
-              <div class="stat-label">Күн сайын анық көрінеді</div>
-            </div>
-          </div>
-
           <div class="hero-buttons">
             <a href="https://app.gardina.kz/login" class="btn btn-primary">
               <span class="material-symbols-outlined">login</span>
@@ -196,10 +187,6 @@
             <a href="https://wa.me/77715373201?text=%D0%A1%D3%99%D0%BB%D0%B5%D0%BC!%20Gardina%20%D0%B1%D0%BE%D0%B9%D1%8B%D0%BD%D1%88%D0%B0%20%D0%BA%D0%B5%D2%A3%D0%B5%D1%81%20%D0%B0%D0%BB%D2%93%D1%8B%D0%BC%20%D0%BA%D0%B5%D0%BB%D0%B5%D0%B4%D1%96." class="btn btn-whatsapp" target="_blank" rel="noopener">
               <span class="material-symbols-outlined">chat</span>
               Демо сұрау
-            </a>
-            <a href="mailto:info@gardina.kz" class="btn btn-outline">
-              <span class="material-symbols-outlined">mail</span>
-              Хат жазу
             </a>
           </div>
         </div>
@@ -308,8 +295,8 @@
           <div class="feature-icon">
             <span class="material-symbols-outlined">groups</span>
           </div>
-          <h3>Клиенттер бір тізімде</h3>
-          <p>Кім қоңырау шалды, қай тапсырыс қай кезеңде — бәрі бір жерде. Ештеңе ұмытылмайды.</p>
+          <h3>Клиенттер мен тапсырыстар</h3>
+          <p>Кім қоңырау шалды, тапсырыс қай кезеңде — өтініштен орнатуға дейінгі жол толық көрінеді. Маңызды өзгеріс болса, хабарлама келеді.</p>
         </div>
 
         <div class="feature-card motion-card">
@@ -317,7 +304,7 @@
             <span class="material-symbols-outlined">straighten</span>
           </div>
           <h3>Өлшем мен фото</h3>
-          <p>Әр терезе, өлшем, түсірілген фото бір тапсырысқа бекітіледі. Дизайнер мен менеджер бір дерек көреді.</p>
+          <p>Бөлме, терезе өлшемдері, фото және ескертпелер тапсырысқа бекітіледі. Дизайнер мен менеджер бір дерек көреді.</p>
         </div>
 
         <div class="feature-card motion-card">
@@ -332,24 +319,24 @@
           <div class="feature-icon">
             <span class="material-symbols-outlined">precision_manufacturing</span>
           </div>
-          <h3>Өндіріс пен тігу</h3>
-          <p>Тапсырыс цехқа өтті ме, тігу бітті ме, орнатуға дайын ба — әр кезең бірден көрінеді.</p>
+          <h3>Мата, тігу, монтаж</h3>
+          <p>Қай мата таңдалды және қанша қажет; тапсырыс цехта ма, тігу бітті ме, орнатуға дайын ба — әр кезең көрінеді.</p>
         </div>
 
         <div class="feature-card motion-card">
           <div class="feature-icon">
             <span class="material-symbols-outlined">payments</span>
           </div>
-          <h3>Төлемдер анық</h3>
-          <p>Алдын ала төлем, қалғаны, төленбеген сома — көрініп тұрады. «Кім не төледі?» деген сұраққа жауап табу оңай.</p>
+          <h3>Төлемдер мен есеп</h3>
+          <p>Алдын ала төлем, қалғаны, төленбеген сома көрініп тұрады. Қысқа шолу не сатылғанын және қай тапсырыс кідіргенін көрсетеді.</p>
         </div>
 
         <div class="feature-card motion-card">
           <div class="feature-icon">
-            <span class="material-symbols-outlined">badge</span>
+            <span class="material-symbols-outlined">shield_lock</span>
           </div>
-          <h3>Қызметкерлерге ыңғайлы</h3>
-          <p>Дизайнер, менеджер, өндіріс — әркім өз жұмысына керек бөлікті көреді. Артық сұрақ азаяды.</p>
+          <h3>Рөлдер мен қауіпсіздік</h3>
+          <p>Әркім өз жұмысына керек бөлікті ғана көреді. Клиент пен тапсырыс мәліметі сенімді сақталады.</p>
         </div>
       </div>
     </div>
@@ -567,7 +554,7 @@
 
   <!-- Floating WhatsApp -->
   <a href="https://wa.me/77715373201?text=%D0%A1%D3%99%D0%BB%D0%B5%D0%BC!%20Gardina%20%D0%B1%D0%BE%D0%B9%D1%8B%D0%BD%D1%88%D0%B0%20%D0%BA%D0%B5%D2%A3%D0%B5%D1%81%20%D0%B0%D0%BB%D2%93%D1%8B%D0%BC%20%D0%BA%D0%B5%D0%BB%D0%B5%D0%B4%D1%96." class="whatsapp-float" target="_blank" rel="noopener" aria-label="WhatsApp арқылы жазу">
-    <span class="material-symbols-outlined">chat</span>
+    <svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/></svg>
   </a>
 
   <script>
@@ -763,15 +750,8 @@
           '.hero-badge': '<span class="material-symbols-outlined">cloud</span>Кез келген жерден ашылады · командаға ыңғайлы',
           '.hero h1': 'Перде бизнесіңізді<br><span>бір жүйеден басқарыңыз</span>',
           '.hero-description': 'Gardina — перде салоныңызға немесе ательеңізге арналған жұмыс құралы. Клиентпен жұмыс, ұсыныс, өлшем, тігу және төлем бойынша барлық мәлімет бір жерде көрінеді. Ештеңе жоғалмайды, бәрі ретімен тұрады.',
-          '.hero-stats .stat:nth-child(1) .stat-value': 'Клиенттер',
-          '.hero-stats .stat:nth-child(1) .stat-label': 'Барлығы бір тізімде',
-          '.hero-stats .stat:nth-child(2) .stat-value': 'Ұсыныс',
-          '.hero-stats .stat:nth-child(2) .stat-label': 'Жіберу және бақылау',
-          '.hero-stats .stat:nth-child(3) .stat-value': 'Бақылау',
-          '.hero-stats .stat:nth-child(3) .stat-label': 'Күн сайын анық көрінеді',
           '.hero-buttons .btn-primary': '<span class="material-symbols-outlined">login</span>Жүйеге кіру',
           '.hero-buttons .btn-whatsapp': '<span class="material-symbols-outlined">chat</span>Демо сұрау',
-          '.hero-buttons .btn-outline': '<span class="material-symbols-outlined">mail</span>Хат жазу',
           '#pain .section-badge': '<span class="material-symbols-outlined" style="font-size:18px;">priority_high</span>Нені шешеміз?',
           '#pain .section-subtitle': 'Көп салондарда бірдей: деректер әр жерде шашыраған, кім не істеп жатқаны бұлыңғыр, төлем мен мерзім ұмытылады. Төменде — қысқаша: не бұзылса, жүйе қалай реттейді.',
           '#pain .pain-card:nth-child(1) .pain-card-label': '<span class="material-symbols-outlined pain-label-icon" aria-hidden="true">error</span>Мәселе',
@@ -791,18 +771,18 @@
           '#pain .pain-card:nth-child(3) .pain-card-fix': '<span class="material-symbols-outlined pain-fix-icon" aria-hidden="true">arrow_forward</span><span>Төлем күйі анық көрсетіледі, қай клиентпен қайта байланысу керек екені бірден білінеді.</span>',
           '#features .section-badge': '<span class="material-symbols-outlined">verified</span>Неге Gardina?',
           '#features .section-subtitle': 'Барлығы қарапайым: тапсырысты бақылаңыз, жұмысты бөлісіңіз, клиентті күттірмеңіз.',
-          '#features .feature-card:nth-child(1) h3': 'Клиенттер бір тізімде',
-          '#features .feature-card:nth-child(1) p': 'Кім қоңырау шалды, қай тапсырыс қай кезеңде — бәрі бір жерде. Ештеңе ұмытылмайды.',
+          '#features .feature-card:nth-child(1) h3': 'Клиенттер мен тапсырыстар',
+          '#features .feature-card:nth-child(1) p': 'Кім қоңырау шалды, тапсырыс қай кезеңде — өтініштен орнатуға дейінгі жол толық көрінеді. Маңызды өзгеріс болса, хабарлама келеді.',
           '#features .feature-card:nth-child(2) h3': 'Өлшем мен фото',
-          '#features .feature-card:nth-child(2) p': 'Әр терезе, өлшем, түсірілген фото бір тапсырысқа бекітіледі. Дизайнер мен менеджер бір дерек көреді.',
+          '#features .feature-card:nth-child(2) p': 'Бөлме, терезе өлшемдері, фото және ескертпелер тапсырысқа бекітіледі. Дизайнер мен менеджер бір дерек көреді.',
           '#features .feature-card:nth-child(3) h3': 'Ұсыныс және келісім',
           '#features .feature-card:nth-child(3) p': 'Клиентке ұсыныс жібересіз, оның жауабын бірден көресіз. Кім қабылдады, кім ойлануда — анық.',
-          '#features .feature-card:nth-child(4) h3': 'Өндіріс пен тігу',
-          '#features .feature-card:nth-child(4) p': 'Тапсырыс цехқа өтті ме, тігу бітті ме, орнатуға дайын ба — әр кезең бірден көрінеді.',
-          '#features .feature-card:nth-child(5) h3': 'Төлемдер анық',
-          '#features .feature-card:nth-child(5) p': 'Алдын ала төлем, қалғаны, төленбеген сома — көрініп тұрады. «Кім не төледі?» деген сұраққа жауап табу оңай.',
-          '#features .feature-card:nth-child(6) h3': 'Қызметкерлерге ыңғайлы',
-          '#features .feature-card:nth-child(6) p': 'Дизайнер, менеджер, өндіріс — әркім өз жұмысына керек бөлікті көреді. Артық сұрақ азаяды.',
+          '#features .feature-card:nth-child(4) h3': 'Мата, тігу, монтаж',
+          '#features .feature-card:nth-child(4) p': 'Қай мата таңдалды және қанша қажет; тапсырыс цехта ма, тігу бітті ме, орнатуға дайын ба — әр кезең көрінеді.',
+          '#features .feature-card:nth-child(5) h3': 'Төлемдер мен есеп',
+          '#features .feature-card:nth-child(5) p': 'Алдын ала төлем, қалғаны, төленбеген сома көрініп тұрады. Қысқа шолу не сатылғанын және қай тапсырыс кідіргенін көрсетеді.',
+          '#features .feature-card:nth-child(6) h3': 'Рөлдер мен қауіпсіздік',
+          '#features .feature-card:nth-child(6) p': 'Әркім өз жұмысына керек бөлікті ғана көреді. Клиент пен тапсырыс мәліметі сенімді сақталады.',
           '#process .section-badge': '<span class="material-symbols-outlined">rocket_launch</span>Қалай бастайсыз',
           '#process .section-subtitle': 'Сізге түсінікті, қарапайым жолмен бастаймыз.',
           '#process .process-step:nth-child(1) h3': 'Кеңес',
@@ -901,15 +881,8 @@
           '.hero-badge': '<span class="material-symbols-outlined">cloud</span>Открывается из любого места · удобно для команды',
           '.hero h1': 'Управляйте шторным бизнесом<br><span>в одной системе</span>',
           '.hero-description': 'Gardina — удобный инструмент для салона штор и ателье. Клиенты, замеры, предложения, пошив и оплаты собраны в одном месте. Ничего не теряется, все под контролем.',
-          '.hero-stats .stat:nth-child(1) .stat-value': 'Клиенты',
-          '.hero-stats .stat:nth-child(1) .stat-label': 'Все в одном списке',
-          '.hero-stats .stat:nth-child(2) .stat-value': 'Предложение',
-          '.hero-stats .stat:nth-child(2) .stat-label': 'Отправка и контроль',
-          '.hero-stats .stat:nth-child(3) .stat-value': 'Контроль',
-          '.hero-stats .stat:nth-child(3) .stat-label': 'Понятно каждый день',
           '.hero-buttons .btn-primary': '<span class="material-symbols-outlined">login</span>Войти',
           '.hero-buttons .btn-whatsapp': '<span class="material-symbols-outlined">chat</span>Запросить демо',
-          '.hero-buttons .btn-outline': '<span class="material-symbols-outlined">mail</span>Написать',
           '#pain .section-badge': '<span class="material-symbols-outlined" style="font-size:18px;">priority_high</span>Что решаем?',
           '#pain .section-subtitle': 'Во многих салонах одно и то же: данные разбросаны, задачи теряются, оплаты и сроки забываются. Ниже — коротко, как это упорядочить.',
           '#pain .pain-card:nth-child(1) .pain-card-label': '<span class="material-symbols-outlined pain-label-icon" aria-hidden="true">error</span>Проблема',
@@ -929,18 +902,18 @@
           '#pain .pain-card:nth-child(3) .pain-card-fix': '<span class="material-symbols-outlined pain-fix-icon" aria-hidden="true">arrow_forward</span><span>Статус оплаты виден сразу, понятно с кем нужно связаться повторно.</span>',
           '#features .section-badge': '<span class="material-symbols-outlined">verified</span>Почему Gardina?',
           '#features .section-subtitle': 'Все просто: контролируйте заказы, распределяйте работу и не заставляйте клиента ждать.',
-          '#features .feature-card:nth-child(1) h3': 'Клиенты в одном списке',
-          '#features .feature-card:nth-child(1) p': 'Кто звонил, где заказ и что дальше — видно сразу, без хаоса.',
+          '#features .feature-card:nth-child(1) h3': 'Клиенты и заказы',
+          '#features .feature-card:nth-child(1) p': 'Кто звонил и где заказ — путь от заявки до установки виден целиком. О важных изменениях приходит уведомление.',
           '#features .feature-card:nth-child(2) h3': 'Замеры и фото',
-          '#features .feature-card:nth-child(2) p': 'Все замеры и фото закрепляются за заказом. Команда видит одну версию данных.',
+          '#features .feature-card:nth-child(2) p': 'Размеры комнат и окон, фото и заметки закреплены за заказом. Дизайнер и менеджер видят одну версию данных.',
           '#features .feature-card:nth-child(3) h3': 'Предложение и договор',
-          '#features .feature-card:nth-child(3) p': 'Отправляете предложение клиенту и сразу видите его реакцию.',
-          '#features .feature-card:nth-child(4) h3': 'Производство и пошив',
-          '#features .feature-card:nth-child(4) p': 'Этапы заказа видны: цех, пошив, готовность к установке.',
-          '#features .feature-card:nth-child(5) h3': 'Оплаты под контролем',
-          '#features .feature-card:nth-child(5) p': 'Предоплата, остаток и долги отображаются понятно и без ручного поиска.',
-          '#features .feature-card:nth-child(6) h3': 'Удобно для сотрудников',
-          '#features .feature-card:nth-child(6) p': 'Каждый сотрудник видит только нужную ему часть работы.',
+          '#features .feature-card:nth-child(3) p': 'Отправляете предложение клиенту и сразу видите его реакцию. Кто согласовал, кто думает — понятно.',
+          '#features .feature-card:nth-child(4) h3': 'Ткани, пошив, монтаж',
+          '#features .feature-card:nth-child(4) p': 'Какая ткань выбрана и сколько нужно; на каком этапе заказ — цех, пошив, готовность к установке.',
+          '#features .feature-card:nth-child(5) h3': 'Оплаты и отчёты',
+          '#features .feature-card:nth-child(5) p': 'Предоплата, остаток и долги на виду. Короткий обзор показывает, что продано и какой заказ задерживается.',
+          '#features .feature-card:nth-child(6) h3': 'Роли и безопасность',
+          '#features .feature-card:nth-child(6) p': 'Каждый сотрудник видит только свою часть работы. Данные клиентов и заказов надёжно защищены.',
           '#process .section-badge': '<span class="material-symbols-outlined">rocket_launch</span>Как начать',
           '#process .section-subtitle': 'Стартуем просто и понятно для вашей команды.',
           '#process .process-step:nth-child(1) h3': 'Консультация',
