@@ -9,6 +9,7 @@ const adminDashboard = {
     team: 'Команда',
     products: 'Продукты',
     clients: 'Клиенты',
+    leads: 'Заявки с сайта',
   },
   widgets: {
     paymentRisks: {

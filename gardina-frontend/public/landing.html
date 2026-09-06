@@ -207,66 +207,22 @@
           </div>
         </div>
 
-        <div class="hero-visual" aria-hidden="true">
-          <div class="hero-mock">
-            <div class="hero-mock-top">
-              <div class="hero-mock-dots"><span></span><span></span><span></span></div>
-              Gardina · бүгінгі тапсырыстар
-            </div>
-            <div class="hero-mock-rows">
-              <aside class="mock-nav" aria-hidden="true">
-                <span class="mock-new"><span class="material-symbols-outlined">add</span><span class="mock-new-text">Жаңа тапсырыс</span></span>
-                <span class="mock-nav-item is-active"><span class="material-symbols-outlined">groups</span><span class="mock-nav-text">Клиенттер</span></span>
-                <span class="mock-nav-item"><span class="material-symbols-outlined">receipt_long</span><span class="mock-nav-text">Тапсырыстар</span></span>
-                <span class="mock-nav-item"><span class="material-symbols-outlined">straighten</span><span class="mock-nav-text">Өлшем</span></span>
-                <span class="mock-nav-item"><span class="material-symbols-outlined">request_quote</span><span class="mock-nav-text">Ұсыныс</span></span>
-                <span class="mock-nav-item"><span class="material-symbols-outlined">payments</span><span class="mock-nav-text">Төлем</span></span>
-              </aside>
-
-              <div class="mock-main">
-                <div class="mock-kpis">
-                  <div class="mock-kpi mock-line">
-                    <span class="mock-kpi-value">18</span>
-                    <span class="mock-kpi-label">Белсенді тапсырыс</span>
-                  </div>
-                  <div class="mock-kpi mock-line">
-                    <span class="mock-kpi-value">6</span>
-                    <span class="mock-kpi-label">Бүгінгі өлшем</span>
-                  </div>
-                  <div class="mock-kpi mock-line">
-                    <span class="mock-kpi-value">2 450 000 ₸</span>
-                    <span class="mock-kpi-label">Осы айда</span>
-                  </div>
-                </div>
-
-                <div class="hero-mock-row accent mock-line">Жаңа келісім · өлшем жоспарланды</div>
-
-                <div class="mock-table">
-                  <div class="mock-tr mock-line">
-                    <span class="mock-avatar">АС</span>
-                    <span class="mock-name">Айгүл С.</span>
-                    <span class="mock-meta">4 терезе</span>
-                    <span class="mock-chip ok">Тігуде</span>
-                    <span class="mock-amount">420 000 ₸</span>
-                  </div>
-                  <div class="mock-tr mock-line">
-                    <span class="mock-avatar">МТ</span>
-                    <span class="mock-name">Мақсат Т.</span>
-                    <span class="mock-meta">2 терезе</span>
-                    <span class="mock-chip warn">Төлем күтуде</span>
-                    <span class="mock-amount">185 000 ₸</span>
-                  </div>
-                  <div class="mock-tr mock-line">
-                    <span class="mock-avatar">ДК</span>
-                    <span class="mock-name">Дана Қ.</span>
-                    <span class="mock-meta">6 терезе</span>
-                    <span class="mock-chip">Өлшем</span>
-                    <span class="mock-amount">96 000 ₸</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+        <div class="hero-visual">
+          <figure class="hero-shot">
+            <!-- The shot is a real capture of the admin overview, so it has to
+                 follow the language switcher; `data-shot` marks which file each
+                 candidate takes. The 560px media query must stay in step with
+                 the .hero-shot aspect-ratio override in styles.css. -->
+            <picture id="heroShot">
+              <source media="(max-width: 560px)" type="image/webp" data-shot="mobile-webp" srcset="/images/hero-app-mobile-kz.webp">
+              <source media="(max-width: 560px)" data-shot="mobile-png" srcset="/images/hero-app-mobile-kz.png">
+              <source type="image/webp" data-shot="desktop-webp" srcset="/images/hero-app-desktop-kz.webp">
+              <img class="hero-shot-img" data-shot="desktop-png" src="/images/hero-app-desktop-kz.png"
+                   width="912" height="880" decoding="async" fetchpriority="high"
+                   data-i18n-attr-alt="hero.shotAlt"
+                   alt="Gardina жүйесі: бүгінгі өлшемдер, тәуекелдегі ақша және түсім бір экранда">
+            </picture>
+          </figure>
         </div>
       </div>
     </div>
@@ -905,6 +861,7 @@
           'a11y.skip': 'Негізгі мазмұнға өту',
           'a11y.nav': 'Бөлімдер бойынша навигация',
           'a11y.menu': 'Мәзір',
+          'hero.shotAlt': 'Gardina жүйесі: бүгінгі өлшемдер, тәуекелдегі ақша және түсім бір экранда',
           'pain.title': 'Күнделікті қиындықтар түсінікті тілде',
           'features.title': 'Бизнесіңізге нақты пайда',
           'modules.title': 'Бір жерде не істей аласыз',
@@ -988,25 +945,8 @@
           '#app-flow .app-step:nth-child(3) h3': 'Тігу, монтаж, төлем',
           '#app-flow .app-step:nth-child(3) p': 'Орындау кезеңдері мен төлем күйін командамен бірге бақылайсыз.',
           '.hero-badge': '<span class="material-symbols-outlined">cloud</span>Кез келген жерден ашылады · командаға ыңғайлы',
-          '.mock-new .mock-new-text': 'Жаңа тапсырыс',
-          '.mock-nav-item:nth-child(2) .mock-nav-text': 'Клиенттер',
-          '.mock-nav-item:nth-child(3) .mock-nav-text': 'Тапсырыстар',
-          '.mock-nav-item:nth-child(4) .mock-nav-text': 'Өлшем',
-          '.mock-nav-item:nth-child(5) .mock-nav-text': 'Ұсыныс',
-          '.mock-nav-item:nth-child(6) .mock-nav-text': 'Төлем',
-          '.mock-kpi:nth-child(1) .mock-kpi-label': 'Белсенді тапсырыс',
-          '.mock-kpi:nth-child(2) .mock-kpi-label': 'Бүгінгі өлшем',
-          '.mock-kpi:nth-child(3) .mock-kpi-label': 'Осы айда',
-          '.mock-tr:nth-child(1) .mock-meta': '4 терезе',
-          '.mock-tr:nth-child(2) .mock-meta': '2 терезе',
-          '.mock-tr:nth-child(3) .mock-meta': '6 терезе',
-          '.mock-tr:nth-child(1) .mock-chip': 'Тігуде',
-          '.mock-tr:nth-child(2) .mock-chip': 'Төлем күтуде',
-          '.mock-tr:nth-child(3) .mock-chip': 'Өлшем',
           '.hero h1': 'Перде бизнесіңізді<br><span>бір жүйеден басқарыңыз</span>',
           '.hero-description': 'Gardina — перде салоныңызға немесе ательеңізге арналған жұмыс құралы. Клиентпен жұмыс, ұсыныс, өлшем, тігу және төлем бойынша барлық мәлімет бір жерде көрінеді. Ештеңе жоғалмайды, бәрі ретімен тұрады.',
-          '.hero-mock-top': '<div class="hero-mock-dots"><span></span><span></span><span></span></div>Gardina · бүгінгі тапсырыстар',
-          '.hero-mock-row.accent': 'Жаңа келісім · өлшем жоспарланды',
           '.hero-stats .stat:nth-child(1) .stat-value': 'Клиенттер',
           '.hero-stats .stat:nth-child(1) .stat-label': 'Барлығы бір тізімде',
           '.hero-stats .stat:nth-child(2) .stat-value': 'Ұсыныс',
@@ -1119,6 +1059,7 @@
           'a11y.skip': 'Перейти к содержимому',
           'a11y.nav': 'Навигация по разделам',
           'a11y.menu': 'Меню',
+          'hero.shotAlt': 'Система Gardina: сегодняшние замеры, деньги на риске и выручка на одном экране',
           'pain.title': 'Ежедневные сложности простыми словами',
           'features.title': 'Польза для бизнеса',
           'modules.title': 'Что можно делать в одном месте',
@@ -1202,25 +1143,8 @@
           '#app-flow .app-step:nth-child(3) h3': 'Пошив, монтаж, оплата',
           '#app-flow .app-step:nth-child(3) p': 'Контролируете этапы выполнения и статус оплаты вместе с командой.',
           '.hero-badge': '<span class="material-symbols-outlined">cloud</span>Открывается из любого места · удобно для команды',
-          '.mock-new .mock-new-text': 'Новый заказ',
-          '.mock-nav-item:nth-child(2) .mock-nav-text': 'Клиенты',
-          '.mock-nav-item:nth-child(3) .mock-nav-text': 'Заказы',
-          '.mock-nav-item:nth-child(4) .mock-nav-text': 'Замеры',
-          '.mock-nav-item:nth-child(5) .mock-nav-text': 'Предложения',
-          '.mock-nav-item:nth-child(6) .mock-nav-text': 'Оплаты',
-          '.mock-kpi:nth-child(1) .mock-kpi-label': 'Активных заказов',
-          '.mock-kpi:nth-child(2) .mock-kpi-label': 'Замеров сегодня',
-          '.mock-kpi:nth-child(3) .mock-kpi-label': 'В этом месяце',
-          '.mock-tr:nth-child(1) .mock-meta': '4 окна',
-          '.mock-tr:nth-child(2) .mock-meta': '2 окна',
-          '.mock-tr:nth-child(3) .mock-meta': '6 окон',
-          '.mock-tr:nth-child(1) .mock-chip': 'В пошиве',
-          '.mock-tr:nth-child(2) .mock-chip': 'Ждёт оплаты',
-          '.mock-tr:nth-child(3) .mock-chip': 'Замер',
           '.hero h1': 'Управляйте шторным бизнесом<br><span>в одной системе</span>',
           '.hero-description': 'Gardina — удобный инструмент для салона штор и ателье. Клиенты, замеры, предложения, пошив и оплаты собраны в одном месте. Ничего не теряется, все под контролем.',
-          '.hero-mock-top': '<div class="hero-mock-dots"><span></span><span></span><span></span></div>Gardina · заказы на сегодня',
-          '.hero-mock-row.accent': 'Новый договор · замер запланирован',
           '.hero-stats .stat:nth-child(1) .stat-value': 'Клиенты',
           '.hero-stats .stat:nth-child(1) .stat-label': 'Все в одном списке',
           '.hero-stats .stat:nth-child(2) .stat-value': 'Предложение',
@@ -1326,6 +1250,8 @@
     const billingButtons = [...document.querySelectorAll('.billing-btn')];
     const i18nNodes = [...document.querySelectorAll('[data-i18n]')];
     const ariaLabelNodes = [...document.querySelectorAll('[data-i18n-attr-label]')];
+    const altNodes = [...document.querySelectorAll('[data-i18n-attr-alt]')];
+    const heroShotNodes = [...document.querySelectorAll('#heroShot [data-shot]')];
     const pageTitle = document.querySelector('title');
     const metaDescription = document.querySelector('meta[name="description"]');
     const ogTitle = document.querySelector('meta[property="og:title"]');
@@ -1389,6 +1315,18 @@
       ariaLabelNodes.forEach((el) => {
         const key = el.getAttribute('data-i18n-attr-label');
         if (dict.ui[key]) el.setAttribute('aria-label', dict.ui[key]);
+      });
+
+      altNodes.forEach((el) => {
+        const key = el.getAttribute('data-i18n-attr-alt');
+        if (dict.ui[key]) el.setAttribute('alt', dict.ui[key]);
+      });
+
+      heroShotNodes.forEach((el) => {
+        const [device, format] = el.dataset.shot.split('-');
+        const src = `/images/hero-app-${device}-${lang}.${format}`;
+        if (el.tagName === 'IMG') el.src = src;
+        else el.srcset = src;
       });
 
       Object.entries(dict.selectors).forEach(([selector, value]) => setSelectorText(selector, value));
@@ -1529,19 +1467,16 @@
       // --- Hero: reveals on load, not on scroll ---
       const logo = document.querySelector('.logo-wordmark-wrap');
       const heroBits = [...document.querySelectorAll('.hero-text > *')];
-      const mockBox = document.querySelector('.hero-visual .hero-mock');
-      const mockLines = [...document.querySelectorAll('.mock-line')];
+      const shot = document.querySelector('.hero-visual .hero-shot');
 
       if (logo) mark([logo], 'reveal-scale');
       mark(heroBits);
-      if (mockBox) mark([mockBox], 'reveal-scale');
-      mark(mockLines, 'reveal-x');
+      if (shot) mark([shot], 'reveal-scale');
 
       requestAnimationFrame(() => {
         if (logo) show([logo]);
         show(heroBits, 80, 60);
-        if (mockBox) show([mockBox], 0, 280);
-        show(mockLines, 90, 520);
+        if (shot) show([shot], 0, 280);
       });
 
       // --- Section grids: staggered on first scroll into view ---

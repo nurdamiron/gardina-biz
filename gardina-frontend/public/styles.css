@@ -170,6 +170,10 @@ button:focus-visible {
     scroll-behavior: auto;
   }
 
+  .hero-shot-img {
+    animation: none;
+  }
+
   .js-anim .reveal,
   .js-anim .reveal-scale,
   .js-anim .reveal-x,
@@ -902,252 +906,46 @@ body.nav-open .whatsapp-float {
   pointer-events: none;
 }
 
-.hero-mock {
+/* ---- Hero product shot ----
+   A real screenshot of the admin overview, cropped to roughly half the app
+   width so the UI renders near 1:1 instead of being shrunk to illegibility.
+   The frame is shorter than the image, so the picture can drift upward inside
+   it, and the bottom dissolves into the page instead of ending on a hard edge. */
+.hero-shot {
   position: relative;
   z-index: 1;
   width: 100%;
   max-width: 920px;
-  padding: 0;
+  margin: 0;
+  aspect-ratio: 912 / 560;
   overflow: hidden;
   background: var(--surface);
   border: 1px solid var(--line-2);
   border-radius: var(--r-xl);
-  box-shadow:
-    0 40px 90px -30px rgba(10, 15, 13, 0.28),
-    0 12px 28px -12px rgba(10, 15, 13, 0.12);
+
+  /* How far the image can travel: (image height - frame height) / image height.
+     912x880 image in a 912x560 frame → 320/880. */
+  --shot-travel: -36.4%;
+
+  /* The fade must cover the frame's own border and corners too, so it lives on
+     the frame rather than on the <img>. mask-origin defaults to border-box. */
+  -webkit-mask-image: linear-gradient(to bottom, #000 52%, rgba(0, 0, 0, 0.55) 76%, transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 52%, rgba(0, 0, 0, 0.55) 76%, transparent 100%);
 }
 
-.hero-mock-top {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 0;
-  padding: 12px 18px;
-  border-bottom: 1px solid var(--line);
-  background: var(--canvas);
-  font-size: 0.8125rem;
-  font-weight: 500;
-  color: var(--muted);
-}
-
-.hero-mock-dots {
-  display: flex;
-  gap: 6px;
-}
-
-.hero-mock-dots span {
-  width: 9px;
-  height: 9px;
-  border-radius: 50%;
-  background: var(--line-2);
-}
-
-.hero-mock-dots span:nth-child(1),
-.hero-mock-dots span:nth-child(2),
-.hero-mock-dots span:nth-child(3) {
-  background: rgba(10, 15, 13, 0.13);
-}
-
-/* The mock is a small, believable slice of the actual app: sidebar, KPI row,
-   highlighted event, and an orders table. */
-.hero-mock-rows {
-  display: grid;
-  grid-template-columns: 186px 1fr;
-  align-items: stretch;
-  gap: 0;
-  padding: 0;
-  text-align: left;
-}
-
-.mock-nav {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  padding: 16px 12px;
-  border-right: 1px solid var(--line);
-  background: var(--canvas);
-}
-
-.mock-new {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  margin-bottom: 12px;
-  padding: 9px 10px;
-  border-radius: var(--r-sm);
-  background: var(--accent);
-  color: #fff;
-  font-size: 0.8125rem;
-  font-weight: 600;
-  letter-spacing: -0.01em;
-  box-shadow: var(--shadow-accent);
-}
-
-.mock-new .material-symbols-outlined {
-  font-size: 17px;
-}
-
-.mock-nav-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 8px 10px;
-  border-radius: var(--r-sm);
-  font-size: 0.8125rem;
-  font-weight: 500;
-  color: var(--muted);
-}
-
-.mock-nav-item .material-symbols-outlined {
-  font-size: 18px;
-  color: var(--muted-2);
-}
-
-.mock-nav-item.is-active {
-  background: var(--surface);
-  color: var(--ink);
-  font-weight: 600;
-  box-shadow: var(--shadow-xs);
-}
-
-.mock-nav-item.is-active .material-symbols-outlined {
-  color: var(--accent);
-}
-
-.mock-main {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-  padding: 18px 20px 22px;
-  min-width: 0;
-}
-
-.mock-kpis {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
-}
-
-.mock-kpi {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  padding: 12px 14px;
-  border: 1px solid var(--line);
-  border-radius: var(--r-md);
-  background: var(--surface);
-}
-
-.mock-kpi-value {
-  font-family: var(--font-display);
-  font-size: 1.0625rem;
-  font-weight: 700;
-  letter-spacing: -0.03em;
-  color: var(--ink);
-  white-space: nowrap;
-}
-
-.mock-kpi-label {
-  font-size: 0.6875rem;
-  color: var(--muted-2);
-}
-
-.mock-table {
-  display: flex;
-  flex-direction: column;
-  border: 1px solid var(--line);
-  border-radius: var(--r-md);
-  overflow: hidden;
-}
-
-.mock-tr {
-  display: grid;
-  grid-template-columns: 26px 1fr auto auto auto;
-  align-items: center;
-  gap: 10px;
-  padding: 11px 14px;
-  border-top: 1px solid var(--line);
-  background: var(--surface);
-}
-
-.mock-tr:first-child {
-  border-top: none;
-}
-
-.mock-avatar {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 26px;
-  height: 26px;
-  border-radius: 50%;
-  background: var(--accent-soft);
-  border: 1px solid var(--accent-line);
-  font-size: 0.625rem;
-  font-weight: 700;
-  color: var(--accent);
-}
-
-.mock-name {
-  font-size: 0.8125rem;
-  font-weight: 600;
-  color: var(--ink);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.mock-meta {
-  font-size: 0.75rem;
-  color: var(--muted-2);
-  white-space: nowrap;
-}
-
-.mock-chip {
-  font-size: 0.6875rem;
-  font-weight: 600;
-  padding: 3px 9px;
-  border-radius: var(--r-full);
-  white-space: nowrap;
-  color: var(--muted);
-  background: var(--canvas-2);
-  border: 1px solid var(--line);
-}
-
-.mock-chip.ok {
-  color: var(--accent);
-  background: var(--accent-soft);
-  border-color: var(--accent-line);
-}
-
-.mock-chip.warn {
-  color: var(--warn);
-  background: rgba(180, 83, 9, 0.08);
-  border-color: rgba(180, 83, 9, 0.2);
-}
-
-.mock-amount {
-  font-size: 0.8125rem;
-  font-weight: 600;
-  letter-spacing: -0.02em;
-  color: var(--ink);
-  white-space: nowrap;
-}
-
-.hero-mock-row.accent {
+.hero-shot-img {
+  display: block;
+  width: 100%;
   height: auto;
-  min-height: 48px;
-  padding: 14px 16px;
-  display: flex;
-  align-items: center;
-  font-size: 0.875rem;
-  font-weight: 600;
-  letter-spacing: -0.01em;
-  color: var(--accent-strong);
-  background: var(--accent-soft);
-  border: 1px solid var(--accent-line);
-  border-radius: var(--r-md);
-  box-shadow: none;
+  will-change: transform;
+  animation: heroShotPan 26s var(--ease) infinite;
+}
+
+/* Holds at the top, drifts down to the widgets below the fold, holds, returns. */
+@keyframes heroShotPan {
+  0%, 14%   { transform: translateY(0); }
+  48%, 62%  { transform: translateY(var(--shot-travel)); }
+  100%      { transform: translateY(0); }
 }
 
 /* ============ SHARED SECTION HEADERS ============ */
@@ -2540,44 +2338,6 @@ footer {
     justify-content: center;
   }
 
-  /* mock: drop the sidebar, keep the data that carries the point */
-  .hero-mock-rows {
-    grid-template-columns: 1fr;
-    padding: 0;
-    gap: 0;
-  }
-
-  .mock-nav {
-    display: none;
-  }
-
-  .mock-main {
-    padding: 14px;
-    gap: 11px;
-  }
-
-  .mock-kpis {
-    gap: 8px;
-  }
-
-  .mock-kpi {
-    padding: 10px;
-  }
-
-  .mock-kpi-value {
-    font-size: 0.9375rem;
-  }
-
-  .mock-tr {
-    grid-template-columns: 24px 1fr auto auto;
-    gap: 8px;
-    padding: 10px 12px;
-  }
-
-  .mock-meta {
-    display: none;
-  }
-
   .section-header {
     margin-bottom: 36px;
   }
@@ -2672,6 +2432,15 @@ footer {
 }
 
 @media (max-width: 560px) {
+  /* The <picture> swaps to the phone capture here, and its aspect and travel
+     both differ. max-width keeps a 390px-wide capture from being blown up:
+     above it the desktop shot scales down instead, which stays sharp. */
+  .hero-shot {
+    aspect-ratio: 390 / 470;
+    --shot-travel: -44.7%;
+    max-width: 420px;
+  }
+
   .container {
     padding: 0 14px;
   }
@@ -2691,35 +2460,8 @@ footer {
     flex: 1 1 auto;
   }
 
-  .hero-mock {
+  .hero-shot {
     border-radius: var(--r-lg);
-  }
-
-  .hero-mock-top {
-    padding: 10px 14px;
-    font-size: 0.75rem;
-  }
-
-  .mock-kpis {
-    grid-template-columns: repeat(3, 1fr);
-  }
-
-  .mock-kpi-label {
-    font-size: 0.625rem;
-  }
-
-  .mock-tr {
-    grid-template-columns: 24px 1fr auto;
-  }
-
-  .mock-amount {
-    display: none;
-  }
-
-  .hero-mock-row.accent {
-    min-height: 42px;
-    font-size: 0.8125rem;
-    padding: 12px 14px;
   }
 
   .section-title {

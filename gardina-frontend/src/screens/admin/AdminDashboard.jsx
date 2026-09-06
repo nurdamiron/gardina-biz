@@ -250,7 +250,7 @@ const AdminDashboard = () => {
                             activeTab === 'leads' ? 'bg-primary text-white' : 'bg-muted text-muted-foreground hover:bg-muted'
                         }`}
                     >
-                        Заявки с сайта
+                        {t('adminDashboard.tabs.leads')}
                         {leads.filter((l) => l.status === 'new').length > 0 && activeTab !== 'leads' && (
                             <span className="absolute -top-1 -right-1 size-4 bg-red-500 text-white text-[10px] font-black rounded-full flex items-center justify-center">
                                 {leads.filter((l) => l.status === 'new').length}

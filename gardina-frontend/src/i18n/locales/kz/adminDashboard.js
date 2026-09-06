@@ -4,11 +4,12 @@ const adminDashboard = {
   retry: 'Қайталау',
   tabs: {
     overview: 'Жалпы',
-    timeline: 'Timeline',
+    timeline: 'Таймлайн',
     finance: 'Қаржы',
     team: 'Команда',
     products: 'Продукттар',
     clients: 'Клиенттер',
+    leads: 'Сайттан өтінім',
   },
   widgets: {
     paymentRisks: {
