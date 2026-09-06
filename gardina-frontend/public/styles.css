@@ -1479,47 +1479,80 @@ body.nav-open .whatsapp-float {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 16px;
-  margin-top: 8px;
+  /* Room above the cards for the step circles to straddle their top edge. */
+  margin-top: 34px;
+  padding-top: 22px;
   position: relative;
 }
 
+/* The connecting path — a gradient rather than a flat hairline, so the row
+   reads as a route that gets more definite as it goes, not just a rule.
+   left/right at 12.5% line up with each circle's center: four equal columns
+   center their content at 1/8, 3/8, 5/8, 7/8 of the row. */
 .process-steps::before {
   content: "";
   position: absolute;
-  top: 44px;
-  left: 8%;
-  right: 8%;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, var(--line-2) 12%, var(--line-2) 88%, transparent);
+  top: 22px;
+  left: 12.5%;
+  right: 12.5%;
+  height: 2px;
+  background: linear-gradient(90deg,
+    var(--accent-line) 0%,
+    var(--accent) 45%,
+    var(--accent-strong) 100%);
   z-index: 0;
 }
 
 .process-step {
   position: relative;
   z-index: 1;
-  padding: 24px 20px;
+  padding: 30px 20px 24px;
   text-align: left;
   background: var(--surface);
   border: 1px solid var(--line);
   border-radius: var(--r-lg);
   box-shadow: var(--shadow-xs);
+  transition:
+    transform 0.25s var(--ease),
+    border-color 0.25s ease,
+    box-shadow 0.25s ease;
 }
 
+.process-step:hover {
+  transform: translateY(-3px);
+  border-color: var(--line-2);
+  box-shadow: var(--shadow-md);
+}
+
+/* The number sits ON the connecting path rather than inside the card's own
+   padding — a stepper node, not a caption. The canvas-colored ring punches a
+   clean gap in the line and the card border alike, so the circle reads as
+   threaded through both instead of stacked on top of them. */
 .step-number {
-  width: 34px;
-  height: 34px;
-  margin: 0 0 16px;
+  position: absolute;
+  z-index: 2;
+  top: -22px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 44px;
+  height: 44px;
+  margin: 0;
   display: flex;
   align-items: center;
   justify-content: center;
   font-family: var(--font-display);
-  font-size: 0.9375rem;
+  font-size: 1.0625rem;
   font-weight: 700;
   color: #fff;
-  background: var(--accent);
+  background: linear-gradient(160deg, var(--accent-bright), var(--accent));
   border: none;
-  border-radius: var(--r-sm);
-  box-shadow: var(--shadow-accent);
+  border-radius: 50%;
+  box-shadow: var(--shadow-accent), 0 0 0 5px var(--canvas);
+  transition: box-shadow 0.25s ease;
+}
+
+.process-step:hover .step-number {
+  box-shadow: var(--shadow-accent), 0 0 0 5px var(--canvas), 0 0 0 8px var(--accent-line);
 }
 
 .process-step h3 {
@@ -1528,13 +1561,16 @@ body.nav-open .whatsapp-float {
   font-weight: 600;
   letter-spacing: -0.02em;
   margin-bottom: 7px;
+  margin-top: 6px;
   color: var(--ink);
+  text-align: center;
 }
 
 .process-step p {
   font-size: 0.85rem;
   color: var(--muted);
   line-height: 1.55;
+  text-align: center;
   opacity: 1;
 }
 
@@ -1825,12 +1861,38 @@ footer {
     grid-template-columns: repeat(2, 1fr);
   }
 
+  /* Below one row, "path threaded through 4 nodes" stops being true — two
+     rows of a stepper straddling their own top edge would have row 2's
+     circles overlap row 1's cards (16px gap, 22px of protrusion). Revert to
+     a plain in-card badge instead of fighting the wrap with more spacing. */
   .process-steps {
     grid-template-columns: repeat(2, 1fr);
+    margin-top: 8px;
+    padding-top: 0;
   }
 
   .process-steps::before {
     display: none;
+  }
+
+  .process-step {
+    padding: 24px 20px;
+  }
+
+  .step-number {
+    position: static;
+    transform: none;
+    margin: 0 0 16px;
+    box-shadow: var(--shadow-accent);
+  }
+
+  .process-step:hover .step-number {
+    box-shadow: var(--shadow-accent);
+  }
+
+  .process-step h3,
+  .process-step p {
+    text-align: left;
   }
 
   .footer-content {
