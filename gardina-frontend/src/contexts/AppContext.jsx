@@ -17,6 +17,11 @@ export const AppProvider = ({ children }) => {
     monthlyTrends: null,
     clientFunnel: null,
     teamKPIs: null,
+    paymentRisks: null,
+    topProducts: null,
+    clientsBySource: null,
+    clientRetention: null,
+    teamEfficiency: null,
   });
   const [loading, setLoading] = useState(false);
   const [analyticsLoading, setAnalyticsLoading] = useState(false);
@@ -87,6 +92,11 @@ export const AppProvider = ({ children }) => {
           monthlyTrends,
           clientFunnel,
           teamKPIs,
+          paymentRisks,
+          topProducts,
+          clientsBySource,
+          clientRetention,
+          teamEfficiency,
           clientsRes,
           designersRes
         ] = await Promise.allSettled([
@@ -96,6 +106,13 @@ export const AppProvider = ({ children }) => {
           analyticsAPI.getMonthlyTrends('revenue', 6),
           analyticsAPI.getClientFunnel(),
           analyticsAPI.getTeamKPIs(),
+          // These five endpoints already existed on the API and in analyticsAPI
+          // but nothing ever called them — the admin overview was a nav menu.
+          analyticsAPI.getPaymentRisks(),
+          analyticsAPI.getTopProducts(5),
+          analyticsAPI.getClientsBySource(),
+          analyticsAPI.getClientRetention(),
+          analyticsAPI.getTeamEfficiency(),
           clientsAPI.getAll(),
           usersAPI.getDesigners()
         ]);
@@ -106,13 +123,20 @@ export const AppProvider = ({ children }) => {
         if (monthlyTrends.status === 'fulfilled') newAnalytics.monthlyTrends = monthlyTrends.value.data.data;
         if (clientFunnel.status === 'fulfilled') newAnalytics.clientFunnel = clientFunnel.value.data.data;
         if (teamKPIs.status === 'fulfilled') newAnalytics.teamKPIs = teamKPIs.value.data.data;
+        if (paymentRisks.status === 'fulfilled') newAnalytics.paymentRisks = paymentRisks.value.data.data;
+        if (topProducts.status === 'fulfilled') newAnalytics.topProducts = topProducts.value.data.data;
+        if (clientsBySource.status === 'fulfilled') newAnalytics.clientsBySource = clientsBySource.value.data.data;
+        if (clientRetention.status === 'fulfilled') newAnalytics.clientRetention = clientRetention.value.data.data;
+        if (teamEfficiency.status === 'fulfilled') newAnalytics.teamEfficiency = teamEfficiency.value.data.data;
         const loadedClients = clientsRes.status === 'fulfilled' ? (clientsRes.value.data.data || []) : [];
         const loadedDesigners = designersRes.status === 'fulfilled' ? (designersRes.value.data.data || []) : [];
         setClients(loadedClients);
         setDesigners(loadedDesigners);
         newAnalytics._clients = loadedClients; // expose for callers
-        anyAnalyticsFailed = [dashboardStats, designersRanking, productSales, monthlyTrends, clientFunnel, teamKPIs]
-          .some(r => r.status === 'rejected');
+        anyAnalyticsFailed = [
+          dashboardStats, designersRanking, productSales, monthlyTrends, clientFunnel, teamKPIs,
+          paymentRisks, topProducts, clientsBySource, clientRetention, teamEfficiency,
+        ].some(r => r.status === 'rejected');
 
       } else if (role === 'manager') {
         const [

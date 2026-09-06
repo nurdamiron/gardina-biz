@@ -10,6 +10,14 @@ import ChartBar from '../../components/analytics/ChartBar';
 import ChartLine from '../../components/analytics/ChartLine';
 import KPICard from '../../components/analytics/KPICard';
 import FunnelChart from '../../components/analytics/FunnelChart';
+import RecentMeasurementsWidget from '../../components/admin/widgets/RecentMeasurementsWidget';
+import FunnelWidget from '../../components/admin/widgets/FunnelWidget';
+import PaymentRisksWidget from '../../components/admin/widgets/PaymentRisksWidget';
+import TodayWidget from '../../components/admin/widgets/TodayWidget';
+import TopProductsWidget from '../../components/admin/widgets/TopProductsWidget';
+import ClientSourcesWidget from '../../components/admin/widgets/ClientSourcesWidget';
+import EfficiencyWidget from '../../components/admin/widgets/EfficiencyWidget';
+import RetentionWidget from '../../components/admin/widgets/RetentionWidget';
 import Icon from '../../components/common/Icon';
 import { useI18n } from '../../contexts/I18nContext';
 import api from '../../services/api';
@@ -290,16 +298,47 @@ const AdminDashboard = () => {
                     ))}
                 </div>
 
-                {/* ── OVERVIEW TAB ── */}
+                {/* ── OVERVIEW TAB ──
+                    Ordered by what an owner acts on: today's work and unpaid
+                    money first, then trend, then the slower analytics. Quick
+                    actions are navigation, so they sit at the bottom. */}
                 {activeTab === 'overview' && (
-                    <div className="lg:grid lg:grid-cols-[1fr_280px] lg:gap-5 space-y-5 lg:space-y-0">
+                    <div className="space-y-4">
 
-                        {/* Left: nav grid */}
-                        <div className="space-y-4">
+                        {/* What needs a person today */}
+                        <div className="grid gap-4 items-start lg:grid-cols-3">
+                            <TodayWidget measurements={measurements} leads={leads} loading={localLoading} />
+                            <PaymentRisksWidget risks={analytics.paymentRisks} loading={analyticsLoading} />
+                            <RecentMeasurementsWidget measurements={measurements} loading={localLoading} />
+                        </div>
+
+                        {/* Where the business is heading.
+                            items-start: without it the grid stretches the
+                            shorter card to the taller one's height, which left
+                            a half-empty panel under the chart. */}
+                        <div className="grid gap-4 items-start lg:grid-cols-[1.7fr_1fr]">
+                            <ChartLine
+                                title={t('adminDashboard.widgets.revenue.title')}
+                                data={analytics.monthlyTrends || []}
+                                valueFormat="currency"
+                                height={190}
+                                loading={analyticsLoading}
+                            />
+                            <FunnelWidget funnel={analytics.clientFunnel} loading={analyticsLoading} />
+                        </div>
+
+                        {/* Slower-moving analytics */}
+                        <div className="grid gap-4 items-start sm:grid-cols-2 xl:grid-cols-4">
+                            <TopProductsWidget products={analytics.topProducts} loading={analyticsLoading} />
+                            <ClientSourcesWidget sources={analytics.clientsBySource} loading={analyticsLoading} />
+                            <RetentionWidget retention={analytics.clientRetention} loading={analyticsLoading} />
+                            <EfficiencyWidget efficiency={analytics.teamEfficiency} loading={analyticsLoading} />
+                        </div>
+
+                        {/* Navigation */}
+                        <div className="space-y-3 pt-1">
                             <h2 className="text-sm font-bold text-muted-foreground uppercase tracking-wider">{t('adminDashboard.sections.quickActions')}</h2>
-
-                            {/* 6-card uniform grid: catalog + nav + AI design studio */}
-                            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 gap-3">
+                            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
                                 {[
                                     { path: '/admin/catalog', icon: 'inventory_2', iconBg: 'bg-primary/10', iconColor: 'text-primary', label: 'Каталог', sub: lang === 'kz' ? 'Маталар, бағалар' : 'Ткани, цены' },
                                     { path: '/admin/clients', icon: 'groups', iconBg: 'bg-primary/10', iconColor: 'text-primary', label: t('adminDashboard.tabs.clients'), sub: `${stats.totalClients}` },
@@ -322,61 +361,6 @@ const AdminDashboard = () => {
                                         </div>
                                     </button>
                                 ))}
-                            </div>
-
-                            {/* Recent measurements table — mobile: hidden on very small, shows on md+ */}
-                            <div className="lg:hidden">
-                                <h2 className="text-sm font-bold text-muted-foreground uppercase tracking-wider mb-3">{lang === 'kz' ? 'Соңғы өлшемдер' : 'Последние замеры'}</h2>
-                                <div className="space-y-2">
-                                    {measurements.slice(0, 3).map(m => (
-                                        <div key={m.id} onClick={() => navigate(`/measurements/${m.id}`)}
-                                            className="bg-card rounded-xl px-4 py-3 border border-border flex items-center gap-3 cursor-pointer hover:border-primary/30 transition-all">
-                                            <div className={`size-2 rounded-full shrink-0 ${m.status === 'completed' ? 'bg-emerald-500' : m.status === 'scheduled' ? 'bg-primary' : 'bg-amber-400'}`} />
-                                            <div className="flex-1 min-w-0">
-                                                <p className="text-sm font-bold truncate">{m.clientName || '—'}</p>
-                                                <p className="text-[11px] text-muted-foreground truncate">{m.address || '—'}</p>
-                                            </div>
-                                            <Icon name="chevron_right" size={16} className="text-muted-foreground shrink-0" />
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Right: activity sidebar (desktop only) */}
-                        <div className="hidden lg:flex flex-col gap-3">
-                            <h2 className="text-sm font-bold text-muted-foreground uppercase tracking-wider">{lang === 'kz' ? 'Соңғы өлшемдер' : 'Последние замеры'}</h2>
-                            <div className="bg-card rounded-2xl border border-border overflow-hidden flex-1">
-                                {measurements.slice(0, 7).length === 0 ? (
-                                    <div className="p-6 text-center text-sm text-muted-foreground">
-                                        <Icon name="inbox" size={28} className="mx-auto mb-2 opacity-30" />
-                                        {lang === 'kz' ? 'Өлшем жоқ' : 'Замеров нет'}
-                                    </div>
-                                ) : (
-                                    <div className="divide-y divide-gray-50">
-                                        {measurements.slice(0, 7).map(m => (
-                                            <div key={m.id} onClick={() => navigate(`/measurements/${m.id}`)}
-                                                className="px-4 py-3 flex items-center gap-3 cursor-pointer hover:bg-muted transition-colors group">
-                                                <div className={`size-2 rounded-full shrink-0 ${
-                                                    m.status === 'completed' ? 'bg-emerald-500' :
-                                                    m.status === 'in_progress' ? 'bg-amber-400' :
-                                                    m.status === 'scheduled' ? 'bg-primary' : 'bg-gray-300'
-                                                }`} />
-                                                <div className="flex-1 min-w-0">
-                                                    <p className="text-sm font-semibold text-foreground truncate group-hover:text-primary transition-colors">{m.clientName || '—'}</p>
-                                                    <p className="text-[11px] text-muted-foreground truncate">{m.address || '—'}</p>
-                                                </div>
-                                                <Icon name="chevron_right" size={14} className="text-muted-foreground shrink-0 group-hover:text-primary transition-colors" />
-                                            </div>
-                                        ))}
-                                    </div>
-                                )}
-                                <div className="border-t border-border px-4 py-2.5">
-                                    <button onClick={() => navigate('/measurements')}
-                                        className="w-full text-xs font-semibold text-primary hover:text-primary-dark transition-colors text-center">
-                                        {lang === 'kz' ? 'Барлығын көру →' : 'Смотреть все →'}
-                                    </button>
-                                </div>
                             </div>
                         </div>
                     </div>
@@ -698,10 +682,13 @@ const AdminDashboard = () => {
                         {/* Monthly Sales Trend */}
                         <ChartLine
                             title={t('dashboard.sections.monthlyTrend')}
-                            data={analytics.monthlyTrends || monthShort(undefined).slice(0, 6).map((label, i) => ({
-                                label,
-                                value: [3200000, 3500000, 4100000, 3800000, 4500000, 5200000][i],
-                            }))}
+                            /* Was `monthShort(...)` with a hardcoded
+                               [3.2M, 3.5M, …] fallback: monthShort was never
+                               imported, so a missing trend threw a
+                               ReferenceError — and when it did not, it showed
+                               invented revenue. ChartLine renders its own
+                               empty state for [], which is the honest one. */
+                            data={analytics.monthlyTrends || []}
                             height={200}
                             valueFormat="currency"
                             loading={analyticsLoading}
