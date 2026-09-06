@@ -82,6 +82,8 @@
   </script>
 </head>
 <body>
+  <a class="skip-link" href="#main" data-i18n="a11y.skip">Негізгі мазмұнға өту</a>
+
   <!-- Header -->
   <header id="header">
     <div class="container">
@@ -92,8 +94,8 @@
           </span>
         </a>
 
-        <nav>
-          <a href="#pain" data-i18n="nav.pain">Мәселе/шешім</a>
+        <nav class="site-nav" data-i18n-attr-label="a11y.nav" aria-label="Бөлімдер бойынша навигация">
+          <a href="#pain" data-i18n="nav.pain">Мәселе</a>
           <a href="#features" data-i18n="nav.features">Артықшылық</a>
           <a href="#modules" data-i18n="nav.modules">Бөлімдер</a>
           <a href="#pricing" data-i18n="nav.pricing">Тарифтер</a>
@@ -108,19 +110,53 @@
 
         <div class="header-cta">
           <a href="https://app.gardina.kz/login" class="btn btn-ghost" data-i18n="header.login">Кіру</a>
-          <a href="tel:+77715373201" class="phone-link">
-            <span class="material-symbols-outlined">call</span>
-            +7 771 537 3201
+          <a href="tel:+77715373201" class="phone-link" aria-label="+7 771 537 3201" title="+7 771 537 3201">
+            <span class="material-symbols-outlined" aria-hidden="true">call</span>
+            <span class="phone-link-text">+7 771 537 3201</span>
           </a>
           <a href="https://wa.me/77715373201?text=%D0%A1%D3%99%D0%BB%D0%B5%D0%BC!%20Gardina%20%D0%B1%D0%BE%D0%B9%D1%8B%D0%BD%D1%88%D0%B0%20%D0%BA%D0%B5%D2%A3%D0%B5%D1%81%20%D0%B0%D0%BB%D2%93%D1%8B%D0%BC%20%D0%BA%D0%B5%D0%BB%D0%B5%D0%B4%D1%96." class="btn btn-whatsapp" target="_blank" rel="noopener">
             WhatsApp
           </a>
         </div>
 
+        <button type="button" class="nav-toggle" id="navToggle" aria-expanded="false" aria-controls="mobileNav"
+                data-i18n-attr-label="a11y.menu" aria-label="Мәзірді ашу">
+          <span class="nav-toggle-bars" aria-hidden="true"><span></span><span></span><span></span></span>
+        </button>
+
+      </div>
+    </div>
+
+    <!-- Mobile drawer: below 1024px the inline nav is hidden, so this is the
+         only path to the page sections. Kept inside <header> so the fixed
+         backdrop and the panel share one stacking context. -->
+    <div class="mobile-nav" id="mobileNav" hidden>
+      <div class="container">
+        <nav class="mobile-nav-links" data-i18n-attr-label="a11y.nav" aria-label="Бөлімдер бойынша навигация">
+          <a href="#app-flow" data-i18n="nav.demo">Демо</a>
+          <a href="#pain" data-i18n="nav.pain">Мәселе</a>
+          <a href="#features" data-i18n="nav.features">Артықшылық</a>
+          <a href="#modules" data-i18n="nav.modules">Бөлімдер</a>
+          <a href="#pricing" data-i18n="nav.pricing">Тарифтер</a>
+          <a href="#process" data-i18n="nav.process">Бастау</a>
+          <a href="#contact" data-i18n="nav.contact">Байланыс</a>
+        </nav>
+        <div class="mobile-nav-cta">
+          <a href="https://wa.me/77715373201?text=%D0%A1%D3%99%D0%BB%D0%B5%D0%BC!%20Gardina%20%D0%B1%D0%BE%D0%B9%D1%8B%D0%BD%D1%88%D0%B0%20%D0%BA%D0%B5%D2%A3%D0%B5%D1%81%20%D0%B0%D0%BB%D2%93%D1%8B%D0%BC%20%D0%BA%D0%B5%D0%BB%D0%B5%D0%B4%D1%96." class="btn btn-whatsapp" target="_blank" rel="noopener">
+            WhatsApp
+          </a>
+          <a href="tel:+77715373201" class="mobile-nav-phone">
+            <span class="material-symbols-outlined" aria-hidden="true">call</span>
+            +7 771 537 3201
+          </a>
+        </div>
       </div>
     </div>
   </header>
 
+  <div class="nav-scrim" id="navScrim" hidden></div>
+
+  <main id="main">
   <!-- Hero -->
   <section class="hero">
     <div class="container">
@@ -664,6 +700,7 @@
       </div>
     </div>
   </section>
+  </main>
 
   <!-- Footer -->
   <footer>
@@ -734,34 +771,140 @@
   </a>
 
   <script>
+    /* ------------------------------------------------------------------
+     * Header: scrolled state, mobile drawer, in-page anchors, scroll-spy.
+     * ------------------------------------------------------------------ */
+    const header = document.getElementById('header');
+    const navToggle = document.getElementById('navToggle');
+    const mobileNav = document.getElementById('mobileNav');
+    const navScrim = document.getElementById('navScrim');
+    const navLinks = [...document.querySelectorAll('.site-nav a[href^="#"], .mobile-nav-links a[href^="#"]')];
+    const desktopNav = window.matchMedia('(min-width: 1081px)'); // matches the CSS drawer breakpoint
+
+    // The bar is fixed, so an anchor scrolled to its natural offset lands
+    // underneath it. Read the live height instead of hardcoding 64/60px.
+    const headerOffset = () => header.getBoundingClientRect().height + 12;
+
+    let isScrolled = false;
     window.addEventListener('scroll', () => {
-      const header = document.getElementById('header');
-      if (window.scrollY > 50) header.classList.add('scrolled');
-      else header.classList.remove('scrolled');
+      const next = window.scrollY > 50;
+      if (next === isScrolled) return; // only touch the DOM on an actual change
+      isScrolled = next;
+      header.classList.toggle('scrolled', next);
+    }, { passive: true });
+
+    /* ---- Mobile drawer ---- */
+    let isNavOpen = false;
+
+    function setNavOpen(open) {
+      if (open === isNavOpen) return;
+      isNavOpen = open;
+
+      navToggle.setAttribute('aria-expanded', String(open));
+      document.body.classList.toggle('nav-open', open);
+
+      if (open) {
+        mobileNav.hidden = false;
+        navScrim.hidden = false;
+        // Next frame, so the opening transition has a start value to run from.
+        requestAnimationFrame(() => {
+          mobileNav.classList.add('is-open');
+          navScrim.classList.add('is-open');
+        });
+      } else {
+        mobileNav.classList.remove('is-open');
+        navScrim.classList.remove('is-open');
+        window.setTimeout(() => {
+          if (isNavOpen) return; // reopened while closing
+          mobileNav.hidden = true;
+          navScrim.hidden = true;
+        }, 220);
+      }
+    }
+
+    navToggle.addEventListener('click', () => setNavOpen(!isNavOpen));
+    navScrim.addEventListener('click', () => setNavOpen(false));
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && isNavOpen) {
+        setNavOpen(false);
+        navToggle.focus();
+      }
     });
 
+    // Crossing into desktop must not leave the page scroll-locked behind a
+    // drawer that is no longer visible.
+    const onBreakpoint = (e) => { if (e.matches) setNavOpen(false); };
+    if (desktopNav.addEventListener) desktopNav.addEventListener('change', onBreakpoint);
+    else desktopNav.addListener(onBreakpoint);
+
+    /* ---- In-page anchors ---- */
     document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
       anchor.addEventListener('click', function (e) {
         const id = this.getAttribute('href');
         if (id === '#') return;
         const target = document.querySelector(id);
-        if (target) {
-          e.preventDefault();
-          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
+        if (!target) return;
+        e.preventDefault();
+        setNavOpen(false);
+
+        const top = target.getBoundingClientRect().top + window.scrollY - headerOffset();
+        const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        window.scrollTo({ top, behavior: reduce ? 'auto' : 'smooth' });
+
+        // scrollTo does not move focus, so keyboard users would keep tabbing
+        // from the header. Hand focus to the section without a second jump.
+        target.setAttribute('tabindex', '-1');
+        target.focus({ preventScroll: true });
       });
     });
+
+    /* ---- Scroll-spy ---- */
+    // Document order, not nav order: the drawer lists sections the inline nav
+    // omits, and `paint()` below picks the topmost visible one.
+    const spySections = [...new Set(
+      navLinks.map((link) => document.querySelector(link.getAttribute('href'))).filter(Boolean)
+    )].sort((a, b) => (a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : 1));
+
+    if (spySections.length && 'IntersectionObserver' in window) {
+      const visible = new Set();
+
+      const paint = () => {
+        // Topmost section currently inside the reading band wins.
+        const current = spySections.find((section) => visible.has(section));
+        navLinks.forEach((link) => {
+          const isCurrent = !!current && link.getAttribute('href') === '#' + current.id;
+          link.classList.toggle('is-current', isCurrent);
+          if (isCurrent) link.setAttribute('aria-current', 'true');
+          else link.removeAttribute('aria-current');
+        });
+      };
+
+      const spy = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) visible.add(entry.target);
+          else visible.delete(entry.target);
+        });
+        paint();
+      }, { rootMargin: '-25% 0px -60% 0px', threshold: 0 });
+
+      spySections.forEach((section) => spy.observe(section));
+    }
 
     const i18n = {
       kz: {
         ui: {
-          'nav.pain': 'Мәселе → шешім',
+          'nav.pain': 'Мәселе',
           'nav.features': 'Неге керек',
-          'nav.modules': 'Жүйеде не бар',
+          'nav.modules': 'Бөлімдер',
           'nav.pricing': 'Тарифтер',
-          'nav.process': 'Қалай бастайсыз',
+          'nav.process': 'Бастау',
           'nav.contact': 'Байланыс',
+          'nav.demo': 'Демо',
           'header.login': 'Жүйеге кіру',
+          'a11y.skip': 'Негізгі мазмұнға өту',
+          'a11y.nav': 'Бөлімдер бойынша навигация',
+          'a11y.menu': 'Мәзір',
           'pain.title': 'Күнделікті қиындықтар түсінікті тілде',
           'features.title': 'Бизнесіңізге нақты пайда',
           'modules.title': 'Бір жерде не істей аласыз',
@@ -965,13 +1108,17 @@
       },
       ru: {
         ui: {
-          'nav.pain': 'Проблема → решение',
-          'nav.features': 'Почему это удобно',
-          'nav.modules': 'Что внутри',
+          'nav.pain': 'Проблема',
+          'nav.features': 'Преимущества',
+          'nav.modules': 'Разделы',
           'nav.pricing': 'Тарифы',
           'nav.process': 'Как начать',
           'nav.contact': 'Контакты',
+          'nav.demo': 'Демо',
           'header.login': 'Войти в систему',
+          'a11y.skip': 'Перейти к содержимому',
+          'a11y.nav': 'Навигация по разделам',
+          'a11y.menu': 'Меню',
           'pain.title': 'Ежедневные сложности простыми словами',
           'features.title': 'Польза для бизнеса',
           'modules.title': 'Что можно делать в одном месте',
@@ -1178,6 +1325,7 @@
     const langButtons = [...document.querySelectorAll('.lang-btn')];
     const billingButtons = [...document.querySelectorAll('.billing-btn')];
     const i18nNodes = [...document.querySelectorAll('[data-i18n]')];
+    const ariaLabelNodes = [...document.querySelectorAll('[data-i18n-attr-label]')];
     const pageTitle = document.querySelector('title');
     const metaDescription = document.querySelector('meta[name="description"]');
     const ogTitle = document.querySelector('meta[property="og:title"]');
@@ -1236,6 +1384,11 @@
       i18nNodes.forEach((el) => {
         const key = el.getAttribute('data-i18n');
         if (dict.ui[key]) el.textContent = dict.ui[key];
+      });
+
+      ariaLabelNodes.forEach((el) => {
+        const key = el.getAttribute('data-i18n-attr-label');
+        if (dict.ui[key]) el.setAttribute('aria-label', dict.ui[key]);
       });
 
       Object.entries(dict.selectors).forEach(([selector, value]) => setSelectorText(selector, value));
