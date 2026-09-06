@@ -170,7 +170,7 @@ button:focus-visible {
     scroll-behavior: auto;
   }
 
-  .hero-shot-img {
+  .hero-shot {
     animation: none;
   }
 
@@ -907,45 +907,42 @@ body.nav-open .whatsapp-float {
 }
 
 /* ---- Hero product shot ----
-   A real screenshot of the admin overview, cropped to roughly half the app
-   width so the UI renders near 1:1 instead of being shrunk to illegibility.
-   The frame is shorter than the image, so the picture can drift upward inside
-   it, and the bottom dissolves into the page instead of ending on a hard edge. */
+   A real capture of the admin overview, whole screen: sidebar, header, tabs
+   and every widget, nothing cropped. The frame matches the capture's aspect
+   exactly so it is never letterboxed or cut. */
 .hero-shot {
   position: relative;
   z-index: 1;
   width: 100%;
-  max-width: 920px;
+  max-width: 980px;
   margin: 0;
-  aspect-ratio: 912 / 560;
+  aspect-ratio: 1440 / 900;
   overflow: hidden;
   background: var(--surface);
   border: 1px solid var(--line-2);
   border-radius: var(--r-xl);
-
-  /* How far the image can travel: (image height - frame height) / image height.
-     912x880 image in a 912x560 frame → 320/880. */
-  --shot-travel: -36.4%;
-
-  /* The fade must cover the frame's own border and corners too, so it lives on
-     the frame rather than on the <img>. mask-origin defaults to border-box. */
-  -webkit-mask-image: linear-gradient(to bottom, #000 52%, rgba(0, 0, 0, 0.55) 76%, transparent 100%);
-  mask-image: linear-gradient(to bottom, #000 52%, rgba(0, 0, 0, 0.55) 76%, transparent 100%);
+  box-shadow:
+    0 40px 90px -30px rgba(10, 15, 13, 0.26),
+    0 12px 28px -12px rgba(10, 15, 13, 0.1);
+  animation: heroShotFloat 9s ease-in-out infinite;
 }
 
 .hero-shot-img {
   display: block;
   width: 100%;
-  height: auto;
-  will-change: transform;
-  animation: heroShotPan 26s var(--ease) infinite;
+  height: 100%;
+  object-fit: cover;
+  object-position: top center;
+  /* The capture ends where the viewport did, so soften only the last sliver —
+     enough to melt into the page, not enough to hide a row. */
+  -webkit-mask-image: linear-gradient(to bottom, #000 88%, transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 88%, transparent 100%);
 }
 
-/* Holds at the top, drifts down to the widgets below the fold, holds, returns. */
-@keyframes heroShotPan {
-  0%, 14%   { transform: translateY(0); }
-  48%, 62%  { transform: translateY(var(--shot-travel)); }
-  100%      { transform: translateY(0); }
+/* Slow drift, so the hero is alive without anything moving out of view. */
+@keyframes heroShotFloat {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-9px); }
 }
 
 /* ============ SHARED SECTION HEADERS ============ */
@@ -2436,9 +2433,8 @@ footer {
      both differ. max-width keeps a 390px-wide capture from being blown up:
      above it the desktop shot scales down instead, which stays sharp. */
   .hero-shot {
-    aspect-ratio: 390 / 470;
-    --shot-travel: -44.7%;
-    max-width: 420px;
+    aspect-ratio: 390 / 780;
+    max-width: 340px;
   }
 
   .container {

@@ -17,7 +17,9 @@ const STATUS_DOT = {
     scheduled: 'bg-primary',
 };
 
-const RecentMeasurementsWidget = ({ measurements = [], loading, limit = 6 }) => {
+// 4 rows keeps this card level with Сегодня and Деньги на риске beside it;
+// at 6 it towered over them and left a hole in the row.
+const RecentMeasurementsWidget = ({ measurements = [], loading, limit = 4 }) => {
     const { t } = useI18n();
     const navigate = useNavigate();
 
