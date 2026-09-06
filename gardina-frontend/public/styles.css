@@ -34,7 +34,7 @@
   --danger: #c2410c;
   --warn: #b45309;
 
-  /* Dark surface tokens (app-flow, CTA, footer) */
+  /* Dark surface tokens (CTA, footer) */
   --dark: #080c0a;
   --dark-2: #0e1512;
   --dark-line: rgba(255, 255, 255, 0.1);
@@ -131,52 +131,16 @@ button:focus-visible {
   will-change: auto;
 }
 
-/* Micro-animations in the pain-card widgets, started when the section scrolls
-   into view (the script adds .pain-in). */
-.js-anim .motion-pain-line {
-  transform: scaleX(0.4);
-  opacity: 0.35;
-}
-
-.js-anim .pain-in .motion-pain-line {
-  transform: scaleX(1);
-  opacity: 1;
-  transition: transform 1.15s var(--ease) 0.35s, opacity 1.15s var(--ease) 0.35s;
-}
-
-.js-anim .pain-in .motion-pain-progress {
-  animation: painFill 1.1s var(--ease) 0.5s both;
-}
-
-@keyframes painFill {
-  from { width: 22%; }
-  to { width: 70%; }
-}
-
-.js-anim .pain-in .motion-pain-pill {
-  animation: painPulse 2.2s ease-in-out infinite;
-}
-
-.js-anim .pain-in .pain-ui-row:nth-child(3) .motion-pain-pill { animation-delay: 0.12s; }
-.js-anim .pain-in .pain-ui-row:nth-child(4) .motion-pain-pill { animation-delay: 0.24s; }
-
-@keyframes painPulse {
-  0%, 100% { opacity: 0.68; }
-  50% { opacity: 1; }
-}
-
 @media (prefers-reduced-motion: reduce) {
-  .js-anim .reveal,
-  .js-anim .reveal-scale,
-  .js-anim .reveal-x,
-  .js-anim .motion-pain-line {
-    opacity: 1;
-    transform: none;
+  html {
+    scroll-behavior: auto;
   }
 
-  .js-anim .pain-in .motion-pain-progress,
-  .js-anim .pain-in .motion-pain-pill {
-    animation: none;
+  .js-anim .reveal,
+  .js-anim .reveal-scale,
+  .js-anim .reveal-x {
+    opacity: 1;
+    transform: none;
   }
 
   /* The demo does not auto-advance under reduced motion, so a progress bar
@@ -246,7 +210,7 @@ header.scrolled {
 }
 
 /* Plain text nav — no pill container, product-app style */
-nav {
+.site-nav {
   display: flex;
   align-items: center;
   gap: 2px;
@@ -263,7 +227,7 @@ nav {
   overflow: hidden;
 }
 
-nav a {
+.site-nav a {
   position: relative;
   font-size: 0.8125rem;
   font-weight: 500;
@@ -276,13 +240,33 @@ nav a {
   transition: color 0.15s ease, background 0.15s ease;
 }
 
-nav a::after {
-  display: none;
+.site-nav a::after {
+  content: "";
+  position: absolute;
+  left: 10px;
+  right: 10px;
+  bottom: -1px;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--accent);
+  transform: scaleX(0);
+  transform-origin: center;
+  transition: transform 0.2s var(--ease);
 }
 
-nav a:hover {
+.site-nav a:hover {
   color: var(--ink);
   background: var(--canvas-2);
+}
+
+/* Scroll-spy: the link for the section currently in the reading band. */
+.site-nav a.is-current {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.site-nav a.is-current::after {
+  transform: scaleX(1);
 }
 
 .header-cta {
@@ -410,26 +394,260 @@ nav a:hover {
 .phone-link {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  font-size: 0.8125rem;
-  font-weight: 500;
+  justify-content: center;
+  width: 34px;
+  flex-shrink: 0;
   color: var(--muted);
   text-decoration: none;
-  padding: 0 10px;
   border-radius: var(--r-sm);
-  border: 1px solid transparent;
+  border: 1px solid var(--line);
   background: transparent;
-  transition: background 0.15s ease, color 0.15s ease;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.phone-link-text {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
 
 .phone-link:hover {
   background: var(--canvas-2);
-  color: var(--ink);
+  border-color: var(--line-2);
 }
 
 .phone-link .material-symbols-outlined {
   font-size: 17px;
   color: var(--accent);
+}
+
+/* Anchor targets must clear the fixed header, otherwise every in-page jump
+   parks the section heading underneath the bar. */
+:target,
+main[id],
+section[id] {
+  scroll-margin-top: calc(var(--header-h) + 20px);
+}
+
+/* Sections get tabindex="-1" so an anchor jump moves focus with it; that is a
+   programmatic focus, not a keyboard one, so it should not paint a ring. */
+main[id]:focus,
+section[id]:focus {
+  outline: none;
+}
+
+/* Keyboard users land here first; visually hidden until focused. */
+.skip-link {
+  position: fixed;
+  top: 8px;
+  left: 8px;
+  z-index: 1300;
+  transform: translateY(calc(-100% - 16px));
+  padding: 10px 16px;
+  border-radius: var(--r-sm);
+  background: var(--ink);
+  color: #fff;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  text-decoration: none;
+  box-shadow: var(--shadow-md);
+  transition: transform 0.2s var(--ease);
+}
+
+.skip-link:focus-visible {
+  transform: translateY(0);
+}
+
+/* ---- Burger + mobile drawer ---- */
+.nav-toggle {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 34px;
+  flex-shrink: 0;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  background: var(--surface);
+  color: var(--ink);
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.nav-toggle:hover {
+  background: var(--canvas-2);
+  border-color: var(--line-2);
+}
+
+.nav-toggle-bars {
+  position: relative;
+  display: block;
+  width: 17px;
+  height: 12px;
+}
+
+.nav-toggle-bars span {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  height: 1.5px;
+  border-radius: 2px;
+  background: currentColor;
+  transition: transform 0.25s var(--ease), opacity 0.15s ease;
+}
+
+.nav-toggle-bars span:nth-child(1) { top: 0; }
+.nav-toggle-bars span:nth-child(2) { top: 5.25px; }
+.nav-toggle-bars span:nth-child(3) { top: 10.5px; }
+
+.nav-toggle[aria-expanded="true"] .nav-toggle-bars span:nth-child(1) {
+  transform: translateY(5.25px) rotate(45deg);
+}
+
+.nav-toggle[aria-expanded="true"] .nav-toggle-bars span:nth-child(2) {
+  opacity: 0;
+}
+
+.nav-toggle[aria-expanded="true"] .nav-toggle-bars span:nth-child(3) {
+  transform: translateY(-5.25px) rotate(-45deg);
+}
+
+.mobile-nav {
+  position: absolute;
+  top: var(--header-h);
+  left: 0;
+  right: 0;
+  max-height: calc(100vh - var(--header-h));
+  max-height: calc(100dvh - var(--header-h));
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 10px 0 20px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--line);
+  box-shadow: var(--shadow-lg);
+  opacity: 0;
+  transform: translateY(-8px);
+  transition: opacity 0.2s ease, transform 0.24s var(--ease);
+}
+
+.mobile-nav[hidden] {
+  display: none;
+}
+
+.mobile-nav.is-open {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.mobile-nav-links {
+  display: flex;
+  flex-direction: column;
+}
+
+.mobile-nav-links a {
+  position: relative;
+  padding: 13px 12px 13px 14px;
+  border-radius: var(--r-sm);
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: var(--ink-2);
+  text-decoration: none;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.mobile-nav-links a:hover {
+  background: var(--canvas-2);
+  color: var(--ink);
+}
+
+.mobile-nav-links a.is-current {
+  color: var(--accent-strong);
+  font-weight: 600;
+  background: var(--accent-soft);
+}
+
+.mobile-nav-links a.is-current::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 11px;
+  bottom: 11px;
+  width: 2px;
+  border-radius: 2px;
+  background: var(--accent);
+}
+
+.mobile-nav-cta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 14px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+}
+
+.mobile-nav-cta .btn-whatsapp {
+  display: inline-flex;
+  flex: 1;
+  height: 42px;
+}
+
+.mobile-nav-phone {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  height: 42px;
+  padding: 0 14px;
+  border: 1px solid var(--line-2);
+  border-radius: var(--r-sm);
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--ink-2);
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background 0.15s ease;
+}
+
+.mobile-nav-phone:hover {
+  background: var(--canvas-2);
+}
+
+.mobile-nav-phone .material-symbols-outlined {
+  font-size: 18px;
+  color: var(--accent);
+}
+
+.nav-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 900;
+  background: rgba(10, 15, 13, 0.34);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.nav-scrim[hidden] {
+  display: none;
+}
+
+.nav-scrim.is-open {
+  opacity: 1;
+}
+
+body.nav-open {
+  overflow: hidden;
+}
+
+/* The float sits above the scrim (z-index 999) and the drawer already carries
+   a WhatsApp button, so it would only compete with it. */
+body.nav-open .whatsapp-float {
+  opacity: 0;
+  pointer-events: none;
 }
 
 /* Segmented language control */
@@ -602,252 +820,43 @@ nav a:hover {
   pointer-events: none;
 }
 
-.hero-mock {
+/* ---- Hero product shot ----
+   A real capture of the admin overview, whole screen: sidebar, header, tabs
+   and every widget, nothing cropped. The frame matches the capture's aspect
+   exactly so it is never letterboxed or cut. */
+.hero-shot {
   position: relative;
   z-index: 1;
   width: 100%;
-  max-width: 920px;
-  padding: 0;
+  max-width: 980px;
+  margin: 0;
+  aspect-ratio: 1440 / 900;
   overflow: hidden;
   background: var(--surface);
   border: 1px solid var(--line-2);
   border-radius: var(--r-xl);
   box-shadow:
-    0 40px 90px -30px rgba(10, 15, 13, 0.28),
-    0 12px 28px -12px rgba(10, 15, 13, 0.12);
+    0 40px 90px -30px rgba(10, 15, 13, 0.26),
+    0 12px 28px -12px rgba(10, 15, 13, 0.1);
+  animation: heroShotFloat 9s ease-in-out infinite;
 }
 
-.hero-mock-top {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 0;
-  padding: 12px 18px;
-  border-bottom: 1px solid var(--line);
-  background: var(--canvas);
-  font-size: 0.8125rem;
-  font-weight: 500;
-  color: var(--muted);
+.hero-shot-img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top center;
+  /* The capture ends where the viewport did, so soften only the last sliver —
+     enough to melt into the page, not enough to hide a row. */
+  -webkit-mask-image: linear-gradient(to bottom, #000 88%, transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 88%, transparent 100%);
 }
 
-.hero-mock-dots {
-  display: flex;
-  gap: 6px;
-}
-
-.hero-mock-dots span {
-  width: 9px;
-  height: 9px;
-  border-radius: 50%;
-  background: var(--line-2);
-}
-
-.hero-mock-dots span:nth-child(1),
-.hero-mock-dots span:nth-child(2),
-.hero-mock-dots span:nth-child(3) {
-  background: rgba(10, 15, 13, 0.13);
-}
-
-/* The mock is a small, believable slice of the actual app: sidebar, KPI row,
-   highlighted event, and an orders table. */
-.hero-mock-rows {
-  display: grid;
-  grid-template-columns: 186px 1fr;
-  align-items: stretch;
-  gap: 0;
-  padding: 0;
-  text-align: left;
-}
-
-.mock-nav {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  padding: 16px 12px;
-  border-right: 1px solid var(--line);
-  background: var(--canvas);
-}
-
-.mock-new {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  margin-bottom: 12px;
-  padding: 9px 10px;
-  border-radius: var(--r-sm);
-  background: var(--accent);
-  color: #fff;
-  font-size: 0.8125rem;
-  font-weight: 600;
-  letter-spacing: -0.01em;
-  box-shadow: var(--shadow-accent);
-}
-
-.mock-new .material-symbols-outlined {
-  font-size: 17px;
-}
-
-.mock-nav-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 8px 10px;
-  border-radius: var(--r-sm);
-  font-size: 0.8125rem;
-  font-weight: 500;
-  color: var(--muted);
-}
-
-.mock-nav-item .material-symbols-outlined {
-  font-size: 18px;
-  color: var(--muted-2);
-}
-
-.mock-nav-item.is-active {
-  background: var(--surface);
-  color: var(--ink);
-  font-weight: 600;
-  box-shadow: var(--shadow-xs);
-}
-
-.mock-nav-item.is-active .material-symbols-outlined {
-  color: var(--accent);
-}
-
-.mock-main {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-  padding: 18px 20px 22px;
-  min-width: 0;
-}
-
-.mock-kpis {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
-}
-
-.mock-kpi {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  padding: 12px 14px;
-  border: 1px solid var(--line);
-  border-radius: var(--r-md);
-  background: var(--surface);
-}
-
-.mock-kpi-value {
-  font-family: var(--font-display);
-  font-size: 1.0625rem;
-  font-weight: 700;
-  letter-spacing: -0.03em;
-  color: var(--ink);
-  white-space: nowrap;
-}
-
-.mock-kpi-label {
-  font-size: 0.6875rem;
-  color: var(--muted-2);
-}
-
-.mock-table {
-  display: flex;
-  flex-direction: column;
-  border: 1px solid var(--line);
-  border-radius: var(--r-md);
-  overflow: hidden;
-}
-
-.mock-tr {
-  display: grid;
-  grid-template-columns: 26px 1fr auto auto auto;
-  align-items: center;
-  gap: 10px;
-  padding: 11px 14px;
-  border-top: 1px solid var(--line);
-  background: var(--surface);
-}
-
-.mock-tr:first-child {
-  border-top: none;
-}
-
-.mock-avatar {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 26px;
-  height: 26px;
-  border-radius: 50%;
-  background: var(--accent-soft);
-  border: 1px solid var(--accent-line);
-  font-size: 0.625rem;
-  font-weight: 700;
-  color: var(--accent);
-}
-
-.mock-name {
-  font-size: 0.8125rem;
-  font-weight: 600;
-  color: var(--ink);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.mock-meta {
-  font-size: 0.75rem;
-  color: var(--muted-2);
-  white-space: nowrap;
-}
-
-.mock-chip {
-  font-size: 0.6875rem;
-  font-weight: 600;
-  padding: 3px 9px;
-  border-radius: var(--r-full);
-  white-space: nowrap;
-  color: var(--muted);
-  background: var(--canvas-2);
-  border: 1px solid var(--line);
-}
-
-.mock-chip.ok {
-  color: var(--accent);
-  background: var(--accent-soft);
-  border-color: var(--accent-line);
-}
-
-.mock-chip.warn {
-  color: var(--warn);
-  background: rgba(180, 83, 9, 0.08);
-  border-color: rgba(180, 83, 9, 0.2);
-}
-
-.mock-amount {
-  font-size: 0.8125rem;
-  font-weight: 600;
-  letter-spacing: -0.02em;
-  color: var(--ink);
-  white-space: nowrap;
-}
-
-.hero-mock-row.accent {
-  height: auto;
-  min-height: 48px;
-  padding: 14px 16px;
-  display: flex;
-  align-items: center;
-  font-size: 0.875rem;
-  font-weight: 600;
-  letter-spacing: -0.01em;
-  color: var(--accent-strong);
-  background: var(--accent-soft);
-  border: 1px solid var(--accent-line);
-  border-radius: var(--r-md);
-  box-shadow: none;
+/* Slow drift, so the hero is alive without anything moving out of view. */
+@keyframes heroShotFloat {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-9px); }
 }
 
 /* ============ SHARED SECTION HEADERS ============ */
@@ -896,338 +905,6 @@ nav a:hover {
   letter-spacing: -0.008em;
 }
 
-/* ============ APP FLOW (dark contrast band) ============ */
-.app-flow {
-  padding: 104px 0;
-  background: linear-gradient(180deg, var(--dark-2) 0%, var(--dark) 42%, var(--dark) 100%);
-  color: #fff;
-  position: relative;
-  overflow: hidden;
-}
-
-.app-flow::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background:
-    radial-gradient(ellipse 40% 40% at 15% 0%, rgba(36, 193, 134, 0.16), transparent 65%),
-    radial-gradient(ellipse 45% 45% at 90% 100%, rgba(21, 128, 90, 0.14), transparent 65%);
-  pointer-events: none;
-}
-
-.app-flow .container {
-  position: relative;
-  z-index: 1;
-}
-
-.app-flow .section-title {
-  color: #fff;
-}
-
-.app-flow .section-subtitle {
-  color: var(--dark-text);
-}
-
-.app-flow .section-badge {
-  background: rgba(36, 193, 134, 0.1);
-  color: var(--accent-bright);
-  border-color: rgba(36, 193, 134, 0.28);
-}
-
-.app-flow-grid {
-  display: grid;
-  /* Capped, centred columns: at 1fr the step text stretched to ~900px with two
-     short lines in it, which is what made the band look half-empty. */
-  grid-template-columns: minmax(0, 320px) minmax(0, 600px);
-  justify-content: center;
-  gap: 72px;
-  align-items: center;
-}
-
-.app-phone {
-  width: 100%;
-  max-width: 320px;
-  margin: 0 auto;
-  border-radius: 36px;
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  background: #050a07;
-  box-shadow:
-    0 40px 80px -30px rgba(0, 0, 0, 0.9),
-    inset 0 1px 0 rgba(255, 255, 255, 0.08);
-  padding: 9px;
-}
-
-.app-phone-notch {
-  width: 76px;
-  height: 6px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.16);
-  margin: 5px auto 9px;
-}
-
-.app-phone-screen {
-  border-radius: 28px;
-  background: linear-gradient(180deg, #0f1714 0%, #0a110e 100%);
-  min-height: 340px;
-  position: relative;
-  overflow: hidden;
-  padding: 14px;
-}
-
-/* App tab bar — the same Material Symbols the CRM itself uses, so the mock reads
-   as a real app screen. Decorative (aria-hidden in the markup). */
-.app-tabbar {
-  position: absolute;
-  left: 12px;
-  right: 12px;
-  bottom: 12px;
-  height: 44px;
-  display: flex;
-  align-items: center;
-  justify-content: space-around;
-  border-radius: 14px;
-  background: rgba(255, 255, 255, 0.035);
-  border: 1px solid rgba(255, 255, 255, 0.07);
-}
-
-.app-tabbar .material-symbols-outlined {
-  font-size: 20px;
-  color: rgba(255, 255, 255, 0.32);
-}
-
-.app-tabbar .is-active {
-  color: var(--accent-bright);
-}
-
-.app-screen {
-  position: absolute;
-  inset: 14px 14px 68px 14px;
-  opacity: 0;
-  transform: translateX(22px);
-  pointer-events: none;
-  transition: opacity 0.35s ease, transform 0.35s ease;
-}
-
-.app-screen.is-active {
-  opacity: 1;
-  transform: translateX(0);
-  pointer-events: auto;
-}
-
-.push-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-size: 0.6875rem;
-  font-weight: 500;
-  color: rgba(255, 255, 255, 0.5);
-  margin-bottom: 14px;
-}
-
-.push-stack {
-  display: grid;
-  gap: 9px;
-}
-
-.push-card {
-  border-radius: var(--r-md);
-  padding: 12px;
-  background: rgba(36, 193, 134, 0.1);
-  border: 1px solid rgba(36, 193, 134, 0.26);
-  box-shadow: none;
-}
-
-.push-card.muted {
-  background: rgba(255, 255, 255, 0.04);
-  border-color: rgba(255, 255, 255, 0.1);
-}
-
-.push-card-top {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-size: 0.625rem;
-  font-weight: 500;
-  color: rgba(255, 255, 255, 0.5);
-  margin-bottom: 6px;
-}
-
-.push-card h3 {
-  font-size: 0.9375rem;
-  font-weight: 600;
-  letter-spacing: -0.015em;
-  line-height: 1.25;
-  margin-bottom: 4px;
-}
-
-.push-card p {
-  font-size: 0.78rem;
-  color: rgba(255, 255, 255, 0.68);
-  line-height: 1.45;
-}
-
-/* Steps read as a vertical timeline tied to what the phone is showing */
-.app-flow-steps {
-  display: grid;
-  gap: 14px;
-  position: relative;
-}
-
-.app-step {
-  position: relative;
-  display: grid;
-  grid-template-columns: auto 1fr;
-  column-gap: 16px;
-  row-gap: 3px;
-  align-items: start;
-  background: rgba(255, 255, 255, 0.025);
-  border: 1px solid var(--dark-line);
-  border-radius: var(--r-lg);
-  --step-pad: 20px;
-  padding: 16px var(--step-pad);
-  cursor: pointer; /* the steps are also the demo's controls */
-  transition: border-color 0.25s ease, background 0.25s ease, transform 0.25s var(--ease);
-}
-
-/* connector between the step badges, drawn in the grid gap: three cards read as
-   one flow (lead → measure → payment) instead of three unrelated boxes */
-.app-step:not(:last-child)::after {
-  content: "";
-  position: absolute;
-  left: calc(var(--step-pad) + 16px);
-  top: 100%;
-  width: 1px;
-  height: 14px;
-  background: linear-gradient(rgba(255, 255, 255, 0.26), rgba(255, 255, 255, 0.06));
-}
-
-.app-step:hover {
-  border-color: rgba(255, 255, 255, 0.22);
-  background: rgba(255, 255, 255, 0.05);
-}
-
-.app-step:focus-visible {
-  outline: 2px solid var(--accent-bright);
-  outline-offset: 2px;
-}
-
-/* active marker rail on the left edge — inset and pill-shaped so it no longer
-   needs `overflow: hidden` on the card (which would clip the connector) */
-.app-step::before {
-  content: "";
-  position: absolute;
-  left: 0;
-  top: 14px;
-  bottom: 14px;
-  width: 3px;
-  border-radius: 999px;
-  background: var(--accent-bright);
-  transform: scaleY(0);
-  transform-origin: top;
-  transition: transform 0.35s var(--ease);
-}
-
-.app-step.is-active {
-  border-color: rgba(36, 193, 134, 0.34);
-  background: rgba(36, 193, 134, 0.06);
-  transform: none;
-}
-
-.app-step.is-active::before {
-  transform: scaleY(1);
-}
-
-.app-step-num {
-  grid-column: 1;
-  grid-row: 1 / span 2;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  margin: 2px 0 0;
-  padding: 0;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  font-family: var(--font);
-  font-size: 0.6875rem;
-  font-weight: 600;
-  letter-spacing: 0.01em;
-  color: rgba(255, 255, 255, 0.55);
-  transition: background 0.25s ease, border-color 0.25s ease, color 0.25s ease;
-}
-
-.app-step.is-active .app-step-num {
-  background: rgba(36, 193, 134, 0.16);
-  border-color: rgba(36, 193, 134, 0.45);
-  color: var(--accent-bright);
-}
-
-.app-step h3 {
-  grid-column: 2;
-  grid-row: 1;
-  font-family: var(--font-display);
-  font-size: 1.0625rem;
-  font-weight: 600;
-  letter-spacing: -0.02em;
-  margin-bottom: 0;
-  color: rgba(255, 255, 255, 0.72);
-  transition: color 0.25s ease;
-}
-
-.app-step.is-active h3 {
-  color: #fff;
-}
-
-.app-step p {
-  grid-column: 2;
-  grid-row: 2;
-  font-size: 0.875rem;
-  color: var(--dark-text);
-  line-height: 1.5;
-}
-
-/* Runs for one STEP_MS while the step is on screen, so the demo reads as a
-   player rather than a random animation. Paused with the timer via .is-paused. */
-.app-step-progress {
-  grid-column: 2;
-  grid-row: 3;
-  margin-top: 12px;
-  height: 2px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.1);
-  overflow: hidden;
-  opacity: 0;
-  transition: opacity 0.25s ease;
-}
-
-.app-step.is-active .app-step-progress {
-  opacity: 1;
-}
-
-.app-step-progress::after {
-  content: "";
-  display: block;
-  height: 100%;
-  border-radius: inherit;
-  background: var(--accent-bright);
-  transform: scaleX(0);
-  transform-origin: left;
-}
-
-.app-step.is-active .app-step-progress::after {
-  animation: appStepFill 4s linear forwards;
-}
-
-.app-flow.is-paused .app-step.is-active .app-step-progress::after {
-  animation-play-state: paused;
-}
-
-@keyframes appStepFill {
-  to { transform: scaleX(1); }
-}
-
 /* ============ PAIN → SOLUTION (light) ============ */
 .pain-solve {
   padding: 104px 0;
@@ -1264,14 +941,16 @@ nav a:hover {
 }
 
 .pain-card {
+  position: relative;
   display: flex;
   flex-direction: column;
-  padding: 24px 22px;
+  padding: 26px 22px 22px;
   background: var(--surface);
   border: 1px solid var(--line);
   border-radius: var(--r-lg);
   backdrop-filter: none;
-  box-shadow: var(--shadow-xs);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
   transition:
     transform 0.25s var(--ease),
     border-color 0.25s ease,
@@ -1281,7 +960,7 @@ nav a:hover {
 .pain-card:hover {
   transform: translateY(-3px);
   border-color: var(--line-2);
-  box-shadow: var(--shadow-md);
+  box-shadow: var(--shadow-lg);
 }
 
 .pain-card-label {
@@ -1297,16 +976,26 @@ nav a:hover {
   background: rgba(194, 65, 12, 0.07);
   border: 1px solid rgba(194, 65, 12, 0.16);
   border-radius: var(--r-full);
-  padding: 3px 9px;
+  padding: 3px 9px 3px 8px;
   margin-bottom: 12px;
+}
+
+.pain-label-icon {
+  font-size: 13px !important;
 }
 
 .pain-card-label.good {
   color: var(--accent);
   background: var(--accent-soft);
   border-color: var(--accent-line);
-  align-self: flex-start;
+  /* stretch (not flex-start) so the badge sits in a full-width flex item —
+     the dashed rule above then spans the whole card as a zone break, while
+     the pill itself stays compact and left-aligned inside it. */
+  align-self: stretch;
+  justify-content: flex-start;
   margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px dashed var(--line-2);
   margin-bottom: 10px;
 }
 
@@ -1327,122 +1016,121 @@ nav a:hover {
   margin-bottom: 0;
 }
 
-/* the "solution" copy carries a green rail so it reads as the answer */
+/* The answer gets its own tinted surface rather than a plain rule on text —
+   it is the payoff of the card and should look like one. */
 .pain-card-fix {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
   font-size: 0.875rem;
   font-weight: 500;
   line-height: 1.55;
   color: var(--ink-2);
   margin-top: 0;
-  padding: 1px 0 1px 13px;
-  margin-bottom: 20px;
-  border-top: none;
-  border-left: 2px solid var(--accent-line);
+  margin-bottom: 18px;
+  padding: 11px 13px;
+  background: var(--accent-soft);
+  border: 1px solid var(--accent-line);
+  border-radius: var(--r-md);
 }
 
-/* mini product widgets — pinned to the bottom so every card in the row ends
-   on the same line instead of leaving ragged whitespace */
-.pain-ui {
+.pain-fix-icon {
+  font-size: 15px !important;
+  color: var(--accent);
+  margin-top: 1px;
+  flex-shrink: 0;
+}
+
+/* Real captures of the widget each card is about, pinned to the bottom so
+   every card in the row ends on the same line. Three frames of the same
+   widget in three real states, cross-faded — the process, not a mock of it. */
+.pain-shot {
+  position: relative;
+  z-index: 1;
+  margin: 20px 0 0;
   margin-top: auto;
-  padding: 14px;
   border-radius: var(--r-md);
   border: 1px solid var(--line);
-  background: var(--canvas);
-}
-
-
-.pain-ui-top {
-  font-size: 0.625rem;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--muted-2);
-  margin-bottom: 10px;
-}
-
-.pain-ui-line {
-  height: 8px;
-  width: 100%;
-  border-radius: var(--r-full);
-  background: var(--canvas-2);
-  border: 1px solid var(--line);
-  transform-origin: left center;
-}
-
-.pain-ui-line.short {
-  width: 62%;
-  margin-top: 8px;
-}
-
-.pain-ui-status {
-  margin-top: 12px;
-  display: inline-flex;
-  align-items: center;
-  border-radius: var(--r-full);
-  padding: 5px 10px;
-  font-size: 0.6875rem;
-  font-weight: 600;
-}
-
-.pain-ui-status.ok {
-  background: var(--accent-soft);
-  color: var(--accent);
-  border: 1px solid var(--accent-line);
-}
-
-.pain-ui-status.warn {
-  background: rgba(180, 83, 9, 0.08);
-  color: var(--warn);
-  border: 1px solid rgba(180, 83, 9, 0.2);
-}
-
-.pain-ui-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  padding: 7px 0;
-  border-top: 1px solid var(--line);
-  font-size: 0.78rem;
-  color: var(--muted);
-}
-
-.pain-ui-row:first-of-type {
-  border-top: none;
-}
-
-.pain-ui-row strong {
-  font-size: 0.78rem;
-  font-weight: 600;
-  color: var(--ink);
-}
-
-.pain-ui-row .motion-pain-pill {
-  font-size: 0.6875rem;
-  font-weight: 600;
-  color: var(--accent);
-  background: var(--accent-soft);
-  border: 1px solid var(--accent-line);
-  border-radius: var(--r-full);
-  padding: 3px 8px;
-}
-
-.pain-ui-progress {
-  width: 100%;
-  height: 8px;
-  border-radius: var(--r-full);
-  background: var(--canvas-2);
-  border: 1px solid var(--line);
   overflow: hidden;
-  margin-bottom: 10px;
+  background: var(--surface);
+  box-shadow: var(--shadow-xs);
+  transition: box-shadow 0.25s ease;
 }
 
-.pain-ui-progress span {
-  display: block;
-  width: 22%;
+/* Soft brand-colored glow behind the capture — it is the card's proof, so it
+   gets a touch more presence than a plain bordered rectangle. Sits behind the
+   shot (z-index below it, above the card background) and is clipped to the
+   card's own bounds since .pain-card has no overflow of its own here. */
+.pain-shot::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: -14px;
+  background: radial-gradient(60% 60% at 50% 30%, var(--accent-soft), transparent 72%);
+  opacity: 0.9;
+  pointer-events: none;
+}
+
+.pain-card:hover .pain-shot {
+  box-shadow: var(--shadow-sm);
+}
+
+.pain-card:hover .pain-shot img {
+  transform: scale(1.035);
+}
+
+/* A quiet pulsing dot — the only hint, beyond the frames themselves, that
+   this is a live product cycling through real states and not a still. */
+.pain-shot-live {
+  position: absolute;
+  z-index: 2;
+  top: 10px;
+  right: 10px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--accent-bright);
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.85);
+  animation: painLivePulse 2.4s ease-in-out infinite;
+}
+
+@keyframes painLivePulse {
+  0%, 100% { opacity: 0.55; transform: scale(0.85); }
+  50%      { opacity: 1; transform: scale(1); }
+}
+
+.pain-shot--order   { aspect-ratio: 378 / 349; }
+.pain-shot--team    { aspect-ratio: 426 / 291; }
+.pain-shot--payment { aspect-ratio: 378 / 327; }
+
+.pain-shot img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
   height: 100%;
-  border-radius: inherit;
-  background: linear-gradient(90deg, var(--accent-bright), var(--accent));
+  object-fit: cover;
+  object-position: top center;
+  opacity: 0;
+  transition: transform 0.4s var(--ease);
+  animation: painShotCycle 10s steps(1, end) infinite;
+}
+
+/* Without the animation — reduced motion, or an old engine — the first frame
+   is the one that stays up. */
+.pain-shot img:first-of-type { opacity: 1; }
+
+.pain-shot img:nth-of-type(2) { animation-delay: 2s; }
+.pain-shot img:nth-of-type(3) { animation-delay: 4s; }
+.pain-shot img:nth-of-type(4) { animation-delay: 6s; }
+.pain-shot img:nth-of-type(5) { animation-delay: 8s; }
+
+/* Frames swap rather than cross-fade. The rows differ between frames, so a
+   fade renders two different lists on top of each other — legible for neither
+   for the length of the fade. A clean switch also reads like the UI updating,
+   which is the point. */
+@keyframes painShotCycle {
+  0%, 20%      { opacity: 1; }
+  20.01%, 100% { opacity: 0; }
 }
 
 /* ============ FEATURES ============ */
@@ -1534,6 +1222,7 @@ nav a:hover {
   color: var(--muted);
   line-height: 1.6;
 }
+
 /* ============ PRICING ============ */
 .pricing {
   padding: 112px 0;
@@ -1761,47 +1450,80 @@ nav a:hover {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 16px;
-  margin-top: 8px;
+  /* Room above the cards for the step circles to straddle their top edge. */
+  margin-top: 34px;
+  padding-top: 22px;
   position: relative;
 }
 
+/* The connecting path — a gradient rather than a flat hairline, so the row
+   reads as a route that gets more definite as it goes, not just a rule.
+   left/right at 12.5% line up with each circle's center: four equal columns
+   center their content at 1/8, 3/8, 5/8, 7/8 of the row. */
 .process-steps::before {
   content: "";
   position: absolute;
-  top: 44px;
-  left: 8%;
-  right: 8%;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, var(--line-2) 12%, var(--line-2) 88%, transparent);
+  top: 22px;
+  left: 12.5%;
+  right: 12.5%;
+  height: 2px;
+  background: linear-gradient(90deg,
+    var(--accent-line) 0%,
+    var(--accent) 45%,
+    var(--accent-strong) 100%);
   z-index: 0;
 }
 
 .process-step {
   position: relative;
   z-index: 1;
-  padding: 24px 20px;
+  padding: 30px 20px 24px;
   text-align: left;
   background: var(--surface);
   border: 1px solid var(--line);
   border-radius: var(--r-lg);
   box-shadow: var(--shadow-xs);
+  transition:
+    transform 0.25s var(--ease),
+    border-color 0.25s ease,
+    box-shadow 0.25s ease;
 }
 
+.process-step:hover {
+  transform: translateY(-3px);
+  border-color: var(--line-2);
+  box-shadow: var(--shadow-md);
+}
+
+/* The number sits ON the connecting path rather than inside the card's own
+   padding — a stepper node, not a caption. The canvas-colored ring punches a
+   clean gap in the line and the card border alike, so the circle reads as
+   threaded through both instead of stacked on top of them. */
 .step-number {
-  width: 34px;
-  height: 34px;
-  margin: 0 0 16px;
+  position: absolute;
+  z-index: 2;
+  top: -22px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 44px;
+  height: 44px;
+  margin: 0;
   display: flex;
   align-items: center;
   justify-content: center;
   font-family: var(--font-display);
-  font-size: 0.9375rem;
+  font-size: 1.0625rem;
   font-weight: 700;
   color: #fff;
-  background: var(--accent);
+  background: linear-gradient(160deg, var(--accent-bright), var(--accent));
   border: none;
-  border-radius: var(--r-sm);
-  box-shadow: var(--shadow-accent);
+  border-radius: 50%;
+  box-shadow: var(--shadow-accent), 0 0 0 5px var(--canvas);
+  transition: box-shadow 0.25s ease;
+}
+
+.process-step:hover .step-number {
+  box-shadow: var(--shadow-accent), 0 0 0 5px var(--canvas), 0 0 0 8px var(--accent-line);
 }
 
 .process-step h3 {
@@ -1810,13 +1532,16 @@ nav a:hover {
   font-weight: 600;
   letter-spacing: -0.02em;
   margin-bottom: 7px;
+  margin-top: 6px;
   color: var(--ink);
+  text-align: center;
 }
 
 .process-step p {
   font-size: 0.85rem;
   color: var(--muted);
   line-height: 1.55;
+  text-align: center;
   opacity: 1;
 }
 
@@ -2034,6 +1759,7 @@ footer {
   text-decoration: none;
   transition:
     transform 0.2s var(--ease),
+    opacity 0.2s ease,
     box-shadow 0.2s ease;
   border: none;
 }
@@ -2050,48 +1776,52 @@ footer {
 /* ============ RESPONSIVE ============ */
 /* The RU nav labels ("Проблема → решение", "Войти в систему") are much longer
    than the KZ ones and used to push the WhatsApp button past the viewport. */
-@media (max-width: 1400px) {
-  nav {
+/* The container caps at 1180px, so the header budget is constant above ~1244px
+   and only starts shrinking below it — that is where the nav has to tighten. */
+@media (max-width: 1244px) {
+  .site-nav {
     margin-left: 10px;
   }
 
-  nav a {
-    padding: 6px 7px;
-    font-size: 0.7625rem;
+  .site-nav a {
+    padding: 6px 8px;
+    font-size: 0.78125rem; /* 12.5px floor — below this the nav stops reading as navigation */
   }
 
-  .phone-link {
-    font-size: 0;
-    width: 34px;
-    padding: 0;
-    justify-content: center;
+  .site-nav a::after {
+    left: 8px;
+    right: 8px;
   }
 
-  .phone-link .material-symbols-outlined {
-    font-size: 17px;
-  }
 }
 
-@media (max-width: 1024px) {
-  nav {
+/* Header switches to the drawer at 1080px, not 1024px: the RU labels are the
+   widest and at 1025px the inline nav was still 4px short of the switcher. */
+@media (max-width: 1080px) {
+  .site-nav {
     display: none;
+  }
+
+  .nav-toggle {
+    display: inline-flex;
   }
 
   .header-content {
     gap: 10px;
   }
 
-  .phone-link {
-    font-size: 0;
-    width: 34px;
-    padding: 0;
-    justify-content: center;
+  /* The drawer carries the phone and WhatsApp, so the bar keeps only login. */
+  .header-cta .phone-link,
+  .header-cta .btn-whatsapp {
+    display: none;
   }
 
-  .phone-link .material-symbols-outlined {
-    font-size: 17px;
+  .lang-switcher {
+    margin-left: auto;
   }
+}
 
+@media (max-width: 1024px) {
   .hero-visual {
     margin-top: 48px;
     padding-bottom: 70px;
@@ -2102,12 +1832,38 @@ footer {
     grid-template-columns: repeat(2, 1fr);
   }
 
+  /* Below one row, "path threaded through 4 nodes" stops being true — two
+     rows of a stepper straddling their own top edge would have row 2's
+     circles overlap row 1's cards (16px gap, 22px of protrusion). Revert to
+     a plain in-card badge instead of fighting the wrap with more spacing. */
   .process-steps {
     grid-template-columns: repeat(2, 1fr);
+    margin-top: 8px;
+    padding-top: 0;
   }
 
   .process-steps::before {
     display: none;
+  }
+
+  .process-step {
+    padding: 24px 20px;
+  }
+
+  .step-number {
+    position: static;
+    transform: none;
+    margin: 0 0 16px;
+    box-shadow: var(--shadow-accent);
+  }
+
+  .process-step:hover .step-number {
+    box-shadow: var(--shadow-accent);
+  }
+
+  .process-step h3,
+  .process-step p {
+    text-align: left;
   }
 
   .footer-content {
@@ -2120,11 +1876,6 @@ footer {
     margin: 0 auto;
   }
 
-  .app-flow-grid {
-    grid-template-columns: minmax(0, 1fr);
-    justify-content: stretch;
-    gap: 32px;
-  }
 }
 
 @media (max-width: 768px) {
@@ -2150,8 +1901,20 @@ footer {
     font-size: 0.75rem;
   }
 
-  .header-cta .btn-whatsapp {
-    display: none;
+  .nav-toggle {
+    width: 36px;
+    height: 32px;
+  }
+
+  .mobile-nav-cta {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .mobile-nav-cta .btn-whatsapp,
+  .mobile-nav-phone {
+    flex: 0 0 auto;
+    width: 100%;
   }
 
   .billing-toggle {
@@ -2203,44 +1966,6 @@ footer {
     justify-content: center;
   }
 
-  /* mock: drop the sidebar, keep the data that carries the point */
-  .hero-mock-rows {
-    grid-template-columns: 1fr;
-    padding: 0;
-    gap: 0;
-  }
-
-  .mock-nav {
-    display: none;
-  }
-
-  .mock-main {
-    padding: 14px;
-    gap: 11px;
-  }
-
-  .mock-kpis {
-    gap: 8px;
-  }
-
-  .mock-kpi {
-    padding: 10px;
-  }
-
-  .mock-kpi-value {
-    font-size: 0.9375rem;
-  }
-
-  .mock-tr {
-    grid-template-columns: 24px 1fr auto auto;
-    gap: 8px;
-    padding: 10px 12px;
-  }
-
-  .mock-meta {
-    display: none;
-  }
-
   .section-header {
     margin-bottom: 36px;
   }
@@ -2262,7 +1987,6 @@ footer {
   }
 
   .pain-solve,
-  .app-flow,
   .features,
   .pricing,
   .process,
@@ -2332,6 +2056,14 @@ footer {
 }
 
 @media (max-width: 560px) {
+  /* The <picture> swaps to the phone capture here, and its aspect and travel
+     both differ. max-width keeps a 390px-wide capture from being blown up:
+     above it the desktop shot scales down instead, which stays sharp. */
+  .hero-shot {
+    aspect-ratio: 390 / 780;
+    max-width: 340px;
+  }
+
   .container {
     padding: 0 14px;
   }
@@ -2341,53 +2073,18 @@ footer {
     padding: 5px 10px 5px 7px;
     margin-bottom: 20px;
   }
-  .hero-mock {
+  .hero-shot {
     border-radius: var(--r-lg);
-  }
-
-  .hero-mock-top {
-    padding: 10px 14px;
-    font-size: 0.75rem;
-  }
-
-  .mock-kpis {
-    grid-template-columns: repeat(3, 1fr);
-  }
-
-  .mock-kpi-label {
-    font-size: 0.625rem;
-  }
-
-  .mock-tr {
-    grid-template-columns: 24px 1fr auto;
-  }
-
-  .mock-amount {
-    display: none;
-  }
-
-  .hero-mock-row.accent {
-    min-height: 42px;
-    font-size: 0.8125rem;
-    padding: 12px 14px;
   }
 
   .section-title {
     font-size: 1.45rem;
   }
 
-  .app-step {
-    --step-pad: 16px;
-  }
-
   .price-card {
     padding: 22px 18px;
   }
 
-  .pain-ui-status {
-    width: 100%;
-    justify-content: center;
-  }
 }
 
 @media (max-width: 400px) {
@@ -2396,7 +2093,27 @@ footer {
   }
 
   .logo img.logo-wordmark {
-    width: 94px;
+    width: 88px;
+  }
+
+  /* At 320px the logo + switcher + login + burger row was 4px wider than the
+     viewport and clipped the burger off the right edge. */
+  .header-content {
+    gap: 5px;
+  }
+
+  .lang-btn {
+    padding: 4px 6px;
+    font-size: 0.625rem;
+  }
+
+  .header-cta .btn {
+    padding: 0 9px;
+    font-size: 0.6875rem;
+  }
+
+  .nav-toggle {
+    width: 34px;
   }
 
   .hero h1 {
@@ -2415,5 +2132,28 @@ footer {
   .pain-card p,
   .feature-card p {
     font-size: 0.84rem;
+  }
+}
+
+/* ============ REDUCED MOTION (must come last) ============
+   Overrides here have the same specificity as the rules they cancel, so they
+   only win by being later in the file. Keep this block at the bottom. */
+@media (prefers-reduced-motion: reduce) {
+  .hero-shot {
+    animation: none;
+  }
+
+  .pain-shot img {
+    animation: none;
+    opacity: 0;
+  }
+
+  .pain-shot img:first-of-type {
+    opacity: 1;
+  }
+
+  .pain-shot-live {
+    animation: none;
+    opacity: 0.75;
   }
 }
