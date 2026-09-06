@@ -983,14 +983,16 @@ body.nav-open .whatsapp-float {
 }
 
 .pain-card {
+  position: relative;
   display: flex;
   flex-direction: column;
-  padding: 24px 22px;
+  padding: 26px 22px 22px;
   background: var(--surface);
   border: 1px solid var(--line);
   border-radius: var(--r-lg);
   backdrop-filter: none;
-  box-shadow: var(--shadow-xs);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
   transition:
     transform 0.25s var(--ease),
     border-color 0.25s ease,
@@ -1000,7 +1002,7 @@ body.nav-open .whatsapp-float {
 .pain-card:hover {
   transform: translateY(-3px);
   border-color: var(--line-2);
-  box-shadow: var(--shadow-md);
+  box-shadow: var(--shadow-lg);
 }
 
 .pain-card-label {
@@ -1016,16 +1018,26 @@ body.nav-open .whatsapp-float {
   background: rgba(194, 65, 12, 0.07);
   border: 1px solid rgba(194, 65, 12, 0.16);
   border-radius: var(--r-full);
-  padding: 3px 9px;
+  padding: 3px 9px 3px 8px;
   margin-bottom: 12px;
+}
+
+.pain-label-icon {
+  font-size: 13px !important;
 }
 
 .pain-card-label.good {
   color: var(--accent);
   background: var(--accent-soft);
   border-color: var(--accent-line);
-  align-self: flex-start;
+  /* stretch (not flex-start) so the badge sits in a full-width flex item —
+     the dashed rule above then spans the whole card as a zone break, while
+     the pill itself stays compact and left-aligned inside it. */
+  align-self: stretch;
+  justify-content: flex-start;
   margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px dashed var(--line-2);
   margin-bottom: 10px;
 }
 
@@ -1046,17 +1058,29 @@ body.nav-open .whatsapp-float {
   margin-bottom: 0;
 }
 
-/* the "solution" copy carries a green rail so it reads as the answer */
+/* The answer gets its own tinted surface rather than a plain rule on text —
+   it is the payoff of the card and should look like one. */
 .pain-card-fix {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
   font-size: 0.875rem;
   font-weight: 500;
   line-height: 1.55;
   color: var(--ink-2);
   margin-top: 0;
-  padding: 1px 0 1px 13px;
-  margin-bottom: 20px;
-  border-top: none;
-  border-left: 2px solid var(--accent-line);
+  margin-bottom: 18px;
+  padding: 11px 13px;
+  background: var(--accent-soft);
+  border: 1px solid var(--accent-line);
+  border-radius: var(--r-md);
+}
+
+.pain-fix-icon {
+  font-size: 15px !important;
+  color: var(--accent);
+  margin-top: 1px;
+  flex-shrink: 0;
 }
 
 /* Real captures of the widget each card is about, pinned to the bottom so
@@ -1064,6 +1088,7 @@ body.nav-open .whatsapp-float {
    widget in three real states, cross-faded — the process, not a mock of it. */
 .pain-shot {
   position: relative;
+  z-index: 1;
   margin: 20px 0 0;
   margin-top: auto;
   border-radius: var(--r-md);
@@ -1071,6 +1096,49 @@ body.nav-open .whatsapp-float {
   overflow: hidden;
   background: var(--surface);
   box-shadow: var(--shadow-xs);
+  transition: box-shadow 0.25s ease;
+}
+
+/* Soft brand-colored glow behind the capture — it is the card's proof, so it
+   gets a touch more presence than a plain bordered rectangle. Sits behind the
+   shot (z-index below it, above the card background) and is clipped to the
+   card's own bounds since .pain-card has no overflow of its own here. */
+.pain-shot::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: -14px;
+  background: radial-gradient(60% 60% at 50% 30%, var(--accent-soft), transparent 72%);
+  opacity: 0.9;
+  pointer-events: none;
+}
+
+.pain-card:hover .pain-shot {
+  box-shadow: var(--shadow-sm);
+}
+
+.pain-card:hover .pain-shot img {
+  transform: scale(1.035);
+}
+
+/* A quiet pulsing dot — the only hint, beyond the frames themselves, that
+   this is a live product cycling through real states and not a still. */
+.pain-shot-live {
+  position: absolute;
+  z-index: 2;
+  top: 10px;
+  right: 10px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--accent-bright);
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.85);
+  animation: painLivePulse 2.4s ease-in-out infinite;
+}
+
+@keyframes painLivePulse {
+  0%, 100% { opacity: 0.55; transform: scale(0.85); }
+  50%      { opacity: 1; transform: scale(1); }
 }
 
 .pain-shot--order   { aspect-ratio: 378 / 349; }
@@ -1085,17 +1153,18 @@ body.nav-open .whatsapp-float {
   object-fit: cover;
   object-position: top center;
   opacity: 0;
+  transition: transform 0.4s var(--ease);
   animation: painShotCycle 10s steps(1, end) infinite;
 }
 
 /* Without the animation — reduced motion, or an old engine — the first frame
    is the one that stays up. */
-.pain-shot img:first-child { opacity: 1; }
+.pain-shot img:first-of-type { opacity: 1; }
 
-.pain-shot img:nth-child(2) { animation-delay: 2s; }
-.pain-shot img:nth-child(3) { animation-delay: 4s; }
-.pain-shot img:nth-child(4) { animation-delay: 6s; }
-.pain-shot img:nth-child(5) { animation-delay: 8s; }
+.pain-shot img:nth-of-type(2) { animation-delay: 2s; }
+.pain-shot img:nth-of-type(3) { animation-delay: 4s; }
+.pain-shot img:nth-of-type(4) { animation-delay: 6s; }
+.pain-shot img:nth-of-type(5) { animation-delay: 8s; }
 
 /* Frames swap rather than cross-fade. The rows differ between frames, so a
    fade renders two different lists on top of each other — legible for neither
@@ -2067,7 +2136,12 @@ footer {
     opacity: 0;
   }
 
-  .pain-shot img:first-child {
+  .pain-shot img:first-of-type {
     opacity: 1;
+  }
+
+  .pain-shot-live {
+    animation: none;
+    opacity: 0.75;
   }
 }
