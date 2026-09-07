@@ -171,7 +171,7 @@ const dashboard = {
     todayTasks: 'Задачи на сегодня',
     tomorrow: 'Завтра',
     upcomingTasks: 'Предстоящие задачи',
-    viewAll: 'Все →',
+    viewAll: 'Все',
   },
 
   // Lang-aware month/weekday arrays for designer date formatting

@@ -240,7 +240,7 @@ const AdminUsers = () => {
               onClick={() => navigate('/admin/billing')}
               className="text-xs font-bold text-amber-700 underline underline-offset-2"
             >
-              {lang === 'kz' ? 'Тарифті көру →' : 'Посмотреть тариф →'}
+              {lang === 'kz' ? 'Тарифті көру' : 'Посмотреть тариф'}
             </button>
           </div>
           <button onClick={() => setLimitError(null)} className="text-amber-400 hover:text-amber-600">
