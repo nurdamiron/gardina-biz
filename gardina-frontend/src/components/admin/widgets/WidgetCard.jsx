@@ -65,7 +65,7 @@ const WidgetCard = ({
                     onClick={action.onClick}
                     className="w-full text-xs font-semibold text-primary hover:text-primary-dark transition-colors text-center"
                 >
-                    {action.label} →
+                    {action.label}
                 </button>
             </div>
         )}

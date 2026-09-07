@@ -16,6 +16,13 @@ function redactIdentifier(value) {
   return crypto.createHash('sha256').update(String(value)).digest('hex').slice(0, 8);
 }
 
+// Same pattern as PasswordResetController: store the hash, email the raw
+// token, never persist the raw value. Duplicated rather than imported to
+// avoid coupling two independently-owned auth flows over one shared helper.
+function hashToken(token) {
+  return crypto.createHash('sha256').update(token).digest('hex');
+}
+
 function normalizeOrgSlug(raw) {
   if (!raw || typeof raw !== 'string') return '';
   return raw
@@ -500,12 +507,13 @@ export class AuthController {
     if (!token) {
       return res.status(400).json({ success: false, error: 'Token жоқ' });
     }
+    const tokenHash = hashToken(token);
     try {
       const result = await pool.query(
         `SELECT user_id, expires_at, used_at
          FROM email_verification_tokens
-         WHERE token = $1`,
-        [token]
+         WHERE token_hash = $1`,
+        [tokenHash]
       );
       const row = result.rows[0];
       if (!row) {
@@ -522,8 +530,8 @@ export class AuthController {
         [row.user_id]
       );
       await pool.query(
-        `UPDATE email_verification_tokens SET used_at = NOW() WHERE token = $1`,
-        [token]
+        `UPDATE email_verification_tokens SET used_at = NOW() WHERE token_hash = $1`,
+        [tokenHash]
       );
       return res.json({ success: true, message: 'Email сәтті расталды' });
     } catch (error) {
@@ -556,13 +564,14 @@ export class AuthController {
 
   async _sendVerificationEmail(userId, email, name, req) {
     const token = crypto.randomBytes(32).toString('hex');
+    const tokenHash = hashToken(token);
     const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24h
     await pool.query(
-      `INSERT INTO email_verification_tokens (user_id, token, expires_at)
-       VALUES ($1, $2, $3)
+      `INSERT INTO email_verification_tokens (user_id, email, token_hash, expires_at)
+       VALUES ($1, $2, $3, $4)
        ON CONFLICT (user_id) DO UPDATE
-         SET token = $2, expires_at = $3, used_at = NULL, created_at = NOW()`,
-      [userId, token, expiresAt]
+         SET token_hash = $3, expires_at = $4, used_at = NULL, created_at = NOW()`,
+      [userId, email, tokenHash, expiresAt]
     );
     const appUrl = process.env.FRONTEND_URL || process.env.APP_URL || 'https://app.gardina.kz';
     const verifyUrl = `${appUrl}/verify-email?token=${token}`;

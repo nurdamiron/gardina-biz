@@ -436,7 +436,7 @@ const DesignerDashboard = () => {
               onClick={() => navigate('/designer/measurements')}
               className="text-primary text-sm font-bold"
             >
-              {t('dashboard.designer.viewAll', 'Барлығы →')}
+              {t('dashboard.designer.viewAll', 'Барлығы')}
             </button>
           </div>
 

@@ -89,7 +89,7 @@ const OnboardingChecklist = () => {
                 onClick={() => navigate(item.link)}
                 className="text-xs font-bold text-primary hover:underline"
               >
-                {t('onboardingChecklist.go')} →
+                {t('onboardingChecklist.go')}
               </button>
             )}
           </li>
