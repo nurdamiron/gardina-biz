@@ -526,7 +526,7 @@ export class AuthController {
         return res.status(400).json({ success: false, error: 'Токен мерзімі өтіп кеткен' });
       }
       await pool.query(
-        `UPDATE users SET email_verified = true, updated_at = NOW() WHERE id = $1`,
+        `UPDATE users SET email_verified_at = NOW(), updated_at = NOW() WHERE id = $1`,
         [row.user_id]
       );
       await pool.query(
@@ -548,7 +548,7 @@ export class AuthController {
     try {
       const user = await this.userRepository.findById(req.user.id);
       if (!user) return res.status(404).json({ success: false, error: 'Пайдаланушы табылмады' });
-      if (user.email_verified) {
+      if (user.email_verified_at) {
         return res.json({ success: true, message: 'Email бұрыннан расталған' });
       }
       if (!user.email) {
