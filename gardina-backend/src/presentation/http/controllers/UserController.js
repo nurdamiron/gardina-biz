@@ -411,8 +411,8 @@ export class UserController {
 
       // Create user — phone is optional for invite-based users (email is identifier)
       const userRes = await client.query(
-        `INSERT INTO users (organization_id, name, email, phone, password_hash, role, email_verified)
-         VALUES ($1, $2, $3, $4, $5, $6, true)
+        `INSERT INTO users (organization_id, name, email, phone, password_hash, role, email_verified_at)
+         VALUES ($1, $2, $3, $4, $5, $6, NOW())
          RETURNING id, name, email, phone, role`,
         [inv.organization_id, finalName, inv.email, inv.email, passwordHash, inv.role]
       );
