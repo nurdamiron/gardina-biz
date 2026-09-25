@@ -1,0 +1,72 @@
+name: Deploy Threads bot → LIVE EC2
+# Separate container `threads-autopilot` next to Gardina. Secrets (Threads tokens, Telegram, Claude key)
+# come from the THREADS_BOT_CONFIG_B64 secret, travel in a short-lived private S3 object, and are
+# deleted from S3 at the end of the run.
+
+on:
+  push:
+    branches: [threads-bot]
+    paths: ["threads-autopilot/**", ".github/workflows/deploy-threads-bot.yml"]
+  workflow_dispatch:
+
+concurrency:
+  group: threads-bot-deploy
+  cancel-in-progress: false
+
+env:
+  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  AWS_DEFAULT_REGION: ${{ secrets.AWS_REGION }}
+  OBJ: s3://alashed-deploy-temp/threads-bot-${{ github.run_id }}-${{ github.run_attempt }}.tar.gz
+  INSTANCE: i-06e2d5837c24c75f3
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Package
+        env:
+          CONFIG_B64: ${{ secrets.THREADS_BOT_CONFIG_B64 }}
+        run: |
+          test -n "$CONFIG_B64" || { echo "THREADS_BOT_CONFIG_B64 secret is empty"; exit 1; }
+          echo "$CONFIG_B64" | base64 -d > config.tar.gz
+          tar -tzf config.tar.gz
+          tar -czf /tmp/bundle.tar.gz threads-autopilot config.tar.gz
+          rm config.tar.gz
+
+      - name: Upload bundle
+        run: aws s3 cp /tmp/bundle.tar.gz "$OBJ" --only-show-errors
+
+      - name: Deploy via SSM
+        run: |
+          URL=$(aws s3 presign "$OBJ" --expires-in 900)
+          PARAMS=$(jq -n --arg url "$URL" '{commands: [
+            "set -e",
+            "rm -rf /tmp/tb && mkdir -p /tmp/tb && cd /tmp/tb",
+            ("wget -q -O b.tgz '" + $url + "'"),
+            "tar -xzf b.tgz && rm b.tgz",
+            "bash threads-autopilot/deploy/remote.sh"
+          ], executionTimeout: ["1500"]}')
+          CMD_ID=$(aws ssm send-command --instance-ids "$INSTANCE" --document-name AWS-RunShellScript \
+            --parameters "$PARAMS" --query Command.CommandId --output text)
+          echo "SSM command: $CMD_ID"
+          for i in $(seq 1 120); do
+            sleep 10
+            STATUS=$(aws ssm get-command-invocation --command-id "$CMD_ID" --instance-id "$INSTANCE" --query Status --output text 2>/dev/null || echo InProgress)
+            echo "[$i] $STATUS"
+            if echo "$STATUS" | grep -qE '^(Success|Failed|TimedOut|Cancelled)$'; then
+              aws ssm get-command-invocation --command-id "$CMD_ID" --instance-id "$INSTANCE" --query StandardOutputContent --output text
+              echo "---- stderr ----"
+              aws ssm get-command-invocation --command-id "$CMD_ID" --instance-id "$INSTANCE" --query StandardErrorContent --output text | tail -20
+              [ "$STATUS" = Success ] || exit 1
+              exit 0
+            fi
+          done
+          echo "timed out waiting for SSM"; exit 1
+
+      - name: Remove bundle from S3
+        if: always()
+        run: aws s3 rm "$OBJ" --only-show-errors || true
