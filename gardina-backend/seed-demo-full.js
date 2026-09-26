@@ -10,7 +10,7 @@ dotenv.config();
 
 const { Pool } = pg;
 const pool = new Pool({
-  connectionString: `postgresql://gardina_app:Gardina%23Prod2026%21@projects.cde42ec8m1u7.eu-north-1.rds.amazonaws.com:5432/gardina_prod?sslmode=require`,
+  connectionString: process.env.DATABASE_URL,
 });
 
 const ORG_ID = 'b35e3efc-cedf-414d-8386-f6d7913a04c5';

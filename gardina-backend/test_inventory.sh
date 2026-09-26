@@ -3,7 +3,7 @@
 
 API_URL="http://localhost:3001/api"
 EMAIL="admin@gardina.kz"
-PASSWORD="admin123"
+PASSWORD="${ADMIN_PASSWORD:?export ADMIN_PASSWORD=...}"
 
 # 1. Login
 echo "Logging in..."

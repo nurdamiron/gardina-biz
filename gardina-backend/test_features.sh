@@ -12,7 +12,7 @@ echo "==================================================="
 # 1. Login to get Token
 echo ""
 echo "🔹 Using Hardcoded Admin Token..."
-TOKEN="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjRmOGNkZTJiLWJkNzUtNDk4YS1hNWJjLTMyZTNiZmNkOGE4YyIsImVtYWlsIjoiYWRtaW5AdGVzdC5jb20iLCJwaG9uZSI6Iis3Nzc3Nzc3Nzc3NyIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc2ODE5ODg5MCwiZXhwIjoxNzY4ODAzNjkwfQ.yRi71uO5bRAZRmx-l2__tF4rRCBy4SDFLlb1rJ101Bw"
+TOKEN="${TOKEN:?export TOKEN=<admin JWT>}"
 
 if [ -z "$TOKEN" ]; then
   echo "❌ Token is empty"
