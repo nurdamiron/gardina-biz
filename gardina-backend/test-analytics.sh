@@ -29,7 +29,7 @@ if [ "$TOKEN" = "null" ] || [ -z "$TOKEN" ]; then
   # Try admin credentials
   LOGIN_RESPONSE=$(curl -s -X POST ${API_URL}/auth/login \
     -H "Content-Type: application/json" \
-    -d '{"phone": "+77012345678", "password": "admin123"}')
+    -d '{"phone": "+77012345678", "password": "'"$ADMIN_PASSWORD"'"}')
 
   TOKEN=$(echo $LOGIN_RESPONSE | jq -r '.data.accessToken')
 
