@@ -1,3 +1,4 @@
+import { useI18n } from '../../contexts/I18nContext';
 import React, { useState, useEffect } from 'react';
 import { 
   calculateRomanWidth,
@@ -11,6 +12,7 @@ import Icon from '../common/Icon';
  * Форма для римских штор
  */
 const RomanShadeForm = ({ data, onChange }) => {
+  const { t } = useI18n();
   const [fabrics, setFabrics] = useState([]);
   const [searchFabric, setSearchFabric] = useState('');
   const [showFabricList, setShowFabricList] = useState(false);
@@ -71,12 +73,12 @@ const RomanShadeForm = ({ data, onChange }) => {
       <div className="bg-card rounded-2xl p-5 shadow-sm border border-border">
         <div className="flex items-center gap-2 mb-4">
           <Icon name="straighten" className="text-primary" />
-          <h3 className="font-bold text-foreground">Терезе өлшемі</h3>
+          <h3 className="font-bold text-foreground">{t('measurements.form.windowSize', 'Терезе өлшемі')}</h3>
         </div>
 
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-muted-foreground mb-2">Ені</label>
+            <label className="block text-sm font-medium text-muted-foreground mb-2">{t('measurements.form.width', 'Ені')}</label>
             <div className="relative">
               <input
                 type="number"
@@ -92,7 +94,7 @@ const RomanShadeForm = ({ data, onChange }) => {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-muted-foreground mb-2">Биіктігі</label>
+            <label className="block text-sm font-medium text-muted-foreground mb-2">{t('measurements.form.height', 'Биіктігі')}</label>
             <div className="relative">
               <input
                 type="number"
@@ -111,7 +113,7 @@ const RomanShadeForm = ({ data, onChange }) => {
         {width > 0 && (
           <div className="mt-4 p-3 bg-primary/10 rounded-xl border border-primary/15">
             <div className="flex justify-between items-center">
-              <span className="text-primary-dark">Мата ені (+ 10см):</span>
+              <span className="text-primary-dark">{t('measurements.form.fabricWidth', 'Мата ені (+ 10см):')}</span>
               <span className="text-xl font-bold text-primary-dark">{romanWidth} м</span>
             </div>
           </div>
@@ -122,7 +124,7 @@ const RomanShadeForm = ({ data, onChange }) => {
       <div className="bg-card rounded-2xl p-5 shadow-sm border border-border">
         <div className="flex items-center gap-2 mb-4">
           <Icon name="grid_view" className="text-muted-foreground" />
-          <h3 className="font-bold text-foreground">Штора саны</h3>
+          <h3 className="font-bold text-foreground">{t('measurements.form.curtainCount', 'Штора саны')}</h3>
         </div>
 
         <div className="flex gap-3">
@@ -147,7 +149,7 @@ const RomanShadeForm = ({ data, onChange }) => {
       <div className="bg-card rounded-2xl p-5 shadow-sm border border-border">
         <div className="flex items-center gap-2 mb-4">
           <Icon name="texture" className="text-amber-600" />
-          <h3 className="font-bold text-foreground">Мата</h3>
+          <h3 className="font-bold text-foreground">{t('measurements.form.fabric', 'Мата')}</h3>
           {fabricTotal > 0 && (
             <span className="ml-auto text-sm font-bold text-green-600">{formatPrice(fabricTotal)}</span>
           )}
@@ -164,7 +166,7 @@ const RomanShadeForm = ({ data, onChange }) => {
             onFocus={() => setShowFabricList(true)}
             className="w-full h-12 px-4 bg-muted border-2 border-transparent rounded-xl 
               focus:bg-card focus:border-primary transition-all"
-            placeholder="Мата іздеу..."
+            placeholder={t('measurements.form.searchFabric', 'Мата іздеу...')}
           />
           
           {showFabricList && filteredFabrics.length > 0 && (
@@ -232,7 +234,7 @@ const RomanShadeForm = ({ data, onChange }) => {
                   : 'bg-muted text-muted-foreground hover:bg-muted'
               }`}
             >
-              <span className="block">{mech.name}</span>
+              <span className="block">{t(`measurements.form.mechanismType.${mech.id}`, mech.name)}</span>
               <span className="block text-xs opacity-70 mt-1">{formatPrice(mech.price)}</span>
             </button>
           ))}
@@ -243,11 +245,11 @@ const RomanShadeForm = ({ data, onChange }) => {
       <div className="bg-card rounded-2xl p-5 shadow-sm border border-border">
         <div className="flex items-center gap-2 mb-4">
           <Icon name="horizontal_rule" className="text-muted-foreground" />
-          <h3 className="font-bold text-foreground">Рим жүйесі</h3>
+          <h3 className="font-bold text-foreground">{t('measurements.form.romanSystem', 'Рим жүйесі')}</h3>
         </div>
 
         <div className="flex justify-between items-center p-3 bg-muted rounded-xl">
-          <span className="text-foreground">Стандарт жүйе</span>
+          <span className="text-foreground">{t('measurements.form.standardSystem', 'Стандарт жүйе')}</span>
           <span className="font-bold text-foreground">{formatPrice(systemTotal)}</span>
         </div>
       </div>
@@ -256,11 +258,11 @@ const RomanShadeForm = ({ data, onChange }) => {
       <div className="bg-card rounded-2xl p-5 shadow-sm border border-border">
         <div className="flex items-center gap-2 mb-4">
           <Icon name="cut" className="text-muted-foreground" />
-          <h3 className="font-bold text-foreground">Тігу</h3>
+          <h3 className="font-bold text-foreground">{t('measurements.form.sewing', 'Тігу')}</h3>
         </div>
 
         <div className="flex justify-between items-center p-3 bg-muted rounded-xl">
-          <span className="text-foreground">Рим пердесін тігу</span>
+          <span className="text-foreground">{t('measurements.form.romanSewing', 'Рим пердесін тігу')}</span>
           <span className="font-bold text-foreground">{formatPrice(sewingTotal)}</span>
         </div>
       </div>
@@ -269,7 +271,7 @@ const RomanShadeForm = ({ data, onChange }) => {
       <div className="bg-card rounded-2xl p-5 shadow-sm border border-border">
         <div className="flex items-center gap-2 mb-4">
           <Icon name="build" className="text-muted-foreground" />
-          <h3 className="font-bold text-foreground">Орнату</h3>
+          <h3 className="font-bold text-foreground">{t('measurements.form.installation', 'Орнату')}</h3>
         </div>
 
         <label className="flex items-center gap-3 cursor-pointer">
@@ -291,7 +293,7 @@ const RomanShadeForm = ({ data, onChange }) => {
               data.installation?.needed ? 'translate-x-6' : 'translate-x-0'
             }`} />
           </div>
-          <span className="font-medium text-foreground">Орнату керек</span>
+          <span className="font-medium text-foreground">{t('measurements.form.installationNeeded', 'Орнату керек')}</span>
           {data.installation?.needed && (
             <span className="ml-auto font-bold text-muted-foreground">{formatPrice(installPrice)}</span>
           )}
@@ -304,7 +306,7 @@ const RomanShadeForm = ({ data, onChange }) => {
           <div className="space-y-2 text-sm mb-3">
             {fabricTotal > 0 && (
               <div className="flex justify-between">
-                <span className="text-green-700">Мата</span>
+                <span className="text-green-700">{t('measurements.form.fabric', 'Мата')}</span>
                 <span className="font-bold text-green-800">{formatPrice(fabricTotal)}</span>
               </div>
             )}
@@ -313,22 +315,22 @@ const RomanShadeForm = ({ data, onChange }) => {
               <span className="font-bold text-green-800">{formatPrice(mechanismTotal)}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-green-700">Жүйе</span>
+              <span className="text-green-700">{t('measurements.form.system', 'Жүйе')}</span>
               <span className="font-bold text-green-800">{formatPrice(systemTotal)}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-green-700">Тігу</span>
+              <span className="text-green-700">{t('measurements.form.sewing', 'Тігу')}</span>
               <span className="font-bold text-green-800">{formatPrice(sewingTotal)}</span>
             </div>
             {installPrice > 0 && (
               <div className="flex justify-between">
-                <span className="text-green-700">Орнату</span>
+                <span className="text-green-700">{t('measurements.form.installation', 'Орнату')}</span>
                 <span className="font-bold text-green-800">{formatPrice(installPrice)}</span>
               </div>
             )}
           </div>
           <div className="border-t border-green-200 pt-3 flex justify-between items-center">
-            <span className="font-bold text-green-800">Барлығы:</span>
+            <span className="font-bold text-green-800">{t('measurements.form.total', 'Барлығы:')}</span>
             <span className="text-2xl font-black text-green-700">{formatPrice(roomTotal)}</span>
           </div>
         </div>

@@ -1,3 +1,4 @@
+import { useI18n } from '../../contexts/I18nContext';
 import React from 'react';
 import { SOLUTION_TYPES } from '../../utils/calculations';
 import Icon from '../common/Icon';
@@ -6,9 +7,10 @@ import Icon from '../common/Icon';
  * Компонент выбора типа оконного решения
  */
 const SolutionTypePicker = ({ value, onChange }) => {
+  const { t } = useI18n();
   return (
     <div className="space-y-3">
-      <h3 className="text-sm font-bold text-foreground">Не орнатамыз?</h3>
+      <h3 className="text-sm font-bold text-foreground">{t('measurements.form.whatToInstall', 'Не орнатамыз?')}</h3>
       
       <div className="grid grid-cols-3 gap-3">
         {SOLUTION_TYPES.map(type => {
@@ -35,7 +37,7 @@ const SolutionTypePicker = ({ value, onChange }) => {
               
               <Icon name={type.icon} size={28} className={isSelected ? 'text-primary' : 'text-muted-foreground'} />
               <span className="text-xs font-bold text-center leading-tight">
-                {type.name}
+                {t(`measurements.form.solution.${type.id}`, type.name)}
               </span>
             </button>
           );

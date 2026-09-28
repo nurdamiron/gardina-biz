@@ -52,6 +52,10 @@ export const I18nProvider = ({ children }) => {
     const fallback = vars ? fallbackArg : varsOrFallback;
     const val = getByPath(messages[lang], key);
     if (val !== undefined) return interpolate(val, vars);
+    // Key missing in the current language: the inline fallback is written in Kazakh across the
+    // codebase, so for KZ it is the right text. Falling through to RU first showed ~300 strings
+    // in Russian to Kazakh-language users.
+    if (lang === 'kz' && fallback !== undefined) return interpolate(fallback, vars);
     // Fallback to RU then KZ then key
     const ruVal = getByPath(messages.ru, key);
     if (ruVal !== undefined) return interpolate(ruVal, vars);

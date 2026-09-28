@@ -3,21 +3,14 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useApp } from '../contexts/AppContext';
 import { useUI } from '../contexts/UIContext';
-import { measurementsAPI, catalogAPI } from '../services/api';
+import { measurementsAPI } from '../services/api';
 import { useI18n } from '../contexts/I18nContext';
 import { pluralize, NOUNS } from '../utils/plural';
 import PaymentRiskIndicator from '../components/payment/PaymentRiskIndicator';
 import PaymentTracking from '../components/payment/PaymentTracking';
+import { calculateRoomEstimate as calculateSharedRoomEstimate, roomFromWindow, estimateLineName, unitLabel } from '../utils/roomEstimate';
 import { formatTime24, formatDate } from '../utils/dateUtils';
 import Icon from '../components/common/Icon';
-
-// Fallback constants — used only if catalog API is unavailable
-const TAPE_ROLL_METERS = 50;
-const TAPE_ROLL_PRICE = 2500;
-const HOOKS_PER_PACK = 100;
-const HOOKS_PACK_PRICE = 1500;
-const DEFAULT_SEWING_RATE = 1700;
-const DEFAULT_INSTALLATION_RATE = 1500;
 
 const formatPrice = (price) => {
   return new Intl.NumberFormat('ru-RU').format(price || 0) + ' ₸';
@@ -40,12 +33,6 @@ const MeasurementDetails = () => {
   const [selectedImage, setSelectedImage] = useState(null);
   const [showImageModal, setShowImageModal] = useState(false);
   const [expandedRooms, setExpandedRooms] = useState({});
-  const [catalogRates, setCatalogRates] = useState({
-    sewingRate: DEFAULT_SEWING_RATE,
-    installationRate: DEFAULT_INSTALLATION_RATE,
-    tapePrice: TAPE_ROLL_PRICE,
-    hooksPrice: HOOKS_PACK_PRICE,
-  });
 
   useEffect(() => {
     if (id) {
@@ -53,27 +40,6 @@ const MeasurementDetails = () => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
-
-  // Load rates from catalog so display stays in sync with admin-configured prices
-  useEffect(() => {
-    catalogAPI.getServices()
-      .then(res => {
-        const services = res.data?.data || [];
-        const updates = {};
-        services.forEach(s => {
-          if (s.type === 'sewing' && s.price_per_unit) updates.sewingRate = s.price_per_unit;
-          if (s.type === 'installation' && s.price_per_unit) updates.installationRate = s.price_per_unit;
-          if (s.type === 'tape' && s.price_per_unit) updates.tapePrice = s.price_per_unit;
-          if (s.type === 'hooks' && s.price_per_unit) updates.hooksPrice = s.price_per_unit;
-        });
-        if (Object.keys(updates).length > 0) {
-          setCatalogRates(prev => ({ ...prev, ...updates }));
-        }
-      })
-      .catch(() => {
-        // Silently use fallback constants if catalog API is unavailable
-      });
-  }, []);
 
   const loadMeasurement = async () => {
     try {
@@ -91,76 +57,12 @@ const MeasurementDetails = () => {
     setExpandedRooms(prev => ({ ...prev, [roomId]: !prev[roomId] }));
   };
 
-  // Расчет сметы для комнаты из priceBreakdown
-  // Rates: use saved per-window value first, then catalog rates, then fallback constants
+  // Same estimate the client received (MeasurementSummary) and the room card show.
   const calculateRoomEstimate = (window) => {
-    const pb = window.priceBreakdown || {};
-    const items = [];
-    let total = 0;
-
-    const widthM = (window.dimensions?.widthCenter || window.dimensions?.width || 0) / 1000;
-
-    // 1. Ткани
-    if (pb.fabricItems && pb.fabricItems.length > 0) {
-      let totalFabricMeters = 0;
-      pb.fabricItems.forEach(item => {
-        const coef = item.fabricType === 'tulle' ? 3 : 2;
-        const meters = Math.ceil(widthM * coef + 0.5);
-        const itemTotal = meters * (item.pricePerMeter || 0);
-        totalFabricMeters += meters;
-        items.push({ name: item.fabricName || item.fabricCode, qty: meters, unit: t('measurements.units.meter', 'м'), price: item.pricePerMeter || 0, total: itemTotal, type: 'fabric' });
-        total += itemTotal;
-      });
-
-      // 2. Тігу — saved rate → catalog rate → fallback constant
-      const sewRate = pb.sewingRate ?? catalogRates.sewingRate;
-      if (totalFabricMeters > 0 && sewRate > 0) {
-        const sewTotal = totalFabricMeters * sewRate;
-        items.push({ name: t('measurements.estimate.sewing', 'Тігу'), qty: totalFabricMeters, unit: t('measurements.units.meter', 'м'), price: sewRate, total: sewTotal, type: 'sewing' });
-        total += sewTotal;
-      }
-
-      // 3. Таспа — catalog rate → fallback constant
-      if (totalFabricMeters > 0) {
-        const tapePrice = catalogRates.tapePrice;
-        const rolls = Math.ceil(totalFabricMeters / TAPE_ROLL_METERS);
-        const tapeTotal = rolls * tapePrice;
-        items.push({ name: `${t('measurements.estimate.tape', 'Таспа')} (${TAPE_ROLL_METERS}${t('measurements.units.meter', 'м')})`, qty: rolls, unit: t('measurements.units.roll', 'рулон'), price: tapePrice, total: tapeTotal, type: 'tape' });
-        total += tapeTotal;
-
-        // 4. Ілгектер — catalog rate → fallback constant
-        const hooksPrice = catalogRates.hooksPrice;
-        const hooksQty = totalFabricMeters * 5;
-        const packs = Math.ceil(hooksQty / HOOKS_PER_PACK);
-        const hooksTotal = packs * hooksPrice;
-        items.push({ name: t('measurements.estimate.hooks', 'Ілгектер'), qty: packs, unit: t('measurements.units.pack', 'қап'), price: hooksPrice, total: hooksTotal, type: 'hooks' });
-        total += hooksTotal;
-      }
-    }
-
-    // 5. Карниз
-    if (pb.cornice?.needed && pb.cornice?.pricePerMeter) {
-      const corniceTotal = widthM * pb.cornice.pricePerMeter;
-      items.push({ name: pb.cornice.name || t('measurements.estimate.cornice', 'Карниз'), qty: widthM.toFixed(1), unit: t('measurements.units.meter', 'м'), price: pb.cornice.pricePerMeter, total: corniceTotal, type: 'cornice' });
-      total += corniceTotal;
-    }
-
-    // 6. Орнату — saved rate → catalog rate → fallback constant
-    const installRate = pb.installationRate ?? catalogRates.installationRate;
-    if (widthM > 0 && installRate > 0) {
-      const installTotal = widthM * installRate;
-      items.push({ name: t('measurements.estimate.installation', 'Орнату'), qty: widthM.toFixed(1), unit: t('measurements.units.meter', 'м'), price: installRate, total: installTotal, type: 'installation' });
-      total += installTotal;
-    }
-
-    // 7. Аксессуарлар
-    if (pb.extras && pb.extras.length > 0) {
-      pb.extras.forEach(extra => {
-        items.push({ name: extra.name, qty: extra.quantity || 1, unit: extra.unit || t('measurements.units.piece', 'дн'), price: extra.pricePerUnit || 0, total: extra.total || 0, type: 'accessory' });
-        total += extra.total || 0;
-      });
-    }
-
+    const { total, lines } = calculateSharedRoomEstimate(roomFromWindow(window));
+    const items = lines.map((l) => ({
+      name: estimateLineName(l, t), qty: l.qty, unit: unitLabel(l.unit, t), price: l.price, total: l.total, type: l.type,
+    }));
     return { items, total };
   };
 

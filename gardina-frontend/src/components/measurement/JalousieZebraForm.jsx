@@ -1,3 +1,4 @@
+import { useI18n } from '../../contexts/I18nContext';
 import React from 'react';
 import Icon from '../common/Icon';
 import {
@@ -14,6 +15,7 @@ import {
  * Форма для жалюзи и зебры
  */
 const JalousieZebraForm = ({ type, data, onChange }) => {
+  const { t } = useI18n();
   const isJalousie = type === 'jalousie_h' || type === 'jalousie_v';
   const isZebra = type === 'zebra';
   
@@ -41,12 +43,12 @@ const JalousieZebraForm = ({ type, data, onChange }) => {
       <div className="bg-card rounded-2xl p-5 shadow-sm border border-border">
         <div className="flex items-center gap-2 mb-4">
           <Icon name="straighten" className="text-primary" />
-          <h3 className="font-bold text-foreground">Терезе өлшемі</h3>
+          <h3 className="font-bold text-foreground">{t('measurements.form.windowSize', 'Терезе өлшемі')}</h3>
         </div>
 
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-muted-foreground mb-2">Ені</label>
+            <label className="block text-sm font-medium text-muted-foreground mb-2">{t('measurements.form.width', 'Ені')}</label>
             <div className="relative">
               <input
                 type="number"
@@ -62,7 +64,7 @@ const JalousieZebraForm = ({ type, data, onChange }) => {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-muted-foreground mb-2">Биіктігі</label>
+            <label className="block text-sm font-medium text-muted-foreground mb-2">{t('measurements.form.height', 'Биіктігі')}</label>
             <div className="relative">
               <input
                 type="number"
@@ -81,7 +83,7 @@ const JalousieZebraForm = ({ type, data, onChange }) => {
         {area > 0 && (
           <div className="mt-4 p-3 bg-primary/10 rounded-xl border border-primary/15">
             <div className="flex justify-between items-center">
-              <span className="text-primary-dark">Ауданы:</span>
+              <span className="text-primary-dark">{t('measurements.form.area', 'Ауданы:')}</span>
               <span className="text-xl font-bold text-primary-dark">{area} м²</span>
             </div>
           </div>
@@ -110,7 +112,7 @@ const JalousieZebraForm = ({ type, data, onChange }) => {
                       : 'bg-muted text-muted-foreground hover:bg-muted'
                   }`}
                 >
-                  <span className="block text-sm">{mat.name}</span>
+                  <span className="block text-sm">{t(`measurements.form.material.${mat.id}`, mat.name)}</span>
                   <span className="block text-xs opacity-70 mt-1">{formatPrice(mat.pricePerSqm)}/м²</span>
                 </button>
               ))}
@@ -121,7 +123,7 @@ const JalousieZebraForm = ({ type, data, onChange }) => {
           <div className="bg-card rounded-2xl p-5 shadow-sm border border-border">
             <div className="flex items-center gap-2 mb-4">
               <Icon name="width" className="text-muted-foreground" />
-              <h3 className="font-bold text-foreground">Ламель ені</h3>
+              <h3 className="font-bold text-foreground">{t('measurements.form.slatWidth', 'Ламель ені')}</h3>
             </div>
 
             <div className="flex gap-3">
@@ -146,7 +148,7 @@ const JalousieZebraForm = ({ type, data, onChange }) => {
           <div className="bg-card rounded-2xl p-5 shadow-sm border border-border">
             <div className="flex items-center gap-2 mb-4">
               <Icon name="palette" className="text-muted-foreground" />
-              <h3 className="font-bold text-foreground">Түсі</h3>
+              <h3 className="font-bold text-foreground">{t('measurements.form.color', 'Түсі')}</h3>
             </div>
 
             <input
@@ -155,7 +157,7 @@ const JalousieZebraForm = ({ type, data, onChange }) => {
               onChange={(e) => updateData({ color: e.target.value })}
               className="w-full h-12 px-4 bg-muted border-2 border-transparent rounded-xl 
                 focus:bg-card focus:border-primary transition-all"
-              placeholder="Мысалы: Ақ, Қоңыр, т.б."
+              placeholder={t('measurements.form.colorPlaceholder', 'Мысалы: Ақ, Қоңыр, т.б.')}
             />
           </div>
         </>
@@ -168,7 +170,7 @@ const JalousieZebraForm = ({ type, data, onChange }) => {
           <div className="bg-card rounded-2xl p-5 shadow-sm border border-border">
             <div className="flex items-center gap-2 mb-4">
               <Icon name="settings" className="text-muted-foreground" />
-              <h3 className="font-bold text-foreground">Жүйе түрі</h3>
+              <h3 className="font-bold text-foreground">{t('measurements.form.systemType', 'Жүйе түрі')}</h3>
             </div>
 
             <div className="grid grid-cols-2 gap-3">
@@ -183,7 +185,7 @@ const JalousieZebraForm = ({ type, data, onChange }) => {
                       : 'bg-muted text-muted-foreground hover:bg-muted'
                   }`}
                 >
-                  <span className="block">{sys.name}</span>
+                  <span className="block">{t(`measurements.form.zebraSystem.${sys.id}`, sys.name)}</span>
                   <span className="block text-xs opacity-70 mt-1">{formatPrice(sys.pricePerSqm)}/м²</span>
                 </button>
               ))}
@@ -194,7 +196,7 @@ const JalousieZebraForm = ({ type, data, onChange }) => {
           <div className="bg-card rounded-2xl p-5 shadow-sm border border-border">
             <div className="flex items-center gap-2 mb-4">
               <Icon name="palette" className="text-muted-foreground" />
-              <h3 className="font-bold text-foreground">Түсі</h3>
+              <h3 className="font-bold text-foreground">{t('measurements.form.color', 'Түсі')}</h3>
             </div>
 
             <input
@@ -203,7 +205,7 @@ const JalousieZebraForm = ({ type, data, onChange }) => {
               onChange={(e) => updateData({ color: e.target.value })}
               className="w-full h-12 px-4 bg-muted border-2 border-transparent rounded-xl 
                 focus:bg-card focus:border-primary transition-all"
-              placeholder="Мысалы: Ақ, Қоңыр, т.б."
+              placeholder={t('measurements.form.colorPlaceholder', 'Мысалы: Ақ, Қоңыр, т.б.')}
             />
           </div>
         </>
@@ -213,7 +215,7 @@ const JalousieZebraForm = ({ type, data, onChange }) => {
       <div className="bg-card rounded-2xl p-5 shadow-sm border border-border">
         <div className="flex items-center gap-2 mb-4">
           <Icon name="build" className="text-muted-foreground" />
-          <h3 className="font-bold text-foreground">Орнату</h3>
+          <h3 className="font-bold text-foreground">{t('measurements.form.installation', 'Орнату')}</h3>
         </div>
 
         <label className="flex items-center gap-3 cursor-pointer">
@@ -235,7 +237,7 @@ const JalousieZebraForm = ({ type, data, onChange }) => {
               data.installation?.needed ? 'translate-x-6' : 'translate-x-0'
             }`} />
           </div>
-          <span className="font-medium text-foreground">Орнату керек</span>
+          <span className="font-medium text-foreground">{t('measurements.form.installationNeeded', 'Орнату керек')}</span>
           {data.installation?.needed && (
             <span className="ml-auto font-bold text-muted-foreground">{formatPrice(installPrice)}</span>
           )}
@@ -247,7 +249,7 @@ const JalousieZebraForm = ({ type, data, onChange }) => {
         <div className="bg-primary/10 rounded-2xl p-5 border border-primary/25">
           <div className="flex items-center gap-2 mb-3">
             <Icon name="calculate" className="text-primary" />
-            <h3 className="font-bold text-primary">Есептеу</h3>
+            <h3 className="font-bold text-primary">{t('measurements.form.calculation', 'Есептеу')}</h3>
           </div>
 
           <div className="space-y-2 text-sm">
@@ -263,7 +265,7 @@ const JalousieZebraForm = ({ type, data, onChange }) => {
             </div>
             {installPrice > 0 && (
               <div className="flex justify-between">
-                <span className="text-primary-dark">Орнату</span>
+                <span className="text-primary-dark">{t('measurements.form.installation', 'Орнату')}</span>
                 <span className="font-bold text-primary-dark">{formatPrice(installPrice)}</span>
               </div>
             )}
@@ -275,7 +277,7 @@ const JalousieZebraForm = ({ type, data, onChange }) => {
       {roomTotal > 0 && (
         <div className="bg-green-50 rounded-2xl p-5 border border-green-200">
           <div className="flex justify-between items-center">
-            <span className="font-bold text-green-800">Барлығы:</span>
+            <span className="font-bold text-green-800">{t('measurements.form.total', 'Барлығы:')}</span>
             <span className="text-2xl font-black text-green-700">{formatPrice(roomTotal)}</span>
           </div>
         </div>
