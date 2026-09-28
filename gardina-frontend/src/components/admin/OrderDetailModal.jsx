@@ -2,18 +2,22 @@ import React from 'react';
 import { formatDateKZ, formatTime24, formatDateTimeFull } from '../../utils/dateUtils';
 import { money } from '../../utils/money';
 import Icon from '../common/Icon';
+import { useI18n } from '../../contexts/I18nContext';
+import { calculateRoomEstimate, roomFromWindow, estimateLineName } from '../../utils/roomEstimate';
 
 /**
  * Order Detail Modal for Admin
  * Shows complete order history, timeline, and all related data
  */
 const OrderDetailModal = ({ order, measurement, onClose }) => {
+  const { t } = useI18n();
   if (!order) return null;
 
-  // Calculate totals from measurement windows
-  const totalPrice = measurement?.windows?.reduce((sum, w) => {
-    return sum + (w.priceBreakdown?.clientCheck?.total || 0);
-  }, 0) || order.totalAmount?.amount || 0;
+  // Same estimate the client received (utils/roomEstimate), not the stale clientCheck snapshot.
+  const windowEstimate = (w) => calculateRoomEstimate(roomFromWindow(w));
+  const totalPrice = measurement?.windows?.reduce((sum, w) => sum + windowEstimate(w).total, 0) || order.totalAmount?.amount || 0;
+  // There is no paidAmount in the API; paid = prepayment + final payment, as on the deal page.
+  const paidAmount = money(order.prepayment) + money(order.finalPayment);
 
   // Build order timeline
   const getOrderTimeline = () => {
@@ -24,11 +28,11 @@ const OrderDetailModal = ({ order, measurement, onClose }) => {
       events.push({
         icon: 'add_circle',
         color: 'bg-primary',
-        label: 'Тапсырыс құрылды',
+        label: t('orders.detailModal.created', 'Тапсырыс құрылды'),
         date: order.createdAt,
-        description: `Дизайнер тағайындалды: ${order.designer?.name || 'Белгісіз'}`,
+        description: t('orders.detailModal.designerAssigned', { name: order.designer?.name || t('orders.detailModal.unknown', 'Белгісіз') }, 'Дизайнер тағайындалды: {name}'),
         subdescription: measurement?.scheduledAt
-          ? `Өлшемге келу уақыты: ${formatDateKZ(measurement.scheduledAt)} • ${formatTime24(measurement.scheduledAt)}`
+          ? t('orders.detailModal.visitTime', { date: formatDateKZ(measurement.scheduledAt), time: formatTime24(measurement.scheduledAt) }, 'Өлшемге келу уақыты: {date} • {time}')
           : null,
         timestamp: new Date(order.createdAt)
       });
@@ -39,9 +43,9 @@ const OrderDetailModal = ({ order, measurement, onClose }) => {
       events.push({
         icon: 'play_arrow',
         color: 'bg-primary/100',
-        label: 'Өлшем басталды',
+        label: t('orders.detailModal.measureStarted', 'Өлшем басталды'),
         date: measurement.startedAt,
-        description: `Дизайнер келді және өлшеуді бастады`,
+        description: t('orders.detailModal.measureStartedDesc', 'Дизайнер келді және өлшеуді бастады'),
         timestamp: new Date(measurement.startedAt)
       });
     }
@@ -51,9 +55,9 @@ const OrderDetailModal = ({ order, measurement, onClose }) => {
       events.push({
         icon: 'check_circle',
         color: 'bg-primary-light',
-        label: 'Өлшем аяқталды',
+        label: t('orders.detailModal.measureDone', 'Өлшем аяқталды'),
         date: measurement?.completedAt,
-        description: `${measurement?.windows?.length || 0} терезе өлшенді`,
+        description: t('orders.detailModal.windowsMeasured', { n: measurement?.windows?.length || 0 }, '{n} терезе өлшенді'),
         showDate: false
       });
     }
@@ -63,9 +67,9 @@ const OrderDetailModal = ({ order, measurement, onClose }) => {
       events.push({
         icon: 'assignment',
         color: 'bg-green-500',
-        label: 'Келісім-шарт және ДДС',
+        label: t('orders.detailModal.contract', 'Келісім-шарт және алдын ала төлем'),
         date: order.contractSignedAt,
-        description: `Алынды: ${money(order.prepayment).toLocaleString()} ₸`,
+        description: t('orders.detailModal.received', { amount: money(order.prepayment).toLocaleString() }, 'Алынды: {amount} ₸'),
         showDate: false
       });
     }
@@ -75,9 +79,9 @@ const OrderDetailModal = ({ order, measurement, onClose }) => {
       events.push({
         icon: 'factory',
         color: 'bg-orange-500',
-        label: 'Өндірісте',
+        label: t('orders.detailModal.production', 'Өндірісте'),
         date: null,
-        description: 'Тігу процесінде',
+        description: t('orders.detailModal.productionDesc', 'Тігу процесінде'),
         showDate: false
       });
     }
@@ -87,9 +91,9 @@ const OrderDetailModal = ({ order, measurement, onClose }) => {
       events.push({
         icon: 'check_circle',
         color: 'bg-green-500',
-        label: 'Орнатуға дайын',
+        label: t('orders.detailModal.ready', 'Орнатуға дайын'),
         date: null,
-        description: 'Тапсырыс дайын',
+        description: t('orders.detailModal.readyDesc', 'Тапсырыс дайын'),
         showDate: false
       });
     }
@@ -99,9 +103,9 @@ const OrderDetailModal = ({ order, measurement, onClose }) => {
       events.push({
         icon: 'construction',
         color: 'bg-lime-500',
-        label: 'Орнатылуда',
+        label: t('orders.detailModal.installing', 'Орнатылуда'),
         date: null,
-        description: 'Орнату процесі',
+        description: t('orders.detailModal.installingDesc', 'Орнату процесі'),
         showDate: false
       });
     }
@@ -111,9 +115,9 @@ const OrderDetailModal = ({ order, measurement, onClose }) => {
       events.push({
         icon: 'task_alt',
         color: 'bg-green-600',
-        label: 'Тапсырыс аяқталды',
+        label: t('orders.detailModal.completed', 'Тапсырыс аяқталды'),
         date: null,
-        description: 'Толығымен аяқталды',
+        description: t('orders.detailModal.completedDesc', 'Толығымен аяқталды'),
         showDate: false
       });
     }
@@ -123,9 +127,9 @@ const OrderDetailModal = ({ order, measurement, onClose }) => {
       events.push({
         icon: 'block',
         color: 'bg-gray-500',
-        label: 'Клиент бас тартты',
+        label: t('orders.detailModal.rejected', 'Клиент бас тартты'),
         date: null,
-        description: 'Келісімге келмеді',
+        description: t('orders.detailModal.rejectedDesc', 'Келісімге келмеді'),
         showDate: false
       });
     }
@@ -135,9 +139,9 @@ const OrderDetailModal = ({ order, measurement, onClose }) => {
       events.push({
         icon: 'cancel',
         color: 'bg-red-500',
-        label: 'Тапсырыс болдырылды',
+        label: t('orders.detailModal.cancelled', 'Тапсырыс болдырылды'),
         date: null,
-        description: 'Себебі көрсетілмеген',
+        description: t('orders.detailModal.cancelledDesc', 'Себебі көрсетілмеген'),
         showDate: false
       });
     }
@@ -168,22 +172,22 @@ const OrderDetailModal = ({ order, measurement, onClose }) => {
 
   const statusLabels = {
     // Simplified statuses
-    'scheduled': 'Жаңа',
-    'measured': 'Өлшем аяқталды',
-    'in_production': 'Өндірісте',
-    'ready': 'Дайын',
-    'installing': 'Орнатылуда',
-    'completed': 'Аяқталды',
-    'cancelled': 'Болдырылды',
-    'rejected': 'Бас тартты',
+    'scheduled': t('orders.detailModal.status_scheduled', 'Жаңа'),
+    'measured': t('orders.detailModal.status_measured', 'Өлшем аяқталды'),
+    'in_production': t('orders.detailModal.status_in_production', 'Өндірісте'),
+    'ready': t('orders.detailModal.status_ready', 'Дайын'),
+    'installing': t('orders.detailModal.status_installing', 'Орнатылуда'),
+    'completed': t('orders.detailModal.status_completed', 'Аяқталды'),
+    'cancelled': t('orders.detailModal.status_cancelled', 'Болдырылды'),
+    'rejected': t('orders.detailModal.status_rejected', 'Бас тартты'),
 
     // Legacy (backward compatibility)
-    'lead': 'Жаңа өтініш',
-    'proposal_sent': 'Ұсыныс жіберілді',
-    'proposal_accepted': 'Ұсыныс қабылданды',
-    'contract_signed': 'Келісім-шарт',
-    'payment_pending': 'Төлем күтілуде',
-    'production': 'Өндірісте',
+    'lead': t('orders.detailModal.status_lead', 'Жаңа өтініш'),
+    'proposal_sent': t('orders.detailModal.status_proposal_sent', 'Ұсыныс жіберілді'),
+    'proposal_accepted': t('orders.detailModal.status_proposal_accepted', 'Ұсыныс қабылданды'),
+    'contract_signed': t('orders.detailModal.status_contract_signed', 'Келісім-шарт'),
+    'payment_pending': t('orders.detailModal.status_payment_pending', 'Төлем күтілуде'),
+    'production': t('orders.detailModal.status_production', 'Өндірісте'),
   };
 
   return (
@@ -195,7 +199,7 @@ const OrderDetailModal = ({ order, measurement, onClose }) => {
         {/* Header */}
         <div className="sticky top-0 bg-gradient-to-r from-primary to-primary-dark text-white px-6 py-4 flex items-center justify-between">
           <div className="flex-1">
-            <h2 className="text-xl font-black">Тапсырыс #{order.id.slice(0, 8)}</h2>
+            <h2 className="text-xl font-black">{t('orders.detailModal.title', { id: order.id.slice(0, 8) }, 'Тапсырыс #{id}')}</h2>
             <p className="text-sm opacity-90">{order.client?.name}</p>
           </div>
           <button
@@ -214,7 +218,7 @@ const OrderDetailModal = ({ order, measurement, onClose }) => {
             </span>
             {order.paymentStatus && (
               <span className={`px-4 py-2 rounded-xl text-sm font-bold ${order.paymentStatus === 'paid' ? 'bg-emerald-500 text-white' : 'bg-amber-500 text-white'}`}>
-                {order.paymentStatus === 'paid' ? 'Төленді' : 'Төлем күтілуде'}
+                {order.paymentStatus === 'paid' ? t('orders.detailModal.paid', 'Төленді') : t('orders.detailModal.awaitingPayment', 'Төлем күтілуде')}
               </span>
             )}
           </div>
@@ -223,12 +227,12 @@ const OrderDetailModal = ({ order, measurement, onClose }) => {
           <div className="bg-primary/10 border-2 border-primary/25 rounded-xl p-4">
             <div className="flex items-center gap-2 mb-3">
               <Icon name="person" className="text-primary" />
-              <h3 className="font-bold text-primary-dark">Клиент ақпараты</h3>
+              <h3 className="font-bold text-primary-dark">{t('orders.detailModal.clientInfo', 'Клиент ақпараты')}</h3>
             </div>
             <div className="space-y-2.5 text-sm">
               <div className="flex justify-between">
-                <span className="text-primary-dark">Аты:</span>
-                <span className="font-bold text-primary-dark">{order.client?.name || 'Белгісіз'}</span>
+                <span className="text-primary-dark">{t('orders.detailModal.name', 'Аты:')}</span>
+                <span className="font-bold text-primary-dark">{order.client?.name || t('orders.detailModal.unknown', 'Белгісіз')}</span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-primary-dark">Телефон:</span>
@@ -237,12 +241,12 @@ const OrderDetailModal = ({ order, measurement, onClose }) => {
                   className="font-bold text-primary-dark hover:underline"
                   onClick={(e) => e.stopPropagation()}
                 >
-                  {order.client?.phone || measurement?.clientPhone || 'Жоқ'}
+                  {order.client?.phone || measurement?.clientPhone || t('orders.detailModal.none', 'Жоқ')}
                 </a>
               </div>
               {(order.client?.address || measurement?.address) && (
                 <div className="flex justify-between items-start">
-                  <span className="text-primary-dark">Мекенжай:</span>
+                  <span className="text-primary-dark">{t('orders.detailModal.address', 'Мекенжай:')}</span>
                   <span className="font-bold text-primary-dark text-right max-w-[60%]">
                     {order.client?.address || measurement?.address}
                   </span>
@@ -255,24 +259,24 @@ const OrderDetailModal = ({ order, measurement, onClose }) => {
           <div className="bg-green-50 border-2 border-green-200 rounded-xl p-4">
             <div className="flex items-center gap-2 mb-3">
               <Icon name="payments" className="text-green-600" />
-              <h3 className="font-bold text-green-900">Қаржылық ақпарат</h3>
+              <h3 className="font-bold text-green-900">{t('orders.detailModal.finance', 'Қаржылық ақпарат')}</h3>
             </div>
             <div className="space-y-2">
               <div className="flex justify-between items-center">
-                <span className="text-green-700">Жалпы құн:</span>
+                <span className="text-green-700">{t('orders.detailModal.total', 'Жалпы құн:')}</span>
                 <span className="text-2xl font-black text-green-900">{totalPrice.toLocaleString()} ₸</span>
               </div>
-              {order.paidAmount > 0 && (
+              {paidAmount > 0 && (
                 <div className="flex justify-between items-center">
-                  <span className="text-green-700">Төленді:</span>
-                  <span className="text-lg font-bold text-green-700">{order.paidAmount.toLocaleString()} ₸</span>
+                  <span className="text-green-700">{t('orders.detailModal.paidLabel', 'Төленді:')}</span>
+                  <span className="text-lg font-bold text-green-700">{paidAmount.toLocaleString()} ₸</span>
                 </div>
               )}
-              {(totalPrice - (order.paidAmount || 0)) > 0 && (
+              {(totalPrice - (paidAmount || 0)) > 0 && (
                 <div className="flex justify-between items-center">
-                  <span className="text-green-700">Қалдық:</span>
+                  <span className="text-green-700">{t('orders.detailModal.remaining', 'Қалдық:')}</span>
                   <span className="text-lg font-bold text-amber-700">
-                    {(totalPrice - (order.paidAmount || 0)).toLocaleString()} ₸
+                    {(totalPrice - (paidAmount || 0)).toLocaleString()} ₸
                   </span>
                 </div>
               )}
@@ -284,12 +288,12 @@ const OrderDetailModal = ({ order, measurement, onClose }) => {
             <div className="bg-primary/5 border-2 border-primary/20 rounded-xl p-4">
               <div className="flex items-center gap-2 mb-3">
                 <Icon name="straighten" className="text-primary" />
-                <h3 className="font-bold text-primary-dark">Өлшем деректері</h3>
+                <h3 className="font-bold text-primary-dark">{t('orders.detailModal.measurement', 'Өлшем деректері')}</h3>
               </div>
               <div className="space-y-2 text-sm">
                 {measurement.scheduledAt && (
                   <div className="flex justify-between items-center bg-card/50 px-3 py-2 rounded-lg mb-2">
-                    <span className="text-primary-dark">Уақыты:</span>
+                    <span className="text-primary-dark">{t('orders.detailModal.time', 'Уақыты:')}</span>
                     <div className="flex items-center gap-2">
                       <span className="font-bold text-primary-dark">{formatDateKZ(measurement.scheduledAt)}</span>
                       <span className="text-primary/40">•</span>
@@ -298,18 +302,18 @@ const OrderDetailModal = ({ order, measurement, onClose }) => {
                   </div>
                 )}
                 <div className="flex justify-between">
-                  <span className="text-primary-dark">Статус:</span>
+                  <span className="text-primary-dark">{t('orders.detailModal.statusLabel', 'Статус:')}</span>
                   <span className="font-bold text-primary-dark">
-                    {measurement.status === 'completed' ? 'Аяқталды' : 'Күтілуде'}
+                    {measurement.status === 'completed' ? t('orders.detailModal.measureDoneShort', 'Аяқталды') : t('orders.detailModal.pending', 'Күтілуде')}
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-primary-dark">Терезелер:</span>
-                  <span className="font-bold text-primary-dark">{measurement.windows?.length || 0} терезе</span>
+                  <span className="text-primary-dark">{t('orders.detailModal.windows', 'Терезелер:')}</span>
+                  <span className="font-bold text-primary-dark">{t('orders.detailModal.windowsCount', { n: measurement.windows?.length || 0 }, '{n} терезе')}</span>
                 </div>
                 {measurement.roomType && (
                   <div className="flex justify-between">
-                    <span className="text-primary-dark">Бөлмелер:</span>
+                    <span className="text-primary-dark">{t('orders.detailModal.rooms', 'Бөлмелер:')}</span>
                     <span className="font-bold text-primary-dark">{measurement.roomType}</span>
                   </div>
                 )}
@@ -332,7 +336,7 @@ const OrderDetailModal = ({ order, measurement, onClose }) => {
           <div className="bg-card border-2 border-border rounded-xl p-5">
             <div className="flex items-center gap-2 mb-4">
               <Icon name="timeline" className="text-primary" />
-              <h3 className="font-bold text-foreground">Тапсырыс тарихы</h3>
+              <h3 className="font-bold text-foreground">{t('orders.detailModal.history', 'Тапсырыс тарихы')}</h3>
             </div>
 
             <div className="relative pl-8 space-y-4">
@@ -370,13 +374,14 @@ const OrderDetailModal = ({ order, measurement, onClose }) => {
             <div className="bg-amber-50 border-2 border-amber-200 rounded-xl p-4">
               <div className="flex items-center gap-2 mb-4">
                 <Icon name="inventory" className="text-amber-600" />
-                <h3 className="font-bold text-amber-900">Детальдар ({measurement.windows.length} бөлме)</h3>
+                <h3 className="font-bold text-amber-900">{t('orders.detailModal.details', { n: measurement.windows.length }, 'Детальдар ({n} бөлме)')}</h3>
               </div>
 
               <div className="space-y-3">
                 {measurement.windows.map((window, idx) => {
-                  const price = window.priceBreakdown?.clientCheck?.total || 0;
-                  const items = window.priceBreakdown?.clientCheck?.items || [];
+                  const est = windowEstimate(window);
+                  const price = est.total;
+                  const items = est.lines.map((l) => ({ name: estimateLineName(l, t), total: l.total }));
 
                   return (
                     <div key={idx} className="bg-card rounded-lg p-3 border border-amber-200">
@@ -387,11 +392,11 @@ const OrderDetailModal = ({ order, measurement, onClose }) => {
 
                       <div className="grid grid-cols-2 gap-2 text-xs">
                         <div>
-                          <span className="text-amber-700">Мата:</span>
+                          <span className="text-amber-700">{t('orders.detailModal.fabric', 'Мата:')}</span>
                           <span className="font-bold text-amber-900 ml-1">{window.fabricCode}</span>
                         </div>
                         <div>
-                          <span className="text-amber-700">Ені:</span>
+                          <span className="text-amber-700">{t('orders.detailModal.width', 'Ені:')}</span>
                           <span className="font-bold text-amber-900 ml-1">{window.lengthMeters}м</span>
                         </div>
                       </div>
@@ -419,7 +424,7 @@ const OrderDetailModal = ({ order, measurement, onClose }) => {
             <div className="bg-muted border border-border rounded-xl p-4">
               <div className="flex items-center gap-2 mb-2">
                 <Icon name="note" className="text-muted-foreground" />
-                <h3 className="font-bold text-foreground">Коментарийлер</h3>
+                <h3 className="font-bold text-foreground">{t('orders.detailModal.comments', 'Коментарийлер')}</h3>
               </div>
               <p className="text-sm text-foreground whitespace-pre-line">{order.notes}</p>
             </div>
@@ -433,13 +438,13 @@ const OrderDetailModal = ({ order, measurement, onClose }) => {
               className="flex-1 bg-primary text-white font-bold py-3 rounded-xl hover:brightness-110 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
             >
               <Icon name="open_in_new" />
-              Өлшемді ашу
+              {t('orders.detailModal.openMeasurement', 'Өлшемді ашу')}
             </button>
             <button
               onClick={onClose}
               className="px-6 bg-muted text-foreground font-bold py-3 rounded-xl hover:bg-gray-300 transition-all"
             >
-              Жабу
+              {t('orders.detailModal.close', 'Жабу')}
             </button>
           </div>
         </div>
