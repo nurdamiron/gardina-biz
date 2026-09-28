@@ -1,4 +1,5 @@
 import bcrypt from 'bcryptjs';
+import crypto from 'crypto';
 import dotenv from 'dotenv';
 import pg from 'pg';
 
@@ -6,6 +7,9 @@ import pg from 'pg';
 dotenv.config({ path: '.env.production' });
 
 const { Pool } = pg;
+
+// Passwords are generated per run and printed once; never commit fixed ones.
+const randomPassword = () => crypto.randomBytes(9).toString('base64url');
 
 const pool = new Pool({
   host: process.env.DATABASE_HOST,
@@ -51,12 +55,12 @@ async function resetUsers() {
 
     // New users to create
     const users = [
-      { phone: 'akbota', name: 'Akbota', role: 'designer', password: 'akbota123' },
-      { phone: 'saltanat', name: 'Saltanat', role: 'designer', password: 'saltanat123' },
-      { phone: 'zhaina', name: 'Zhaina', role: 'designer', password: 'zhaina123' },
-      { phone: 'ultu', name: 'Ultu', role: 'designer', password: 'ultu123' },
-      { phone: 'dosymzhan', name: 'Dosymzhan', role: 'designer', password: 'dosymzhan123' },
-      { phone: 'admin', name: 'Admin', role: 'admin', password: 'admin123' },
+      { phone: 'akbota', name: 'Akbota', role: 'designer', password: randomPassword() },
+      { phone: 'saltanat', name: 'Saltanat', role: 'designer', password: randomPassword() },
+      { phone: 'zhaina', name: 'Zhaina', role: 'designer', password: randomPassword() },
+      { phone: 'ultu', name: 'Ultu', role: 'designer', password: randomPassword() },
+      { phone: 'dosymzhan', name: 'Dosymzhan', role: 'designer', password: randomPassword() },
+      { phone: 'admin', name: 'Admin', role: 'admin', password: randomPassword() },
     ];
 
     console.log('\n👤 Creating new users...');

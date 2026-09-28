@@ -2,7 +2,7 @@
 
 # Configuration
 API_URL="http://localhost:3001/api"
-TOKEN="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjRmOGNkZTJiLWJkNzUtNDk4YS1hNWJjLTMyZTNiZmNkOGE4YyIsImVtYWlsIjoiYWRtaW5AdGVzdC5jb20iLCJwaG9uZSI6Iis3Nzc3Nzc3Nzc3NyIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc2ODE5ODg5MCwiZXhwIjoxNzY4ODAzNjkwfQ.yRi71uO5bRAZRmx-l2__tF4rRCBy4SDFLlb1rJ101Bw"
+TOKEN="${TOKEN:?export TOKEN=<admin JWT>}"
 
 # IDs
 MEASUREMENT_ID="99999999-9999-4999-a999-999999999999"
@@ -20,11 +20,11 @@ echo "==================================================="
 echo "🔹 Cleaning up..."
 # Delete deal first if exists (we don't know deal id yet)
 # We'll just rely on unique IDs for measurement/room/item to avoid clashes
-PGPASSWORD=prometric01 psql -h prometric.cde42ec8m1u7.eu-north-1.rds.amazonaws.com -U prometric -d shtory -p 5432 -c "DELETE FROM measurement_windows WHERE measurement_id = '$MEASUREMENT_ID'; DELETE FROM room_items WHERE room_id = '$ROOM_ID'; DELETE FROM rooms WHERE id = '$ROOM_ID'; DELETE FROM measurements WHERE id = '$MEASUREMENT_ID';" > /dev/null 2>&1
+psql "${DATABASE_URL:?export DATABASE_URL=postgresql://...}" -c "DELETE FROM measurement_windows WHERE measurement_id = '$MEASUREMENT_ID'; DELETE FROM room_items WHERE room_id = '$ROOM_ID'; DELETE FROM rooms WHERE id = '$ROOM_ID'; DELETE FROM measurements WHERE id = '$MEASUREMENT_ID';" > /dev/null 2>&1
 
 # 2. SQL Insert Measurement Chain
 echo "🔹 Inserting Client, Measurement, Room, Item (SQL)..."
-PGPASSWORD=prometric01 psql -h prometric.cde42ec8m1u7.eu-north-1.rds.amazonaws.com -U prometric -d shtory -p 5432 <<EOF
+psql "${DATABASE_URL:?export DATABASE_URL=postgresql://...}" <<EOF
 INSERT INTO clients (id, name, phone)
 VALUES ('$CLIENT_ID', 'Test Client', '+77000000000')
 ON CONFLICT (id) DO NOTHING;
@@ -68,7 +68,7 @@ echo "✅ Deal Created: $DEAL_ID"
 
 # 4. Check deal_products
 echo "🔹 Checking deal_products..."
-COUNT=$(PGPASSWORD=prometric01 psql -h prometric.cde42ec8m1u7.eu-north-1.rds.amazonaws.com -U prometric -d shtory -p 5432 -t -c "SELECT COUNT(*) FROM deal_products WHERE deal_id = '$DEAL_ID';")
+COUNT=$(psql "${DATABASE_URL:?export DATABASE_URL=postgresql://...}" -t -c "SELECT COUNT(*) FROM deal_products WHERE deal_id = '$DEAL_ID';")
 COUNT=$(echo $COUNT | xargs) # trim
 
 if [ "$COUNT" -eq "1" ]; then

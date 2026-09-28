@@ -29,7 +29,7 @@ echo ""
 
 # 2. Get designer ID (admin user)
 echo "2️⃣  Getting designer ID..."
-DESIGNER_ID=$(psql "postgresql://prometric:prometric01@prometric.cde42ec8m1u7.eu-north-1.rds.amazonaws.com:5432/shtory?sslmode=require" \
+DESIGNER_ID=$(psql "${DATABASE_URL:?export DATABASE_URL=postgresql://...}" \
   -t -c "SELECT id FROM users WHERE role='admin' LIMIT 1" | tr -d ' ')
 echo "✅ Designer ID: $DESIGNER_ID"
 echo ""
