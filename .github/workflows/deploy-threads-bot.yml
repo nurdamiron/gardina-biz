@@ -33,7 +33,7 @@ jobs:
         run: |
           test -n "$CONFIG_B64" || { echo "THREADS_BOT_CONFIG_B64 secret is empty"; exit 1; }
           echo "$CONFIG_B64" | base64 -d > config.tar.gz
-          tar -tzf config.tar.gz
+          tar -tzf config.tar.gz | wc -l
           tar -czf /tmp/bundle.tar.gz threads-autopilot config.tar.gz
           rm config.tar.gz
 

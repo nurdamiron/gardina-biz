@@ -3,7 +3,7 @@
 set -euo pipefail
 cd /tmp/tb
 
-echo "== host"; uname -m; nproc; free -m | head -2; df -h / | tail -1
+echo "== host ok"
 AVAIL=$(free -m | awk '/Mem:/{print $7}')
 FREE_DISK=$(df -m / | awk 'NR==2{print $4}')
 # The bot is capped at 800 MB; refuse to start it if that would squeeze the live Gardina containers.
@@ -29,7 +29,7 @@ docker tag threads-autopilot:new threads-autopilot:latest
 
 sleep 20
 echo "== status"; docker ps --filter name=threads-autopilot --format '{{.Names}} {{.Status}}'
-echo "== logs"; docker logs --tail 12 threads-autopilot 2>&1 | grep -viE 'token=|access_token'
+echo "== logs"; docker logs --tail 12 threads-autopilot 2>&1 | grep -viE 'token|pairing|\/start|admin'
 docker image prune -f >/dev/null 2>&1 || true
 rm -rf /tmp/tb
 echo DEPLOY_OK
