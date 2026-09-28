@@ -61,7 +61,7 @@ const AdminBilling = () => {
       cycle: { monthly: 'ежемесячно', yearly: 'ежегодно' },
       price: 'Стоимость',
       contactSupport: 'Связаться с поддержкой',
-      supportMsg: '+7 771 537 3201 (WhatsApp)',
+      supportMsg: '+7 707 942 9827 (WhatsApp)',
     },
     kz: {
       title: 'Жазылым',
@@ -84,7 +84,7 @@ const AdminBilling = () => {
       cycle: { monthly: 'ай сайын', yearly: 'жыл сайын' },
       price: 'Құны',
       contactSupport: 'Қолдауға хабарласу',
-      supportMsg: '+7 771 537 3201 (WhatsApp)',
+      supportMsg: '+7 707 942 9827 (WhatsApp)',
     },
   }[lang === 'kz' ? 'kz' : 'ru'];
 

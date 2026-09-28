@@ -14,7 +14,7 @@ export default function welcome({ appUrl, name, organizationName, organizationSl
       step2: 'Запланировать первый замер',
       step3: 'Пригласить дизайнера/менеджера в команду',
       step4: 'Загрузить логотип салона в настройках',
-      help: 'Если что-то непонятно — пишите в WhatsApp +7 771 537 3201',
+      help: 'Если что-то непонятно — пишите в WhatsApp +7 707 942 9827',
     },
     kz: {
       subject: 'Gardina-ға қош келдіңіз',
@@ -28,7 +28,7 @@ export default function welcome({ appUrl, name, organizationName, organizationSl
       step2: 'Алғашқы өлшемді жоспарлау',
       step3: 'Командаға дизайнер/менеджер шақыру',
       step4: 'Баптауларда салонның логотипін жүктеу',
-      help: 'Түсініксіз нәрсе болса — WhatsApp +7 771 537 3201',
+      help: 'Түсініксіз нәрсе болса — WhatsApp +7 707 942 9827',
     },
   }[lang === 'kz' ? 'kz' : 'ru'];
 

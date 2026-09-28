@@ -10,7 +10,7 @@ export default function trialExpired({ appUrl, name }, lang = 'ru') {
       restore: 'Чтобы восстановить полный доступ — выберите тариф:',
       cta: 'Выбрать тариф',
       data: 'Все ваши данные сохранены и не удаляются.',
-      help: 'Если у вас есть вопросы — WhatsApp +7 771 537 3201',
+      help: 'Если у вас есть вопросы — WhatsApp +7 707 942 9827',
     },
     kz: {
       subject: 'Gardina сынақ кезеңі аяқталды',
@@ -20,7 +20,7 @@ export default function trialExpired({ appUrl, name }, lang = 'ru') {
       restore: 'Толық қол жеткізуді қалпына келтіру үшін — тариф таңдаңыз:',
       cta: 'Тариф таңдау',
       data: 'Барлық деректеріңіз сақталды, жойылмады.',
-      help: 'Сұрақтарыңыз болса — WhatsApp +7 771 537 3201',
+      help: 'Сұрақтарыңыз болса — WhatsApp +7 707 942 9827',
     },
   }[lang === 'kz' ? 'kz' : 'ru'];
 

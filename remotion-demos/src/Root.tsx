@@ -3,6 +3,8 @@ import { Composition } from 'remotion';
 import { RoleDemo, introFrames, outroFrames } from './RoleDemo';
 import { ROLES, FPS } from './data';
 import durations from './durations.json';
+import { Promo, scriptFrames, W, H } from './promo/Promo';
+import { SCRIPTS } from './promo/scripts';
 
 export const RemotionRoot: React.FC = () => {
   return (
@@ -23,6 +25,20 @@ export const RemotionRoot: React.FC = () => {
           />
         );
       })}
+      {SCRIPTS.flatMap((script) =>
+        (['ru', 'kz'] as const).map((lang) => (
+          <Composition
+            key={`${script.id}-${lang}`}
+            id={`promo-${script.id}-${lang}`}
+            component={Promo as any}
+            durationInFrames={scriptFrames(script)}
+            fps={FPS}
+            width={W}
+            height={H}
+            defaultProps={{ script, lang }}
+          />
+        )),
+      )}
     </>
   );
 };

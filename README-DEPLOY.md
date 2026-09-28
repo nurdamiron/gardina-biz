@@ -284,5 +284,5 @@ docker-compose run --rm certbot certonly --webroot \
 
 ## Контакты
 
-- WhatsApp: +7 771 537 3201
+- WhatsApp: +7 707 942 9827
 - Email: support@gardina.kz

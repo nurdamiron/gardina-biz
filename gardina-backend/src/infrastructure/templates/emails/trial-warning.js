@@ -11,7 +11,7 @@ export default function trialWarning({ appUrl, name, daysLeft }, lang = 'ru') {
       step2: 'Все ваши данные остаются с вами и не удаляются',
       step3: 'Чтобы продолжить работу — выберите тариф ниже',
       cta: 'Выбрать тариф',
-      help: 'Возникли вопросы? Напишите в WhatsApp +7 771 537 3201',
+      help: 'Возникли вопросы? Напишите в WhatsApp +7 707 942 9827',
     },
     kz: {
       subject: `${daysLeft} күн Gardina сынақ кезеңі аяқталғанша`,
@@ -22,7 +22,7 @@ export default function trialWarning({ appUrl, name, daysLeft }, lang = 'ru') {
       step2: 'Барлық деректеріңіз сізде қалады, жойылмайды',
       step3: 'Жұмысты жалғастыру үшін — төмендегі тарифті таңдаңыз',
       cta: 'Тариф таңдау',
-      help: 'Сұрақтар бар ма? WhatsApp +7 771 537 3201',
+      help: 'Сұрақтар бар ма? WhatsApp +7 707 942 9827',
     },
   }[lang === 'kz' ? 'kz' : 'ru'];
 
