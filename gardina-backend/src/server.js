@@ -360,6 +360,28 @@ async function runAutoMigrations() {
       END $$;
     `);
 
+    // room_items.fabric_id was created (001-catalog-system) as a FK to the legacy
+    // `fabrics` table, but the measurement form picks fabrics from `products`, so
+    // saving/completing a measurement with a catalog fabric failed with a FK
+    // violation (HTTP 400). Point the FK at products. NOT VALID keeps old rows that
+    // still reference legacy fabrics from blocking startup; new rows are checked.
+    await client.query(`
+      DO $$
+      BEGIN
+        IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'room_items')
+           AND EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'products')
+           AND NOT EXISTS (
+             SELECT 1 FROM pg_constraint
+             WHERE conname = 'room_items_fabric_id_fkey'
+               AND confrelid = 'products'::regclass
+           ) THEN
+          ALTER TABLE room_items DROP CONSTRAINT IF EXISTS room_items_fabric_id_fkey;
+          ALTER TABLE room_items ADD CONSTRAINT room_items_fabric_id_fkey
+            FOREIGN KEY (fabric_id) REFERENCES products(id) ON DELETE SET NULL NOT VALID;
+        END IF;
+      END $$;
+    `);
+
     await client.query('COMMIT');
     console.log('✅  Auto-migrations completed');
   } catch (err) {

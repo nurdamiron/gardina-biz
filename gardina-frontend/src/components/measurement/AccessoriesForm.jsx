@@ -1,3 +1,4 @@
+import { useI18n } from '../../contexts/I18nContext';
 import React, { useState, useEffect } from 'react';
 import { 
   calculateTapeRolls,
@@ -15,6 +16,7 @@ import Icon from '../common/Icon';
  * Аксессуары загружаются из каталога
  */
 const AccessoriesForm = ({ totalTapeMeters, data, onChange }) => {
+  const { t } = useI18n();
   const [showAddExtra, setShowAddExtra] = useState(false);
   const [selectedExtra, setSelectedExtra] = useState('');
   const [extraQty, setExtraQty] = useState(1);
@@ -104,7 +106,7 @@ const AccessoriesForm = ({ totalTapeMeters, data, onChange }) => {
     <div className="space-y-6">
       <div className="flex items-center gap-2">
         <Icon name="category" className="text-primary" />
-        <h2 className="text-lg font-bold text-foreground">Аксессуарлар</h2>
+        <h2 className="text-lg font-bold text-foreground">{t('measurements.form.accessories', 'Аксессуарлар')}</h2>
         <span className="ml-auto text-sm font-bold text-green-600">{formatPrice(accessoriesTotal)}</span>
       </div>
 
@@ -112,18 +114,18 @@ const AccessoriesForm = ({ totalTapeMeters, data, onChange }) => {
       <div className="bg-card rounded-2xl p-5 shadow-sm border border-border">
         <div className="flex items-center gap-2 mb-4">
           <Icon name="straighten" className="text-primary" />
-          <h3 className="font-bold text-foreground">Таспа</h3>
+          <h3 className="font-bold text-foreground">{t('measurements.form.tape', 'Таспа')}</h3>
         </div>
 
         <div className="p-3 bg-primary/10 rounded-xl border border-primary/15 mb-4">
           <div className="flex justify-between items-center">
-            <span className="text-primary-dark">Қажет метраж:</span>
+            <span className="text-primary-dark">{t('measurements.form.neededMeters', 'Қажет метраж:')}</span>
             <span className="text-xl font-bold text-primary-dark">{totalTapeMeters} м</span>
           </div>
         </div>
 
         <div className="mb-4">
-          <label className="block text-sm font-medium text-muted-foreground mb-2">Рулон өлшемі</label>
+          <label className="block text-sm font-medium text-muted-foreground mb-2">{t('measurements.form.rollSize', 'Рулон өлшемі')}</label>
           <div className="flex gap-2">
             {TAPE_ROLLS.map(roll => (
               <button
@@ -153,19 +155,19 @@ const AccessoriesForm = ({ totalTapeMeters, data, onChange }) => {
       <div className="bg-card rounded-2xl p-5 shadow-sm border border-border">
         <div className="flex items-center gap-2 mb-4">
           <Icon name="link" className="text-primary-light" />
-          <h3 className="font-bold text-foreground">Ілгектер</h3>
+          <h3 className="font-bold text-foreground">{t('measurements.form.hooks', 'Ілгектер')}</h3>
         </div>
 
         <div className="p-3 bg-primary/5 rounded-xl border border-primary/15 mb-4">
           <div className="flex justify-between items-center">
-            <span className="text-primary-dark">Қажет саны:</span>
-            <span className="text-xl font-bold text-primary-dark">{hooksQty} дн</span>
+            <span className="text-primary-dark">{t('measurements.form.neededQty', 'Қажет саны:')}</span>
+            <span className="text-xl font-bold text-primary-dark">{hooksQty} {t('measurements.units.piece', 'дн')}</span>
           </div>
-          <p className="text-xs text-primary mt-1">({totalTapeMeters}м × 5 = {hooksQty} дана)</p>
+          <p className="text-xs text-primary mt-1">{t('measurements.form.hooksFormula', { m: totalTapeMeters, q: hooksQty }, '({m}м × 5 = {q} дана)')}</p>
         </div>
 
         <div className="mb-4">
-          <label className="block text-sm font-medium text-muted-foreground mb-2">Түрі</label>
+          <label className="block text-sm font-medium text-muted-foreground mb-2">{t('measurements.form.type', 'Түрі')}</label>
           <div className="flex gap-3">
             {HOOK_TYPES.map(hook => (
               <button
@@ -178,15 +180,15 @@ const AccessoriesForm = ({ totalTapeMeters, data, onChange }) => {
                     : 'bg-muted text-muted-foreground hover:bg-muted'
                 }`}
               >
-                <span className="block">{hook.name}</span>
-                <span className="block text-xs opacity-70">{formatPrice(hook.pricePerPack)}/100дн</span>
+                <span className="block">{t(`measurements.form.hookType.${hook.id}`, hook.name)}</span>
+                <span className="block text-xs opacity-70">{formatPrice(hook.pricePerPack)}/100{t('measurements.units.piece', 'дн')}</span>
               </button>
             ))}
           </div>
         </div>
 
         <div className="flex justify-between items-center p-3 bg-muted rounded-xl">
-          <span className="text-foreground">{hookPacks} қап × {formatPrice(selectedHookType.pricePerPack)}</span>
+          <span className="text-foreground">{hookPacks} {t('measurements.units.pack', 'қап')} × {formatPrice(selectedHookType.pricePerPack)}</span>
           <span className="font-bold text-foreground">{formatPrice(hooksTotal)}</span>
         </div>
       </div>
@@ -196,7 +198,7 @@ const AccessoriesForm = ({ totalTapeMeters, data, onChange }) => {
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
             <Icon name="add_circle" className="text-amber-500" />
-            <h3 className="font-bold text-foreground">Қосымша</h3>
+            <h3 className="font-bold text-foreground">{t('measurements.form.extras', 'Қосымша')}</h3>
           </div>
           <button
             type="button"
@@ -204,12 +206,12 @@ const AccessoriesForm = ({ totalTapeMeters, data, onChange }) => {
             className="text-primary font-bold text-sm flex items-center gap-1"
           >
             <Icon name="add" size={20} />
-            Қосу
+            {t('measurements.form.add', 'Қосу')}
           </button>
         </div>
 
         {extras.length === 0 ? (
-          <p className="text-muted-foreground text-sm text-center py-4">Қосымша аксессуар жоқ</p>
+          <p className="text-muted-foreground text-sm text-center py-4">{t('measurements.form.noExtras', 'Қосымша аксессуар жоқ')}</p>
         ) : (
           <div className="space-y-2">
             {extras.map(extra => (
@@ -245,7 +247,7 @@ const AccessoriesForm = ({ totalTapeMeters, data, onChange }) => {
             onClick={e => e.stopPropagation()}
           >
             <div className="sticky top-0 bg-card px-5 py-4 border-b border-border flex items-center justify-between">
-              <h3 className="text-lg font-bold">Аксессуар қосу</h3>
+              <h3 className="text-lg font-bold">{t('measurements.form.addAccessory', 'Аксессуар қосу')}</h3>
               <button 
                 onClick={() => setShowAddExtra(false)} 
                 className="size-8 rounded-full bg-muted flex items-center justify-center"
@@ -257,7 +259,7 @@ const AccessoriesForm = ({ totalTapeMeters, data, onChange }) => {
             <div className="p-5 space-y-4">
               {/* Список аксессуаров как кнопки */}
               <div>
-                <label className="block text-sm font-bold text-foreground mb-3">Өнім таңдау</label>
+                <label className="block text-sm font-bold text-foreground mb-3">{t('measurements.form.pickProduct', 'Өнім таңдау')}</label>
                 
                 {loadingCatalog ? (
                   <div className="text-center py-8">
@@ -266,7 +268,7 @@ const AccessoriesForm = ({ totalTapeMeters, data, onChange }) => {
                 ) : catalogAccessories.length === 0 ? (
                   <div className="text-center py-8 text-muted-foreground">
                     <Icon name="inventory_2" size={32} />
-                    <p className="text-sm mt-2">Каталогта аксессуар жоқ</p>
+                    <p className="text-sm mt-2">{t('measurements.form.noAccessories', 'Каталогта аксессуар жоқ')}</p>
                   </div>
                 ) : (
                   <div className="space-y-2 max-h-60 overflow-y-auto">
@@ -299,7 +301,7 @@ const AccessoriesForm = ({ totalTapeMeters, data, onChange }) => {
               {/* Количество */}
               {selectedExtra && (
                 <div>
-                  <label className="block text-sm font-bold text-foreground mb-2">Саны</label>
+                  <label className="block text-sm font-bold text-foreground mb-2">{t('measurements.form.quantity', 'Саны')}</label>
                   <input
                     type="number"
                     min="1"
@@ -316,7 +318,7 @@ const AccessoriesForm = ({ totalTapeMeters, data, onChange }) => {
                 <div className="p-4 bg-green-50 rounded-xl border-2 border-green-200">
                   <div className="flex items-center gap-2 mb-2">
                     <Icon name="check_circle" className="text-green-600" />
-                    <span className="text-sm font-bold text-green-800">Таңдалды</span>
+                    <span className="text-sm font-bold text-green-800">{t('measurements.form.selected', 'Таңдалды')}</span>
                   </div>
                   <p className="font-bold text-foreground">{selectedAccessory.name}</p>
                   <div className="flex justify-between items-center mt-3 p-3 bg-card rounded-lg">
@@ -342,7 +344,7 @@ const AccessoriesForm = ({ totalTapeMeters, data, onChange }) => {
                   shadow-lg shadow-primary/30"
               >
                 <Icon name="add" />
-                Қосу
+                {t('measurements.form.add', 'Қосу')}
               </button>
             </div>
           </div>
@@ -353,22 +355,22 @@ const AccessoriesForm = ({ totalTapeMeters, data, onChange }) => {
       <div className="bg-primary/5 rounded-2xl p-5 border border-primary/20">
         <div className="space-y-2 text-sm mb-3">
           <div className="flex justify-between">
-            <span className="text-primary-dark">Таспа ({tapeRolls} рулон)</span>
+            <span className="text-primary-dark">{t('measurements.form.tapeRolls', { n: tapeRolls }, 'Таспа ({n} рулон)')}</span>
             <span className="font-bold text-primary-dark">{formatPrice(tapeTotal)}</span>
           </div>
           <div className="flex justify-between">
-            <span className="text-primary-dark">Ілгектер ({hookPacks} қап)</span>
+            <span className="text-primary-dark">{t('measurements.form.hookPacks', { n: hookPacks }, 'Ілгектер ({n} қап)')}</span>
             <span className="font-bold text-primary-dark">{formatPrice(hooksTotal)}</span>
           </div>
           {extrasTotal > 0 && (
             <div className="flex justify-between">
-              <span className="text-primary-dark">Қосымша</span>
+              <span className="text-primary-dark">{t('measurements.form.extras', 'Қосымша')}</span>
               <span className="font-bold text-primary-dark">{formatPrice(extrasTotal)}</span>
             </div>
           )}
         </div>
         <div className="border-t border-primary/20 pt-3 flex justify-between items-center">
-          <span className="font-bold text-primary-dark">Аксессуарлар барлығы:</span>
+          <span className="font-bold text-primary-dark">{t('measurements.form.accessoriesTotal', 'Аксессуарлар барлығы:')}</span>
           <span className="text-xl font-black text-primary-dark">{formatPrice(accessoriesTotal)}</span>
         </div>
       </div>

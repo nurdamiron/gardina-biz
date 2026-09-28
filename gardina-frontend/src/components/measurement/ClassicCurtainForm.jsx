@@ -1,3 +1,4 @@
+import { useI18n } from '../../contexts/I18nContext';
 import React, { useState, useEffect } from 'react';
 import { 
   calculateTapeRolls,
@@ -23,6 +24,7 @@ const FABRIC_COEFFICIENTS = {
  * - Лента, крючки, аксессуары
  */
 const ClassicCurtainForm = ({ data, onChange }) => {
+  const { t } = useI18n();
   const [fabrics, setFabrics] = useState([]);
   const [cornices, setCornices] = useState([]);
   const [catalogAccessories, setCatalogAccessories] = useState([]);
@@ -87,7 +89,7 @@ const ClassicCurtainForm = ({ data, onChange }) => {
   };
 
   const getFabricTypeLabel = (type) => {
-    return type === 'tulle' ? 'Тюль' : 'Перде';
+    return type === 'tulle' ? t('measurements.form.tulle', 'Тюль') : t('measurements.form.curtain', 'Перде');
   };
 
   // Общий метраж всех тканей (для ленты и крючков)
@@ -258,13 +260,13 @@ const ClassicCurtainForm = ({ data, onChange }) => {
       <div className="bg-card rounded-2xl p-5 shadow-sm border border-border">
         <div className="flex items-center gap-2 mb-4">
           <Icon name="straighten" className="text-primary" />
-          <h3 className="font-bold text-foreground">Өлшемдер</h3>
+          <h3 className="font-bold text-foreground">{t('measurements.form.sizes', 'Өлшемдер')}</h3>
         </div>
 
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-muted-foreground mb-2">
-              Карниз ұзындығы
+              {t('measurements.form.corniceLength', 'Карниз ұзындығы')}
             </label>
             <div className="relative">
               <input
@@ -282,7 +284,7 @@ const ClassicCurtainForm = ({ data, onChange }) => {
 
           <div>
             <label className="block text-sm font-medium text-muted-foreground mb-2">
-              Биіктігі
+              {t('measurements.form.height', 'Биіктігі')}
             </label>
             <div className="relative">
               <input
@@ -305,7 +307,7 @@ const ClassicCurtainForm = ({ data, onChange }) => {
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
             <Icon name="texture" className="text-amber-600" />
-            <h3 className="font-bold text-foreground">Маталар</h3>
+            <h3 className="font-bold text-foreground">{t('measurements.form.fabrics', 'Маталар')}</h3>
           </div>
           <button
             type="button"
@@ -313,20 +315,20 @@ const ClassicCurtainForm = ({ data, onChange }) => {
             className="text-primary font-bold text-sm flex items-center gap-1"
           >
             <Icon name="add" size={20} />
-            Қосу
+            {t('measurements.form.add', 'Қосу')}
           </button>
         </div>
 
         {fabricItems.length === 0 ? (
           <div className="text-center py-8 text-muted-foreground">
             <Icon name="inventory_2" size={32} />
-            <p className="text-sm mt-2">Мата қосылмаған</p>
+            <p className="text-sm mt-2">{t('measurements.form.noFabrics', 'Мата қосылмаған')}</p>
             <button
               type="button"
               onClick={() => setShowAddFabric(true)}
               className="mt-3 text-primary font-bold text-sm"
             >
-              + Мата қосу
+              {t('measurements.form.addFabricPlus', '+ Мата қосу')}
             </button>
           </div>
         ) : (
@@ -380,12 +382,12 @@ const ClassicCurtainForm = ({ data, onChange }) => {
         <div className="bg-card rounded-2xl p-5 shadow-sm border border-border">
           <div className="flex items-center gap-2 mb-4">
             <Icon name="cut" className="text-primary" />
-            <h3 className="font-bold text-foreground">Тігу</h3>
+            <h3 className="font-bold text-foreground">{t('measurements.form.sewing', 'Тігу')}</h3>
           </div>
 
           <div className="mb-4">
             <label className="block text-sm font-medium text-muted-foreground mb-2">
-              Тігу бағасы (1 метр үшін)
+              {t('measurements.form.sewingRate', 'Тігу бағасы (1 метр үшін)')}
             </label>
             <div className="relative">
               <input
@@ -398,7 +400,7 @@ const ClassicCurtainForm = ({ data, onChange }) => {
               />
               <span className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground font-bold">₸/м</span>
             </div>
-            <p className="text-xs text-muted-foreground mt-1">Күрделі тігу үшін бағаны өзгертуге болады</p>
+            <p className="text-xs text-muted-foreground mt-1">{t('measurements.form.sewingHint', 'Күрделі тігу үшін бағаны өзгертуге болады')}</p>
           </div>
 
           <div className="p-3 bg-primary/5 rounded-xl border border-primary/15">
@@ -432,7 +434,7 @@ const ClassicCurtainForm = ({ data, onChange }) => {
                 : 'bg-muted text-muted-foreground'
             }`}
           >
-            Керек
+            {t('measurements.form.needed', 'Керек')}
           </button>
           <button
             type="button"
@@ -443,7 +445,7 @@ const ClassicCurtainForm = ({ data, onChange }) => {
                 : 'bg-muted text-muted-foreground'
             }`}
           >
-            Бар (орнатылған)
+            {t('measurements.form.installed', 'Бар (орнатылған)')}
           </button>
         </div>
 
@@ -459,7 +461,7 @@ const ClassicCurtainForm = ({ data, onChange }) => {
               onFocus={() => setShowCorniceList(true)}
               className="w-full h-12 px-4 bg-muted border-2 border-transparent rounded-xl 
                 focus:bg-card focus:border-primary transition-all"
-              placeholder="Карниз таңдау..."
+              placeholder={t('measurements.form.pickCornice', 'Карниз таңдау...')}
             />
             
             {showCorniceList && filteredCornices.length > 0 && (
@@ -501,7 +503,7 @@ const ClassicCurtainForm = ({ data, onChange }) => {
         <div className="bg-card rounded-2xl p-5 shadow-sm border border-border">
           <div className="flex items-center gap-2 mb-4">
             <Icon name="inventory_2" className="text-primary" />
-            <h3 className="font-bold text-foreground">Таспа / Ілгек</h3>
+            <h3 className="font-bold text-foreground">{t('measurements.form.tapeHooks', 'Таспа / Ілгек')}</h3>
           </div>
 
           <div className="space-y-3">
@@ -510,8 +512,8 @@ const ClassicCurtainForm = ({ data, onChange }) => {
               <div className="flex items-center gap-3">
                 <Icon name="straighten" className="text-primary" />
                 <div>
-                  <p className="font-bold text-foreground">Таспа 50м</p>
-                  <p className="text-xs text-muted-foreground">{totalFabricMeters}м керек = {tapeRolls} рулон</p>
+                  <p className="font-bold text-foreground">{t('measurements.form.tape50', 'Таспа 50м')}</p>
+                  <p className="text-xs text-muted-foreground">{t('measurements.form.tapeNeed', { m: totalFabricMeters, r: tapeRolls }, '{m}м керек = {r} рулон')}</p>
                 </div>
               </div>
               <span className="font-bold text-primary-dark">{formatPrice(tapeTotal)}</span>
@@ -522,8 +524,8 @@ const ClassicCurtainForm = ({ data, onChange }) => {
               <div className="flex items-center gap-3">
                 <Icon name="link" className="text-primary" />
                 <div>
-                  <p className="font-bold text-foreground">Ілгек (пластик)</p>
-                  <p className="text-xs text-muted-foreground">{hooksQty} дн керек = {hookPacks} қап</p>
+                  <p className="font-bold text-foreground">{t('measurements.form.hooksPlastic', 'Ілгек (пластик)')}</p>
+                  <p className="text-xs text-muted-foreground">{t('measurements.form.hooksNeed', { q: hooksQty, p: hookPacks }, '{q} дн керек = {p} қап')}</p>
                 </div>
               </div>
               <span className="font-bold text-primary-dark">{formatPrice(hooksTotal)}</span>
@@ -537,7 +539,7 @@ const ClassicCurtainForm = ({ data, onChange }) => {
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
             <Icon name="add_circle" className="text-amber-500" />
-            <h3 className="font-bold text-foreground">Қосымша</h3>
+            <h3 className="font-bold text-foreground">{t('measurements.form.extras', 'Қосымша')}</h3>
           </div>
           <button
             type="button"
@@ -545,12 +547,12 @@ const ClassicCurtainForm = ({ data, onChange }) => {
             className="text-primary font-bold text-sm flex items-center gap-1"
           >
             <Icon name="add" size={20} />
-            Қосу
+            {t('measurements.form.add', 'Қосу')}
           </button>
         </div>
 
         {extras.length === 0 ? (
-          <p className="text-muted-foreground text-sm text-center py-4">Қосымша аксессуар жоқ</p>
+          <p className="text-muted-foreground text-sm text-center py-4">{t('measurements.form.noExtras', 'Қосымша аксессуар жоқ')}</p>
         ) : (
           <div className="space-y-2">
             {extras.map(extra => (
@@ -580,13 +582,13 @@ const ClassicCurtainForm = ({ data, onChange }) => {
         <div className="bg-card rounded-2xl p-5 shadow-sm border border-border">
           <div className="flex items-center gap-2 mb-4">
             <Icon name="build" className="text-green-600" />
-            <h3 className="font-bold text-foreground">Орнату</h3>
+            <h3 className="font-bold text-foreground">{t('measurements.form.installation', 'Орнату')}</h3>
             <span className="ml-auto text-sm font-bold text-green-600">{formatPrice(installationTotal)}</span>
           </div>
 
           <div className="mb-4">
             <label className="block text-sm font-medium text-muted-foreground mb-2">
-              Орнату бағасы (1 метр үшін)
+              {t('measurements.form.installationRate', 'Орнату бағасы (1 метр үшін)')}
             </label>
             <div className="relative">
               <input
@@ -618,13 +620,13 @@ const ClassicCurtainForm = ({ data, onChange }) => {
           <div className="space-y-2 text-sm mb-3">
             {totalFabricCost > 0 && (
               <div className="flex justify-between">
-                <span className="text-green-700">Маталар ({fabricItems.length})</span>
+                <span className="text-green-700">{t('measurements.form.fabricsCount', { n: fabricItems.length }, 'Маталар ({n})')}</span>
                 <span className="font-bold text-green-800">{formatPrice(totalFabricCost)}</span>
               </div>
             )}
             {totalSewingCost > 0 && (
               <div className="flex justify-between">
-                <span className="text-green-700">Тігу ({totalFabricMeters} м)</span>
+                <span className="text-green-700">{t('measurements.form.sewingMeters', { m: totalFabricMeters }, 'Тігу ({m} м)')}</span>
                 <span className="font-bold text-green-800">{formatPrice(totalSewingCost)}</span>
               </div>
             )}
@@ -637,30 +639,30 @@ const ClassicCurtainForm = ({ data, onChange }) => {
             {totalFabricMeters > 0 && (
               <>
                 <div className="flex justify-between">
-                  <span className="text-green-700">Таспа ({tapeRolls} рулон)</span>
+                  <span className="text-green-700">{t('measurements.form.tapeRolls', { n: tapeRolls }, 'Таспа ({n} рулон)')}</span>
                   <span className="font-bold text-green-800">{formatPrice(tapeTotal)}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-green-700">Ілгектер ({hookPacks} қап)</span>
+                  <span className="text-green-700">{t('measurements.form.hookPacks', { n: hookPacks }, 'Ілгектер ({n} қап)')}</span>
                   <span className="font-bold text-green-800">{formatPrice(hooksTotal)}</span>
                 </div>
               </>
             )}
             {extrasTotal > 0 && (
               <div className="flex justify-between">
-                <span className="text-green-700">Қосымша</span>
+                <span className="text-green-700">{t('measurements.form.extras', 'Қосымша')}</span>
                 <span className="font-bold text-green-800">{formatPrice(extrasTotal)}</span>
               </div>
             )}
             {installationTotal > 0 && (
               <div className="flex justify-between">
-                <span className="text-green-700">Орнату</span>
+                <span className="text-green-700">{t('measurements.form.installation', 'Орнату')}</span>
                 <span className="font-bold text-green-800">{formatPrice(installationTotal)}</span>
               </div>
             )}
           </div>
           <div className="border-t border-green-200 pt-3 flex justify-between items-center">
-            <span className="font-bold text-green-800">Бөлме барлығы:</span>
+            <span className="font-bold text-green-800">{t('measurements.form.roomTotal', 'Бөлме барлығы:')}</span>
             <span className="text-2xl font-black text-green-700">{formatPrice(roomTotal)}</span>
           </div>
         </div>
@@ -677,7 +679,7 @@ const ClassicCurtainForm = ({ data, onChange }) => {
             onClick={e => e.stopPropagation()}
           >
             <div className="sticky top-0 bg-card px-5 py-4 border-b border-border flex items-center justify-between">
-              <h3 className="text-lg font-bold">Мата қосу</h3>
+              <h3 className="text-lg font-bold">{t('measurements.form.addFabric', 'Мата қосу')}</h3>
               <button 
                 onClick={() => setShowAddFabric(false)} 
                 className="size-8 rounded-full bg-muted flex items-center justify-center"
@@ -688,7 +690,7 @@ const ClassicCurtainForm = ({ data, onChange }) => {
 
             <div className="p-5 space-y-5">
               <div>
-                <label className="block text-sm font-bold text-foreground mb-3">Мата таңдау</label>
+                <label className="block text-sm font-bold text-foreground mb-3">{t('measurements.form.pickFabric', 'Мата таңдау')}</label>
                 <div className="relative">
                   <Icon name="search" className="text-muted-foreground" />
                   <input
@@ -701,7 +703,7 @@ const ClassicCurtainForm = ({ data, onChange }) => {
                     onFocus={() => setShowFabricList(true)}
                     className="w-full h-14 pl-12 pr-4 bg-muted border-2 border-transparent rounded-xl 
                       focus:bg-card focus:border-primary transition-all text-lg"
-                    placeholder="Мата іздеу..."
+                    placeholder={t('measurements.form.searchFabric', 'Мата іздеу...')}
                   />
                 </div>
                 
@@ -724,7 +726,7 @@ const ClassicCurtainForm = ({ data, onChange }) => {
                                 ? 'text-primary bg-primary/10' 
                                 : 'text-amber-600 bg-amber-100'
                             }`}>
-                              {fabric.type === 'tulle' ? 'Тюль' : 'Перде'}
+                              {fabric.type === 'tulle' ? t('measurements.form.tulle', 'Тюль') : t('measurements.form.curtain', 'Перде')}
                             </span>
                           </div>
                           <p className="text-xs text-muted-foreground">{fabric.code}</p>
@@ -740,7 +742,7 @@ const ClassicCurtainForm = ({ data, onChange }) => {
                 <div className="p-4 bg-green-50 rounded-xl border-2 border-green-200">
                   <div className="flex items-center gap-2 mb-2">
                     <Icon name="check_circle" className="text-green-600" />
-                    <span className="text-sm font-bold text-green-800">Таңдалды</span>
+                    <span className="text-sm font-bold text-green-800">{t('measurements.form.selected', 'Таңдалды')}</span>
                     <span className={`ml-auto text-xs font-bold px-2 py-0.5 rounded ${
                       newFabric.fabricType === 'tulle' 
                         ? 'text-primary bg-primary/10' 
@@ -771,7 +773,7 @@ const ClassicCurtainForm = ({ data, onChange }) => {
                   shadow-lg shadow-primary/30"
               >
                 <Icon name="add" />
-                Қосу
+                {t('measurements.form.add', 'Қосу')}
               </button>
             </div>
           </div>
@@ -789,7 +791,7 @@ const ClassicCurtainForm = ({ data, onChange }) => {
             onClick={e => e.stopPropagation()}
           >
             <div className="sticky top-0 bg-card px-5 py-4 border-b border-border flex items-center justify-between">
-              <h3 className="text-lg font-bold">Аксессуар қосу</h3>
+              <h3 className="text-lg font-bold">{t('measurements.form.addAccessory', 'Аксессуар қосу')}</h3>
               <button 
                 onClick={() => setShowAddAccessory(false)} 
                 className="size-8 rounded-full bg-muted flex items-center justify-center"
@@ -800,12 +802,12 @@ const ClassicCurtainForm = ({ data, onChange }) => {
 
             <div className="p-5 space-y-4">
               <div>
-                <label className="block text-sm font-bold text-foreground mb-3">Өнім таңдау</label>
+                <label className="block text-sm font-bold text-foreground mb-3">{t('measurements.form.pickProduct', 'Өнім таңдау')}</label>
                 
                 {catalogAccessories.length === 0 ? (
                   <div className="text-center py-8 text-muted-foreground">
                     <Icon name="inventory_2" size={32} />
-                    <p className="text-sm mt-2">Каталогта аксессуар жоқ</p>
+                    <p className="text-sm mt-2">{t('measurements.form.noAccessories', 'Каталогта аксессуар жоқ')}</p>
                   </div>
                 ) : (
                   <div className="space-y-2 max-h-60 overflow-y-auto">
@@ -837,7 +839,7 @@ const ClassicCurtainForm = ({ data, onChange }) => {
 
               {selectedAccessory && (
                 <div>
-                  <label className="block text-sm font-bold text-foreground mb-2">Саны</label>
+                  <label className="block text-sm font-bold text-foreground mb-2">{t('measurements.form.quantity', 'Саны')}</label>
                   <input
                     type="number"
                     min="1"
@@ -854,7 +856,7 @@ const ClassicCurtainForm = ({ data, onChange }) => {
                 <div className="p-4 bg-green-50 rounded-xl border-2 border-green-200">
                   <div className="flex items-center gap-2 mb-2">
                     <Icon name="check_circle" className="text-green-600" />
-                    <span className="text-sm font-bold text-green-800">Таңдалды</span>
+                    <span className="text-sm font-bold text-green-800">{t('measurements.form.selected', 'Таңдалды')}</span>
                   </div>
                   <p className="font-bold text-foreground">{selectedAccessoryItem.name}</p>
                   <div className="flex justify-between items-center mt-3 p-3 bg-card rounded-lg">
@@ -879,7 +881,7 @@ const ClassicCurtainForm = ({ data, onChange }) => {
                   shadow-lg shadow-primary/30"
               >
                 <Icon name="add" />
-                Қосу
+                {t('measurements.form.add', 'Қосу')}
               </button>
             </div>
           </div>
