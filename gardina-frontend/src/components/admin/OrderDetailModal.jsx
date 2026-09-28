@@ -16,7 +16,18 @@ const OrderDetailModal = ({ order, measurement, onClose }) => {
   // Same estimate the client received (utils/roomEstimate), not the stale clientCheck snapshot.
   const windowEstimate = (w) => calculateRoomEstimate(roomFromWindow(w));
   const totalPrice = measurement?.windows?.reduce((sum, w) => sum + windowEstimate(w).total, 0) || order.totalAmount?.amount || 0;
-  // There is no paidAmount in the API; paid = prepayment + final payment, as on the deal page.
+  // Deals carry many status names (legacy and simplified); the modal works with one stage set.
+  const STAGE = {
+    new: 'scheduled', lead: 'scheduled', assigned: 'scheduled', measurement_scheduled: 'scheduled', scheduled: 'scheduled',
+    measuring: 'measured', measurement_done: 'measured', measured: 'measured', proposal_sent: 'measured', proposal_accepted: 'measured', contract_signed: 'measured',
+    in_sewing: 'in_production', in_production: 'in_production', corrections: 'in_production',
+    ready_to_install: 'ready', ready_for_installation: 'ready', ready: 'ready',
+    installing: 'installing', installation_scheduled: 'installing',
+    installed: 'completed', completed: 'completed', cancelled: 'cancelled', rejected: 'rejected',
+  };
+  const stage = STAGE[order.status] || order.status;
+
+  // There is no order.paidAmount in the API; paid = prepayment + final payment, as on the deal page.
   const paidAmount = money(order.prepayment) + money(order.finalPayment);
 
   // Build order timeline
@@ -51,7 +62,7 @@ const OrderDetailModal = ({ order, measurement, onClose }) => {
     }
 
     // Step 3: Measurement completed
-    if (order.status === 'measured' || order.status === 'in_production' || order.status === 'ready' || order.status === 'installing' || order.status === 'completed') {
+    if (stage === 'measured' || stage === 'in_production' || stage === 'ready' || stage === 'installing' || stage === 'completed') {
       events.push({
         icon: 'check_circle',
         color: 'bg-primary-light',
@@ -63,7 +74,7 @@ const OrderDetailModal = ({ order, measurement, onClose }) => {
     }
 
     // Contract & Prepayment
-    if (order.status === 'in_production' || order.status === 'ready' || order.status === 'installing' || order.status === 'completed') {
+    if (stage === 'in_production' || stage === 'ready' || stage === 'installing' || stage === 'completed') {
       events.push({
         icon: 'assignment',
         color: 'bg-green-500',
@@ -75,7 +86,7 @@ const OrderDetailModal = ({ order, measurement, onClose }) => {
     }
 
     // Production
-    if (order.status === 'in_production' || order.status === 'ready' || order.status === 'installing' || order.status === 'completed') {
+    if (stage === 'in_production' || stage === 'ready' || stage === 'installing' || stage === 'completed') {
       events.push({
         icon: 'factory',
         color: 'bg-orange-500',
@@ -87,7 +98,7 @@ const OrderDetailModal = ({ order, measurement, onClose }) => {
     }
 
     // Ready for installation
-    if (order.status === 'ready' || order.status === 'installing' || order.status === 'completed') {
+    if (stage === 'ready' || stage === 'installing' || stage === 'completed') {
       events.push({
         icon: 'check_circle',
         color: 'bg-green-500',
@@ -99,7 +110,7 @@ const OrderDetailModal = ({ order, measurement, onClose }) => {
     }
 
     // Installing
-    if (order.status === 'installing' || order.status === 'completed') {
+    if (stage === 'installing' || stage === 'completed') {
       events.push({
         icon: 'construction',
         color: 'bg-lime-500',
@@ -111,7 +122,7 @@ const OrderDetailModal = ({ order, measurement, onClose }) => {
     }
 
     // Completed
-    if (order.status === 'completed') {
+    if (stage === 'completed') {
       events.push({
         icon: 'task_alt',
         color: 'bg-green-600',
@@ -123,7 +134,7 @@ const OrderDetailModal = ({ order, measurement, onClose }) => {
     }
 
     // Rejected
-    if (order.status === 'rejected') {
+    if (stage === 'rejected') {
       events.push({
         icon: 'block',
         color: 'bg-gray-500',
@@ -135,7 +146,7 @@ const OrderDetailModal = ({ order, measurement, onClose }) => {
     }
 
     // Cancelled
-    if (order.status === 'cancelled') {
+    if (stage === 'cancelled') {
       events.push({
         icon: 'cancel',
         color: 'bg-red-500',
@@ -213,8 +224,8 @@ const OrderDetailModal = ({ order, measurement, onClose }) => {
         <div className="p-6 space-y-6">
           {/* Status Badge */}
           <div className="flex items-center gap-3">
-            <span className={`px-4 py-2 rounded-xl text-sm font-bold text-white ${statusColors[order.status]} shadow-lg`}>
-              {statusLabels[order.status]}
+            <span className={`px-4 py-2 rounded-xl text-sm font-bold text-white ${statusColors[stage]} shadow-lg`}>
+              {statusLabels[stage]}
             </span>
             {order.paymentStatus && (
               <span className={`px-4 py-2 rounded-xl text-sm font-bold ${order.paymentStatus === 'paid' ? 'bg-emerald-500 text-white' : 'bg-amber-500 text-white'}`}>
@@ -397,7 +408,7 @@ const OrderDetailModal = ({ order, measurement, onClose }) => {
                         </div>
                         <div>
                           <span className="text-amber-700">{t('orders.detailModal.width', 'Ені:')}</span>
-                          <span className="font-bold text-amber-900 ml-1">{window.lengthMeters}м</span>
+                          <span className="font-bold text-amber-900 ml-1">{roomFromWindow(window).corniceLength}м</span>
                         </div>
                       </div>
 
