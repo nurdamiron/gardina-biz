@@ -98,7 +98,7 @@ ssh gardina-ec2
 
 Что делает workflow:
 
-1. Пакует `docker-compose.yml`, `nginx/`, `gardina-frontend/`, `gardina-backend/`, `gardina-bot/`.
+1. Пакует `docker-compose.yml`, `nginx/`, `gardina-frontend/`, `gardina-backend/`.
 2. Загружает архив на EC2.
 3. Запускает `docker compose up -d --build` через `scripts/deploy-aws-stack.sh`.
 4. Проверяет `https://gardina.kz`, `https://app.gardina.kz`, `https://api.gardina.kz/health`.

@@ -92,23 +92,8 @@ services:
       - gardina-network
       - caddy-edge # so the shared Caddy can reverse_proxy to gardina-frontend:80
 
-  # ============================================
-  # TELEGRAM BOT - Gardina Academy
-  # ============================================
-  telegram-bot:
-    build: ./gardina-bot
-    container_name: gardina-telegram-bot
-    restart: always
-    env_file:
-      - ./gardina-bot/.env
-    depends_on:
-      postgres:
-        condition: service_healthy
-    networks:
-      - gardina-network
-
 networks:
-  # Private to Gardina — postgres and the bot are never reachable from it.
+  # Private to Gardina — postgres is never reachable from it.
   gardina-network:
     driver: bridge
   # The shared host's existing reverse-proxy network. Must already exist

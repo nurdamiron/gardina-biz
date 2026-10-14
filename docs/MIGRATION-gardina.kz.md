@@ -59,7 +59,6 @@ checklist with decision points — read it through once before starting.
 | `app.gardina.kz` | CRM PWA (React) | `gardina-nginx` → `frontend:80` |
 | `api.gardina.kz` | REST API | `gardina-nginx` → `backend:3001` |
 | — | Database | `gardina-postgres` (volume `postgres-data`) |
-| — | Telegram bot | `gardina-telegram-bot` |
 
 The Gardina stack runs entirely inside Docker Compose on its own bridge network
 (`gardina-network`). Nothing it does touches cPanel accounts, Exim, or the
@@ -76,9 +75,9 @@ The Gardina stack runs entirely inside Docker Compose on its own bridge network
       old server SSH *or* direct `psql` connection string (host/port/user/pass/db).
       This is in the current `gardina-backend/.env.production` (`DB_HOST`,
       `DB_PORT`, `DB_NAME`, `DB_USER`, `DB_PASSWORD`).
-- [ ] The current secret values to rebuild `.env.production` and `gardina-bot/.env`
+- [ ] The current secret values to rebuild `.env.production`
       on the new box (JWT secrets, AWS S3 keys, Cloudinary, SMTP, VAPID, Sentry
-      DSN, `BOT_TOKEN`, `ADMIN_IDS`, `PRIVATE_CHANNEL_ID`, Kaspi payment fields).
+      DSN, Kaspi payment fields).
 - [ ] Decide the **edge strategy** — section 3.
 
 ### Check the server's real state first
@@ -261,19 +260,7 @@ AWS_S3_BUCKET=<carry over>
 # email / push / sentry / cloudinary / twilio — carry over as used
 ```
 
-### `./gardina-bot/.env`
-
-From `gardina-bot/.env.example`. Point it at the same DB:
-
-```dotenv
-BOT_TOKEN=<carry over>
-ADMIN_IDS=<carry over>
-PRIVATE_CHANNEL_ID=<carry over>
-DATABASE_URL=postgresql+asyncpg://gardina:<POSTGRES_PASSWORD>@postgres:5432/gardina_shtory
-# payment / contact fields as used
-```
-
-`chmod 600 .env gardina-backend/.env.production gardina-bot/.env`.
+`chmod 600 .env gardina-backend/.env.production`.
 
 ---
 
@@ -363,7 +350,6 @@ docker compose build
 docker compose up -d
 docker compose ps
 docker compose logs -f backend        # watch for DB connect + "listening on 3001"
-docker compose logs telegram-bot
 ```
 
 Local smoke (before DNS):

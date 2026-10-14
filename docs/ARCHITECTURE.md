@@ -6,8 +6,6 @@ database serve every salon (tenant); each tenant's data is isolated by `organiza
 - **Backend**: `gardina-backend` — Express 4, Node (ESM), PostgreSQL via `pg`, raw SQL,
   Domain-Driven Design layering. Entry: `gardina-backend/src/server.js`.
 - **Frontend**: `gardina-frontend` — React 19 + Vite, axios, tokens in `localStorage`.
-- **Bot**: `gardina-bot` — Python Telegram bot (aiogram-style handlers/keyboards/states),
-  its own thin client over the same database / business domain.
 
 **API base path: `/api`** (no `/v1` prefix).
 - prod: `https://api.gardina.kz/api`
@@ -46,7 +44,6 @@ gardina/
 │               ├── controllers/   # request → use-case → response
 │               └── middleware/    # auth.middleware, billing.middleware, …
 ├── gardina-frontend/     # React 19 + Vite SPA
-├── gardina-bot/          # Python Telegram bot
 ├── gardina-screens/      # screen specs / design references
 ├── nginx/                # reverse-proxy config
 ├── docs/                 # this documentation set + openapi.yaml
@@ -175,7 +172,6 @@ flowchart TB
   subgraph Clients
     WEB["gardina-frontend<br/>React 19 + Vite (Vercel)<br/>tokens in localStorage"]
     IOS["iOS app (planned)<br/>native SwiftUI<br/>tokens in Keychain"]
-    BOT["gardina-bot<br/>Python Telegram bot"]
     LAND["Landing form<br/>POST /api/leads"]
   end
 
@@ -201,7 +197,6 @@ flowchart TB
 
   WEB -->|HTTPS /api| PRES
   IOS -->|HTTPS /api| PRES
-  BOT -->|HTTPS /api| PRES
   LAND -->|HTTPS /api/leads| PRES
 
   PRES --> APP --> DOM
