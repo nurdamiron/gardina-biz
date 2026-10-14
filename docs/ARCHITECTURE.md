@@ -10,7 +10,7 @@ database serve every salon (tenant); each tenant's data is isolated by `organiza
   its own thin client over the same database / business domain.
 
 **API base path: `/api`** (no `/v1` prefix).
-- prod: `https://api.gardina.kz/api`
+- prod: `https://api.gardina.alashed.kz/api`
 - dev:  `http://localhost:5000/api`
 
 The full HTTP contract lives in [`openapi.yaml`](./openapi.yaml).
@@ -48,7 +48,6 @@ gardina/
 ├── gardina-frontend/     # React 19 + Vite SPA
 ├── gardina-bot/          # Python Telegram bot
 ├── gardina-screens/      # screen specs / design references
-├── nginx/                # reverse-proxy config
 ├── docs/                 # this documentation set + openapi.yaml
 └── docker-compose.yml    # local full-stack orchestration
 ```
@@ -138,12 +137,12 @@ Auth details (issuance, refresh, blacklist, roles, 402 gate):
 
 ## 5. Deployment
 
-Both halves **auto-deploy from `main`**.
+Both halves are deployed with `deploy.sh` on the VPS.
 
 | Component | Host | Pipeline |
 |-----------|------|----------|
-| Frontend (`gardina-frontend`) | **Vercel** | Push to `main` → Vercel build + deploy. |
-| Backend (`gardina-backend`) | **AWS EC2** | Push to `main` → CI builds backend image (`--no-cache --pull`), `npm ci`, deploys to EC2. nginx (`nginx/`) reverse-proxies to the Node process. |
+| Frontend (`gardina-frontend`) | **VPS** (Docker, behind shared Caddy) | `./deploy.sh` on the VPS — see [`README-DEPLOY.md`](../README-DEPLOY.md). |
+| Backend (`gardina-backend`) | **VPS** (Docker, behind shared Caddy) | `./deploy.sh` on the VPS. |
 | Database | PostgreSQL | Single shared instance; migrations in `src/infrastructure/database`. |
 
 External integrations and their env vars: [`DEPENDENCIES.md`](./DEPENDENCIES.md).
@@ -179,7 +178,7 @@ flowchart TB
     LAND["Landing form<br/>POST /api/leads"]
   end
 
-  subgraph Edge["EC2 + nginx (reverse proxy)"]
+  subgraph Edge["VPS + shared Caddy (reverse proxy, TLS)"]
     direction TB
     subgraph API["gardina-backend (Express, DDD)"]
       PRES["Presentation<br/>routes · controllers · middleware<br/>(auth → tenant ctx → billing gate)"]
