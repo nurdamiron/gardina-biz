@@ -25,11 +25,6 @@ if [ ! -f gardina-backend/.env.production ]; then
   exit 1
 fi
 
-if [ ! -f gardina-bot/.env ] && [ -f gardina-bot/.env.example ]; then
-  echo "gardina-bot/.env is missing. Creating from .env.example (please replace values)."
-  cp gardina-bot/.env.example gardina-bot/.env
-fi
-
 echo "==> Pull/build images"
 $COMPOSE build --pull
 
