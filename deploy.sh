@@ -1,165 +1,47 @@
-#!/bin/bash
+#!/usr/bin/env bash
+# Deploy Gardina on the shared VPS (178.88.167.84).
+#
+# The shared Caddy (/opt/ortodok/infra) owns 80/443 and TLS; this script never
+# touches ports, certificates or other projects. Images are built while the old
+# containers keep serving, then swapped one service at a time.
+#
+# Usage (on the VPS, in /opt/gardina):
+#   ./deploy.sh                 # backend + frontend
+#   ./deploy.sh backend         # only backend
+#
+# The static landing (gardina.kz) is served from /srv/gardina/landing and is
+# NOT deployed by this script.
+set -euo pipefail
+cd "$(dirname "$0")"
 
-# ============================================
-# GARDINA — AWS EC2 deployment script
-# ============================================
+if [ $# -gt 0 ]; then SERVICES=("$@"); else SERVICES=(backend frontend); fi
+HEALTH_TIMEOUT=120
 
-set -e
+[ -f gardina-backend/.env.production ] || { echo "missing gardina-backend/.env.production"; exit 1; }
 
-echo "🚀 Starting Gardina deployment..."
+echo "==> git pull"
+git pull --ff-only
 
-# Colors
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-NC='\033[0m'
+echo "==> build: ${SERVICES[*]}"
+docker compose build "${SERVICES[@]}"
 
-# Check if running as root
-if [ "$EUID" -ne 0 ]; then
-    echo -e "${YELLOW}Please run as root (sudo)${NC}"
-    exit 1
-fi
+for svc in "${SERVICES[@]}"; do
+  echo "==> up: $svc"
+  docker compose up -d --no-deps "$svc"
+  cid=$(docker compose ps -q "$svc")
+  for ((i = 0; i < HEALTH_TIMEOUT; i += 3)); do
+    status=$(docker inspect -f '{{if .State.Health}}{{.State.Health.Status}}{{else}}{{.State.Status}}{{end}}' "$cid")
+    case "$status" in healthy | running) break ;; esac
+    sleep 3
+  done
+  case "$status" in healthy | running) ;; *)
+    echo "!! $svc is '$status' after ${HEALTH_TIMEOUT}s"; docker compose logs --tail 50 "$svc"; exit 1 ;;
+  esac
+  echo "    $svc: $status"
+done
 
-# ============================================
-# STEP 1: Update system
-# ============================================
-echo -e "${GREEN}📦 Updating system packages...${NC}"
-apt-get update && apt-get upgrade -y
+docker image prune -f > /dev/null
 
-# ============================================
-# STEP 2: Install Docker if not present
-# ============================================
-if ! command -v docker &> /dev/null; then
-    echo -e "${GREEN}🐳 Installing Docker...${NC}"
-    curl -fsSL https://get.docker.com -o get-docker.sh
-    sh get-docker.sh
-    systemctl enable docker
-    systemctl start docker
-    rm get-docker.sh
-fi
-
-# ============================================
-# STEP 3: Install Docker Compose if not present
-# ============================================
-if ! command -v docker-compose &> /dev/null; then
-    echo -e "${GREEN}🐙 Installing Docker Compose...${NC}"
-    curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-    chmod +x /usr/local/bin/docker-compose
-fi
-
-# ============================================
-# STEP 4: Create directories
-# ============================================
-echo -e "${GREEN}📁 Creating directories...${NC}"
-mkdir -p certbot/conf
-mkdir -p certbot/www
-mkdir -p nginx/conf.d
-
-# ============================================
-# STEP 5: Initial SSL certificates (if not exist)
-# ============================================
-if [ ! -d "certbot/conf/live/gardina.kz" ]; then
-    echo -e "${GREEN}🔐 Obtaining SSL certificates...${NC}"
-
-    # Create temporary nginx config for certbot
-    cat > nginx/conf.d/temp.conf << 'EOF'
-server {
-    listen 80;
-    server_name gardina.kz www.gardina.kz app.gardina.kz api.gardina.kz;
-
-    location /.well-known/acme-challenge/ {
-        root /var/www/certbot;
-    }
-
-    location / {
-        return 200 'Waiting for SSL...';
-        add_header Content-Type text/plain;
-    }
-}
-EOF
-
-    # Start nginx temporarily
-    docker run -d --name temp-nginx \
-        -p 80:80 \
-        -v $(pwd)/nginx/conf.d/temp.conf:/etc/nginx/conf.d/default.conf:ro \
-        -v $(pwd)/certbot/www:/var/www/certbot:ro \
-        nginx:alpine
-
-    # Wait for nginx to start
-    sleep 5
-
-    # Get certificates
-    docker run --rm \
-        -v $(pwd)/certbot/conf:/etc/letsencrypt \
-        -v $(pwd)/certbot/www:/var/www/certbot \
-        certbot/certbot certonly \
-        --webroot \
-        --webroot-path=/var/www/certbot \
-        --email support@gardina.kz \
-        --agree-tos \
-        --no-eff-email \
-        -d gardina.kz \
-        -d www.gardina.kz \
-        -d app.gardina.kz \
-        -d api.gardina.kz
-
-    # Stop temporary nginx
-    docker stop temp-nginx && docker rm temp-nginx
-
-    # Remove temporary config
-    rm nginx/conf.d/temp.conf
-fi
-
-# ============================================
-# STEP 6: Build and start containers
-# ============================================
-echo -e "${GREEN}🏗️ Building and starting containers...${NC}"
-docker-compose down || true
-docker-compose build --no-cache
-docker-compose up -d
-
-# ============================================
-# STEP 7: Wait and check status
-# ============================================
-echo -e "${GREEN}⏳ Waiting for services to start...${NC}"
-sleep 10
-
-# Check status
-echo -e "${GREEN}📊 Service status:${NC}"
-docker-compose ps
-
-# ============================================
-# STEP 8: Health checks
-# ============================================
-echo -e "${GREEN}🏥 Running health checks...${NC}"
-
-# Check backend
-if curl -s http://localhost:3001/health > /dev/null; then
-    echo -e "${GREEN}✅ Backend is healthy${NC}"
-else
-    echo -e "${RED}❌ Backend health check failed${NC}"
-fi
-
-# Check nginx
-if curl -s http://localhost:80 > /dev/null; then
-    echo -e "${GREEN}✅ Nginx is healthy${NC}"
-else
-    echo -e "${RED}❌ Nginx health check failed${NC}"
-fi
-
-# ============================================
-# DONE
-# ============================================
-echo ""
-echo -e "${GREEN}🎉 Deployment complete!${NC}"
-echo ""
-echo "Your services are now running:"
-echo "  - Landing:  https://gardina.kz"
-echo "  - App:      https://app.gardina.kz"
-echo "  - API:      https://api.gardina.kz"
-echo ""
-echo "Useful commands:"
-echo "  - View logs:    docker-compose logs -f"
-echo "  - Restart:      docker-compose restart"
-echo "  - Stop:         docker-compose down"
-echo "  - Rebuild:      docker-compose up -d --build"
+for url in https://app.gardina.kz https://api.gardina.kz/health; do
+  printf '%s %s\n' "$(curl -s -o /dev/null -w '%{http_code}' --max-time 10 "$url")" "$url"
+done
